@@ -1,0 +1,7 @@
+aws/secrets/aws_credentials.csv
+aws/secrets/netwp_credentials.csv
+aws/scripts/terraform.tfstate
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.log

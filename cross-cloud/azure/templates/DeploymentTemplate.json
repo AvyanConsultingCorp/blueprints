@@ -1,0 +1,418 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newStorageAccountName": {
+      "type": "string",
+      "defaultValue": "awsvpnstg",
+      "metadata": {
+        "description": "Unique DNS Name for the Storage Account where the Virtual Machine's disks will be placed."
+      }
+    },
+
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "administrator-az",
+      "metadata": {
+        "description": "User name for the Virtual Machine."
+      }
+    },
+
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+
+    "AWSPublicIP": {
+      "type": "string",
+      "defaultValue": "172.16.0.0",
+      "metadata": {
+        "description": "Public IP address of the AWS OpenSwan VM."
+      }
+    },
+
+    "ubuntuOSVersion": {
+      "type": "string",
+      "defaultValue": "14.04.2-LTS",
+      "allowedValues": [
+        "12.04.5-LTS",
+        "14.04.2-LTS",
+        "15.04"
+      ],
+
+      "metadata": {
+        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version. Allowed values: 12.04.5-LTS, 14.04.2-LTS, 15.04."
+      }
+    }
+  },
+
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "imagePublisherLinux": "Canonical",
+    "imageOffer": "UbuntuServer",
+    "OSDiskNameLinuxGW": "[concat(variables('vmNameLinuxGW'), '-osdisk')]",
+    "OSDiskNameLinuxDB": "[concat(variables('vmNameLinuxDB'), '-osdisk')]",
+    "nicNameLinuxGW": "vm01-nic",
+    "nicNameLinuxDB": "vm02-nic",
+    "nsgNameGW": "OpenSwan-NSG",
+    "vnetAddressPrefix": "10.0.0.0/16",
+    "subnetNameGW": "Subnet-GW",
+    "subnetPrefixGW": "10.0.0.0/24",
+    "subnetNameDB": "Subnet-DB",
+    "subnetPrefixDB": "10.0.1.0/24",
+    "remoteSubnetPrefix": "192.168.0.0/16",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressName": "vm01-pip",
+    "publicIPAddressType": "Static",
+    "PrivateIPAddressLinuxGW": "10.0.0.4",
+    "PrivateIPAddressLinuxDB": "10.0.1.4",
+    "routeTableName": "rt-azure2aws",
+    "vmStorageAccountContainerName": "vhds",
+    "vmNameLinuxGW": "vm01ipsecgw",
+    "vmNameLinuxDB": "vm02psql",
+    "vmSize": "Standard_D2",
+    "virtualNetworkName": "vnetazure",
+    "publicIPRef": "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "subnetRefGW": "[concat(variables('vnetID'),'/subnets/', variables('subnetNameGW'))]",
+    "subnetRefDB": "[concat(variables('vnetID'),'/subnets/', variables('subnetNameDB'))]"
+
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('newStorageAccountName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "properties": {
+        "accountType": "[variables('storageAccountType')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "name": "[variables('routeTableName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "awsvpnroute",
+            "properties": {
+              "addressPrefix": "[variables('remoteSubnetPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[variables('PrivateIPAddressLinuxGW')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgNameGW')]",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+      ],
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "openswan_IKE_protocol",
+            "properties": {
+              "protocol": "Udp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "500",
+              "sourceAddressPrefix": "[concat(parameters('AWSPublicIP'), '/32')]",
+              "destinationAddressPrefix": "[concat(variables('PrivateIPAddressLinuxGW'), '/32')]",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "openswan_IKE_NAT_Traversal",
+            "properties": {
+              "protocol": "Udp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "4500",
+              "sourceAddressPrefix": "[concat(parameters('AWSPublicIP'), '/32')]",
+              "destinationAddressPrefix": "[concat(variables('PrivateIPAddressLinuxGW'), '/32')]",
+              "access": "Allow",
+              "priority": 300,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "iperf_default_port",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "5001",
+              "sourceAddressPrefix": "[concat(parameters('AWSPublicIP'), '/32')]",
+              "destinationAddressPrefix": "[concat(variables('PrivateIPAddressLinuxGW'), '/32')]",
+              "access": "Allow",
+              "priority": 400,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/routeTables/', variables('routeTableName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnetAddressPrefix')]",
+            "[variables('remoteSubnetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetNameGW')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefixGW')]"
+            }
+          },
+          {
+            "name": "[variables('subnetNameDB')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefixDB')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicNameLinuxGW')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgNameGW'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('PrivateIPAddressLinuxGW')]",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRefGW')]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgNameGW'))]"
+        },
+        "enableIPForwarding": true
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmNameLinuxGW')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicNameLinuxGW'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmNameLinuxGW')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisherLinux')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('ubuntuOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskNameLinuxGW'),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicNameLinuxGW'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicNameLinuxDB')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('PrivateIPAddressLinuxDB')]",
+              "subnet": {
+                "id": "[variables('subnetRefDB')]"
+              }
+            }
+          }
+        ],
+        "enableIPForwarding": false
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmNameLinuxDB')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicNameLinuxDB'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmNameLinuxDB')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisherLinux')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('ubuntuOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskNameLinuxDB'),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicNameLinuxDB'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('newStorageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmNameLinuxGW'),'/installopenswan')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmNameLinuxGW'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "settings": {
+          "fileUris": [
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common.sh"
+          ],
+          "commandToExecute": "sh vpn_common.sh",
+          "timestamp": 1
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('vmNameLinuxDB'),'/installpostgresql')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmNameLinuxDB'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "settings": {
+          "fileUris": [
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common.sh"
+          ],
+          "commandToExecute": "sh db_common.sh",
+          "timestamp": 1
+        }
+      }
+    }
+  ]
+}
