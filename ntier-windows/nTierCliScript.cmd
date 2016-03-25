@@ -3,46 +3,61 @@ SETLOCAL ENABLEEXTENSIONS
 SET me=%~n0
 SET parent=%~dp0
 
-IF "%~1"=="" (
-    ECHO Usage: %me% subscription-id admin-box-ip
+IF "%~3"=="" (
+    ECHO Usage: %0 subscription-id admin-address-whitelist-CIDR-format admin-password
+    ECHO 	For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx nnn.nnn.nnn.nnn/mm pwd
     EXIT /B
-    )
-
-IF "%~2"=="" (
-    ECHO Usage: %me% subscription-id admin-box-ip
-    EXIT /B
-    )
-
-:: Set up variables to build out the naming conventions for deploying the cluster
-SET LOCATION=centralus
-SET APP_NAME=app3
-SET ENVIRONMENT=dev
-SET USERNAME=testuser
-SET PASSWORD=AweS0me@PW
-
-:: Number of VMs in the service tier (in the same subnet)
-SET NUM_VM_INSTANCES_SERVICE_TIER=6
-
-:: Number of firewall VMs to be deployed to the DMZ subnet
-SET NUM_VM_INSTANCES_DMZ_TIER=2
-
-SET NUM_VM_INSTANCES_MANAGEMENT_TIER=1
-SET REMOTE_ACCESS_PORT=3389
+	)
 
 :: Explicitly set the subscription to avoid confusion as to which subscription
 :: is active/default
 SET SUBSCRIPTION=%1
-SET ADMIN_BOX_IP=%2
+SET ADMIN_ADDRESS_PREFIX=%2
+SET PASSWORD=%3
+	
+:: The APP_NAME variable must not exceed 4 characters in size.
+:: If it does the 15 character size limitation of the VM name may be exceeded.
+SET APP_NAME=app1
+SET LOCATION=centralus
+SET ENVIRONMENT=dev
+SET USERNAME=testuser
 
+:: Number of VMs in the first service tier
+SET NUM_VM_INSTANCES_SERVICE_TIER_1=3
+
+:: Number of VMs in the second service tier
+SET NUM_VM_INSTANCES_SERVICE_TIER_1=3
+
+:: Number of firewall VMs to be deployed to the DMZ subnet
+SET NUM_VM_INSTANCES_DMZ_TIER=2
+
+:: Number of management VMs
+SET NUM_VM_INSTANCES_MANAGEMENT_TIER=1
+
+:: Set IP range for various subnets using CIDR-format
+SET VNET_IP_RANGE=10.0.0.0/16
+SET SERVICE_SUBNET_1_IP_RANGE=10.0.0.0/24
+SET SERVICE_SUBNET_2_IP_RANGE=10.0.1.0/24
+SET DB_SUBNET_IP_RANGE=10.0.2.0/24
+SET MANAGE_SUBNET_IP_RANGE=10.0.3.0/24
+
+:: Set IP address of Internal Load Balancer in the high end of subnet's IP range
+:: to keep separate from IP addresses assigned to VM's that start at the low end.
 SET BIZ_ILB_IP=10.0.1.250
 
 :: Set up the names of things using recommended conventions
 SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
 SET VNET_NAME=%APP_NAME%-vnet
-SET VNET_IP_RANGE=10.0.0.0/16
 SET PUBLIC_IP_NAME=%APP_NAME%-pip
-SET BASTION_PUBLIC_IP_NAME=%APP_NAME%-bastion-pip
 SET DIAGNOSTICS_STORAGE=%APP_NAME:-=%diag
+SET JUMPBOX_PUBLIC_IP_NAME=%APP_NAME%-jumpbox-pip
+SET JUMPBOX_NIC_NAME=%APP_NAME%-manage-vm1-nic1
+
+:: Set up the postfix variables attached to most CLI commands
+SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
+
+:: Make sure we're in ARM mode
+CALL azure config mode arm
 
 :: Firewall subnet
 SET DMZ_SUBNET_NAME=%APP_NAME%-dmz-subnet
@@ -76,10 +91,9 @@ SET APPLIANCE_BASE_IMAGE=fortinet:fortinet_fortigate-vm_v5:fortinet_fg-vm:5.2.3
 :: azure vm sizes --location %LOCATION%
 SET VM_SIZE=Standard_DS1
 
-:: Set up the postfix variables attached to most CLI commands
-SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 
-CALL azure config mode arm
+
+
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Here's an approach that uses a template deployment to create a SQL AlwaysOn AG 
@@ -193,7 +207,12 @@ CALL azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix ^
 IF %LB_NEEDED%==true ( 
 	:: Create the load balancer
 	CALL azure network lb create --name %LB_NAME% --location %LOCATION% %POSTFIX%
-
+	
+	SET SUBNET_STRING=
+	
+	IF %TIER_NAME%==dmz {
+		SET SUBNET_STRING=
+	}
 	IF %TIER_NAME%==svc (
 		ECHO Creating frontend-ip for service tier lb
 		:: Associate the frontend-ip with the public IP address
