@@ -386,7 +386,8 @@
         "typeHandlerVersion": "1.4",
         "settings": {
           "fileUris": [
-            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common.sh"
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common.sh",
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_final_updates.sh"
           ],
           "commandToExecute": "sh vpn_common.sh",
           "timestamp": 1
@@ -399,7 +400,8 @@
       "name": "[concat(variables('vmNameLinuxDB'),'/installpostgresql')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmNameLinuxDB'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmNameLinuxDB'))]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmNameLinuxGW'), '/extensions/installopenswan')]"
       ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
@@ -407,12 +409,24 @@
         "typeHandlerVersion": "1.4",
         "settings": {
           "fileUris": [
-            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common.sh"
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common.sh",
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/azure/scripts/db_post_install.sh"
           ],
           "commandToExecute": "sh db_common.sh",
           "timestamp": 1
         }
       }
     }
-  ]
+  ],
+
+  "outputs": {
+    "AzurePublicIP": {
+      "type": "object",
+      "value": "[reference(variables('publicIPAddressName'))]"
+    },
+    "ScriptExecWithAzurePublicIp": {
+      "type": "string",
+      "value": "[concat('sh -c \"echo IP [', reference(variables('publicIPAddressName')).ipAddress, ']\" > /tmp/test2')]"
+    }
+  }
 }
