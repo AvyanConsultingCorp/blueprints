@@ -1,0 +1,35 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "publicIPAddressName": "vm01-pip",
+    "publicIPAddressType": "Static"
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+      }
+    }
+  ],
+
+  "outputs": {
+    "publicIPAddressName": {
+      "type": "string",
+      "value": "[variables('publicIPAddressName')]"
+    },
+    "azurePublicIP": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressName')).ipAddress]"
+    }
+  }
+}
