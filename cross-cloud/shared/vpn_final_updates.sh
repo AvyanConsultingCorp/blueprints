@@ -41,14 +41,14 @@ while [ "$1" != "" ]; do
             shift
             AZURE_PUBLICIP="$1"
             ;;
-		--configforazure )
-			CONFIGAZURE="1"
-			CONFIG="AZURE"
-			;;
-		--configforaws )
-			CONFIGAWS="1"
-			CONFIG="AWS"
-			;;
+        --configforazure )
+            CONFIGAZURE="1"
+            CONFIG="AZURE"
+            ;;
+        --configforaws )
+            CONFIGAWS="1"
+            CONFIG="AWS"
+            ;;
         -h | -? | --help )
             usage
             exit
