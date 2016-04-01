@@ -19,7 +19,6 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "CidrBlock": "192.168.1.0/24",
-        "AvailabilityZone": "us-east-1c",
         "VpcId": {
           "Ref": "vpca75861c3"
         }
@@ -34,7 +33,6 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "CidrBlock": "192.168.0.0/24",
-        "AvailabilityZone": "us-east-1b",
         "VpcId": {
           "Ref": "vpca75861c3"
         }
