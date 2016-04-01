@@ -165,8 +165,8 @@
                 "command": "sh /tmp/vpn_common.sh",
                 "ignoreErrors": "false"
               },
-              "installDB": {
-                "command": "/tmp/vpn_final_updates.sh",
+              "installVPN": {
+                "command": "sh /tmp/vpn_final_updates.sh",
                 "ignoreErrors": "false"
               }
             },
@@ -247,7 +247,7 @@
                 "ignoreErrors": "false"
               },
               "installDB": {
-                "command": "/tmp/db_post_install.sh",
+                "command": "sh /tmp/db_post_install.sh",
                 "ignoreErrors": "false"
               }
             },
