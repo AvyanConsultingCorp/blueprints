@@ -47,6 +47,14 @@ Keep in mind that this environment could support a number of different workloads
 #### Application -> Postgres Install
 ### AWS Side
 #### Compute
+##### Finding AWS AMI IDs
+Amazon AWS AMIs (Amazon Machine Images) have different IDs in each region.  This ID is needed in the CloudFormation template for the region that you are deploying into. Specifically, it is the "ImageId" in the Properties for the "AWS::EC2::Instance" resources. Even if the image is the same, the AMI IDs will be different in each region.  In order to implement this in the CloudFormation template, a Mapping was used to map the region name to an AMI ID. The list of AMI IDs for Ubuntu images for each region was built using Canonical's Amazon EC2 AMI Locator, http://cloud-images.ubuntu.com/locator/ec2/. Using the site, we filtered on: 
+  * Version:  14.04 LTS
+  * Arch:  amd64
+  * Instance Type: hvm:ebs-ssd
+  
+and then copied / pasted the "Zone" and "AMI-ID" to the RegionMap mapping in the CloudFormation template. For more information on using CloudFormation Mappings, see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html. 
+ 
 #### Storage -> Trivial
 #### Network -> the nasty bits
 #### Application -> Postgres Install
