@@ -2,15 +2,17 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Mappings": {
     "RegionMap": {
-      "us-east-1": {
-        "AMI": "ami-df0607b5"
-      },
-      "us-west-1": {
-        "AMI": "ami-12394b72"
-      },
-      "us-west-2": {
-        "AMI": "ami-37b95057"
-      }
+      "ap-northeast-1": { "AMI": "ami-01ded66f" },
+      "ap-southeast-1": { "AMI": "ami-8fda11ec" },
+      "ap-southeast-2": { "AMI": "ami-817454e2" },
+      "cn-north-1":     { "AMI": "ami-0679b06b" },
+      "eu-central-1":   { "AMI": "ami-7e9b7c11" },
+      "eu-west-1":      { "AMI": "ami-58cc762b" },
+      "sa-east-1":      { "AMI": "ami-cd53dea1" },
+      "us-east-1":      { "AMI": "ami-df0607b5" },
+      "us-gov-west-1":  { "AMI": "ami-30b8da13" },
+      "us-west-1":      { "AMI": "ami-12394b72" },
+      "us-west-2":      { "AMI": "ami-37b95057" }
     }
   },
 
