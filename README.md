@@ -69,6 +69,17 @@ The desiredstate.json file is created from the following steps.
 	2. Change "name" value to somename-desiredstate
 4. Save this file. It's now your JSON baseline of your desired state. 	
 
+### Running Unit Test against ValidateRG.py
+
+To test the ValidateRG.py code.  12 JSON files were created under .\unittestjson\ directory.
+
+Run "unit-test-ValudateRG.cmd" to the desired state against test json files to validate failures are found. 
+
+They will test that the ValidateRG.py code can test for the following 4 issues:
+1. Not enough assets were found in the deployment
+2. Extra assets were found in the deployment
+3. An asset is missing from the deployment
+4. Azure asset found that isn't specified in the baseline
 
 
 
