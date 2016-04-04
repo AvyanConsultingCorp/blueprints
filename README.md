@@ -57,5 +57,20 @@ For example
 ValidateRG.cmd your-subscription-id my-singlevm-RG  singlevm-desiredstate.json
 
 
+### Creating a desiredstate.json
+
+The desiredstate.json file is created from the following steps.
+
+1. Locate a resource group you want to use as your baseline to test against.
+2. Create a JSON of this deployment by running the following command:
+   "azure group show --name <your-targeted-RG>  --subscription <your-subscription> --json > somename-desiredstate.json
+3. Edit generated JSON file 
+	1. Keep JSON entry for "name" and "resources" array. Remove all entries, they aren't used
+	2. Change "name" value to somename-desiredstate
+4. Save this file. It's now your JSON baseline of your desired state. 	
+
+
+
+
 
 
