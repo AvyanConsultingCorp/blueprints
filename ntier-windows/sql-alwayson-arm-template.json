@@ -254,7 +254,7 @@
       "sqllbFEConfigID": "[concat(variables('ids').sqllbID,'/frontendIPConfigurations/',variables('lbSettings').sqlLBFE)]",
       "sqllbProbeID": "[concat(variables('ids').sqllbID,'/probes/',variables('SQLAOProbe'))]"
     },
-    "SQL2012-WS2012R2": "Enterprise",
+    "SQL2012SP2-WS2012R2": "Enterprise",
     "SQL2014-WS2012R2": "Enterprise",
     "SQL2016CTP3-WS2012R2": "Evaluation",
     "subnets": [

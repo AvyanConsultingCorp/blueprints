@@ -1,0 +1,54 @@
+{
+  "name": "singlevm-schema-desiredstate",
+  "resources": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/app1-dev-rg/providers/Microsoft.Compute/virtualMachines/app1-vm0",
+      "name": "app1-vm0",
+      "type": "virtualMachines",
+      "location": "eastus2",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/app1-dev-rg/providers/Microsoft.Compute/virtualMachines/app1-vm0/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "eastus2",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/app1-dev-rg/providers/Microsoft.Network/networkInterfaces/app1-vm0-0nic",
+      "name": "app1-vm0-0nic",
+      "type": "networkInterfaces",
+      "location": "eastus2",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/app1-dev-rg/providers/Microsoft.Network/networkSecurityGroups/app1-nsg",
+      "name": "app1-nsg",
+      "type": "networkSecurityGroups",
+      "location": "eastus2",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/app1-dev-rg/providers/Microsoft.Network/publicIPAddresses/app1-pip",
+      "name": "app1-pip",
+      "type": "publicIPAddresses",
+      "location": "eastus2",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/app1-dev-rg/providers/Microsoft.Network/virtualNetworks/app1-vnet",
+      "name": "app1-vnet",
+      "type": "virtualNetworks",
+      "location": "eastus2",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/app1-dev-rg/providers/Microsoft.Storage/storageAccounts/app1vm0diag",
+      "name": "app1vm0diag",
+      "type": "storageAccounts",
+      "location": "eastus2",
+      "tags": null
+    }
+  ]
+}
