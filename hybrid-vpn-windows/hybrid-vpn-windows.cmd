@@ -24,9 +24,9 @@ SET ON_PREMISES_ADDRESS_SPACE=10.10.0.0/16
 SET ON_PREMISES_PUBLIC_IP=40.50.60.70
 :: This gives the gateway an IP range 10.20.255.240 - 10.20.255.254
 SET GATEWAY_SUBNET_IP_RANGE=10.20.255.240/28
-:: This give the internal subnet an IP range of 10.20.0.1 - 10.20.127.254 
+:: This give the internal subnet an IP range of 10.20.0.1 - 10.20.127.254
 SET INTERNAL_SUBNET_IP_RANGE=10.20.0.0/17
-:: We'll put this at the end of the subnet 
+:: We will put this at the end of the subnet
 SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS=10.20.127.254
 
 :: Set up the names of things using recommended conventions
@@ -73,12 +73,10 @@ CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
 CALL :CallCLI azure network public-ip create --allocation-method Dynamic ^
   --name %PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
 
-goto :eof
-
 :: Create virtual network gateway
 CALL :CallCLI azure network vpn-gateway create --name %VPN_GATEWAY_NAME% ^
   --type %VPN_GATEWAY_TYPE% --public-ip-name %PUBLIC_IP_NAME% --vnet-name %VNET_NAME% ^
-  --location %LOCATION% %POSTFIX
+  --location %LOCATION% %POSTFIX%
 
 :: Create local gateway
 CALL :CallCLI azure network local-gateway create --name %LOCAL_GATEWAY_NAME% ^
@@ -116,7 +114,7 @@ CALL :CallCLI azure network lb probe create --protocol %INTERNAL_LOAD_BALANCER_P
   --interval %INTERNAL_LOAD_BALANCER_PROBE_INTERVAL% --count %INTERNAL_LOAD_BALANCER_PROBE_COUNT% ^
   --lb-name %INTERNAL_LOAD_BALANCER_NAME% --name %INTERNAL_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
 
-:: This will show the shared key for the VPN connection.  We won't bother with the error checking.
+:: This will show the shared key for the VPN connection.  We do not need the error checking.
 CALL azure network vpn-connection shared-key show --name %VPN_CONNECTION_NAME% %POSTFIX%
 
 GOTO :eof
@@ -126,7 +124,7 @@ SETLOCAL
 CALL %*
 IF ERRORLEVEL 1 (
     CALL :ShowError "Error executing CLI Command: " %*
-    :: This executes in the CALLER'S context, so we can exit the whole script on an error
+    :: This command executes in the main script context so we can exit the whole script on an error
     (GOTO) 2>NULL & GOTO :eof
 )
 GOTO :eof
@@ -136,7 +134,7 @@ SETLOCAL EnableDelayedExpansion
 :: Print the message
 ECHO %~1
 SHIFT
-:: Get the first part of the azure CLI command so we don't have an extra space at the beginning
+:: Get the first part of the azure CLI command so we do not have an extra space at the beginning
 SET CLICommand=%~1
 SHIFT
 :: Loop through the rest of the parameters and recreate the CLI command
@@ -148,4 +146,3 @@ GOTO Loop
 :Continue
 ECHO %CLICommand%
 GOTO :eof
-
