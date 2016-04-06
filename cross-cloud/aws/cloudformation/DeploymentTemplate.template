@@ -141,6 +141,9 @@
       "Type": "AWS::EC2::Instance",
       "Metadata": {
         "AWS::CloudFormation::Init": {
+         "configSets" : {
+            "Install" : [ "config" ]
+          },
           "config": {
             "packages": { },
             "groups": { },
@@ -178,7 +181,7 @@
         }
       },
       "Properties": {
-        "DisableApiTermination": "false",
+        "DisableApiTermination": "false", 
         "InstanceInitiatedShutdownBehavior": "stop",
         "ImageId": {
           "Fn::FindInMap": [
@@ -215,14 +218,26 @@
           {
             "Key": "Name", "Value": "OpenSwan"
           }
-        ]
-      }
+        ],
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+             "#!/bin/bash -xe\n",
+             "yum update -y aws-cfn-bootstrap\n",
+
+             "# Install the files and packages from the metadata\n",
+             "/opt/aws/bin/cfn-init -v ",
+             "         --stack ", { "Ref" : "AWS::StackName" },
+             "         --resource instancei01084c85 ",
+             "         --configsets Install ",
+             "         --region ", { "Ref" : "AWS::Region" }, "\n"
+    ]]}}      }
     },
     "instanceifbac0960": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
         "AWS::CloudFormation::Init": {
-          "config": {
+            "configSets" : {
+            "Install" : [ "config" ]
+          }, "config": {
             "packages": { },
             "groups": { },
             "users": { },
@@ -296,7 +311,18 @@
           {
             "Key": "Name", "Value": "PostgreSQL"
           }
-        ]
+        ],
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+             "#!/bin/bash -xe\n",
+             "yum update -y aws-cfn-bootstrap\n",
+
+             "# Install the files and packages from the metadata\n",
+             "/opt/aws/bin/cfn-init -v ",
+             "         --stack ", { "Ref" : "AWS::StackName" },
+             "         --resource instanceifbac0960 ",
+             "         --configsets Install ",
+             "         --region ", { "Ref" : "AWS::Region" }, "\n"
+    ]]}}
 
       }
     },
