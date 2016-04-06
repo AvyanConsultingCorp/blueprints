@@ -1,0 +1,341 @@
+{
+  "name": "3tier-test-extra#NIC",
+  "resources": [
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/availabilitySets/3tier-biz-as",
+      "name": "3tier-biz-as",
+      "type": "availabilitySets",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/availabilitySets/3tier-db-as",
+      "name": "3tier-db-as",
+      "type": "availabilitySets",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/availabilitySets/3tier-web-as",
+      "name": "3tier-web-as",
+      "type": "availabilitySets",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-biz-vm1",
+      "name": "3tier-biz-vm1",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-biz-vm1/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-biz-vm2",
+      "name": "3tier-biz-vm2",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-biz-vm2/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-biz-vm3",
+      "name": "3tier-biz-vm3",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-biz-vm3/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-db-vm1",
+      "name": "3tier-db-vm1",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-db-vm1/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-db-vm2",
+      "name": "3tier-db-vm2",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-db-vm2/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-manage-vm1",
+      "name": "3tier-manage-vm1",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-manage-vm1/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-web-vm1",
+      "name": "3tier-web-vm1",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-web-vm1/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-web-vm2",
+      "name": "3tier-web-vm2",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-web-vm2/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-web-vm3",
+      "name": "3tier-web-vm3",
+      "type": "virtualMachines",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Compute/virtualMachines/3tier-web-vm3/extensions/BGInfo",
+      "name": "BGInfo",
+      "type": "extensions",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/loadBalancers/3tier-biz-lb",
+      "name": "3tier-biz-lb",
+      "type": "loadBalancers",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/loadBalancers/3tier-web-lb",
+      "name": "3tier-web-lb",
+      "type": "loadBalancers",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-biz-vm1-nic1",
+      "name": "test-extra-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-biz-vm1-nic1",
+      "name": "3tier-biz-vm1-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-biz-vm2-nic1",
+      "name": "3tier-biz-vm2-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-biz-vm3-nic1",
+      "name": "3tier-biz-vm3-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-db-vm1-nic1",
+      "name": "3tier-db-vm1-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-db-vm2-nic1",
+      "name": "3tier-db-vm2-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-manage-vm1-nic1",
+      "name": "3tier-manage-vm1-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-web-vm1-nic1",
+      "name": "3tier-web-vm1-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-web-vm2-nic1",
+      "name": "3tier-web-vm2-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkInterfaces/3tier-web-vm3-nic1",
+      "name": "3tier-web-vm3-nic1",
+      "type": "networkInterfaces",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkSecurityGroups/3tier-db-nsg",
+      "name": "3tier-db-nsg",
+      "type": "networkSecurityGroups",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/networkSecurityGroups/3tier-manage-nsg",
+      "name": "3tier-manage-nsg",
+      "type": "networkSecurityGroups",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/publicIPAddresses/3tier-jumpbox-pip",
+      "name": "3tier-jumpbox-pip",
+      "type": "publicIPAddresses",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/publicIPAddresses/3tier-pip",
+      "name": "3tier-pip",
+      "type": "publicIPAddresses",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Network/virtualNetworks/3tier-vnet",
+      "name": "3tier-vnet",
+      "type": "virtualNetworks",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierbizvm1st1",
+      "name": "3tierbizvm1st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierbizvm2st1",
+      "name": "3tierbizvm2st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierbizvm3st1",
+      "name": "3tierbizvm3st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierdbvm1st1",
+      "name": "3tierdbvm1st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierdbvm2st1",
+      "name": "3tierdbvm2st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierdiag",
+      "name": "3tierdiag",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tiermanagevm1st1",
+      "name": "3tiermanagevm1st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierwebvm1st1",
+      "name": "3tierwebvm1st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierwebvm2st1",
+      "name": "3tierwebvm2st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    },
+    {
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/3tier-test-rg/providers/Microsoft.Storage/storageAccounts/3tierwebvm3st1",
+      "name": "3tierwebvm3st1",
+      "type": "storageAccounts",
+      "location": "centralus",
+      "tags": null
+    }
+  ]
+}
