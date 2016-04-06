@@ -1,8 +1,8 @@
 @ECHO OFF
 SETLOCAL
-IF "%~1"=="" (
-    ECHO Usage: %0 subscription-id
-    ECHO   For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+IF "%~2"=="" (
+    ECHO Usage: %0 subscription-id ipsec-shared-key
+    ECHO   For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx xxxxxxxxxxxx
     EXIT /B
     )
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -40,74 +40,35 @@ IF "%~1"=="" (
 :: is active/default
 SET SUBSCRIPTION=%1
 
-:: Set global avariables that is common to hub and spokes
+SET IPSEC_SHARED_KEY=%2
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Input variables
+:: Note: You can change input variables. 
+:: There is no validation on the input. 
+:: Make sure your input is correct!
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 SET ON_PREM_GATEWAY_PIP_ADDRESS=131.107.36.3
+
 SET ON_PREM_NAME=on-prem
+
+SET ENVIRONMENT=dev
+
 SET HUB_NAME=hub0
+
 SET SPK1_NAME=app1
 SET SPK2_NAME=app1
 SET SPK3_NAME=app3
-SET ENVIRONMENT=dev
-SET VPN_GATEWAY_TYPE=RouteBased
-SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
 
-:: vpn gateway
-:: also defined in :CREATE_SPOKE sub routine as 
-::  SET VPN_GATEWAY_NAME=%APP_NAME%-vgw
-SET HUB_VPN_GATEWAY_NAME=%HUB_NAME%-vgw
-SET SPK1_VPN_GATEWAY_NAME=%SPK1_NAME%-vgw
-SET SPK2_VPN_GATEWAY_NAME=%SPK2_NAME%-vgw
-SET SPK3_VPN_GATEWAY_NAME=%SPK3_NAME%-vgw
-
-:: resource group name
-:: also defined in :CREATE_SPOKE sub routine as 
-:: SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
-SET SPK1_RESOURCE_GROUP=%SPK1_NAME%-%ENVIRONMENT%-rg
-SET SPK2_RESOURCE_GROUP=%SPK2_NAME%-%ENVIRONMENT%-rg
-SET SPK3_RESOURCE_GROUP=%SPK3_NAME%-%ENVIRONMENT%-rg
-
-:: spoke-to-hub local gateway name
-:: make sure the naming convention is consistant with 
-:: the follwoing line in :CREATE_SPOKE sub routine
-:: SET HUB_LOCAL_GATEWAY=%APP_NAME%-to-%HUB_NAME%-lgw
-SET SPK1_TO_HUB_LGW=%SPK1_NAME%-to-%HUB_NAME%-lgw
-SET SPK2_TO_HUB_LGW=%SPK2_NAME%-to-%HUB_NAME%-lgw
-SET SPK3_TO_HUB_LGW=%SPK3_NAME%-to-%HUB_NAME%-lgw
-SET ON_PREM_TO_HUB_LGW=%ON_PREM_NAME%-to-%HUB_NAME%-lgw
-
-:: hub-to-spoke local gateway name
-SET HUB_TO_ON_PREM_LGW=%HUB_NAME%-to-%ON_PREM_NAME%-lgw
-SET HUB_TO_SPOKE1_LGW=%HUB_NAME%-to-%SPK1_NAME%-lgw
-SET HUB_TO_SPOKE2_LGW=%HUB_NAME%-to-%SPK2_NAME%-lgw
-SET HUB_TO_SPOKE3_LGW=%HUB_NAME%-to-%SPK3_NAME%-lgw
-
-:: hub-to-spoke vpn connection name
-SET HUB_TO_ON_PREM_CONECTION=%HUB_NAME%-to-%ON_PREM_NAME%-vpn
-SET HUB_TO_SPK1_CONECTION=%HUB_NAME%-to-%SPK1_NAME%-vpn
-SET HUB_TO_SPK2_CONECTION=%HUB_NAME%-to-%SPK2_NAME%-vpn
-SET HUB_TO_SPK3_CONECTION=%HUB_NAME%-to-%SPK3_NAME%-vpn
-
-:: spoke-to-hub vpn connection name
-SET SPK1_TO_HUB_CONECTION=%SPK1_NAME%-to-%HUB_NAME%-vpn
-SET SPK2_TO_HUB_CONECTION=%SPK2_NAME%-to-%HUB_NAME%-vpn
-SET SPK3_TO_HUB_CONECTION=%SPK3_NAME%-to-%HUB_NAME%-vpn
-SET ON_PREM_TO_HUB_CONECTION=%ON_PREM_NAME%-to-%HUB_NAME%-vpn
-
-:: set net work ip address range, they will be used in hub
-SET ON_PREM_IP_RANGE0=192.268.0.0/24
+:: network ip address range
+SET ON_PREM_CIDR=192.268.0.0/24
 SET HUB_CIDR=10.0.0.0/16
 SET SPK1_CIDR=10.1.0.0/16
 SET SPK2_CIDR=10.2.0.0/16
 SET SPK3_CIDR=10.3.0.0/16
 
-:: set local gateway address space
-SET SPK1_TO_HUB_LGW_CIDRS=10.2.0.0/16,10.3.0.0/16,10.4.0.0/16,192.168.0.0/24
-SET SPK2_TO_HUB_LGW_CIDRS=10.1.0.0/16,10.3.0.0/16,10.4.0.0/16,192.168.0.0/24
-SET SPK3_TO_HUB_LGW_CIDRS=10.1.0.0/16,10.2.0.0/16,10.4.0.0/16,192.168.0.0/24
-SET ON_PREM_TO_HUB_LGW_CIDRS=10.1.0.0/16,10.2.0.0/16,10.3.0.0/16,10.4.0.0/16
-SET HUB_TO_ON_PREM_LGW_CIDRS=192.168.0.0/24
-
-:: set gateway subnet ip address range
+:: gateway subnet ip address range
 SET HUB_GW=10.0.255.240/28
 SET SPK1_GW=10.1.255.240/28
 SET SPK2_GW=10.2.255.240/28
@@ -129,6 +90,64 @@ SET SPK3_LOC=eastus
 SET SPK1_ILB=10.1.127.254
 SET SPK2_ILB=10.2.127.254
 SET SPK3_ILB=10.3.127.254
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Derived variable. we suggest that you don't change them
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:: local gateway address space
+SET SPK1_TO_HUB_LGW_CIDRS=%ON_PREM_CIDR%,%HUB_CIDR%,%SPK2_CIDR%,%SPK3_CIDR%
+
+SET SPK2_TO_HUB_LGW_CIDRS=%ON_PREM_CIDR%,%HUB_CIDR%,%SPK1_CIDR%,%SPK3_CIDR%
+
+SET SPK3_TO_HUB_LGW_CIDRS=%ON_PREM_CIDR%,%HUB_CIDR%,%SPK1_CIDR%,%SPK2_CIDR%
+
+SET ON_PREM_TO_HUB_LGW_CIDRS=%HUB_CIDR%,%SPK1_CIDR%,%SPK2_CIDR%,%SPK3_CIDR%
+
+SET HUB_TO_ON_PREM_LGW_CIDRS=%ON_PREM_CIDR%
+
+SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
+
+:: vpn gateway
+:: also defined in :CREATE_SPOKE sub routine as 
+::  SET VPN_GATEWAY_NAME=%APP_NAME%-vgw
+SET HUB_VPN_GATEWAY_NAME=%HUB_NAME%-vgw
+SET SPK1_VPN_GATEWAY_NAME=%SPK1_NAME%-vgw
+SET SPK2_VPN_GATEWAY_NAME=%SPK2_NAME%-vgw
+SET SPK3_VPN_GATEWAY_NAME=%SPK3_NAME%-vgw
+
+:: resource group name
+:: also defined in :CREATE_SPOKE sub routine as 
+:: SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
+SET SPK1_RESOURCE_GROUP=%SPK1_NAME%-%ENVIRONMENT%-rg
+SET SPK2_RESOURCE_GROUP=%SPK2_NAME%-%ENVIRONMENT%-rg
+SET SPK3_RESOURCE_GROUP=%SPK3_NAME%-%ENVIRONMENT%-rg
+
+:: spoke-to-hub local gateway name
+SET SPK1_TO_HUB_LGW=%SPK1_NAME%-to-%HUB_NAME%-lgw
+SET SPK2_TO_HUB_LGW=%SPK2_NAME%-to-%HUB_NAME%-lgw
+SET SPK3_TO_HUB_LGW=%SPK3_NAME%-to-%HUB_NAME%-lgw
+SET ON_PREM_TO_HUB_LGW=%ON_PREM_NAME%-to-%HUB_NAME%-lgw
+
+:: hub-to-spoke local gateway name
+:: also defined in :CREATE_SPOKE sub routine as 
+:: SET LOCAL_GATEWAY_NAME=%HUB_NAME%-to-%APP_NAME%-lgw
+SET HUB_TO_ON_PREM_LGW=%HUB_NAME%-to-%ON_PREM_NAME%-lgw
+SET HUB_TO_SPOKE1_LGW=%HUB_NAME%-to-%SPK1_NAME%-lgw
+SET HUB_TO_SPOKE2_LGW=%HUB_NAME%-to-%SPK2_NAME%-lgw
+SET HUB_TO_SPOKE3_LGW=%HUB_NAME%-to-%SPK3_NAME%-lgw
+
+:: hub-to-spoke vpn connection name
+SET HUB_TO_ON_PREM_CONECTION=%HUB_NAME%-to-%ON_PREM_NAME%-vpn
+SET HUB_TO_SPK1_CONECTION=%HUB_NAME%-to-%SPK1_NAME%-vpn
+SET HUB_TO_SPK2_CONECTION=%HUB_NAME%-to-%SPK2_NAME%-vpn
+SET HUB_TO_SPK3_CONECTION=%HUB_NAME%-to-%SPK3_NAME%-vpn
+
+:: spoke-to-hub vpn connection name
+SET SPK1_TO_HUB_CONECTION=%SPK1_NAME%-to-%HUB_NAME%-vpn
+SET SPK2_TO_HUB_CONECTION=%SPK2_NAME%-to-%HUB_NAME%-vpn
+SET SPK3_TO_HUB_CONECTION=%SPK3_NAME%-to-%HUB_NAME%-vpn
+SET ON_PREM_TO_HUB_CONECTION=%ON_PREM_NAME%-to-%HUB_NAME%-vpn
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create hub vnet
@@ -207,7 +226,7 @@ CALL :CallCLI azure network public-ip create --allocation-method Dynamic ^
 
 :: Create virtual network gateway
 CALL :CallCLI azure network vpn-gateway create --name %HUB_VPN_GATEWAY_NAME% ^
-  --type %VPN_GATEWAY_TYPE% --public-ip-name %PUBLIC_IP_NAME% --vnet-name %VNET_NAME% ^
+  --type RouteBased --public-ip-name %PUBLIC_IP_NAME% --vnet-name %VNET_NAME% ^
   --location %LOCATION% %POSTFIX
 
 :: Parse public-ip json to get the line that contains an ip address. 
@@ -278,9 +297,6 @@ SET LOCATION=%5
 SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS=%6
 
 :: Set up the names of things using recommended conventions
-SET HUB_LOCAL_GATEWAY=%APP_NAME%-to-%HUB_NAME%-lgw
-
-:: Set up the names of things using recommended conventions
 SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
 SET VNET_NAME=%APP_NAME%-vnet
 SET PUBLIC_IP_NAME=%APP_NAME%-pip
@@ -330,7 +346,7 @@ CALL :CallCLI azure network public-ip create --allocation-method Dynamic ^
 
 :: Create virtual network gateway
 CALL :CallCLI azure network vpn-gateway create --name %VPN_GATEWAY_NAME% ^
-  --type %VPN_GATEWAY_TYPE% --public-ip-name %PUBLIC_IP_NAME% --vnet-name %VNET_NAME% ^
+  --type RouteBased --public-ip-name %PUBLIC_IP_NAME% --vnet-name %VNET_NAME% ^
   --location %LOCATION% %POSTFIX
 
 :: Parse public-ip json to get the line that contains an ip address. 
@@ -391,6 +407,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --lnet-gateway2 %SPK1_TO_HUB_LGW% ^
   --lnet-gateway2-group %sSPK1_RESOURCE_GROUP% ^
   --type IPsec --location %SPK1_LOC% ^
+  --shared-key %IPSEC_SHARED_KEY% ^
   --resource-group %SPK1_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
@@ -402,6 +419,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --lnet-gateway2 %SPK2_TO_HUB_LGW% ^
   --lnet-gateway2-group %sSPK2_RESOURCE_GROUP% ^
   --type IPsec --location %SPK2_LOC% ^
+  --shared-key %IPSEC_SHARED_KEY% ^
   --resource-group %SPK2_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
@@ -413,6 +431,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --lnet-gateway2 %SPK3_TO_HUB_LGW% ^
   --lnet-gateway2-group %sSPK3_RESOURCE_GROUP% ^
   --type IPsec --location %SPK3_LOC% ^
+  --shared-key %IPSEC_SHARED_KEY% ^
   --resource-group %SPK3_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
@@ -429,36 +448,52 @@ GOTO :eof
 :CREATE_HUB_TO_SPOKE_CONNECTIONS
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create HUB_TO_ON_PREM_CONECTION
-CALL :CallCLI azure network vpn-connection create --name %HUB_TO_ON_PREM_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
+CALL :CallCLI azure network vpn-connection create ^
+  --name %HUB_TO_ON_PREM_CONECTION% ^
+  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
+  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
   --lnet-gateway2 %HUB_TO_ON_PREM_LGW% ^
   --lnet-gateway2-group %HUB_RESOURCE_GROUP% ^
   --type IPsec --location %HUB_LOC% ^
-  --resource-group %HUB_RESOURCE_GROUP% --subscription %SUBSCRIPTION%
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
 
 :: Create HUB_TO_SPK1_CONECTION
-CALL :CallCLI azure network vpn-connection create --name %HUB_TO_SPK1_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
+CALL :CallCLI azure network vpn-connection create ^
+  --name %HUB_TO_SPK1_CONECTION% ^
+  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
+  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
   --lnet-gateway2 %HUB_TO_SPK1_LGW% ^
   --lnet-gateway2-group %SPK1_RESOURCE_GROUP% ^
   --type IPsec --location %HUB_LOC% ^
-  --resource-group %HUB_RESOURCE_GROUP% --subscription %SUBSCRIPTION%
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
 
 :: Create HUB_TO_SPK2_CONECTION
-CALL :CallCLI azure network vpn-connection create --name %HUB_TO_SPK2_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
+CALL :CallCLI azure network vpn-connection create ^
+  --name %HUB_TO_SPK2_CONECTION% ^
+  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
+  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
   --lnet-gateway2 %HUB_TO_SPK2_LGW% ^
   --lnet-gateway2-group %SPK2_RESOURCE_GROUP% ^
   --type IPsec --location %HUB_LOC% ^
-  --resource-group %HUB_RESOURCE_GROUP% --subscription %SUBSCRIPTION%
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
 
 :: Create HUB_TO_SPK3_CONECTION
-CALL :CallCLI azure network vpn-connection create --name %HUB_TO_SPK3_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
+CALL :CallCLI azure network vpn-connection create ^
+  --name %HUB_TO_SPK3_CONECTION% ^
+  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
+  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
   --lnet-gateway2 %HUB_TO_SPK3_LGW% ^
   --lnet-gateway2-group %SPK3_RESOURCE_GROUP% ^
   --type IPsec --location %HUB_LOC% ^
-  --resource-group %HUB_RESOURCE_GROUP% --subscription %SUBSCRIPTION%
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
 
 GOTO :eof
 
