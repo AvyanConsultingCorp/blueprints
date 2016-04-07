@@ -71,22 +71,24 @@ CALL azure config mode arm
 :: Create root level resources
 
 :: Create the enclosing resource group
-CALL azure group create --name %RESOURCE_GROUP% --location %LOCATION% ^
+CALL :CallCLI azure group create --name %RESOURCE_GROUP% --location %LOCATION% ^
   --subscription %SUBSCRIPTION%
 
 :: Create the virtual network
-CALL azure network vnet create --address-prefixes %VNET_IP_RANGE% ^
+CALL :CallCLI azure network vnet create --address-prefixes %VNET_IP_RANGE% ^
   --name %VNET_NAME% --location %LOCATION% %POSTFIX%
 
 :: Create the storage account for diagnostics logs
-CALL azure storage account create --type LRS --location %LOCATION% %POSTFIX% ^
+CALL :CallCLI azure storage account create --type LRS --location %LOCATION% %POSTFIX% ^
   %DIAGNOSTICS_STORAGE%
 
 :: Create the public IP address (dynamic)
-CALL azure network public-ip create --name %PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network public-ip create --name %PUBLIC_IP_NAME% ^
+  --location %LOCATION% %POSTFIX%
 
 :: Create the jumpbox public IP address (dynamic)
-CALL azure network public-ip create --name %JUMPBOX_PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network public-ip create --name %JUMPBOX_PUBLIC_IP_NAME% ^
+  --location %LOCATION% %POSTFIX%
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -99,18 +101,18 @@ SET AVAILSET_NAME=%APP_NAME%-web-as
 SET USING_AVAILSET=true
 
 :: Create web tier (public) load balancer
-CALL azure network lb create --name %LB_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network lb create --name %LB_NAME% --location %LOCATION% %POSTFIX%
 
 :: Create the subnet
-CALL azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix ^
-  %WEB_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
+CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
+  --address-prefix %WEB_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
 
 :: Create the availability sets
-CALL azure availset create --name %AVAILSET_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure availset create --name %AVAILSET_NAME% --location %LOCATION% %POSTFIX%
 
 :: Create the load balancer frontend-ip using the public IP address
-CALL azure network lb frontend-ip create --name %LB_NAME%-frontend% --lb-name ^
-  %LB_NAME% --public-ip-name %PUBLIC_IP_NAME% %POSTFIX%
+CALL :CallCLI azure network lb frontend-ip create --name %LB_NAME%-frontend% ^
+  --lb-name %LB_NAME% --public-ip-name %PUBLIC_IP_NAME% %POSTFIX%
 
 CALL :CreateCommonLBResources %LB_NAME%
 
@@ -128,18 +130,18 @@ SET AVAILSET_NAME=%APP_NAME%-biz-as
 SET USING_AVAILSET=true
 
 :: Create the business tier internal load balancer
-CALL azure network lb create --name %LB_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network lb create --name %LB_NAME% --location %LOCATION% %POSTFIX%
 
 :: Create the subnet
-CALL azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix ^
-  %BIZ_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
+CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
+  --address-prefix %BIZ_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
 
 :: Create the availability sets
-CALL azure availset create --name %AVAILSET_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure availset create --name %AVAILSET_NAME% --location %LOCATION% %POSTFIX%
 
 :: Create the load balancer frontend-ip using a private IP address and subnet
-CALL azure network lb frontend-ip create --name %LB_NAME%-frontend --lb-name ^
-  %LB_NAME% --private-ip-address %BIZ_ILB_IP% --subnet-name %SUBNET_NAME% ^
+CALL :CallCLI azure network lb frontend-ip create --name %LB_NAME%-frontend ^
+  --lb-name %LB_NAME% --private-ip-address %BIZ_ILB_IP% --subnet-name %SUBNET_NAME% ^
   --subnet-vnet-name %VNET_NAME% %POSTFIX%
 
 CALL :CreateCommonLBResources %LB_NAME%
@@ -157,11 +159,11 @@ SET AVAILSET_NAME=%APP_NAME%-db-as
 SET USING_AVAILSET=true
 
 :: Create the subnet
-CALL azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix ^
-  %DB_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
+CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
+  --address-prefix %DB_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
 
-  :: Create the availability sets
-  CALL azure availset create --name %AVAILSET_NAME% --location %LOCATION% %POSTFIX%
+:: Create the availability sets
+CALL :CallCLI azure availset create --name %AVAILSET_NAME% --location %LOCATION% %POSTFIX%
 
 :: Create VMs and per-VM resources
 FOR /L %%I IN (1,1,%NUM_VM_INSTANCES_DB_TIER%) DO CALL :CreateVM %%I db %SUBNET_NAME% %USING_AVAILSET%
@@ -175,8 +177,8 @@ SET SUBNET_NAME=%APP_NAME%-manage-subnet
 SET USING_AVAILSET=false
 
 :: Create the subnet
-CALL azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix ^
-  %MANAGE_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
+CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
+  --address-prefix %MANAGE_SUBNET_IP_RANGE% --name %SUBNET_NAME% %POSTFIX%
 
 :: Create VMs and per-VM resources
 FOR /L %%I IN (1,1,%NUM_VM_INSTANCES_MANAGE_TIER%) DO CALL :CreateVM %%I manage %SUBNET_NAME% %USING_AVAILSET%
@@ -192,46 +194,55 @@ FOR /L %%I IN (1,1,%NUM_VM_INSTANCES_MANAGE_TIER%) DO CALL :CreateVM %%I manage 
 
 SET MANAGE_NSG_NAME=%APP_NAME%-manage-nsg
 
-CALL azure network nsg create --name %MANAGE_NSG_NAME% --location %LOCATION% %POSTFIX%
-CALL azure network nsg rule create --nsg-name %MANAGE_NSG_NAME% --name admin-rdp-allow ^
+CALL :CallCLI azure network nsg create --name %MANAGE_NSG_NAME% ^
+  --location %LOCATION% %POSTFIX%
+
+CALL :CallCLI azure network nsg rule create --nsg-name %MANAGE_NSG_NAME% ^
+  --name admin-rdp-allow
 	--access Allow --protocol Tcp --direction Inbound --priority 100 ^
 	--source-address-prefix %ADMIN_ADDRESS_PREFIX% --source-port-range * ^
 	--destination-address-prefix * --destination-port-range %REMOTE_ACCESS_PORT% %POSTFIX%
 
 :: Associate the NSG rule with the jumpbox NIC
-CALL azure network nic set --name %JUMPBOX_NIC_NAME% ^
+CALL :CallCLI azure network nic set --name %JUMPBOX_NIC_NAME% ^
 	--network-security-group-name %MANAGE_NSG_NAME% %POSTFIX%
 
 :: Make Jump Box publically accessible
-CALL azure network nic set --name %JUMPBOX_NIC_NAME% --public-ip-name %JUMPBOX_PUBLIC_IP_NAME% %POSTFIX%
+CALL :CallCLI azure network nic set --name %JUMPBOX_NIC_NAME% ^
+  --public-ip-name %JUMPBOX_PUBLIC_IP_NAME% %POSTFIX%
 
 
 :: DB Tier NSG rule
 
 SET DB_TIER_NSG_NAME=%APP_NAME%-db-nsg
 
-CALL azure network nsg create --name %DB_TIER_NSG_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network nsg create --name %DB_TIER_NSG_NAME% ^
+  --location %LOCATION% %POSTFIX%
 
 :: Allow inbound traffic from business tier subnet to the DB tier
-CALL azure network nsg rule create --nsg-name %DB_TIER_NSG_NAME% --name biz-allow ^
+CALL :CallCLI azure network nsg rule create --nsg-name %DB_TIER_NSG_NAME% ^
+  --name biz-allow ^
 	--access Allow --protocol * --direction Inbound --priority 100 ^
 	--source-address-prefix %BIZ_SUBNET_IP_RANGE% --source-port-range * ^
 	--destination-address-prefix * --destination-port-range * %POSTFIX%
 
 :: Allow inbound remote access traffic from management subnet
-CALL azure network nsg rule create --nsg-name %DB_TIER_NSG_NAME% --name manage-rdp-allow ^
+CALL :CallCLI azure network nsg rule create --nsg-name %DB_TIER_NSG_NAME% ^
+  --name manage-rdp-allow ^
 	--access Allow --protocol Tcp --direction Inbound --priority 200 ^
 	--source-address-prefix %MANAGE_SUBNET_IP_RANGE% --source-port-range * ^
 	--destination-address-prefix * --destination-port-range %REMOTE_ACCESS_PORT% %POSTFIX%
 
 :: Deny all other inbound traffic from within vnet
-CALL azure network nsg rule create --nsg-name %DB_TIER_NSG_NAME% --name vnet-deny ^
+CALL :CallCLI azure network nsg rule create --nsg-name %DB_TIER_NSG_NAME% ^
+  --name vnet-deny ^
 	--access Deny --protocol * --direction Inbound --priority 1000 ^
 	--source-address-prefix VirtualNetwork --source-port-range * ^
 	--destination-address-prefix * --destination-port-range * %POSTFIX%
 
 :: Associate the NSG rule with the subnet
-CALL azure network vnet subnet set --vnet-name %VNET_NAME% --name %APP_NAME%-db-subnet ^
+CALL :CallCLI azure network vnet subnet set --vnet-name %VNET_NAME% ^
+  --name %APP_NAME%-db-subnet ^
 	--network-security-group-name %DB_TIER_NSG_NAME% %POSTFIX%
 
 GOTO :eof
@@ -249,15 +260,15 @@ SET LB_PROBE_NAME=%LB_NAME%-probe
 ECHO Creating resources for load balancer: %LB_NAME%
 
 :: Create LB back-end address pool
-CALL azure network lb address-pool create --name %LB_BACKEND_NAME% --lb-name ^
-  %LB_NAME% %POSTFIX%
+CALL :CallCLI azure network lb address-pool create --name %LB_BACKEND_NAME% ^
+  --lb-name %LB_NAME% %POSTFIX%
 
 :: Create a health probe for an HTTP endpoint
-CALL azure network lb probe create --name %LB_PROBE_NAME% --lb-name %LB_NAME% ^
-  --port 80 --interval 5 --count 2 --protocol http --path / %POSTFIX%
+CALL :CallCLI azure network lb probe create --name %LB_PROBE_NAME% ^
+  --lb-name %LB_NAME% --port 80 --interval 5 --count 2 --protocol http --path / %POSTFIX%
 
 :: Create a load balancer rule for HTTP
-CALL azure network lb rule create --name %LB_NAME%-rule-http --protocol tcp ^
+CALL :CallCLI azure network lb rule create --name %LB_NAME%-rule-http --protocol tcp ^
   --lb-name %LB_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name ^
   %LB_FRONTEND_NAME% --probe-name %LB_PROBE_NAME% %POSTFIX%
 
@@ -284,23 +295,23 @@ SET VHD_STORAGE=%VM_NAME:-=%st1
 SET /a RDP_PORT=50001 + %1
 
 :: Create NIC for VM1
-CALL azure network nic create --name %NIC_NAME% --subnet-name %SUBNET_NAME% ^
+CALL :CallCLI azure network nic create --name %NIC_NAME% --subnet-name %SUBNET_NAME% ^
   --subnet-vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
 
 IF NOT "%LB_NAME%"=="" (
 	:: Add NIC to back-end address pool
 	SET LB_BACKEND_NAME=%LB_NAME%-backend-pool
-	CALL azure network nic address-pool add --name %NIC_NAME% --lb-name %LB_NAME% ^
-	  --lb-address-pool-name %LB_BACKEND_NAME% %POSTFIX%
+	CALL :CallCLI azure network nic address-pool add --name %NIC_NAME% ^
+    --lb-name %LB_NAME% --lb-address-pool-name %LB_BACKEND_NAME% %POSTFIX%
 )
 
 :: Create the storage account for the OS VHD
-CALL azure storage account create --type PLRS --location %LOCATION% ^
+CALL :CallCLI azure storage account create --type PLRS --location %LOCATION% ^
  %VHD_STORAGE% %POSTFIX%
 
 :: Create the VM
 IF "%NEEDS_AVAILABILITY_SET%"=="true" (
-  CALL azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
+  CALL :CallCLI azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
     %WINDOWS_BASE_IMAGE% --vm-size %VM_SIZE% --vnet-subnet-name %SUBNET_NAME% ^
     --nic-name %NIC_NAME% --vnet-name %VNET_NAME% --storage-account-name ^
     %VHD_STORAGE% --os-disk-vhd "%VM_NAME%-osdisk.vhd" --admin-username ^
@@ -308,7 +319,7 @@ IF "%NEEDS_AVAILABILITY_SET%"=="true" (
     "https://%DIAGNOSTICS_STORAGE%.blob.core.windows.net/" --availset-name ^
     %AVAILSET_NAME% --location %LOCATION% %POSTFIX%
 ) ELSE (
-  CALL azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
+  CALL :CallCLI azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
     %WINDOWS_BASE_IMAGE% --vm-size %VM_SIZE% --vnet-subnet-name %SUBNET_NAME% ^
     --nic-name %NIC_NAME% --vnet-name %VNET_NAME% --storage-account-name ^
     %VHD_STORAGE% --os-disk-vhd "%VM_NAME%-osdisk.vhd" --admin-username ^
@@ -318,7 +329,19 @@ IF "%NEEDS_AVAILABILITY_SET%"=="true" (
 )
 
 :: Attach a data disk
-CALL azure vm disk attach-new --vm-name %VM_NAME% --size-in-gb 128 --vhd-name ^
+CALL :CallCLI azure vm disk attach-new --vm-name %VM_NAME% --size-in-gb 128 --vhd-name ^
   %VM_NAME%-data1.vhd --storage-account-name %VHD_STORAGE% %POSTFIX%
 
 goto :eof
+
+
+:CallCLI
+SETLOCAL
+CALL %*
+IF %ERRORLEVEL% NEQ 0 (
+    Echo Error executing CLI Command: %*
+    
+    REM This command executes in the main script context so we can exit the whole script on an error
+    (GOTO) 2> NUL & GOTO :eof
+)
+GOTO :eof
