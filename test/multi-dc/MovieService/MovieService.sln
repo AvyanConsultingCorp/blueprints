@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieService", "MovieService\MovieService.csproj", "{9CB03318-20A2-48D0-8ECE-B434FA35E95D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieService.Tests", "MovieService.Tests\MovieService.Tests.csproj", "{78C7BC66-F0C1-4E2F-A2F6-E3C3F17C1386}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishScripts", "PublishScripts", "{A0AAEB8C-CA15-483B-9D1E-33A5CBA0D3C3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{8A5040E2-7DD7-4FA1-8D56-1B38EA282F91}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\Scripts\ConfigureWebServer.ps1 = PublishScripts\Scripts\ConfigureWebServer.ps1
+		PublishScripts\Scripts\Deploy-AzureResourceGroup.ps1 = PublishScripts\Scripts\Deploy-AzureResourceGroup.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{4AEF375E-785E-45FE-AAE4-E62F1DC5C130}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\Templates\MovieService.json = PublishScripts\Templates\MovieService.json
+		PublishScripts\Templates\MovieService.param.dev.json = PublishScripts\Templates\MovieService.param.dev.json
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieService.Frontend", "MovieService.Frontend\MovieService.Frontend.csproj", "{C3DC4A09-75D3-4581-8613-470D40EE8831}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MovieService.Core", "MovieService.Core\MovieService.Core.csproj", "{E062D7F2-80BA-4C29-8FDB-468B328DF1C5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CB03318-20A2-48D0-8ECE-B434FA35E95D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CB03318-20A2-48D0-8ECE-B434FA35E95D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CB03318-20A2-48D0-8ECE-B434FA35E95D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CB03318-20A2-48D0-8ECE-B434FA35E95D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78C7BC66-F0C1-4E2F-A2F6-E3C3F17C1386}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78C7BC66-F0C1-4E2F-A2F6-E3C3F17C1386}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78C7BC66-F0C1-4E2F-A2F6-E3C3F17C1386}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78C7BC66-F0C1-4E2F-A2F6-E3C3F17C1386}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3DC4A09-75D3-4581-8613-470D40EE8831}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3DC4A09-75D3-4581-8613-470D40EE8831}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3DC4A09-75D3-4581-8613-470D40EE8831}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3DC4A09-75D3-4581-8613-470D40EE8831}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E062D7F2-80BA-4C29-8FDB-468B328DF1C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E062D7F2-80BA-4C29-8FDB-468B328DF1C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E062D7F2-80BA-4C29-8FDB-468B328DF1C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E062D7F2-80BA-4C29-8FDB-468B328DF1C5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8A5040E2-7DD7-4FA1-8D56-1B38EA282F91} = {A0AAEB8C-CA15-483B-9D1E-33A5CBA0D3C3}
+		{4AEF375E-785E-45FE-AAE4-E62F1DC5C130} = {A0AAEB8C-CA15-483B-9D1E-33A5CBA0D3C3}
+	EndGlobalSection
+EndGlobal
