@@ -5,11 +5,11 @@ SETLOCAL
 :: Set up variables for deploying resources to Azure.
 :: Change these variables for your own deployment.
 
-SET STORAGE_PREFIX=mikew
+SET STORAGE_PREFIX=xyz
 
 :: The APP_NAME variable must not exceed 4 characters in size.
 :: If it does the 15 character size limitation of the VM name may be exceeded.
-SET APP_NAME=dc02
+SET APP_NAME=app1
 SET USERNAME=sqladmin
 
 SET LOCATION=westus
