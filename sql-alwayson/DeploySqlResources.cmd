@@ -9,7 +9,7 @@ SET STORAGE_PREFIX=mikew
 
 :: The APP_NAME variable must not exceed 4 characters in size.
 :: If it does the 15 character size limitation of the VM name may be exceeded.
-SET APP_NAME=dc01
+SET APP_NAME=dc02
 SET USERNAME=sqladmin
 
 SET LOCATION=westus
@@ -146,9 +146,10 @@ SET LB_PROBE_NAME=%LB_NAME%-probe
 :: Create the load balancer
 CALL azure network lb create --name %LB_NAME% --location %LOCATION% %POSTFIX%
 
-:: Create LB front-end and associate it with the public IP address
+:: Create LB front-end with a static IP address
 CALL azure network lb frontend-ip create --name %LB_FRONTEND_NAME% --lb-name ^
-  %LB_NAME% --private-ip-address 10.1.0.7 %POSTFIX%
+  %LB_NAME% --private-ip-address 10.0.1.7 --subnet-name sql-subnet ^
+  --subnet-vnet-name %VNET_NAME% %POSTFIX%
 
 :: Create LB back-end address pool
 CALL azure network lb address-pool create --name %LB_BACKEND_NAME% --lb-name ^
@@ -156,11 +157,11 @@ CALL azure network lb address-pool create --name %LB_BACKEND_NAME% --lb-name ^
 
 :: Create a health probe for an HTTP endpoint
 CALL azure network lb probe create --name %LB_PROBE_NAME% --lb-name %LB_NAME% ^
-  --port 80 --interval 5 --count 2 --protocol http --path / %POSTFIX%
+  --port 59999 --interval 5 --count 2 --protocol tcp %POSTFIX%
 
 :: Create a load balancer rule for HTTP
 CALL azure network lb rule create --name %LB_NAME%-rule-http --protocol tcp ^
-  --lb-name %LB_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name ^
+  --lb-name %LB_NAME% --frontend-port 1433 --backend-port 1433 --frontend-ip-name ^
   %LB_FRONTEND_NAME% --probe-name %LB_PROBE_NAME% %POSTFIX%
 
 

@@ -1,48 +1,94 @@
-﻿Import-Module "sqlps" -DisableNameChecking
+﻿[CmdletBinding()]
+Param(
+  [Parameter(Mandatory=$True)]
+  [string]$AdminUser,
+
+  [Parameter(Mandatory=$True)]
+  [string]$AdminPassword,
+
+  [Parameter(Mandatory=$True)]
+  [string]$AppName,
+
+  [Parameter(Mandatory=$True)]
+  [string]$Domain
+)
 
 
-$cred = Get-Credential $AdminUser
-Enable-SqlAlwaysOn -ServerInstance sql1 -Credentiaql $cred
-Enable-SqlAlwaysOn -ServerInstance sql2 -Credentiaql $cred
+# TODO: Can refactor some of this into functions
 
-// Create a database, to join to the availability group
-$srv = new-Object Microsoft.SqlServer.Management.Smo.Server("sql1")
-$db = New-Object Microsoft.SqlServer.Management.Smo.Database($srv, "TestDb")
+$Sql1ServerName = "$AppName-sql-1"
+$Sql2ServerName = "$AppName-sql-2"
+
+
+Import-Module "sqlps" -DisableNameChecking
+
+$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
+
+
+$sql1 = new-Object Microsoft.SqlServer.Management.Smo.Server($Sql1ServerName)
+$sql2 = new-Object Microsoft.SqlServer.Management.Smo.Server($Sql2ServerName)
+
+# Create a database, to join to the availability group
+$db = New-Object Microsoft.SqlServer.Management.Smo.Database($sql1, "TestDb")
 $db.Create()
 
 
-// Change SQL service log on.
-// This allows MSSQLSERVER to access the file share
-$mc = new-object Microsoft.SQLServer.Management.SMO.WMI.ManagedComputer "sql1"
+# Change SQL service log on.
+# This allows MSSQLSERVER to access the file share
+$mc = new-object Microsoft.SQLServer.Management.SMO.WMI.ManagedComputer $Sql1ServerName
 $service = $mc.Services["MSSQLSERVER"]
-$service.SetServiceAccount("contoso.local\testuser", $pwd)
-$service.Stop()
-$service.Refresh()
-$service.Start()
+$service.SetServiceAccount("$Domain\sqladmin", $AdminPassword)
+#$service.Stop()
+#$service.Refresh()
+#$service.Start()
 
-// TODO same thing on SQL2
+$mc = new-object Microsoft.SQLServer.Management.SMO.WMI.ManagedComputer $Sql2ServerName
+$service = $mc.Services["MSSQLSERVER"]
+$service.SetServiceAccount("$Domain\sqladmin", $AdminPassword)
+#$service.Stop()
+#$service.Refresh()
+#$service.Start()
 
-
-// Back up database to an file share that both SQL server instances can access
-Backup-SqlDatabase -Database "TestDB" -BackupFile "\\fsw\cluster1-fsw\db.bak" -ServerInstance "sql1"
-Backup-SqlDatabase -Database "TestDB" -BackupFile "\\fsw\cluster1-fsw\db.log" -ServerInstance "sql1" -BackupAction Log 
-
-
-
-// TODO Open port 1433
-
-Restore-SqlDatabase -Database "TestDb" -BackupFile "\\fsw\cluster1-fsw\db.bak" -ServerInstance "sql2" -NoRecover
+Enable-SqlAlwaysOn -ServerInstance $Sql1ServerName 
+Enable-SqlAlwaysOn -ServerInstance $Sql2ServerName 
 
 
-// Create the availability group
+# Open ports on SQL1
+New-NetFirewallRule -DisplayName "SQL AlwaysOn: DB Mirror" -Action "Allow" -Direction "Inbound" -Protocol TCP -LocalPort 5022 
+New-NetFirewallRule -DisplayName "SQL Server" -Action "Allow" -Direction "Inbound" -Protocol TCP -LocalPort 1433 
+New-NetFirewallRule -DisplayName "SQL AlwaysOn: Listener Probe" -Action "Allow" -Direction "Inbound" -Protocol TCP -LocalPort 59999 
 
-$secondary = New-SqlAvailabilityReplica -Name "sql2" -EndpointUrl "tcp://sql2.contoso.local:5022" `
-    -AvaililityMode "AchronousCommit" -FailoverMode "Automatic" -Version 12 -AsTemplate
+# Open ports on SQL2
+$cim = New-CimSession -ComputerName $Sql2ServerName
+New-NetFirewallRule -DisplayName "SQL AlwaysOn: DB Mirror" -Action "Allow" -Direction "Inbound" -Protocol TCP -LocalPort 5022 -CimSession $cim
+New-NetFirewallRule -DisplayName "SQL Server" -Action "Allow" -Direction "Inbound" -Protocol TCP -LocalPort 1433 -CimSession $cim
+New-NetFirewallRule -DisplayName "SQL AlwaysOn: Listener Probe" -Action "Allow" -Direction "Inbound" -Protocol TCP -LocalPort 59999 -CimSession $cim
 
 
-$primary = New-SqlAvailabilityReplica -Name "sql1" -EndpointUrl "tcp://sql1.contoso.local:5022" `
-    -AvailabilityMode "SynchronousCommit" -FailoverMode "Automatic" -Version 12 -AsTemplate
+# Back up database to a file share that both SQL server instances can access, and restore to sql2
+Backup-SqlDatabase -Database "TestDB" -BackupFile "\\$AppName-fsw\cluster1-fsw\db.bak" -ServerInstance $Sql1ServerName
+Backup-SqlDatabase -Database "TestDB" -BackupFile "\\$AppName-fsw\cluster1-fsw\db.log" -ServerInstance $Sql1ServerName -BackupAction Log 
+Restore-SqlDatabase -Database "TestDb" -BackupFile "\\$AppName-fsw\cluster1-fsw\db.bak" -ServerInstance $Sql2ServerName -NoRecovery
+Restore-SqlDatabase -Database "TestDb" -BackupFile "\\$AppName-fsw\cluster1-fsw\db.log" -ServerInstance $Sql2ServerName -NoRecovery -RestoreAction Log
 
-        // BUG can get version from the instance
 
-New-SqlAvailabilityGroup -Name "ag1" -InputObject $srv -AvailabilityReplica @($primary, $secondary) -Database "TestDb"
+# Create the availability group
+
+
+$primaryUrl = "tcp://$Sql1ServerName."+$Domain+":5022"
+$secondaryUrl = "tcp://$Sql2ServerName."+$Domain+":5022"
+
+
+$primary = New-SqlAvailabilityReplica -Name $Sql1ServerName -EndpointUrl $primaryUrl -AvailabilityMode "SynchronousCommit" -FailoverMode "Automatic" -Version 12 -AsTemplate
+
+$secondary = New-SqlAvailabilityReplica -Name $Sql2ServerName -EndpointUrl $secondaryUrl -AvailabilityMode "SynchronousCommit" -FailoverMode "Automatic" -Version 12 -AsTemplate
+
+
+        # TODO can get version from the instance
+
+New-SqlAvailabilityGroup -Name "ag1" -Path "SQLSERVER:\SQL\$Sql1ServerName\DEFAULT" -AvailabilityReplica @($primary, $secondary) -Database "TestDb"
+Join-SqlAvailabilityGroup -Path "SQLSERVER:\SQL\$Sql2ServerName\DEFAULT" -Name "ag1"
+Add-SqlAvailabilityDatabase -Path "SQLSERVER:\SQL\$Sql2ServerName\DEFAULT\AvailabilityGroups\ag1" -Database "TestDb"
+New-SqlAvailabilityGroupListener -Name "listener1" -StaticIp '10.0.1.7/255.255.255.0' -Path SQLSERVER:\sql\$Sql1ServerName\DEFAULT\AvailabilityGroups\ag1
+

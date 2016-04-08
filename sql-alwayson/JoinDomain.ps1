@@ -17,13 +17,10 @@ $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Fo
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
 
+Enable-PSRemoting -Force
 
-// Where to put this?
-Install-WindowsFeature -Name FailOver-Clustering -IncludeManagementTools
-
-// Join domain
-Add-Computer -Credential $credential -DomainName $Domain -Force 
-
+# Join domain
+Add-Computer -Credential $credential -DomainName $Domain -Force -Restart
 
 
 
