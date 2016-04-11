@@ -487,7 +487,7 @@ CALL :CallCLI azure network public-ip create ^
 CALL :CallCLI azure network vpn-gateway create ^
   --name %APP_GATEWAY_NAME% ^
   --type RouteBased ^
-  --public-ip-name %PUBLIC_IP_NAME% ^
+  --public-ip-name %APP_PUBLIC_IP_NAME% ^
   --vnet-name %APP_VNET_NAME% ^
   --location %APP_LOCATION% ^
   --resource-group %APP_RESOURCE_GROUP% ^
@@ -495,6 +495,8 @@ CALL :CallCLI azure network vpn-gateway create ^
 
 :::::::::::::::::::::::::::::::::::::::
 :: Create ILB resources
+SET CREATE_ILB=FALSE
+IF "%CREATE_ILB%" == "TRUE" (
 
 IF "%INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS%"=="" (
     EXIT /B
@@ -546,6 +548,7 @@ CALL azure network vpn-connection shared-key show ^
   --name %VPN_CONNECTION_NAME% ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
+)
 
 GOTO :eof
 
