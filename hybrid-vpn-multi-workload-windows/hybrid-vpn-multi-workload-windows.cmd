@@ -18,15 +18,17 @@ SET ENVIRONMENT=dev
 :: Modify data about your hub-and-spoke topology here. 
 :: Only modify the values, do not modify the variable names.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET prefix=my
+:::::::::::::::::::::::::::::::::::::::
 :: on-prem network ONP data
-SET ONP_NAME=my-onp
+SET ONP_NAME=%prefix%-onp
 SET ONP_GATEWAY_PIP=131.107.36.3
 SET ONP_CIDR=192.268.0.0/24
 SET ONP_LOCACTION =%HUB_LOCATION%
 SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROPU%
 :::::::::::::::::::::::::::::::::::::::
 :: hub vnet data
-SET HUB_NAME=my-hub
+SET HUB_NAME=%prefix%-hub
 SET HUB_CIDR=10.0.0.0/16
 SET HUB_INTERNAL_CIDR=10.0.0.0/17
 SET HUB_GATEWAY_CIDR=10.0.255.224/27
@@ -36,7 +38,7 @@ SET HUB_LOCATION=eastus
 SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
 :::::::::::::::::::::::::::::::::::::::
 :: spoke vnet SP1 data
-SET SP1_NAME=my-sp1
+SET SP1_NAME=%prefix%-sp1
 SET SP1_CIDR=10.1.0.0/16
 SET SP1_INTERNAL_CIDR=10.1.0.0/17
 SET SP1_GATEWAY_CIDR=10.1.255.224/27
@@ -47,7 +49,7 @@ SET SP1_RESOURCE_GROUP=%SP1_NAME%-%ENVIRONMENT%-rg
 SET SP1_ILB=10.1.127.254
 :::::::::::::::::::::::::::::::::::::::
 :: spoke vnet SP2 data
-SET SP2_NAME=my-sp2
+SET SP2_NAME=%prefix%-sp2
 SET SP2_CIDR=10.2.0.0/16
 SET SP2_INTERNAL_CIDR=10.2.0.0/17
 SET SP2_GATEWAY_CIDR=10.2.255.224/27
@@ -58,7 +60,7 @@ SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
 SET SP2_ILB=10.2.127.254
 :::::::::::::::::::::::::::::::::::::::
 :: spoke vnet SP3 data
-SET SP3_NAME=my-sp3
+SET SP3_NAME=%prefix%-sp3
 SET SP3_CIDR=10.3.0.0/16
 SET SP3_INTERNAL_CIDR=10.3.0.0/17
 SET SP3_GATEWAY_CIDR=10.3.255.224/27
@@ -155,7 +157,7 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "TRUE" (
   :: 1. Change the variable value for ADD_ADDITIONAL_SPOKE_4 from FALSE to TRUE
 
   :: 2. Put your data about SP4 here:
-  SET SP4_NAME=my-sp4
+  SET SP4_NAME=%prefix%-sp4
   SET SP4_CIDR=10.4.0.0/16
   SET SP4_INTERNAL_CIDR=10.4.0.0/17
   SET SP4_GATEWAY_CIDR=10.4.255.224/27
