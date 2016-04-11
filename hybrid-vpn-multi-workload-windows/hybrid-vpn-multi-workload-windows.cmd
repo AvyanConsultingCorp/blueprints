@@ -19,7 +19,7 @@ SET ENVIRONMENT=dev
 :: Only modify the values, do not modify the variable names.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: on-prem network ONP data
-SET ONP_NAME=onp
+SET ONP_NAME=my_onp
 SET ONP_GATEWAY_PIP=131.107.36.3
 SET ONP_CIDR=192.268.0.0/24
 SET ONP_LOCACTION =%HUB_LOCATION%
@@ -191,12 +191,15 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "TRUE" (
     %ONP_NAME% ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
+
   CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP1_NAME% ^
     %SP1_RESOURCE_GROUP%
+
   CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP2_NAME% ^
     %SP2_RESOURCE_GROUP%
+
   CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP3_NAME% ^
     %SP3_RESOURCE_GROUP%
@@ -208,10 +211,12 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "TRUE" (
     on_prem
   CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP1_NAME% ^
-    %SP1_RESOURCE_GROUP%
+    %SP1_RESOURCE_GROUP% 
+
   CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP2_NAME% ^
-    %SP2_RESOURCE_GROUP%
+    %SP2_RESOURCE_GROUP% 
+
   CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP3_NAME% ^
     %SP3_RESOURCE_GROUP%
@@ -251,14 +256,14 @@ SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
 CALL :CallCLI azure network vpn-connection delete ^
   --name %HUB_TO_SPK_VPN-CONNECTION% ^
   --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SUBSCRIPTION% ^
   --quite
 
 IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   CALL :CallCLI azure network vpn-connection delete ^
   --name %SPK_TO_HUB_VPN-CONNECTION% ^
   --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SUBSCRIPTION% ^
   --quite
 )
 
@@ -285,14 +290,14 @@ SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
 CALL :CallCLI azure network local-gateway delete ^
   --name %HUB_TO_SPK_LGW% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SUBSCRIPTION% ^
   --quite
 
 :: SPK_TO_HUB_LGW
 CALL :CallCLI azure network local-gateway delete ^
   --name %SPK_TO_HUB_LGW% ^
   --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SUBSCRIPTION% ^
   --quite
 
 GOTO :eof
@@ -453,7 +458,7 @@ CALL :CallCLI azure network vnet create ^
 :: Create the GatewaySubnet
 CALL :CallCLI azure network vnet subnet create ^
   --name GatewaySubnet ^
-  --address-prefix %APP_GATEWAY_CIDR%
+  --address-prefix %APP_GATEWAY_CIDR% ^
   --vnet-name %APP_VNET_NAME% ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
@@ -520,7 +525,7 @@ CALL :CallCLI azure network lb frontend-ip create ^
 :: Create the backend address pool for the internal load balancer
 CALL :CallCLI azure network lb address-pool create ^
   --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
-  --name %INTERNAL_LOAD_BALANCER_POOL_NAME% 
+  --name %INTERNAL_LOAD_BALANCER_POOL_NAME% ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
 
@@ -536,7 +541,7 @@ CALL :CallCLI azure network lb probe create ^
 
 :: This will show the shared key for the VPN connection.  We won't bother with the error checking.
 CALL azure network vpn-connection shared-key show ^
-  --name %VPN_CONNECTION_NAME% 
+  --name %VPN_CONNECTION_NAME% ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
 
