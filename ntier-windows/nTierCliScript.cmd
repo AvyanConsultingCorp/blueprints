@@ -2,7 +2,6 @@
 SETLOCAL ENABLEEXTENSIONS
 SETLOCAL ENABLEDELAYEDEXPANSION
 SET me=%~n0
-SET parent=%~dp0
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up variables for deploying resources to Azure.
@@ -58,8 +57,8 @@ SET DMZ_VM_SIZE=Standard_DS2
 
 :: Validate command line arguments
 IF "%~3"=="" (
-    ECHO Usage: %0 subscription-id admin-address-whitelist-CIDR-format admin-password
-    ECHO 	For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx nnn.nnn.nnn.nnn/mm pwd
+    ECHO Usage: %me% subscription-id admin-address-whitelist-CIDR-format admin-password
+    ECHO 	For example: %me% xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx nnn.nnn.nnn.nnn/mm pwd
     EXIT /B
 	)
 
@@ -273,6 +272,12 @@ CALL :CallCLI azure network nsg rule create --nsg-name %SERVICE_TIER_NSG_NAME% -
 	--access Allow --protocol * --direction Inbound --priority 100 ^
 	--source-address-prefix %DMZ_SUBNET_IP_RANGE_2% --source-port-range * ^
 	--destination-address-prefix * --destination-port-range * %POSTFIX%
+
+:: Allow inbound remote access traffic from management subnet
+CALL :CallCLI azure network nsg rule create --nsg-name %SERVICE_TIER_NSG_NAME% --name manage-rdp-allow ^
+	--access Allow --protocol Tcp --direction Inbound --priority 200 ^
+	--source-address-prefix %MANAGE_SUBNET_IP_RANGE% --source-port-range * ^
+	--destination-address-prefix * --destination-port-range %REMOTE_ACCESS_PORT% %POSTFIX%
 
 :: Deny all other inbound traffic from within vnet
 CALL :CallCLI azure network nsg rule create --nsg-name %SERVICE_TIER_NSG_NAME% --name vnet-deny ^
