@@ -124,7 +124,7 @@ SETLOCAL
 CALL %*
 IF ERRORLEVEL 1 (
     CALL :ShowError "Error executing CLI Command: " %*
-    :: This command executes in the main script context so we can exit the whole script on an error
+    REM This command executes in the main script context so we can exit the whole script on an error
     (GOTO) 2>NULL & GOTO :eof
 )
 GOTO :eof

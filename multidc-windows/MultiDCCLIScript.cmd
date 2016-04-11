@@ -8,12 +8,10 @@ SETLOCAL
 :: The APP_NAME variable must not exceed 4 characters in size.
 :: If it does the 15 character size limitation of the VM name may be exceeded.
 SET APP_NAME=app2
-SET LOCATION=centralus
-SET FAILOVER_LOCATION=eastus
+SET PRIMARY_LOCATION=centralus
+SET SECONDARY_LOCATION=eastus
 SET ENVIRONMENT=dev
 SET USERNAME=testuser
-
-SET VNET_IP_RANGE=10.0.0.0/16
 
 :: For Windows, use the following command to get the list of URNs:
 :: azure vm image list %LOCATION% MicrosoftWindowsServer WindowsServer 2012-R2-Datacenter
@@ -23,6 +21,8 @@ SET WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4
 :: To see the VM sizes available in a region:
 :: 	azure vm sizes --location <<location>>
 SET VM_SIZE=Standard_DS1
+
+SET TRAFFICMANAGERPROFILE_MONITORPATH=/healthprobe/index/123
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -43,14 +43,10 @@ SET PASSWORD=%3
 SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
 SET TRAFFICMANAGERPROFILE_NAME=%APP_NAME%-%ENVIRONMENT%-tm
 SET TRAFFICMANAGERPROFILE_DNSNAME=%APP_NAME%%ENVIRONMENT%
-SET TRAFFICMANAGERPROFILE_MONITORPATH=/healthprobe/index/123
 
-SET VNET_NAME=%APP_NAME%-vnet
-SET PUBLIC_IP_NAME=%APP_NAME%-pip
-SET FAILOVERPUBLIC_IP_NAME=%APP_NAME%-failover-pip
+SET PRIMARYPUBLIC_IP_NAME=%APP_NAME%-primary-pip
+SET SECONDARYPUBLIC_IP_NAME=%APP_NAME%-secondary-pip
 SET DIAGNOSTICS_STORAGE=%APP_NAME:-=%diag
-SET JUMPBOX_PUBLIC_IP_NAME=%APP_NAME%-jumpbox-pip
-SET JUMPBOX_NIC_NAME=%APP_NAME%-manage-vm1-nic1
 
 :: Set up the postfix variables attached to most CLI commands
 SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
@@ -62,37 +58,36 @@ CALL azure config mode arm
 :: Create root level resources
 
 :: Create the enclosing resource group
-CALL azure group create --name %RESOURCE_GROUP% --location %LOCATION% ^
+CALL azure group create --name %RESOURCE_GROUP% --location %PRIMARY_LOCATION% ^
   --subscription %SUBSCRIPTION%
 
-:: Create the virtual network
-CALL azure network vnet create --address-prefixes %VNET_IP_RANGE% ^
-  --name %VNET_NAME% --location %LOCATION% %POSTFIX%
-
 :: Create the public IP address (dynamic)
-CALL azure network public-ip create --name %PUBLIC_IP_NAME% ^
-  --location %LOCATION% --domain-name-label %PUBLIC_IP_NAME% %POSTFIX%
+CALL azure network public-ip create --name %PRIMARYPUBLIC_IP_NAME% ^
+  --location %PRIMARY_LOCATION% --domain-name-label %PRIMARYPUBLIC_IP_NAME% %POSTFIX%
 
 :: Create the failover public IP address (dynamic)
-CALL azure network public-ip create --name %FAILOVERPUBLIC_IP_NAME% ^
-  --location %FAILOVER_LOCATION% --domain-name-label %FAILOVERPUBLIC_IP_NAME% %POSTFIX%
+CALL azure network public-ip create --name %SECONDARYPUBLIC_IP_NAME% ^
+  --location %SECONDARY_LOCATION% --domain-name-label %SECONDARYPUBLIC_IP_NAME% %POSTFIX%
 
 CALL azure network traffic-manager profile create ^
   --name %TRAFFICMANAGERPROFILE_NAME% ^
   --relative-dns-name %TRAFFICMANAGERPROFILE_DNSNAME% ^
-  --monitor-path %TRAFFICMANAGERPROFILE_MONITORPATH% %POSTFIX%
+  --monitor-path %TRAFFICMANAGERPROFILE_MONITORPATH% ^
+  --traffic-routing-method Priority  %POSTFIX%
 
-SET PUBLIC_IP_RESOURCEID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/publicIPAddresses/%PUBLIC_IP_NAME%
-SET FAILOVERPUBLIC_IP_RESOURCEID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/publicIPAddresses/%FAILOVERPUBLIC_IP_NAME%
-
-CALL azure network traffic-manager endpoint create ^
-  --name %TRAFFICMANAGERPROFILE_NAME%-ep-%LOCATION% ^
-  --profile-name %TRAFFICMANAGERPROFILE_NAME% ^
-  --type AzureEndpoints ^
-  --target-resource-id %PUBLIC_IP_RESOURCEID%  %POSTFIX%
+SET PRIMARY_PUBLIC_IP_RESOURCEID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/publicIPAddresses/%PRIMARYPUBLIC_IP_NAME%
+SET SECONDARY_PUBLIC_IP_RESOURCEID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/publicIPAddresses/%SECONDARYPUBLIC_IP_NAME%
 
 CALL azure network traffic-manager endpoint create ^
-  --name %TRAFFICMANAGERPROFILE_NAME%-ep-%FAILOVER_LOCATION% ^
+  --name %TRAFFICMANAGERPROFILE_NAME%-ep-primary ^
   --profile-name %TRAFFICMANAGERPROFILE_NAME% ^
   --type AzureEndpoints ^
-  --target-resource-id %FAILOVERPUBLIC_IP_RESOURCEID%  %POSTFIX%
+  --target-resource-id %PRIMARY_PUBLIC_IP_RESOURCEID% ^
+  --priority 1 %POSTFIX%
+
+CALL azure network traffic-manager endpoint create ^
+  --name %TRAFFICMANAGERPROFILE_NAME%-ep-secondary ^
+  --profile-name %TRAFFICMANAGERPROFILE_NAME% ^
+  --type AzureEndpoints ^
+  --target-resource-id %SECONDARY_PUBLIC_IP_RESOURCEID% ^
+  --priority 100 %POSTFIX%
