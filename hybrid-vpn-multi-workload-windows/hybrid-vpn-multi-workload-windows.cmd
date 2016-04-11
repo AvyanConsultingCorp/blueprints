@@ -1,9 +1,9 @@
-@ECHO OFF
+::@ECHO OFF
 SETLOCAL
 
 IF "%~2"=="" (
     ECHO Usage: %0 subscription-id ipsec-shared-key
-    ECHO   For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx xxxxxxxxxxxx
+    ECHO   For example: %0 13ed86531-1602-4c51-a4d4-afcfc38ddad3 mytestabc123
     EXIT /B
     )
 
@@ -83,16 +83,15 @@ SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR%"
 SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SET ADD_ADDITIONAL_SPOKE_4=FLASE
-::SET ADD_ADDITIONAL_SPOKE_4=TRUE
+SET ADD_ADDITIONAL_SPOKE_4=FALSE
 
-IF "%ADD_ADDITIONAL_SPOKE_4%" == "FALSE" (
+IF "%ADD_ADDITIONAL_SPOKE_4%"=="FALSE" (
   :: this is for initial hub-spoke topology setup with 
   :: one on-prem net, one hub, and three spokes.
   :: 
   :: It will first create vNets for HUB, and the spokes SP1, SP2, and SP3, 
   :: and then connects all the spokes including the on-prem spoke to and from the hub
-
+  ::
   :: Create hub vnet
   CALL :CREATE_VNET ^
     %HUB_NAME% ^
@@ -140,24 +139,20 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "FALSE" (
     %SP3_RESOURCE_GROUP% ^
     %SP3_ILB%
 
-  :::::::::::::::::::::::::::::::::::::::
   :: Connect ONP, SP1, SP2 and SP3 to and from HUB
     CALL :CONNECT_ONP_AND_SP_1_2_3_TO_AND_FROM_HUB
+)
 
-) ELSE (
-  ::%ADD_ADDITIONAL_SPOKE_4%==TRUE
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+IF "%ADD_ADDITIONAL_SPOKE_4%" == "TRUE" (
+
   :: If you have already created the above hub spoke topology which consists of
-  :: ONP, HUB, SP1, SP2, and SP3, and now you want 
+ :: ONP, HUB, SP1, SP2, and SP3, and now you want 
   :: to add an addtion spoke SP4, you have to delete all the exisiting 
   :: vpn connections and gateways and then recreate them. Here are the steps:
-
   :::::::::::::::::::::::::::::::::::::::
   :: 1. Change the variable value for ADD_ADDITIONAL_SPOKE_4 from FALSE to TRUE
-  ::
-
-  :::::::::::::::::::::::::::::::::::::::
   :: 2. Put your data about SP4 here:
   SET SP4_NAME=my_sp4
   SET SP4_CIDR=10.4.0.0/16
@@ -169,22 +164,32 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "FALSE" (
   SET SP4_RESOURCE_GROUP=%SP4_NAME%-%ENVIRONMENT%-rg
   SET SP4_ILB=10.4.127.254
 
-  :::::::::::::::::::::::::::::::::::::::
   :: 3. Modify all the existing gateway address space list by adding ,%SP4_CIDR% at the end
-
   SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%,%SP4_CIDR%"
-
   SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR,%SP4_CIDR%"
-
   SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR,%SP4_CIDR%"
+  SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP4_CIDR%"
 
+  :: 2. Put your data about SP4 here:
+  SET SP4_NAME=my_sp4
+  SET SP4_CIDR=10.4.0.0/16
+  SET SP4_INTERNAL_CIDR=10.4.0.0/17
+  SET SP4_GATEWAY_CIDR=10.4.255.224/27
+  SET SP4_GATEWAY_NAME=%SP4_NAME%-vgw
+  SET SP4_GATEWAY_PIP_NAME=%SP4_NAME%-vgw
+  SET SP4_LOCATION=eastus
+  SET SP4_RESOURCE_GROUP=%SP4_NAME%-%ENVIRONMENT%-rg
+  SET SP4_ILB=10.4.127.254
+
+  :: 3. Modify all the existing gateway address space list by adding ,%SP4_CIDR% at the end
+  SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%,%SP4_CIDR%"
+  SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR,%SP4_CIDR%"
+  SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR,%SP4_CIDR%"
   SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP4_CIDR%"
 
   :: Set SP4_TO_HUB_CIDR_LIST
-  ::
   SET SP4_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP3_CIDR%"
 
-  :::::::::::::::::::::::::::::::::::::::
   :: 4. Create spoke vnet SP4
   CALL :CREATE_VNET ^
     %SP4_NAME% ^
@@ -197,52 +202,39 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "FALSE" (
     %SP4_RESOURCE_GROUP% ^
     %SP4_ILB%
 
-  :::::::::::::::::::::::::::::::::::::::
   :: 5. Delete all existing vpn connections
-  ::
   CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %ONP_NAME% ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
-
   CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP1_NAME% ^
     %SP1_RESOURCE_GROUP%
-
   CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP2_NAME% ^
     %SP2_RESOURCE_GROUP%
-
   CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP3_NAME% ^
     %SP3_RESOURCE_GROUP%
 
-  :::::::::::::::::::::::::::::::::::::::
   :: 6. Delete all existing vpn gateways
-  ::
-
   CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %ONP_NAME% ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
-
   CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP1_NAME% ^
     %SP1_RESOURCE_GROUP%
-
   CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP2_NAME% ^
     %SP2_RESOURCE_GROUP%
-
   CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP3_NAME% ^
     %SP3_RESOURCE_GROUP%
 
-  :::::::::::::::::::::::::::::::::::::::
   :: 7. Re-Connect ONP, SP1, SP2 and SP3 to and from HUB
-    CALL :CONNECT_ONP_AND_SP_1_2_3_TO_AND_FROM_HUB
+  CALL :CONNECT_ONP_AND_SP_1_2_3_TO_AND_FROM_HUB
 
-  :::::::::::::::::::::::::::::::::::::::
   :: 8. Connect SP4 to and from HUB
   CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP4_NAME% ^
@@ -251,8 +243,7 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "FALSE" (
     %SP4_GATEWAY_PIP_NAME% ^
     %SP4_LOCACTION% ^
     %SP4_RESOURCE_GROUP%
-
-) ::END ELSE
+) 
 
 GOTO :eof
 
@@ -613,10 +604,15 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP3_RESOURCE_GROUP%
 
 GOTO :eof
+
+:CallCLI
+echo CallCLI!!!!
+goto :eof
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: SUBROUTINE
-:CallCLI
+:CallCLI1
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SETLOCAL
 CALL %*
