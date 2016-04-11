@@ -153,13 +153,7 @@
             "sources": { },
             "files": {
               "/tmp/vpn_common.sh": {
-                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common.sh",
-                "mode": "000644",
-                "owner": "root",
-                "group": "root"
-              },
-              "/tmp/vpn_final_updates.sh": {
-                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_final_updates.sh",
+                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common_ab.sh",
                 "mode": "000644",
                 "owner": "root",
                 "group": "root"
@@ -168,10 +162,6 @@
             "commands": {
               "installCommon": {
                 "command": "sh /tmp/vpn_common.sh",
-                "ignoreErrors": "false"
-              },
-              "installVPN": {
-                "command": "sh /tmp/vpn_final_updates.sh",
                 "ignoreErrors": "false"
               }
             },
@@ -183,7 +173,7 @@
         }
       },
       "Properties": {
-        "DisableApiTermination": "false", 
+        "DisableApiTermination": "false",
         "InstanceInitiatedShutdownBehavior": "stop",
         "ImageId": {
           "Fn::FindInMap": [
@@ -223,10 +213,14 @@
         ],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
              "#!/bin/bash -xe\n",
-             "yum update -y aws-cfn-bootstrap\n",
+             "# Install AWS cfn-bootstrap utilities\n",
+              "apt-get update\n",
+              "apt-get -y install python-pip\n",
+              "pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+
 
              "# Install the files and packages from the metadata\n",
-             "/opt/aws/bin/cfn-init -v ",
+             "/usr/local/bin/cfn-init -v ",
              "         --stack ", { "Ref" : "AWS::StackName" },
              "         --resource instancei01084c85 ",
              "         --configsets Install ",
@@ -246,13 +240,13 @@
             "sources": { },
             "files": {
               "/tmp/db_common.sh": {
-                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common.sh",
+                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common_ab.sh",
                 "mode": "000644",
                 "owner": "root",
                 "group": "root"
               },
               "/tmp/db_post_install.sh": {
-                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/aws/scripts/db_post_install.sh",
+                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/aws/scripts/db_post_install_ab.sh",
                 "mode": "000644",
                 "owner": "root",
                 "group": "root"
@@ -316,10 +310,12 @@
         ],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
              "#!/bin/bash -xe\n",
-             "yum update -y aws-cfn-bootstrap\n",
+             "apt-get update\n",
+             "apt-get -y install python-pip\n",
+             "pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
 
              "# Install the files and packages from the metadata\n",
-             "/opt/aws/bin/cfn-init -v ",
+             "/usr/local/bin/cfn-init -v ",
              "         --stack ", { "Ref" : "AWS::StackName" },
              "         --resource instanceifbac0960 ",
              "         --configsets Install ",
