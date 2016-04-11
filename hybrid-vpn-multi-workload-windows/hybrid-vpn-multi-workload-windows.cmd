@@ -1,508 +1,569 @@
 @ECHO OFF
 SETLOCAL
+SET MODIFY_TOPOLOGY=FLASE
 IF "%~2"=="" (
     ECHO Usage: %0 subscription-id ipsec-shared-key
     ECHO   For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx xxxxxxxxxxxx
     EXIT /B
     )
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: this script will create a hub-and-spoke network topology which consists of
-:: on-premise network
-:: hub vnet
-:: spoke1 vent
-:: spoke2 vent
-:: spoke3 vent
-:: all the network traffic goes through hub
-:: VMs in all vnet are two-way connected through hub. for example, you should be 
-:: able to pin from a vm in spoke1 to a vm in spoke2. or from a computer in on-prem
-:: network to a vm in spoke3.
-::
-:: Order of execution: 
-::   SET globle variables
-::   CALL :CREATE_HUB_VNET 
-::   CALL :CREATE_SPOKE_VNET %SPK1_NAME% %SPK1_CIDR% %SPK1_GW% %SPK1_SUBNET% %SPK1_LOC% %SPK1_ILB% 
-::   CALL :CREATE_SPOKE_VNET %SPK2_NAME% %SPK2_CIDR% %SPK2_GW% %SPK2_SUBNET% %SPK2_LOC% %SPK1_ILB% 
-::   CALL :CREATE_SPOKE_VNET %SPK3_NAME% %SPK3_CIDR% %SPK3_GW% %SPK3_SUBNET% %SPK3_LOC% %SPK1_ILB% 
-::   CALL :CREATE_SPOKE_TO_HUB_CONNECTIONS
-::   CALL :CREATE_HUB_TO_SPOKE_CONNECTIONS
-:: THE END
-::
-:: The script consists the following subroutines
-::   :CREATE_HUB_VNET 
-::   :CREATE_SPOKE_VNET               called one time for each spoke 
-::   :CREATE_SPOKE_TO_HUB_CONNECTIONS
-::   :CREATE_HUB_TO_SPOKE_CONNECTIONS
-::   :CallCLI                         which put error handling for CLI command
-::   :ShowError                       which pritn out the error messages
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Explicitly set the subscription to avoid confusion as to which subscription
 :: is active/default
 SET SUBSCRIPTION=%1
-
 SET IPSEC_SHARED_KEY=%2
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Input variables
-:: Note: You can change input variables. 
-:: There is no validation on the input. 
-:: Make sure your input is correct!
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-SET ON_PREM_GATEWAY_PIP_ADDRESS=131.107.36.3
-
-SET ON_PREM_NAME=on-prem
-
 SET ENVIRONMENT=dev
 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create hub vnet
 SET HUB_NAME=hub0
-
-SET SPK1_NAME=app1
-SET SPK2_NAME=app1
-SET SPK3_NAME=app3
-
-:: network ip address range
-SET ON_PREM_CIDR=192.268.0.0/24
 SET HUB_CIDR=10.0.0.0/16
-SET SPK1_CIDR=10.1.0.0/16
-SET SPK2_CIDR=10.2.0.0/16
-SET SPK3_CIDR=10.3.0.0/16
-
-:: gateway subnet ip address range
-SET HUB_GW=10.0.255.240/28
-SET SPK1_GW=10.1.255.240/28
-SET SPK2_GW=10.2.255.240/28
-SET SPK3_GW=10.3.255.240/28
-
-:: set subnet ip address range
-SET HUB_SUBNET=10.0.0.0/17
-SET SPK1_SUBNET=10.1.0.0/17
-SET SPK2_SUBNET=10.2.0.0/17
-SET SPK3_SUBNET=10.3.0.0/17
-
-:: set azure region
-SET HUB_LOC=eastus
-SET SPK1_LOC=eastus
-SET SPK2_LOC=eastus
-SET SPK3_LOC=eastus
-
-:: set internal load banlance ip address
-SET SPK1_ILB=10.1.127.254
-SET SPK2_ILB=10.2.127.254
-SET SPK3_ILB=10.3.127.254
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Derived variable. we suggest that you don't change them
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-:: local gateway address space
-SET SPK1_TO_HUB_LGW_CIDRS=%ON_PREM_CIDR%,%HUB_CIDR%,%SPK2_CIDR%,%SPK3_CIDR%
-
-SET SPK2_TO_HUB_LGW_CIDRS=%ON_PREM_CIDR%,%HUB_CIDR%,%SPK1_CIDR%,%SPK3_CIDR%
-
-SET SPK3_TO_HUB_LGW_CIDRS=%ON_PREM_CIDR%,%HUB_CIDR%,%SPK1_CIDR%,%SPK2_CIDR%
-
-SET ON_PREM_TO_HUB_LGW_CIDRS=%HUB_CIDR%,%SPK1_CIDR%,%SPK2_CIDR%,%SPK3_CIDR%
-
-SET HUB_TO_ON_PREM_LGW_CIDRS=%ON_PREM_CIDR%
-
+SET HUB_INTERNAL_CIDR=10.0.0.0/17
+SET HUB_GATEWAY_CIDR=10.0.255.240/28
+SET HUB_GATEWAY_NAME=%HUB_NAME%-vgw
+SET HUB_GATEWAY_PIP_NAME=%HUB_NAME%-pip
+SET HUB_LOCATION=eastus
 SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
-
-:: vpn gateway
-:: also defined in :CREATE_SPOKE sub routine as 
-::  SET VPN_GATEWAY_NAME=%APP_NAME%-vgw
-SET HUB_VPN_GATEWAY_NAME=%HUB_NAME%-vgw
-SET SPK1_VPN_GATEWAY_NAME=%SPK1_NAME%-vgw
-SET SPK2_VPN_GATEWAY_NAME=%SPK2_NAME%-vgw
-SET SPK3_VPN_GATEWAY_NAME=%SPK3_NAME%-vgw
-
-:: resource group name
-:: also defined in :CREATE_SPOKE sub routine as 
-:: SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
-SET SPK1_RESOURCE_GROUP=%SPK1_NAME%-%ENVIRONMENT%-rg
-SET SPK2_RESOURCE_GROUP=%SPK2_NAME%-%ENVIRONMENT%-rg
-SET SPK3_RESOURCE_GROUP=%SPK3_NAME%-%ENVIRONMENT%-rg
-
-:: spoke-to-hub local gateway name
-SET SPK1_TO_HUB_LGW=%SPK1_NAME%-to-%HUB_NAME%-lgw
-SET SPK2_TO_HUB_LGW=%SPK2_NAME%-to-%HUB_NAME%-lgw
-SET SPK3_TO_HUB_LGW=%SPK3_NAME%-to-%HUB_NAME%-lgw
-SET ON_PREM_TO_HUB_LGW=%ON_PREM_NAME%-to-%HUB_NAME%-lgw
-
-:: hub-to-spoke local gateway name
-:: also defined in :CREATE_SPOKE sub routine as 
-:: SET LOCAL_GATEWAY_NAME=%HUB_NAME%-to-%APP_NAME%-lgw
-SET HUB_TO_ON_PREM_LGW=%HUB_NAME%-to-%ON_PREM_NAME%-lgw
-SET HUB_TO_SPOKE1_LGW=%HUB_NAME%-to-%SPK1_NAME%-lgw
-SET HUB_TO_SPOKE2_LGW=%HUB_NAME%-to-%SPK2_NAME%-lgw
-SET HUB_TO_SPOKE3_LGW=%HUB_NAME%-to-%SPK3_NAME%-lgw
-
-:: hub-to-spoke vpn connection name
-SET HUB_TO_ON_PREM_CONECTION=%HUB_NAME%-to-%ON_PREM_NAME%-vpn
-SET HUB_TO_SPK1_CONECTION=%HUB_NAME%-to-%SPK1_NAME%-vpn
-SET HUB_TO_SPK2_CONECTION=%HUB_NAME%-to-%SPK2_NAME%-vpn
-SET HUB_TO_SPK3_CONECTION=%HUB_NAME%-to-%SPK3_NAME%-vpn
-
-:: spoke-to-hub vpn connection name
-SET SPK1_TO_HUB_CONECTION=%SPK1_NAME%-to-%HUB_NAME%-vpn
-SET SPK2_TO_HUB_CONECTION=%SPK2_NAME%-to-%HUB_NAME%-vpn
-SET SPK3_TO_HUB_CONECTION=%SPK3_NAME%-to-%HUB_NAME%-vpn
-SET ON_PREM_TO_HUB_CONECTION=%ON_PREM_NAME%-to-%HUB_NAME%-vpn
+IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+  CALL :CREATE_VNET ^
+    %HUB_NAME% ^
+    %HUB_CIDR% ^
+    %HUB_INTERNAL_CIDR% ^
+    %HUB_GATEWAY_CIDR% ^
+    %HUB_GATEWAY_NAME% ^
+    %HUB_GATEWAY_PIP_NAME% ^
+    %HUB_LOCATION% ^
+    %HUB_RESOURCE_GROUP%
+)
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: create hub vnet
-CALL :CREATE_HUB_VNET %HUB_CIDR% %HUB_GW% %HUB_SUBNET% %HUB_LOC% %SPK1_ILB% 
+:: Set variable for on-prem network ONP
+SET ONP_NAME=onp
+SET ONP_GATEWAY_PIP=131.107.36.3
+SET ONP_CIDR=192.268.0.0/24
+SET ONP_LOCACTION =%HUB_LOCATION%
+SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROPU%
 
-:: create spoke vnet
-CALL :CREATE_SPOKE_VNET %SPK1_NAME% %SPK1_CIDR% %SPK1_GW% %SPK1_SUBNET% %SPK1_LOC% %SPK1_ILB% 
-CALL :CREATE_SPOKE_VNET %SPK2_NAME% %SPK2_CIDR% %SPK2_GW% %SPK2_SUBNET% %SPK2_LOC% %SPK1_ILB% 
-CALL :CREATE_SPOKE_VNET %SPK3_NAME% %SPK3_CIDR% %SPK3_GW% %SPK3_SUBNET% %SPK3_LOC% %SPK1_ILB% 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create spoke vnet SP1 
+SET SP1_NAME=sp1
+SET SP1_CIDR=10.1.0.0/16
+SET SP1_INTERNAL_CIDR=10.1.0.0/17
+SET SP1_GATEWAY_CIDR=10.1.255.240/28
+SET SP1_GATEWAY_NAME=%SP1_NAME%-vgw
+SET SP1_GATEWAY_PIP_NAME=%SP1_NAME%-vgw
+SET SP1_LOCATION=eastus
+SET SP1_RESOURCE_GROUP=%SP1_NAME%-%ENVIRONMENT%-rg
+SET SP1_ILB=10.1.127.254
+IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+  CALL :CREATE_VNET ^
+    %SP1_NAME% ^
+    %SP1_CIDR% ^
+    %SP1_INTERNAL_CIDR% ^
+    %SP1_GATEWAY_CIDR% ^
+    %SP1_GATEWAY_NAME% ^
+    %SP1_GATEWAY_PIP_NAME% ^
+    %SP1_LOCATION% ^
+    %SP1_RESOURCE_GROUP% ^
+    %SP1_ILB%
+)
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create spoke vnet SP2
+SET SP2_NAME=sp1
+SET SP2_CIDR=10.2.0.0/16
+SET SP2_INTERNAL_CIDR=10.2.0.0/17
+SET SP2_GATEWAY_CIDR=10.2.255.240/28
+SET SP2_GATEWAY_NAME=%SP2_NAME%-vgw
+SET SP2GATEWAY_PIP_NAME=%SP2_NAME%-vgw
+SET SP2_LOCATION=eastus
+SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
+SET SP2_ILB=10.2.127.254
+IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+  CALL :CREATE_VNET ^
+    %SP2_NAME% ^
+    %SP2_CIDR% ^
+    %SP2_INTERNAL_CIDR% ^
+    %SP2_GATEWAY_CIDR% ^
+    %SP2_GATEWAY_NAME% ^
+    %SP2_GATEWAY_PIP_NAME% ^
+    %SP2_LOCATION% ^
+    %SP2_RESOURCE_GROUP% ^
+    %SP2_ILB%
+)
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create spoke vnet SP3
+SET SP3_NAME=sp3
+SET SP3_CIDR=10.3.0.0/16
+SET SP3_INTERNAL_CIDR=10.3.0.0/17
+SET SP3_GATEWAY_CIDR=10.3.255.240/28
+SET SP3_GATEWAY_NAME=%SP3_NAME%-vgw
+SET SP3GATEWAY_PIP_NAME=%SP3_NAME%-vgw
+SET SP3_LOCATION=eastus
+SET SP3_RESOURCE_GROUP=%SP3_NAME%-%ENVIRONMENT%-rg
+SET SP3_ILB=10.3.127.254
 
-:: create spoke to hub vpn connections
-CALL :CREATE_SPOKE_TO_HUB_CONNECTIONS
+IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+  CALL :CREATE_VNET ^
+    %SP3_NAME% ^
+    %SP3_CIDR% ^
+    %SP3_INTERNAL_CIDR% ^
+    %SP3_GATEWAY_CIDR% ^
+    %SP3_GATEWAY_NAME% ^
+    %SP3_GATEWAY_PIP_NAME% ^
+    %SP3_LOCATION% ^
+    %SP3_RESOURCE_GROUP% ^
+    %SP3_ILB%
+)
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Set gateway address space CIDR list
+:: You need enclose the CIDR list in quotes because they are comma seperated, 
+:: If without the quotes, the script subroutine will treat each CIDR as a seperate variable.
+::
+:: All the lists need to be modified if you add or remove a spoke from the topology.
+SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
+SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
+SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR%"
+SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
 
-:: create hub to spoke vpn connections
-CALL :CREATE_HUB_TO_SPOKE_CONNECTIONS
+IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+  CALL :CREATE_HUB_SPOKE_CONNECTION_FOR_ALL
+)
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: THIS IS THE END OF THE MAIN SCRIPT
+:: THIS IS THE END OF THE MAIN SCRIPT
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: If you have already created the above hub spoke topology which consists of
+:: ONP, HUB, SP1, SP2, and SP3
+:: Now you want to add an addtion spoke SP4, you have to delete all the exisiting 
+:: vpn connections and gateways and recreate them. Here are the steps:
+:::::::::::::::::::::::::::::::::::::::
+:: 1. Change the variable value for MODIFY_TOPOLOGY in the top of this file from FALSE to TRUE
+::    so that above steps for creating vnet are skipped. creating vnet will careate vpn gateway
+:::   which takes long time. You don't need to do them again.
+
+:: 2. comment the follwoing line "GOTO :eof" so that the script will continue to step 3.
+::
 
 GOTO :eof
 
+:::::::::::::::::::::::::::::::::::::::
+:: 3. Create spoke vnet SP4
+::
+SET SP4_NAME=sp4
+SET SP4_CIDR=10.4.0.0/16
+SET SP4_INTERNAL_CIDR=10.4.0.0/17
+SET SP4_GATEWAY_CIDR=10.4.255.240/28
+SET SP4_GATEWAY_NAME=%SP4_NAME%-vgw
+SET SP4_GATEWAY_PIP_NAME=%SP4_NAME%-vgw
+SET SP4_LOCATION=eastus
+SET SP4_RESOURCE_GROUP=%SP4_NAME%-%ENVIRONMENT%-rg
+SET SP4_ILB=10.4.127.254
+CALL :CREATE_VNET ^
+    %SP4_NAME% ^
+    %SP4_CIDR% ^
+    %SP4_INTERNAL_CIDR% ^
+    %SP4_GATEWAY_CIDR% ^
+    %SP4_GATEWAY_NAME% ^
+    %SP4_GATEWAY_PIP_NAME% ^
+    %SP4_LOCATION% ^
+    %SP4_RESOURCE_GROUP% ^
+    %SP4_ILB%
 
+:::::::::::::::::::::::::::::::::::::::
+:: 4. Modify all the existing gateway address space CIDR list by adding ,%SP4_CIDR%
+
+SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%,%SP4_CIDR%"
+SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR,%SP4_CIDR%"
+SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR,%SP4_CIDR%"
+SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP4_CIDR%"
+
+:::::::::::::::::::::::::::::::::::::::
+:: 5. Set SP4_TO_HUB_CIDR_LIST
+::
+SET SP4_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP3_CIDR%"
+
+:::::::::::::::::::::::::::::::::::::::
+:: 6. Delete all existing vpn connections
+::
+CALL :DELETE_HUB_SPOKE_CONNECTION ^
+    %ONP_NAME% ^
+    %ONP_RESOURCE_GROUP% ^
+    on_prem
+
+CALL :DELETE_HUB_SPOKE_CONNECTION ^
+    %SP1_NAME% ^
+    %SP1_RESOURCE_GROUP%
+
+CALL :DELETE_HUB_SPOKE_CONNECTION ^
+    %SP2_NAME% ^
+    %SP2_RESOURCE_GROUP%
+
+CALL :DELETE_HUB_SPOKE_CONNECTION ^
+    %SP3_NAME% ^
+    %SP3_RESOURCE_GROUP%
+
+:::::::::::::::::::::::::::::::::::::::
+:: 7. Delete all existing vpn gateways
+::
+IF "%MODIFY_TOPOLOGY%" == "TRUE" (
+  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+    %ONP_NAME% ^
+    %ONP_RESOURCE_GROUP% ^
+    on_prem
+
+  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+    %SP1_NAME% ^
+    %SP1_RESOURCE_GROUP%
+
+  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+    %SP2_NAME% ^
+    %SP2_RESOURCE_GROUP%
+
+  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+    %SP3_NAME% ^
+    %SP3_RESOURCE_GROUP%
+)
+
+:::::::::::::::::::::::::::::::::::::::
+:: 8. Recreate all existing connections
+::
+IF "%MODIFY_TOPOLOGY%" == "TRUE" (
+  CALL :CREATE_HUB_SPOKE_CONNECTION_FOR_ALL
+)
+
+:::::::::::::::::::::::::::::::::::::::
+:: 8. Create SP4 connections
+:: 
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
+    %SP4_NAME% ^
+    %SP4_CIDR% ^
+    %SP4_TO_HUB_CIDR_LIST% ^
+    %SP4_GATEWAY_PIP_NAME% ^
+    %SP4_LOCACTION% ^
+    %SP4_RESOURCE_GROUP%
+
+:::::::::::::::::::::::::::::::::::::::
+:: 9. Rerun the script. when finished, the topology 
+::    should be recreated with the new spoke SP4
+:: 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUB ROUTION 1
-:CREATE_HUB_VNET
+:: THIS IS THE END OF THE SCRIPT FOR MODIFYING TOPOLOGY
+:: THIS IS THE END OF THE SCRIPT FOR MODIFYING TOPOLOGY
+:: THE REST ARE SUBROUTINES
+GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-IF "%~4"=="" (
-    ECHO Usage: %0 vnet_addrss gateway_addrss subnt_adrss loc    
-    ECHO   For example: %0 10.0.0.0/16 10.0.255.240/28 10.0.0.0/17 eastus 
-    EXIT /B
-    )
-
-:: Set up variables to build out the naming conventions for deployment
-SET APP_NAME=%HUB_NAME%
-SET VNET_IP_RANGE=%1
-SET GATEWAY_SUBNET_IP_RANGE=%2
-SET INTERNAL_SUBNET_IP_RANGE=%3
-SET LOCATION=%4
-
-:: Set up the names of things using recommended conventions
-SET VNET_NAME=%APP_NAME%-vnet
-SET PUBLIC_IP_NAME=%APP_NAME%-pip
-
-SET INTERNAL_SUBNET_NAME=%APP_NAME%-internal-subnet
-
-SET ON_PREM_RESOURCE_GROUP=%RESOURCE_GROUP%
-SET ON_PREM_LOCAL_GATEWAY=%APP_NAME%-to-%ON_PREM_NAME%-lgw
-
-:: Set up the postfix variables attached to most CLI commands
-SET POSTFIX=--resource-group %HUB_RESOURCE_GROUP% --subscription %SUBSCRIPTION%
-
-CALL azure config mode arm
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create resources
+:: SUBROUTINE
+:DELETE_HUB_SPOKE_CONNECTION
 
-:: Create the enclosing resource group
-CALL :CallCLI azure group create --name %HUB_RESOURCE_GROUP% --location %LOCATION% ^
+:: input variable
+SET SPK_NAME=%1
+SET SPK_RESOURCE_GROUP=%2
+SET ON_PREM_FLAG=%3
+
+:: azure resource names
+SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
+SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
+SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
+
+:: HUB_TO_SPK_VPN-CONNECTION
+CALL :CallCLI azure network vpn-connection delete ^
+  --name %HUB_TO_SPK_VPN-CONNECTION% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
+  --quite
 
-:: Create the VNet
-CALL :CallCLI azure network vnet create --address-prefixes %VNET_IP_RANGE% ^
-  --name %VNET_NAME% --location %LOCATION% %POSTFIX%
+IF NOT "%ON_PREM_FLAG%" == "on_prem" (
+  CALL :CallCLI azure network vpn-connection delete ^
+  --name %SPK_TO_HUB_VPN-CONNECTION% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
+  --quite
+)
 
-:: Create the GatewaySubnet
-CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
-  --address-prefix %GATEWAY_SUBNET_IP_RANGE% --name GatewaySubnet %POSTFIX%
+GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: SUBROUTINE
+:DELETE_HUB_SPOKE_VPN_GATEWAY
 
-:: Create the internal subnet
-CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
-  --address-prefix %INTERNAL_SUBNET_IP_RANGE% --name %INTERNAL_SUBNET_NAME% %POSTFIX%
+:: input variable
+SET SPK_NAME=%1
+SET SPK_RESOURCE_GROUP=%2
+SET ON_PREM_FLAG=%3
 
-:: Create public IP address for VPN Gateway
-:: Note that the Azure VPN Gateway only supports dynamic IP addresses
-CALL :CallCLI azure network public-ip create --allocation-method Dynamic ^
-  --name %PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
+:: azure resource names
+SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
+SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
+SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
 
-:: Create virtual network gateway
-CALL :CallCLI azure network vpn-gateway create --name %HUB_VPN_GATEWAY_NAME% ^
-  --type RouteBased --public-ip-name %PUBLIC_IP_NAME% --vnet-name %VNET_NAME% ^
-  --location %LOCATION% %POSTFIX
+:: HUB_TO_SPK_LGW
+CALL :CallCLI azure network local-gateway delete ^
+  --name %HUB_TO_SPK_LGW% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
+  --quite
 
-:: Parse public-ip json to get the line that contains an ip address. 
+:: SPK_TO_HUB_LGW
+CALL :CallCLI azure network local-gateway delete ^
+  --name %SPK_TO_HUB_LGW% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
+  --quite
+
+GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: SUBROUTINE
+:CREATE_HUB_SPOKE_CONNECTION
+
+:: input variable
+SET SPK_NAME=%1
+SET SPK_CIDR=%2
+SET SPK_TO_HUB_CIDR_LIST=%3
+SET SPK_TO_HUB_CIDR_LIST=%SPK_TO_HUB_CIDR_LIST:~1,-1%
+SET SPK_GATEWAY_PIP_NAME=%4
+SET SPK_LOCACTION=%5
+SET SPK_RESOURCE_GROUP=%6
+SET ON_PREM_FLAG=%7
+
+:: azure resource names
+SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
+SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
+SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
+
+:::::::::::::::::::::::::::::::::::::::
+:: Retrieve SPK_GATEWAY_PIP
+
+IF "%ON_PREM_FLAG%" == "on_prem" (
+    SET SPK_GATEWAY_PIP=%SPK_GATEWAY_PIP_NAME%
+) ELSE (
+    :: Parse public-ip json to get the line that contains an ip address.
+    :: There is only one line that consists the ip address
+    FOR /F "delims=" %%a in ('
+    CALL azure network public-ip show -g %SPK_RESOURCE_GROUP% -n %SPK_GATEWAY_PIP_NAME% --json ^| 
+    FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
+    ') DO @SET JSON_IP_ADDRESS_LINE=%%a
+
+    :: Remove the first 16 and last two charactors to get the ip address
+    SET SPK_GATEWAY_PIP=%JSON_IP_ADDRESS_LINE:~16,-2%
+)
+
+:::::::::::::::::::::::::::::::::::::::
+:: Retrieve HUB_GATEWAY_PIP
+
+:: Parse public-ip json to get the line that contains an ip address.
 :: There is only one line that consists the ip address
 FOR /F "delims=" %%a in ('
-    CALL azure network public-ip show -g %HUB_RESOURCE_GROUP% -n %PUBLIC_IP_NAME% --json ^| 
+    CALL azure network public-ip show -g %SPK_RESOURCE_GROUP% -n %HUB_GATEWAY_PIP_NAME% --json ^| 
     FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
     ') DO @SET JSON_IP_ADDRESS_LINE=%%a
 
 :: Remove the first 16 and last two charactors to get the ip address
-SET VPN_GATEWAY_PIP_ADDRESS=%JSON_IP_ADDRESS_LINE:~16,-2%
+SET HUB_GATEWAY_PIP=%JSON_IP_ADDRESS_LINE:~16,-2%
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create in-comming local gateways to hub. 
-:: The gateways are used in:CREATE_SPOKE_VNET subroutine
+:::::::::::::::::::::::::::::::::::::::
+:: Create vpn gateways
 
-:: Create local gateway SPK1_TO_HUB_LGW
-CALL :CallCLI azure network local-gateway create --name %SPK1_TO_HUB_LGW% ^
-  --address-space %SPK1_TO_HUB_LGW_CIDRS% --ip-address %VPN_GATEWAY_PIP_ADDRESS% ^
-  --location %LOCATION% %POSTFIX%
+:: HUB_TO_SPK_LGW
+CALL :CallCLI azure network local-gateway create ^
+  --name %HUB_TO_SPK_LGW% ^
+  --address-space %SPK_CIDR% ^
+  --ip-address %SPK_GATEWAY_PIP% ^
+  --location %SPK_LOCACTION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
 
-:: Create local gateway SPK2_TO_HUB_LGW
-CALL :CallCLI azure network local-gateway create --name %SPK2_TO_HUB_LGW% ^
-  --address-space %SPK2_TO_HUB_LGW_CIDRS% --ip-address %VPN_GATEWAY_PIP_ADDRESS% ^
-  --location %LOCATION% %POSTFIX%
+:: SPK_TO_HUB_LGW
+CALL :CallCLI azure network local-gateway create ^
+  --name %SPK_TO_HUB_LGW% ^
+  --address-space %SPK_TO_HUB_CIDR_LIST% ^
+  --ip-address %HUB_GATEWAY_PIP% ^
+  --location %HUB_LOCACTION% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
 
-:: Create local gateway SPK3_TO_HUB_LGW
-CALL :CallCLI azure network local-gateway create --name %SPK3_TO_HUB_LGW% ^
-  --address-space %SPK3_TO_HUB_LGW_CIDRS% --ip-address %VPN_GATEWAY_PIP_ADDRESS% ^
-  --location %LOCATION% %POSTFIX%
+:::::::::::::::::::::::::::::::::::::::
+:: Create site-to-site vpn connections
 
-:: Create local gateway ON_PREM_TO_HUB_LGW
-:: ON_PREM_TO_HUB_LGW will be used by the on premise gateway to connect to azure vnet
-:: you need the VPN_GATEWAY_PIP_ADDRESS and ON_PREM_TO_HUB_LGW_CIDRS values
-:: to config the on premise gateway
-CALL :CallCLI azure network local-gateway create --name %ON_PREM_TO_HUB_LGW% ^
-  --address-space %ON_PREM_TO_HUB_LGW_CIDRS% --ip-address %VPN_GATEWAY_PIP_ADDRESS% ^
-  --location %LOCATION% %POSTFIX%
+:: HUB_TO_SPK_VPN-CONNECTION
+CALL :CallCLI azure network vpn-connection create ^
+  --name %HUB_TO_SPK_VPN-CONNECTION% ^
+  --vnet-gateway1 %HUB_GATEWAY% ^
+  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
+  --lnet-gateway2 %HUB_TO_SPK_LGW% ^
+  --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
+  --type IPsec ^
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --location %HUB_LOCACTION% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create out-going local gateway from hub to on premise network
-:: Note:  out-going local gateway to other vnets are created in :CREATE_SPOKE_VNET subroutine
+:: SPK_TO_HUB_VPN-CONNECTION
+:: You do not create on-prem to hub connection in azure. 
+:: Instead, you need to go to on premise network
+:: to route the traffic to the hub gateway pip.
 
-:: Create local gateway HUB_TO_ON_PREM_LGW
-CALL :CallCLI azure network local-gateway create --name %HUB_TO_ON_PREM_LGW% ^
-  --address-space %HUB_TO_ON_PREM_LGW_CIDRS% --ip-address %ON_PREM_GATEWAY_PIP_ADDRESS% ^
-  --location %LOCATION% %POSTFIX%
+IF NOT "%ON_PREM_FLAG%" == "on_prem" (
+  CALL :CallCLI azure network vpn-connection create ^
+  --name %SPK_TO_HUB_VPN-CONNECTION% ^
+  --vnet-gateway1 %SPK_GATEWAY% ^
+  --vnet-gateway1-group %SPK_RESOURCE_GROUP% ^
+  --lnet-gateway2 %SPK_TO_HUB_LGW% ^
+  --lnet-gateway2-group %HUB_RESOURCE_GROUP% ^
+  --type IPsec ^
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --location %SPK_LOCACTION% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
+)
 
 GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUB ROUTION 2
-:CREATE_SPOKE_VNET
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-IF "%~6"=="" (
-    ECHO Usage: %0 app vnet_addrss gateway_addrss subnt_adrss loc connect_to_lgw ilb_fe_ip
-    ECHO   For example: %0 app1 app1 10.1.0.0/16 10.1.255.240/28 10.1.0.0/17 eastus app1_to_hub_lgw 10.1.127.254
-    EXIT /B
-    )
+:: SUBROUTINE
+:CREATE_VNET
 
 :: Set up variables to build out the naming conventions for deployment
 SET APP_NAME=%1
-SET VNET_IP_RANGE=%2
-SET GATEWAY_SUBNET_IP_RANGE=%3
-SET INTERNAL_SUBNET_IP_RANGE=%4
-SET LOCATION=%5
-SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS=%6
+SET APP_CIDR=%2
+SET APP_INTERNAL_CIDR=%3
+SET APP_GATEWAY_CIDR=%4
+SET APP_GATEWAY_NAME=%5
+SET APP_GATEWAY_PIP_NAME=%6
+SET APP_LOCATION=%7
+SET APP_RESOURCE_GROUP=%8
+SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS=%9
 
-:: Set up the names of things using recommended conventions
-SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
-SET VNET_NAME=%APP_NAME%-vnet
-SET PUBLIC_IP_NAME=%APP_NAME%-pip
+:: Set up the azure resource names using recommended conventions
+SET APP_SUBSCRIPTION=%SUBSCRIPTION%
+SET APP_VNET_NAME=%APP_NAME%-vnet
+SET APP_PUBLIC_IP_NAME=%APP_NAME%-pip
+SET APP_INTERNAL_SUBNET_NAME=%APP_NAME%-internal-subnet
 
-SET INTERNAL_SUBNET_NAME=%APP_NAME%-internal-subnet
-SET VPN_GATEWAY_NAME=%APP_NAME%-vgw
-SET LOCAL_GATEWAY_NAME=%HUB_NAME%-to-%APP_NAME%-lgw
-SET VPN_CONNECTION_NAME=%APP_NAME%-to-%HUB_NAME%-vpn
+:: Prepare Azure CLI
+CALL azure config mode arm
+
+:::::::::::::::::::::::::::::::::::::::
+:: Create network resources
+
+:: Create the enclosing resource group
+CALL :CallCLI azure group create ^
+  --name %APP_RESOURCE_GROUP% ^
+  --location %APP_LOCATION% ^
+  --subscription %APP_SUBSCRIPTION%
+
+:: Create the VNet
+CALL :CallCLI azure network vnet create ^
+  --name %APP_VNET_NAME% ^
+  --address-prefixes %APP_CIDR% ^
+  --location %APP_LOCATION% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+:: Create the GatewaySubnet
+CALL :CallCLI azure network vnet subnet create ^
+  --name GatewaySubnet ^
+  --address-prefix %APP_GATEWAY_CIDR%
+  --vnet-name %APP_VNET_NAME% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+:: Create the internal subnet
+CALL :CallCLI azure network vnet subnet create ^
+  --name %APP_INTERNAL_SUBNET_NAME% ^
+  --address-prefix %APP_INTERNAL_CIDR% ^
+  --vnet-name %APP_VNET_NAME% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+:: Create the public IP address for VPN Gateway
+:: Note that the Azure VPN Gateway only supports
+:: dynamic IP addresses
+CALL :CallCLI azure network public-ip create ^
+  --name %APP_GATEWAY_PIP_NAME% ^
+  --allocation-method Dynamic ^
+  --location %APP_LOCATION% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+:: Create the vpn gateway
+CALL :CallCLI azure network vpn-gateway create ^
+  --name %APP_GATEWAY_NAME% ^
+  --type RouteBased ^
+  --public-ip-name %PUBLIC_IP_NAME% ^
+  --vnet-name %APP_VNET_NAME% ^
+  --location %APP_LOCATION% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+:::::::::::::::::::::::::::::::::::::::
+:: Create ILB resources
+
+IF "%INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS%"=="" (
+    EXIT /B
+    )
 
 SET INTERNAL_LOAD_BALANCER_NAME=%APP_NAME%-ilb
 SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_NAME=%APP_NAME%-ilb-fip
 SET INTERNAL_LOAD_BALANCER_POOL_NAME=%APP_NAME%-ilb-pool
-
 SET INTERNAL_LOAD_BALANCER_PROBE_PROTOCOL=tcp
 SET INTERNAL_LOAD_BALANCER_PROBE_INTERVAL=300
 SET INTERNAL_LOAD_BALANCER_PROBE_COUNT=4
 SET INTERNAL_LOAD_BALANCER_PROBE_NAME=%INTERNAL_LOAD_BALANCER_NAME%-probe
 
-:: Set up the postfix variables attached to most CLI commands
-SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
-
-CALL azure config mode arm
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create resources
-
-:: Create the enclosing resource group
-CALL :CallCLI azure group create --name %RESOURCE_GROUP% --location %LOCATION% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create the VNet
-CALL :CallCLI azure network vnet create --address-prefixes %VNET_IP_RANGE% ^
-  --name %VNET_NAME% --location %LOCATION% %POSTFIX%
-
-:: Create the internal subnet
-CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
-  --address-prefix %INTERNAL_SUBNET_IP_RANGE% --name %INTERNAL_SUBNET_NAME% %POSTFIX%
-
-:: Create the GatewaySubnet
-CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% ^
-  --address-prefix %GATEWAY_SUBNET_IP_RANGE% --name GatewaySubnet %POSTFIX%
-
-:: Create public IP address for VPN Gateway
-:: Note that the Azure VPN Gateway only supports dynamic IP addresses
-CALL :CallCLI azure network public-ip create --allocation-method Dynamic ^
-  --name %PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
-
-:: Create virtual network gateway
-CALL :CallCLI azure network vpn-gateway create --name %VPN_GATEWAY_NAME% ^
-  --type RouteBased --public-ip-name %PUBLIC_IP_NAME% --vnet-name %VNET_NAME% ^
-  --location %LOCATION% %POSTFIX
-
-:: Parse public-ip json to get the line that contains an ip address. 
-:: There is only one line that consists the ip address
-FOR /F "delims=" %%a in ('
-    CALL azure network public-ip show -g %RESOURCE_GROUP% -n %PUBLIC_IP_NAME% --json ^| 
-    FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
-    ') DO @SET JSON_IP_ADDRESS_LINE=%%a
-
-:: Remove the first 16 and last two charactors to get the ip address
-SET VPN_GATEWAY_PIP_ADDRESS=%JSON_IP_ADDRESS_LINE:~16,-2%
-
-:: Create local gateway
-CALL :CallCLI azure network local-gateway create --name %LOCAL_GATEWAY_NAME% ^
-  --address-space %VNET_IP_RANGE% --ip-address %VPN_GATEWAY_PIP_ADDRESS% ^
-  --location %LOCATION% %POSTFIX%
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create ILB
-
-CALL :CallCLI azure network lb create --name %INTERNAL_LOAD_BALANCER_NAME% ^
-  --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network lb create ^
+  --name %APP_INTERNAL_LOAD_BALANCER_NAME% ^
+  --location %APP_LOCATION% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
 
 :: Create a frontend IP address for the internal load balancer
-CALL :CallCLI azure network lb frontend-ip create --subnet-vnet-name %VNET_NAME% ^
-  --subnet-name %INTERNAL_SUBNET_NAME% ^
+CALL :CallCLI azure network lb frontend-ip create ^
+  --name %INTERNAL_LOAD_BALANCER_FRONTEND_IP_NAME% ^
   --private-ip-address %INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS% ^
   --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
-  --name %INTERNAL_LOAD_BALANCER_FRONTEND_IP_NAME% ^
-  %POSTFIX%
+  --subnet-name %INTERNAL_SUBNET_NAME% ^
+  --subnet-vnet-name %APP_VNET_NAME% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
 
 :: Create the backend address pool for the internal load balancer
-CALL :CallCLI azure network lb address-pool create --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
-  --name %INTERNAL_LOAD_BALANCER_POOL_NAME% %POSTFIX%
+CALL :CallCLI azure network lb address-pool create ^
+  --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
+  --name %INTERNAL_LOAD_BALANCER_POOL_NAME% 
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
 
 :: Create a health probe for the internal load balancer
-CALL :CallCLI azure network lb probe create --protocol %INTERNAL_LOAD_BALANCER_PROBE_PROTOCOL% ^
-  --interval %INTERNAL_LOAD_BALANCER_PROBE_INTERVAL% --count %INTERNAL_LOAD_BALANCER_PROBE_COUNT% ^
-  --lb-name %INTERNAL_LOAD_BALANCER_NAME% --name %INTERNAL_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
+CALL :CallCLI azure network lb probe create ^
+  --name %INTERNAL_LOAD_BALANCER_PROBE_NAME% ^
+  --protocol %INTERNAL_LOAD_BALANCER_PROBE_PROTOCOL% ^
+  --interval %INTERNAL_LOAD_BALANCER_PROBE_INTERVAL% ^
+  --count %INTERNAL_LOAD_BALANCER_PROBE_COUNT% ^
+  --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
 
 :: This will show the shared key for the VPN connection.  We won't bother with the error checking.
-CALL azure network vpn-connection shared-key show --name %VPN_CONNECTION_NAME% %POSTFIX%
+CALL azure network vpn-connection shared-key show ^
+  --name %VPN_CONNECTION_NAME% 
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
 
 GOTO :eof
 
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUB ROUTION 3
-:CREATE_SPOKE_TO_HUB_CONNECTIONS
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-:: Create SPK1_TO_HUB_CONECTION vpn connection
-CALL :CallCLI azure network vpn-connection create ^
-  --name %SPK1_TO_HUB_CONECTION% ^
-  --vnet-gateway1 %SPK1_VPN_GATEWAY_NAME% ^
-  --vnet-gateway1-group %SPK1_RESOURCE_GROUP% ^
-  --lnet-gateway2 %SPK1_TO_HUB_LGW% ^
-  --lnet-gateway2-group %sSPK1_RESOURCE_GROUP% ^
-  --type IPsec --location %SPK1_LOC% ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --resource-group %SPK1_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create SPK2_TO_HUB_CONECTION vpn connection
-CALL :CallCLI azure network vpn-connection create ^
-  --name %SPK2_TO_HUB_CONECTION% ^
-  --vnet-gateway1 %SPK2_VPN_GATEWAY_NAME% ^
-  --vnet-gateway1-group %SPK2_RESOURCE_GROUP% ^
-  --lnet-gateway2 %SPK2_TO_HUB_LGW% ^
-  --lnet-gateway2-group %sSPK2_RESOURCE_GROUP% ^
-  --type IPsec --location %SPK2_LOC% ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --resource-group %SPK2_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create SPK3_TO_HUB_CONECTION vpn connection
-CALL :CallCLI azure network vpn-connection create ^
-  --name %SPK3_TO_HUB_CONECTION% ^
-  --vnet-gateway1 %SPK3_VPN_GATEWAY_NAME% ^
-  --vnet-gateway1-group %SPK3_RESOURCE_GROUP% ^
-  --lnet-gateway2 %SPK3_TO_HUB_LGW% ^
-  --lnet-gateway2-group %sSPK3_RESOURCE_GROUP% ^
-  --type IPsec --location %SPK3_LOC% ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --resource-group %SPK3_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create ON_PREM_TO_HUB_CONECTION vpn connection
-:: TBD manually ...
-:: You need to go to the on premise gateway to set up the connection
-
-GOTO :eof
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUB ROUTION 4
-:CREATE_HUB_TO_SPOKE_CONNECTIONS
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create HUB_TO_ON_PREM_CONECTION
-CALL :CallCLI azure network vpn-connection create ^
-  --name %HUB_TO_ON_PREM_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
-  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
-  --lnet-gateway2 %HUB_TO_ON_PREM_LGW% ^
-  --lnet-gateway2-group %HUB_RESOURCE_GROUP% ^
-  --type IPsec --location %HUB_LOC% ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create HUB_TO_SPK1_CONECTION
-CALL :CallCLI azure network vpn-connection create ^
-  --name %HUB_TO_SPK1_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
-  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
-  --lnet-gateway2 %HUB_TO_SPK1_LGW% ^
-  --lnet-gateway2-group %SPK1_RESOURCE_GROUP% ^
-  --type IPsec --location %HUB_LOC% ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create HUB_TO_SPK2_CONECTION
-CALL :CallCLI azure network vpn-connection create ^
-  --name %HUB_TO_SPK2_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
-  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
-  --lnet-gateway2 %HUB_TO_SPK2_LGW% ^
-  --lnet-gateway2-group %SPK2_RESOURCE_GROUP% ^
-  --type IPsec --location %HUB_LOC% ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create HUB_TO_SPK3_CONECTION
-CALL :CallCLI azure network vpn-connection create ^
-  --name %HUB_TO_SPK3_CONECTION% ^
-  --vnet-gateway1 %HUB_VPN_GATEWAY_NAME% ^
-  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
-  --lnet-gateway2 %HUB_TO_SPK3_LGW% ^
-  --lnet-gateway2-group %SPK3_RESOURCE_GROUP% ^
-  --type IPsec --location %HUB_LOC% ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-GOTO :eof
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUB ROUTION 5
+:: SUBROUTINE
 :CallCLI
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 SETLOCAL
 CALL %*
 IF ERRORLEVEL 1 (
@@ -511,20 +572,21 @@ IF ERRORLEVEL 1 (
     (GOTO) 2>NULL & GOTO :eof
 )
 GOTO :eof
-
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUB ROUTION 6
+:: SUBROUTINE
 :ShowError
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 SETLOCAL EnableDelayedExpansion
+
 :: Print the message
 ECHO %~1
 SHIFT
+
 :: Get the first part of the azure CLI command so we don't have an extra space at the beginning
 SET CLICommand=%~1
 SHIFT
+
 :: Loop through the rest of the parameters and recreate the CLI command
 :Loop
     IF "%~1"=="" GOTO Continue
@@ -534,4 +596,55 @@ GOTO Loop
 :Continue
 ECHO %CLICommand%
 GOTO :eof
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: SUBROUTINE
+:CREATE_HUB_SPOKE_CONNECTION_FOR_ALL
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: ONP connections
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
+    %ONP_NAME% ^
+    %ONP_CIDR% ^
+    %ONP_TO_HUB_CIDR_LIST% ^
+    %ONP_GATEWAY_PIP% ^
+    %ONP_LOCACTION% ^
+    %ONP_RESOURCE_GROUP% ^
+    on_prem
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: SP1 connections
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
+    %SP1_NAME% ^
+    %SP1_CIDR% ^
+    %SP1_TO_HUB_CIDR_LIST% ^
+    %SP1_GATEWAY_PIP_NAME% ^
+    %SP1_LOCACTION% ^
+    %SP1_RESOURCE_GROUP%
+
+GOTO :eof
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: SP2 connections
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
+    %SP2_NAME% ^
+    %SP2_CIDR% ^
+    %SP2_TO_HUB_CIDR_LIST% ^
+    %SP2_GATEWAY_PIP_NAME% ^
+    %SP2_LOCACTION% ^
+    %SP2_RESOURCE_GROUP%
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: SP3 connections
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
+    %SP3_NAME% ^
+    %SP3_CIDR% ^
+    %SP3_TO_HUB_CIDR_LIST% ^
+    %SP3_GATEWAY_PIP_NAME% ^
+    %SP3_LOCACTION% ^
+    %SP3_RESOURCE_GROUP%
+
+GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
