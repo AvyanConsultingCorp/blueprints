@@ -198,7 +198,7 @@ CALL :CallCLI azure network nsg create --name %MANAGE_NSG_NAME% ^
   --location %LOCATION% %POSTFIX%
 
 CALL :CallCLI azure network nsg rule create --nsg-name %MANAGE_NSG_NAME% ^
-  --name admin-rdp-allow
+  --name admin-rdp-allow ^
 	--access Allow --protocol Tcp --direction Inbound --priority 100 ^
 	--source-address-prefix %ADMIN_ADDRESS_PREFIX% --source-port-range * ^
 	--destination-address-prefix * --destination-port-range %REMOTE_ACCESS_PORT% %POSTFIX%
