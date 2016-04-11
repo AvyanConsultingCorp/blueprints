@@ -8,6 +8,11 @@
 # Command-line parameters determine if you are configuring the AWS or Azure
 # side and what the public IP addresses are for the AWS and Azure OpenSwan VMs
 
+SUDO=''
+if [[ $EUID -ne 0 ]]; then
+    SUDO='sudo'
+fi
+
 AZURE_PUBLICIP=""
 AWS_PUBLICIP=""
 CONFIGAZURE=""
@@ -119,12 +124,12 @@ conn aws_azure_vpn
     forceencaps=yes
     authby=secret
     auto=start
-" | sudo tee -a /etc/ipsec.conf
+" | $SUDO tee -a /etc/ipsec.conf
 
 # Add a shared secret to ipsec.secrets
 echo "Appending the following to /etc/ipsec.secrets:"
 echo "${AZURE_PUBLICIP} ${AWS_PUBLICIP} : PSK \"thelongsharedsupersecretkey\"
-" | sudo tee -a /etc/ipsec.secrets
+" | $SUDO tee -a /etc/ipsec.secrets
 
 # Restart the IPsec service for the changes to take affect
-sudo service ipsec restart
+$SUDO service ipsec restart
