@@ -1,6 +1,6 @@
 @ECHO OFF
 SETLOCAL
-SET MODIFY_TOPOLOGY=FLASE
+
 IF "%~2"=="" (
     ECHO Usage: %0 subscription-id ipsec-shared-key
     ECHO   For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx xxxxxxxxxxxx
@@ -15,16 +15,85 @@ SET IPSEC_SHARED_KEY=%2
 SET ENVIRONMENT=dev
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create hub vnet
+:: Modify data about your hub-and-spoke topology here. 
+:: Only modify the values, do not modify the variable names.
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: on-prem network ONP data
+SET ONP_NAME=onp
+SET ONP_GATEWAY_PIP=131.107.36.3
+SET ONP_CIDR=192.268.0.0/24
+SET ONP_LOCACTION =%HUB_LOCATION%
+SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROPU%
+:::::::::::::::::::::::::::::::::::::::
+:: hub vnet data
 SET HUB_NAME=hub0
 SET HUB_CIDR=10.0.0.0/16
 SET HUB_INTERNAL_CIDR=10.0.0.0/17
-SET HUB_GATEWAY_CIDR=10.0.255.240/28
+SET HUB_GATEWAY_CIDR=10.0.255.224/27
 SET HUB_GATEWAY_NAME=%HUB_NAME%-vgw
 SET HUB_GATEWAY_PIP_NAME=%HUB_NAME%-pip
 SET HUB_LOCATION=eastus
 SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
-IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+:::::::::::::::::::::::::::::::::::::::
+:: spoke vnet SP1 data
+SET SP1_NAME=sp1
+SET SP1_CIDR=10.1.0.0/16
+SET SP1_INTERNAL_CIDR=10.1.0.0/17
+SET SP1_GATEWAY_CIDR=10.1.255.224/27
+SET SP1_GATEWAY_NAME=%SP1_NAME%-vgw
+SET SP1_GATEWAY_PIP_NAME=%SP1_NAME%-vgw
+SET SP1_LOCATION=eastus
+SET SP1_RESOURCE_GROUP=%SP1_NAME%-%ENVIRONMENT%-rg
+SET SP1_ILB=10.1.127.254
+:::::::::::::::::::::::::::::::::::::::
+:: spoke vnet SP2 data
+SET SP2_NAME=sp1
+SET SP2_CIDR=10.2.0.0/16
+SET SP2_INTERNAL_CIDR=10.2.0.0/17
+SET SP2_GATEWAY_CIDR=10.2.255.224/27
+SET SP2_GATEWAY_NAME=%SP2_NAME%-vgw
+SET SP2_GATEWAY_PIP_NAME=%SP2_NAME%-vgw
+SET SP2_LOCATION=eastus
+SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
+SET SP2_ILB=10.2.127.254
+:::::::::::::::::::::::::::::::::::::::
+:: spoke vnet SP3 data
+SET SP3_NAME=sp3
+SET SP3_CIDR=10.3.0.0/16
+SET SP3_INTERNAL_CIDR=10.3.0.0/17
+SET SP3_GATEWAY_CIDR=10.3.255.224/27
+SET SP3_GATEWAY_NAME=%SP3_NAME%-vgw
+SET SP3_GATEWAY_PIP_NAME=%SP3_NAME%-vgw
+SET SP3_LOCATION=eastus
+SET SP3_RESOURCE_GROUP=%SP3_NAME%-%ENVIRONMENT%-rg
+SET SP3_ILB=10.3.127.254
+:::::::::::::::::::::::::::::::::::::::
+:: Set gateway address space CIDR list
+:: You need enclose the CIDR list in quotes because they are comma seperated, 
+:: If without the quotes, the script subroutine will treat each CIDR as a seperate variable.
+::
+:: All the lists need to be modified if you add or remove a spoke from the topology.
+::
+SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
+
+SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
+
+SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR%"
+
+SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET ADD_ADDITIONAL_SPOKE_4=FLASE
+::SET ADD_ADDITIONAL_SPOKE_4=TRUE
+
+IF "%ADD_ADDITIONAL_SPOKE_4%" == "FALSE" (
+  :: this is for initial hub-spoke topology setup with 
+  :: one on-prem net, one hub, and three spokes.
+  :: 
+  :: It will first create vNets for HUB, and the spokes SP1, SP2, and SP3, 
+  :: and then connects all the spokes including the on-prem spoke to and from the hub
+
+  :: Create hub vnet
   CALL :CREATE_VNET ^
     %HUB_NAME% ^
     %HUB_CIDR% ^
@@ -34,28 +103,8 @@ IF "%MODIFY_TOPOLOGY%" == "FALSE" (
     %HUB_GATEWAY_PIP_NAME% ^
     %HUB_LOCATION% ^
     %HUB_RESOURCE_GROUP%
-)
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Set variable for on-prem network ONP
-SET ONP_NAME=onp
-SET ONP_GATEWAY_PIP=131.107.36.3
-SET ONP_CIDR=192.268.0.0/24
-SET ONP_LOCACTION =%HUB_LOCATION%
-SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROPU%
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create spoke vnet SP1 
-SET SP1_NAME=sp1
-SET SP1_CIDR=10.1.0.0/16
-SET SP1_INTERNAL_CIDR=10.1.0.0/17
-SET SP1_GATEWAY_CIDR=10.1.255.240/28
-SET SP1_GATEWAY_NAME=%SP1_NAME%-vgw
-SET SP1_GATEWAY_PIP_NAME=%SP1_NAME%-vgw
-SET SP1_LOCATION=eastus
-SET SP1_RESOURCE_GROUP=%SP1_NAME%-%ENVIRONMENT%-rg
-SET SP1_ILB=10.1.127.254
-IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+  :: Create spoke vnet SP1 
   CALL :CREATE_VNET ^
     %SP1_NAME% ^
     %SP1_CIDR% ^
@@ -66,19 +115,8 @@ IF "%MODIFY_TOPOLOGY%" == "FALSE" (
     %SP1_LOCATION% ^
     %SP1_RESOURCE_GROUP% ^
     %SP1_ILB%
-)
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create spoke vnet SP2
-SET SP2_NAME=sp1
-SET SP2_CIDR=10.2.0.0/16
-SET SP2_INTERNAL_CIDR=10.2.0.0/17
-SET SP2_GATEWAY_CIDR=10.2.255.240/28
-SET SP2_GATEWAY_NAME=%SP2_NAME%-vgw
-SET SP2GATEWAY_PIP_NAME=%SP2_NAME%-vgw
-SET SP2_LOCATION=eastus
-SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
-SET SP2_ILB=10.2.127.254
-IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+
+  :: Create spoke vnet SP2
   CALL :CREATE_VNET ^
     %SP2_NAME% ^
     %SP2_CIDR% ^
@@ -89,20 +127,8 @@ IF "%MODIFY_TOPOLOGY%" == "FALSE" (
     %SP2_LOCATION% ^
     %SP2_RESOURCE_GROUP% ^
     %SP2_ILB%
-)
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create spoke vnet SP3
-SET SP3_NAME=sp3
-SET SP3_CIDR=10.3.0.0/16
-SET SP3_INTERNAL_CIDR=10.3.0.0/17
-SET SP3_GATEWAY_CIDR=10.3.255.240/28
-SET SP3_GATEWAY_NAME=%SP3_NAME%-vgw
-SET SP3GATEWAY_PIP_NAME=%SP3_NAME%-vgw
-SET SP3_LOCATION=eastus
-SET SP3_RESOURCE_GROUP=%SP3_NAME%-%ENVIRONMENT%-rg
-SET SP3_ILB=10.3.127.254
 
-IF "%MODIFY_TOPOLOGY%" == "FALSE" (
+  :: Create spoke vnet SP3
   CALL :CREATE_VNET ^
     %SP3_NAME% ^
     %SP3_CIDR% ^
@@ -113,53 +139,54 @@ IF "%MODIFY_TOPOLOGY%" == "FALSE" (
     %SP3_LOCATION% ^
     %SP3_RESOURCE_GROUP% ^
     %SP3_ILB%
-)
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Set gateway address space CIDR list
-:: You need enclose the CIDR list in quotes because they are comma seperated, 
-:: If without the quotes, the script subroutine will treat each CIDR as a seperate variable.
-::
-:: All the lists need to be modified if you add or remove a spoke from the topology.
-SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
-SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
-SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR%"
-SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
 
-IF "%MODIFY_TOPOLOGY%" == "FALSE" (
-  CALL :CREATE_HUB_SPOKE_CONNECTION_FOR_ALL
-)
+  :::::::::::::::::::::::::::::::::::::::
+  :: Connect ONP, SP1, SP2 and SP3 to and from HUB
+    CALL :CONNECT_ONP_AND_SP_1_2_3_TO_AND_FROM_HUB
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: THIS IS THE END OF THE MAIN SCRIPT
-:: THIS IS THE END OF THE MAIN SCRIPT
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: If you have already created the above hub spoke topology which consists of
-:: ONP, HUB, SP1, SP2, and SP3
-:: Now you want to add an addtion spoke SP4, you have to delete all the exisiting 
-:: vpn connections and gateways and recreate them. Here are the steps:
-:::::::::::::::::::::::::::::::::::::::
-:: 1. Change the variable value for MODIFY_TOPOLOGY in the top of this file from FALSE to TRUE
-::    so that above steps for creating vnet are skipped. creating vnet will careate vpn gateway
-:::   which takes long time. You don't need to do them again.
+) ELSE (
+  ::%ADD_ADDITIONAL_SPOKE_4%==TRUE
 
-:: 2. comment the follwoing line "GOTO :eof" so that the script will continue to step 3.
-::
+  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  :: If you have already created the above hub spoke topology which consists of
+  :: ONP, HUB, SP1, SP2, and SP3, and now you want 
+  :: to add an addtion spoke SP4, you have to delete all the exisiting 
+  :: vpn connections and gateways and then recreate them. Here are the steps:
 
-GOTO :eof
+  :::::::::::::::::::::::::::::::::::::::
+  :: 1. Change the variable value for ADD_ADDITIONAL_SPOKE_4 from FALSE to TRUE
+  ::
 
-:::::::::::::::::::::::::::::::::::::::
-:: 3. Create spoke vnet SP4
-::
-SET SP4_NAME=sp4
-SET SP4_CIDR=10.4.0.0/16
-SET SP4_INTERNAL_CIDR=10.4.0.0/17
-SET SP4_GATEWAY_CIDR=10.4.255.240/28
-SET SP4_GATEWAY_NAME=%SP4_NAME%-vgw
-SET SP4_GATEWAY_PIP_NAME=%SP4_NAME%-vgw
-SET SP4_LOCATION=eastus
-SET SP4_RESOURCE_GROUP=%SP4_NAME%-%ENVIRONMENT%-rg
-SET SP4_ILB=10.4.127.254
-CALL :CREATE_VNET ^
+  :::::::::::::::::::::::::::::::::::::::
+  :: 2. Put your data about SP4 here:
+  SET SP4_NAME=sp4
+  SET SP4_CIDR=10.4.0.0/24
+  SET SP4_INTERNAL_CIDR=10.4.0.0/25
+  SET SP4_GATEWAY_CIDR=10.4.255.224/27
+  SET SP4_GATEWAY_NAME=%SP4_NAME%-vgw
+  SET SP4_GATEWAY_PIP_NAME=%SP4_NAME%-vgw
+  SET SP4_LOCATION=eastus
+  SET SP4_RESOURCE_GROUP=%SP4_NAME%-%ENVIRONMENT%-rg
+  SET SP4_ILB=10.4.127.254
+
+  :::::::::::::::::::::::::::::::::::::::
+  :: 3. Modify all the existing gateway address space list by adding ,%SP4_CIDR% at the end
+
+  SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%,%SP4_CIDR%"
+
+  SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR,%SP4_CIDR%"
+
+  SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR,%SP4_CIDR%"
+
+  SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP4_CIDR%"
+
+  :: Set SP4_TO_HUB_CIDR_LIST
+  ::
+  SET SP4_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP3_CIDR%"
+
+  :::::::::::::::::::::::::::::::::::::::
+  :: 4. Create spoke vnet SP4
+  CALL :CREATE_VNET ^
     %SP4_NAME% ^
     %SP4_CIDR% ^
     %SP4_INTERNAL_CIDR% ^
@@ -170,72 +197,54 @@ CALL :CREATE_VNET ^
     %SP4_RESOURCE_GROUP% ^
     %SP4_ILB%
 
-:::::::::::::::::::::::::::::::::::::::
-:: 4. Modify all the existing gateway address space CIDR list by adding ,%SP4_CIDR%
-
-SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%,%SP4_CIDR%"
-SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR,%SP4_CIDR%"
-SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR,%SP4_CIDR%"
-SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP4_CIDR%"
-
-:::::::::::::::::::::::::::::::::::::::
-:: 5. Set SP4_TO_HUB_CIDR_LIST
-::
-SET SP4_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR,%SP3_CIDR%"
-
-:::::::::::::::::::::::::::::::::::::::
-:: 6. Delete all existing vpn connections
-::
-CALL :DELETE_HUB_SPOKE_CONNECTION ^
+  :::::::::::::::::::::::::::::::::::::::
+  :: 5. Delete all existing vpn connections
+  ::
+  CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %ONP_NAME% ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
 
-CALL :DELETE_HUB_SPOKE_CONNECTION ^
+  CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP1_NAME% ^
     %SP1_RESOURCE_GROUP%
 
-CALL :DELETE_HUB_SPOKE_CONNECTION ^
+  CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP2_NAME% ^
     %SP2_RESOURCE_GROUP%
 
-CALL :DELETE_HUB_SPOKE_CONNECTION ^
+  CALL ::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS ^
     %SP3_NAME% ^
     %SP3_RESOURCE_GROUP%
 
-:::::::::::::::::::::::::::::::::::::::
-:: 7. Delete all existing vpn gateways
-::
-IF "%MODIFY_TOPOLOGY%" == "TRUE" (
-  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+  :::::::::::::::::::::::::::::::::::::::
+  :: 6. Delete all existing vpn gateways
+  ::
+
+  CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %ONP_NAME% ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
 
-  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+  CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP1_NAME% ^
     %SP1_RESOURCE_GROUP%
 
-  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+  CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP2_NAME% ^
     %SP2_RESOURCE_GROUP%
 
-  CALL :DELETE_HUB_SPOKE_VPN_GATEWAY ^
+  CALL :DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS ^
     %SP3_NAME% ^
     %SP3_RESOURCE_GROUP%
-)
 
-:::::::::::::::::::::::::::::::::::::::
-:: 8. Recreate all existing connections
-::
-IF "%MODIFY_TOPOLOGY%" == "TRUE" (
-  CALL :CREATE_HUB_SPOKE_CONNECTION_FOR_ALL
-)
+  :::::::::::::::::::::::::::::::::::::::
+  :: 7. Re-Connect ONP, SP1, SP2 and SP3 to and from HUB
+    CALL :CONNECT_ONP_AND_SP_1_2_3_TO_AND_FROM_HUB
 
-:::::::::::::::::::::::::::::::::::::::
-:: 8. Create SP4 connections
-:: 
-CALL :CREATE_HUB_SPOKE_CONNECTION ^
+  :::::::::::::::::::::::::::::::::::::::
+  :: 8. Connect SP4 to and from HUB
+  CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP4_NAME% ^
     %SP4_CIDR% ^
     %SP4_TO_HUB_CIDR_LIST% ^
@@ -243,20 +252,14 @@ CALL :CREATE_HUB_SPOKE_CONNECTION ^
     %SP4_LOCACTION% ^
     %SP4_RESOURCE_GROUP%
 
-:::::::::::::::::::::::::::::::::::::::
-:: 9. Rerun the script. when finished, the topology 
-::    should be recreated with the new spoke SP4
-:: 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: THIS IS THE END OF THE SCRIPT FOR MODIFYING TOPOLOGY
-:: THIS IS THE END OF THE SCRIPT FOR MODIFYING TOPOLOGY
-:: THE REST ARE SUBROUTINES
+) ::END ELSE
+
 GOTO :eof
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: SUBROUTINE
-:DELETE_HUB_SPOKE_CONNECTION
+::DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_CONNECTIONS
 
 :: input variable
 SET SPK_NAME=%1
@@ -285,11 +288,12 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
 )
 
 GOTO :eof
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: SUBROUTINE
-:DELETE_HUB_SPOKE_VPN_GATEWAY
-
+:DELETE_SPOKE_TO_HUB_AND_HUB_TO_SPOKE_VPN_GATEWAYS
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: input variable
 SET SPK_NAME=%1
 SET SPK_RESOURCE_GROUP=%2
@@ -298,6 +302,7 @@ SET ON_PREM_FLAG=%3
 :: azure resource names
 SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
 SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+
 SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
 SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
 
@@ -316,10 +321,12 @@ CALL :CallCLI azure network local-gateway delete ^
   --quite
 
 GOTO :eof
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: SUBROUTINE
-:CREATE_HUB_SPOKE_CONNECTION
+:CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: input variable
 SET SPK_NAME=%1
@@ -334,6 +341,7 @@ SET ON_PREM_FLAG=%7
 :: azure resource names
 SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
 SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+
 SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
 SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
 
@@ -408,7 +416,6 @@ CALL :CallCLI azure network vpn-connection create ^
 :: You do not create on-prem to hub connection in azure. 
 :: Instead, you need to go to on premise network
 :: to route the traffic to the hub gateway pip.
-
 IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   CALL :CallCLI azure network vpn-connection create ^
   --name %SPK_TO_HUB_VPN-CONNECTION% ^
@@ -429,6 +436,7 @@ GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: SUBROUTINE
 :CREATE_VNET
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: Set up variables to build out the naming conventions for deployment
 SET APP_NAME=%1
@@ -562,8 +570,54 @@ GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: SUBROUTINE
-:CallCLI
+:CONNECT_ONP_AND_SP_1_2_3_TO_AND_FROM_HUB
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: ONP_TO_HUB_TO_ONP connections
+CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
+    %ONP_NAME% ^
+    %ONP_CIDR% ^
+    %ONP_TO_HUB_CIDR_LIST% ^
+    %ONP_GATEWAY_PIP% ^
+    %ONP_LOCACTION% ^
+    %ONP_RESOURCE_GROUP% ^
+    on_prem
 
+:::::::::::::::::::::::::::::::::::::::
+:: SP1_TO_HUB_TO_SP1 connections
+CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
+    %SP1_NAME% ^
+    %SP1_CIDR% ^
+    %SP1_TO_HUB_CIDR_LIST% ^
+    %SP1_GATEWAY_PIP_NAME% ^
+    %SP1_LOCACTION% ^
+    %SP1_RESOURCE_GROUP%
+
+:::::::::::::::::::::::::::::::::::::::
+:: SP2_TO_HUB_TO_SP2 connections
+CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
+    %SP2_NAME% ^
+    %SP2_CIDR% ^
+    %SP2_TO_HUB_CIDR_LIST% ^
+    %SP2_GATEWAY_PIP_NAME% ^
+    %SP2_LOCACTION% ^
+    %SP2_RESOURCE_GROUP%
+
+:::::::::::::::::::::::::::::::::::::::
+:: SP3_TO_HUB_SP3 connections
+CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
+    %SP3_NAME% ^
+    %SP3_CIDR% ^
+    %SP3_TO_HUB_CIDR_LIST% ^
+    %SP3_GATEWAY_PIP_NAME% ^
+    %SP3_LOCACTION% ^
+    %SP3_RESOURCE_GROUP%
+
+GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: SUBROUTINE
+:CallCLI
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SETLOCAL
 CALL %*
 IF ERRORLEVEL 1 (
@@ -572,11 +626,12 @@ IF ERRORLEVEL 1 (
     (GOTO) 2>NULL & GOTO :eof
 )
 GOTO :eof
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: SUBROUTINE
 :ShowError
-
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SETLOCAL EnableDelayedExpansion
 
 :: Print the message
@@ -597,54 +652,5 @@ GOTO Loop
 ECHO %CLICommand%
 GOTO :eof
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUBROUTINE
-:CREATE_HUB_SPOKE_CONNECTION_FOR_ALL
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: ONP connections
-CALL :CREATE_HUB_SPOKE_CONNECTION ^
-    %ONP_NAME% ^
-    %ONP_CIDR% ^
-    %ONP_TO_HUB_CIDR_LIST% ^
-    %ONP_GATEWAY_PIP% ^
-    %ONP_LOCACTION% ^
-    %ONP_RESOURCE_GROUP% ^
-    on_prem
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SP1 connections
-CALL :CREATE_HUB_SPOKE_CONNECTION ^
-    %SP1_NAME% ^
-    %SP1_CIDR% ^
-    %SP1_TO_HUB_CIDR_LIST% ^
-    %SP1_GATEWAY_PIP_NAME% ^
-    %SP1_LOCACTION% ^
-    %SP1_RESOURCE_GROUP%
-
-GOTO :eof
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SP2 connections
-CALL :CREATE_HUB_SPOKE_CONNECTION ^
-    %SP2_NAME% ^
-    %SP2_CIDR% ^
-    %SP2_TO_HUB_CIDR_LIST% ^
-    %SP2_GATEWAY_PIP_NAME% ^
-    %SP2_LOCACTION% ^
-    %SP2_RESOURCE_GROUP%
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SP3 connections
-CALL :CREATE_HUB_SPOKE_CONNECTION ^
-    %SP3_NAME% ^
-    %SP3_CIDR% ^
-    %SP3_TO_HUB_CIDR_LIST% ^
-    %SP3_GATEWAY_PIP_NAME% ^
-    %SP3_LOCACTION% ^
-    %SP3_RESOURCE_GROUP%
-
-GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
