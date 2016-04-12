@@ -223,7 +223,7 @@ IF "%ON_PREM_FLAG%" == "on_prem" (
 :: Parse public-ip json to get the line that contains an ip address.
 :: There is only one line that consists the ip address
 FOR /F "delims=" %%a in ('
-    CALL azure network public-ip show -g %SPK_RESOURCE_GROUP% -n %HUB_GATEWAY_PIP_NAME% --json ^| 
+    CALL azure network public-ip show -g %HUB_RESOURCE_GROUP% -n %HUB_GATEWAY_PIP_NAME% --json ^| 
     FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
     ') DO @SET JSON_IP_ADDRESS_LINE=%%a
 
@@ -300,7 +300,6 @@ SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS=%9
 :: Set up the azure resource names using recommended conventions
 SET APP_SUBSCRIPTION=%SUBSCRIPTION%
 SET APP_VNET_NAME=%APP_NAME%-vnet
-SET APP_PUBLIC_IP_NAME=%APP_NAME%-pip
 SET APP_INTERNAL_SUBNET_NAME=%APP_NAME%-internal-subnet
 
 :: Prepare Azure CLI
@@ -350,7 +349,7 @@ CALL :CallCLI azure network public-ip create ^
 CALL :CallCLI azure network vpn-gateway create ^
   --name %APP_GATEWAY_NAME% ^
   --type RouteBased ^
-  --public-ip-name %APP_PUBLIC_IP_NAME% ^
+  --public-ip-name %APP_GATEWAY_PIP_NAME% ^
   --vnet-name %APP_VNET_NAME% ^
   --location %APP_LOCATION% ^
   --resource-group %APP_RESOURCE_GROUP% ^
