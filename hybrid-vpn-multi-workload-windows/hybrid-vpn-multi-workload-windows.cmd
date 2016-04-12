@@ -1,80 +1,88 @@
 ::@ECHO OFF
 SETLOCAL
 
-IF "%~2"=="" (
-    ECHO Usage: %0 subscription-id ipsec-shared-key
-    ECHO   For example: %0 13ed86531-1602-4c51-a4d4-afcfc38ddad3 mytestabc123
+IF "%~3"=="" (
+    ECHO Usage: %0 subscription-id ipsec-shared-key resource-group-prefix
+    ECHO   For example: %0 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsecretkey123 mytest123
     EXIT /B
     )
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Explicitly set the subscription to avoid confusion as to which subscription
 :: is active/default
 SET SUBSCRIPTION=%1
 SET IPSEC_SHARED_KEY=%2
-SET ENVIRONMENT=dev
-
+SET PREFIX=%3
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Modify data about your hub-and-spoke topology here. 
 :: Only modify the values, do not modify the variable names.
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SET prefix=my
-:::::::::::::::::::::::::::::::::::::::
-:: on-prem network ONP data
-SET ONP_NAME=%prefix%-onp
+::
+:: on-prem network ONP data YOU MUST CHANGE!
 SET ONP_GATEWAY_PIP=131.107.36.3
 SET ONP_CIDR=192.268.0.0/24
+::
+:: hub vnet data
+SET HUB_CIDR=10.0.0.0/16
+SET HUB_INTERNAL_CIDR=10.0.0.0/17
+SET HUB_GATEWAY_CIDR=10.0.255.224/27
+::
+:: spoke vnet SP1 data
+SET SP1_CIDR=10.1.0.0/16
+SET SP1_INTERNAL_CIDR=10.1.0.0/17
+SET SP1_GATEWAY_CIDR=10.1.255.224/27
+SET SP1_ILB=10.1.127.254
+::
+:: spoke vnet SP2 data
+SET SP2_CIDR=10.2.0.0/16
+SET SP2_INTERNAL_CIDR=10.2.0.0/17
+SET SP2_GATEWAY_CIDR=10.2.255.224/27
+SET SP2_ILB=10.2.127.254
+::
+:: spoke vnet SP3 data
+SET SP3_CIDR=10.3.0.0/16
+SET SP3_INTERNAL_CIDR=10.3.0.0/17
+SET SP3_GATEWAY_CIDR=10.3.255.224/27
+SET SP3_ILB=10.3.127.254
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Global variables
+::
+SET ENVIRONMENT=dev
+:::::::::::::::::::::::::::::::::::::::
+:: on-prem network ONP data
+SET ONP_NAME=%PREFIX%-onp
 SET ONP_LOCACTION =%HUB_LOCATION%
 SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROPU%
 :::::::::::::::::::::::::::::::::::::::
 :: hub vnet data
-SET HUB_NAME=%prefix%-hub
-SET HUB_CIDR=10.0.0.0/16
-SET HUB_INTERNAL_CIDR=10.0.0.0/17
-SET HUB_GATEWAY_CIDR=10.0.255.224/27
+SET HUB_NAME=%PREFIX%-hub
 SET HUB_GATEWAY_NAME=%HUB_NAME%-vgw
 SET HUB_GATEWAY_PIP_NAME=%HUB_NAME%-pip
 SET HUB_LOCATION=eastus
 SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
 :::::::::::::::::::::::::::::::::::::::
 :: spoke vnet SP1 data
-SET SP1_NAME=%prefix%-sp1
-SET SP1_CIDR=10.1.0.0/16
-SET SP1_INTERNAL_CIDR=10.1.0.0/17
-SET SP1_GATEWAY_CIDR=10.1.255.224/27
+SET SP1_NAME=%PREFIX%-sp1
 SET SP1_GATEWAY_NAME=%SP1_NAME%-vgw
-SET SP1_GATEWAY_PIP_NAME=%SP1_NAME%-vgw
+SET SP1_GATEWAY_PIP_NAME=%SP1_NAME%-pip
 SET SP1_LOCATION=eastus
 SET SP1_RESOURCE_GROUP=%SP1_NAME%-%ENVIRONMENT%-rg
-SET SP1_ILB=10.1.127.254
 :::::::::::::::::::::::::::::::::::::::
 :: spoke vnet SP2 data
-SET SP2_NAME=%prefix%-sp2
-SET SP2_CIDR=10.2.0.0/16
-SET SP2_INTERNAL_CIDR=10.2.0.0/17
-SET SP2_GATEWAY_CIDR=10.2.255.224/27
+SET SP2_NAME=%PREFIX%-sp2
 SET SP2_GATEWAY_NAME=%SP2_NAME%-vgw
-SET SP2_GATEWAY_PIP_NAME=%SP2_NAME%-vgw
+SET SP2_GATEWAY_PIP_NAME=%SP2_NAME%-pip
 SET SP2_LOCATION=eastus
 SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
-SET SP2_ILB=10.2.127.254
 :::::::::::::::::::::::::::::::::::::::
 :: spoke vnet SP3 data
-SET SP3_NAME=%prefix%-sp3
-SET SP3_CIDR=10.3.0.0/16
-SET SP3_INTERNAL_CIDR=10.3.0.0/17
-SET SP3_GATEWAY_CIDR=10.3.255.224/27
+SET SP3_NAME=%PREFIX%-sp3
 SET SP3_GATEWAY_NAME=%SP3_NAME%-vgw
-SET SP3_GATEWAY_PIP_NAME=%SP3_NAME%-vgw
+SET SP3_GATEWAY_PIP_NAME=%SP3_NAME%-pip
 SET SP3_LOCATION=eastus
 SET SP3_RESOURCE_GROUP=%SP3_NAME%-%ENVIRONMENT%-rg
-SET SP3_ILB=10.3.127.254
 :::::::::::::::::::::::::::::::::::::::
-:: Set gateway address space CIDR list
+:: gateway address space CIDR list
 :: You need enclose the CIDR list in quotes because they are comma seperated, 
 :: If without the quotes, the script subroutine will treat each CIDR as a seperate variable.
-::
-:: All the lists need to be modified if you add or remove a spoke from the topology.
 ::
 SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
 
@@ -157,7 +165,7 @@ IF "%ADD_ADDITIONAL_SPOKE_4%" == "TRUE" (
   :: 1. Change the variable value for ADD_ADDITIONAL_SPOKE_4 from FALSE to TRUE
 
   :: 2. Put your data about SP4 here:
-  SET SP4_NAME=%prefix%-sp4
+  SET SP4_NAME=%PREFIX%-sp4
   SET SP4_CIDR=10.4.0.0/16
   SET SP4_INTERNAL_CIDR=10.4.0.0/17
   SET SP4_GATEWAY_CIDR=10.4.255.224/27
@@ -316,7 +324,7 @@ SET SPK_CIDR=%2
 SET SPK_TO_HUB_CIDR_LIST=%3
 SET SPK_TO_HUB_CIDR_LIST=%SPK_TO_HUB_CIDR_LIST:~1,-1%
 SET SPK_GATEWAY_PIP_NAME=%4
-SET SPK_LOCACTION=%5
+SET SPK_LOCATION=%5
 SET SPK_RESOURCE_GROUP=%6
 SET ON_PREM_FLAG=%7
 
@@ -365,7 +373,7 @@ CALL :CallCLI azure network local-gateway create ^
   --name %HUB_TO_SPK_LGW% ^
   --address-space %SPK_CIDR% ^
   --ip-address %SPK_GATEWAY_PIP% ^
-  --location %SPK_LOCACTION% ^
+  --location %SPK_LOCATION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
@@ -374,7 +382,7 @@ CALL :CallCLI azure network local-gateway create ^
   --name %SPK_TO_HUB_LGW% ^
   --address-space %SPK_TO_HUB_CIDR_LIST% ^
   --ip-address %HUB_GATEWAY_PIP% ^
-  --location %HUB_LOCACTION% ^
+  --location %HUB_LOCATION% ^
   --resource-group %HUB_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
@@ -390,7 +398,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
   --type IPsec ^
   --shared-key %IPSEC_SHARED_KEY% ^
-  --location %HUB_LOCACTION% ^
+  --location %HUB_LOCATION% ^
   --resource-group %HUB_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
@@ -407,7 +415,7 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   --lnet-gateway2-group %HUB_RESOURCE_GROUP% ^
   --type IPsec ^
   --shared-key %IPSEC_SHARED_KEY% ^
-  --location %SPK_LOCACTION% ^
+  --location %SPK_LOCATION% ^
   --resource-group %HUB_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 )
@@ -452,7 +460,7 @@ CALL :CallCLI azure group create ^
 :: Create the VNet
 CALL :CallCLI azure network vnet create ^
   --name %APP_VNET_NAME% ^
-  --address-prefixes %APP_CIDR% ^
+  --address-PREFIXes %APP_CIDR% ^
   --location %APP_LOCATION% ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
@@ -460,7 +468,7 @@ CALL :CallCLI azure network vnet create ^
 :: Create the GatewaySubnet
 CALL :CallCLI azure network vnet subnet create ^
   --name GatewaySubnet ^
-  --address-prefix %APP_GATEWAY_CIDR% ^
+  --address-PREFIX %APP_GATEWAY_CIDR% ^
   --vnet-name %APP_VNET_NAME% ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
@@ -468,7 +476,7 @@ CALL :CallCLI azure network vnet subnet create ^
 :: Create the internal subnet
 CALL :CallCLI azure network vnet subnet create ^
   --name %APP_INTERNAL_SUBNET_NAME% ^
-  --address-prefix %APP_INTERNAL_CIDR% ^
+  --address-PREFIX %APP_INTERNAL_CIDR% ^
   --vnet-name %APP_VNET_NAME% ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
@@ -563,7 +571,7 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %ONP_CIDR% ^
     %ONP_TO_HUB_CIDR_LIST% ^
     %ONP_GATEWAY_PIP% ^
-    %ONP_LOCACTION% ^
+    %ONP_LOCATION% ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
 
@@ -574,7 +582,7 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP1_CIDR% ^
     %SP1_TO_HUB_CIDR_LIST% ^
     %SP1_GATEWAY_PIP_NAME% ^
-    %SP1_LOCACTION% ^
+    %SP1_LOCATION% ^
     %SP1_RESOURCE_GROUP%
 
 :::::::::::::::::::::::::::::::::::::::
@@ -584,7 +592,7 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP2_CIDR% ^
     %SP2_TO_HUB_CIDR_LIST% ^
     %SP2_GATEWAY_PIP_NAME% ^
-    %SP2_LOCACTION% ^
+    %SP2_LOCATION% ^
     %SP2_RESOURCE_GROUP%
 
 :::::::::::::::::::::::::::::::::::::::
@@ -594,7 +602,7 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP3_CIDR% ^
     %SP3_TO_HUB_CIDR_LIST% ^
     %SP3_GATEWAY_PIP_NAME% ^
-    %SP3_LOCACTION% ^
+    %SP3_LOCATION% ^
     %SP3_RESOURCE_GROUP%
 
 GOTO :eof
