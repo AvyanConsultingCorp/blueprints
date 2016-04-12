@@ -11,7 +11,7 @@
 
 ############################################################################
 # User defined functions for single VM script                              #
-# errhandle : handles errors via trap if any exception happens             # 
+# errhandle : handles errors via trap if any exception happens             #
 # in the cli execution or if the user interrupts with CTRL+C               #
 # allowing for fast interruption                                           #
 ############################################################################
@@ -22,7 +22,7 @@
 trap 'errhandle $LINENO $?' SIGINT ERR
 
 errhandle()
-{ 
+{
   echo "Error or Interruption at line ${1} exit code ${2} "
   exit ${2}
 }
@@ -53,9 +53,9 @@ fi
 SUBSCRIPTION=$1
 PUBLICKEYFILE=$2
 
-# ScriptVars 
+# ScriptVars
 LOCATION=eastus2
-APP_NAME=app200
+APP_NAME=app201
 ENVIRONMENT=dev
 USERNAME=testuser
 VM_NAME="${APP_NAME}-vm1"
@@ -106,9 +106,9 @@ azure network vnet subnet create --vnet-name $VNET_NAME \
 --address-prefix  "172.17.0.0/24" --name $SUBNET_NAME --network-security-group-name $NSG_NAME \
 --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION
 
- 
+
 #Create the public IP address (dynamic)
-azure network public-ip create --name $IP_NAME $POSTFIX
+azure network public-ip create --name $IP_NAME --domain-name-label $VM_NAME $POSTFIX
 
 #Create the NIC
 azure network nic create --public-ip-name $IP_NAME --subnet-name $SUBNET_NAME \
@@ -128,7 +128,7 @@ azure vm create --name $VM_NAME --os-type Linux \
 --os-disk-vhd "${VM_NAME}-osdisk.vhd" --admin-username $USERNAME --ssh-publickey-file $PUBLICKEYFILE \
 --boot-diagnostics-storage-uri "https://${DIAGNOSTICS_STORAGE}.blob.core.windows.net/" $POSTFIX
 
- 
+
 #Attach a data disk
 azure vm disk attach-new -s $SUBSCRIPTION -g $RESOURCE_GROUP \
 --vm-name $VM_NAME --size-in-gb 128 --vhd-name data1.vhd \
@@ -138,4 +138,3 @@ azure vm disk attach-new -s $SUBSCRIPTION -g $RESOURCE_GROUP \
 azure network nsg rule create -s $SUBSCRIPTION -g $RESOURCE_GROUP \
 --nsg-name $NSG_NAME --direction Inbound --protocol Tcp \
 --destination-port-range 22  --source-port-range "*"  --priority 100 --access Allow SSHAllow
-
