@@ -1,20 +1,20 @@
-::@ECHO OFF
+@ECHO OFF
 SETLOCAL
 
 :: this script will setup a hub-spoke topology setup with one on-prem network, one hub, and three spokes.
 ::
 IF "%~5"=="" (
-    ECHO Usage: %0 subscription-id ipsec-shared-key resource-group-prefix on-prem-gateway-pip on-prem-address-prefix
-    ECHO   For example: %0 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsecretkey123 mytest123 11.22.33.44 192.168.0.0/24
+    ECHO Usage: %0 subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix resource-group-prefix 
+    ECHO   For example: %0 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24 mytest123
     EXIT /B
     )
 
 :: input variables from the command line
 SET SUBSCRIPTION=%1
-SET RESOURCE_PREFIX=%2
-SET ONP_GATEWAY_PIP=%3
-SET ONP_CIDR=%4
-SET IPSEC_SHARED_KEY=%5
+SET ONP_GATEWAY_PIP=%2
+SET ONP_CIDR=%3
+SET IPSEC_SHARED_KEY=%4
+SET RESOURCE_PREFIX=%5
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Modify data about your hub-and-spoke topology here. 
@@ -58,7 +58,7 @@ SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
 ::
 :: on-prem network ONP variables
 SET ONP_NAME=%RESOURCE_PREFIX%-onp
-SET ONP_LOCACTION =%HUB_LOCATION%
+SET ONP_LOCATION=%HUB_LOCATION%
 SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROUP%
 ::
 :: spoke vnet SP1 variables
@@ -179,6 +179,7 @@ GOTO :eof
 :: SUBROUTINE
 :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 :: input variable
 SET SPK_NAME=%1
 SET SPK_CIDR=%2
@@ -202,13 +203,15 @@ IF "%ON_PREM_FLAG%" == "on_prem" (
 ) ELSE (
     :: Parse public-ip json to get the line that contains an ip address.
     :: There is only one line that consists the ip address
+    :: Please ignore the message "The system cannot find the drive specified whe you run the script
     FOR /F "delims=" %%a in ('
     CALL azure network public-ip show -g %SPK_RESOURCE_GROUP% -n %SPK_GATEWAY_PIP_NAME% --json ^| 
     FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
     ') DO @SET JSON_IP_ADDRESS_LINE=%%a
 
     :: Remove the first 16 and last two charactors to get the ip address
-    SET SPK_GATEWAY_PIP=%JSON_IP_ADDRESS_LINE:~16,-2%
+    :: Note the use of ! instead of % since this is inside the IF statement
+    SET SPK_GATEWAY_PIP=!JSON_IP_ADDRESS_LINE:~16,-2!
 )
 
 :: Retrieve HUB_GATEWAY_PIP
@@ -286,18 +289,18 @@ SET APP_GATEWAY_CIDR=%4
 SET APP_GATEWAY_PIP_NAME=%5
 SET APP_LOCATION=%6
 SET APP_RESOURCE_GROUP=%7
-SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS=%8
+SET APP_ILB_FRONTEND_IP_ADDRESS=%8
 
 :: Set up the azure resource names using recommended conventions
 SET APP_SUBSCRIPTION=%SUBSCRIPTION%
 SET APP_VNET_NAME=%APP_NAME%-vnet
-SET APP_GATEWAY_NAME==%APP_NAME%-vgw
+SET APP_GATEWAY_NAME=%APP_NAME%-vgw
 SET APP_INTERNAL_SUBNET_NAME=%APP_NAME%-internal-subnet
 
 :: Prepare Azure CLI
 CALL azure config mode arm
 
-:: Create the enclosing resource group
+:: Create the resource group
 CALL :CallCLI azure group create ^
   --name %APP_RESOURCE_GROUP% ^
   --location %APP_LOCATION% ^
@@ -327,6 +330,52 @@ CALL :CallCLI azure network vnet subnet create ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
 
+:::::::::::::::::::::::::::::::::::::::
+:: Create ILB resources
+SET APP_ILB_NAME=%APP_NAME%-ilb
+SET APP_ILB_FRONTEND_IP_NAME=%APP_NAME%-ilb-fip
+SET APP_ILB_POOL_NAME=%APP_NAME%-ilb-pool
+SET APP_ILB_PROBE_PROTOCOL=tcp
+SET APP_ILB_PROBE_INTERVAL=300
+SET APP_ILB_PROBE_COUNT=4
+SET APP_ILB_PROBE_NAME=%APP_ILB_NAME%-probe
+
+IF NOT "%APP_ILB_FRONTEND_IP_ADDRESS%" == "" (
+  CALL :CallCLI azure network lb create ^
+  --name %APP_ILB_NAME% ^
+  --location %APP_LOCATION% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+  :: Create a frontend IP address for the internal load balancer
+  CALL :CallCLI azure network lb frontend-ip create ^
+  --name %APP_ILB_FRONTEND_IP_NAME% ^
+  --private-ip-address %APP_ILB_FRONTEND_IP_ADDRESS% ^
+  --lb-name %APP_ILB_NAME% ^
+  --subnet-name %APP_INTERNAL_SUBNET_NAME% ^
+  --subnet-vnet-name %APP_VNET_NAME% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+  :: Create the backend address pool for the internal load balancer
+  CALL :CallCLI azure network lb address-pool create ^
+  --lb-name %APP_ILB_NAME% ^
+  --name %APP_ILB_POOL_NAME% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+
+  :: Create a health probe for the internal load balancer
+  CALL :CallCLI azure network lb probe create ^
+  --name %APP_ILB_PROBE_NAME% ^
+  --protocol %APP_ILB_PROBE_PROTOCOL% ^
+  --interval %APP_ILB_PROBE_INTERVAL% ^
+  --count %APP_ILB_PROBE_COUNT% ^
+  --lb-name %APP_ILB_NAME% ^
+  --resource-group %APP_RESOURCE_GROUP% ^
+  --subscription %APP_SUBSCRIPTION%
+)
+
+:::::::::::::::::::::::::::::::::::::::
 :: Create the public IP address for VPN Gateway
 :: Note that the Azure VPN Gateway only supports
 :: dynamic IP addresses
@@ -347,70 +396,6 @@ CALL :CallCLI azure network vpn-gateway create ^
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
 
-:::::::::::::::::::::::::::::::::::::::
-:: Create ILB resources
-SET CREATE_ILB=FALSE
-IF "%CREATE_ILB%" == "TRUE" (
-
-IF "%INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS%"=="" (
-    EXIT /B
-    )
-
-SET INTERNAL_LOAD_BALANCER_NAME=%APP_NAME%-ilb
-SET INTERNAL_LOAD_BALANCER_FRONTEND_IP_NAME=%APP_NAME%-ilb-fip
-SET INTERNAL_LOAD_BALANCER_POOL_NAME=%APP_NAME%-ilb-pool
-SET INTERNAL_LOAD_BALANCER_PROBE_PROTOCOL=tcp
-SET INTERNAL_LOAD_BALANCER_PROBE_INTERVAL=300
-SET INTERNAL_LOAD_BALANCER_PROBE_COUNT=4
-SET INTERNAL_LOAD_BALANCER_PROBE_NAME=%INTERNAL_LOAD_BALANCER_NAME%-probe
-
-CALL :CallCLI azure network lb create ^
-  --name %APP_INTERNAL_LOAD_BALANCER_NAME% ^
-  --location %APP_LOCATION% ^
-  --resource-group %APP_RESOURCE_GROUP% ^
-  --subscription %APP_SUBSCRIPTION%
-
-:: Create a frontend IP address for the internal load balancer
-CALL :CallCLI azure network lb frontend-ip create ^
-  --name %INTERNAL_LOAD_BALANCER_FRONTEND_IP_NAME% ^
-  --private-ip-address %INTERNAL_LOAD_BALANCER_FRONTEND_IP_ADDRESS% ^
-  --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
-  --subnet-name %INTERNAL_SUBNET_NAME% ^
-  --subnet-vnet-name %APP_VNET_NAME% ^
-  --resource-group %APP_RESOURCE_GROUP% ^
-  --subscription %APP_SUBSCRIPTION%
-
-:: Create the backend address pool for the internal load balancer
-CALL :CallCLI azure network lb address-pool create ^
-  --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
-  --name %INTERNAL_LOAD_BALANCER_POOL_NAME% ^
-  --resource-group %APP_RESOURCE_GROUP% ^
-  --subscription %APP_SUBSCRIPTION%
-
-:: Create a health probe for the internal load balancer
-CALL :CallCLI azure network lb probe create ^
-  --name %INTERNAL_LOAD_BALANCER_PROBE_NAME% ^
-  --protocol %INTERNAL_LOAD_BALANCER_PROBE_PROTOCOL% ^
-  --interval %INTERNAL_LOAD_BALANCER_PROBE_INTERVAL% ^
-  --count %INTERNAL_LOAD_BALANCER_PROBE_COUNT% ^
-  --lb-name %INTERNAL_LOAD_BALANCER_NAME% ^
-  --resource-group %APP_RESOURCE_GROUP% ^
-  --subscription %APP_SUBSCRIPTION%
-
-:: This will show the shared key for the VPN connection.  
-:: We won't bother with the error checking.
-CALL azure network vpn-connection shared-key show ^
-  --name %VPN_CONNECTION_NAME% ^
-  --resource-group %APP_RESOURCE_GROUP% ^
-  --subscription %APP_SUBSCRIPTION%
-)
-
-GOTO :eof
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUBROUTINE
-:CONNECT_ONP_AND_SP_1_2_3_TO_AND_FROM_HUB
 GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -433,7 +418,6 @@ GOTO :eof
 :ShowError
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SETLOCAL EnableDelayedExpansion
-
 :: Print the message
 ECHO %~1
 SHIFT
@@ -451,4 +435,5 @@ GOTO Loop
 :Continue
 ECHO %CLICommand%
 GOTO :eof
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
