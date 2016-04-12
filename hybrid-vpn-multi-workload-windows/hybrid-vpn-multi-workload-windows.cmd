@@ -1,83 +1,78 @@
 ::@ECHO OFF
 SETLOCAL
 
-IF "%~3"=="" (
-    ECHO Usage: %0 subscription-id ipsec-shared-key resource-group-prefix
-    ECHO   For example: %0 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsecretkey123 mytest123
+IF "%~5"=="" (
+    ECHO Usage: %0 subscription-id ipsec-shared-key resource-group-prefix on-prem-gateway-pip on-prem-address-prefix
+    ECHO   For example: %0 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsecretkey123 mytest123 11.22.33.44 192.168.0.0/24
     EXIT /B
     )
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Explicitly set the subscription to avoid confusion as to which subscription
-:: is active/default
+
 SET SUBSCRIPTION=%1
 SET IPSEC_SHARED_KEY=%2
-SET PREFIX=%3
+SET RESOURCE_PREFIX=%3
+SET ONP_GATEWAY_PIP=%4
+SET ONP_CIDR=%5
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Modify data about your hub-and-spoke topology here. 
 :: Only modify the values, do not modify the variable names.
 ::
-:: on-prem network ONP data YOU MUST CHANGE!
-SET ONP_GATEWAY_PIP=131.107.36.3
-SET ONP_CIDR=192.268.0.0/24
-::
+SET ENVIRONMENT=dev
 :: hub vnet data
 SET HUB_CIDR=10.0.0.0/16
 SET HUB_INTERNAL_CIDR=10.0.0.0/17
 SET HUB_GATEWAY_CIDR=10.0.255.224/27
+SET HUB_LOCATION=eastus
 ::
 :: spoke vnet SP1 data
 SET SP1_CIDR=10.1.0.0/16
 SET SP1_INTERNAL_CIDR=10.1.0.0/17
 SET SP1_GATEWAY_CIDR=10.1.255.224/27
 SET SP1_ILB=10.1.127.254
+SET SP1_LOCATION=eastus
 ::
 :: spoke vnet SP2 data
 SET SP2_CIDR=10.2.0.0/16
 SET SP2_INTERNAL_CIDR=10.2.0.0/17
 SET SP2_GATEWAY_CIDR=10.2.255.224/27
 SET SP2_ILB=10.2.127.254
+SET SP2_LOCATION=eastus
 ::
 :: spoke vnet SP3 data
 SET SP3_CIDR=10.3.0.0/16
 SET SP3_INTERNAL_CIDR=10.3.0.0/17
 SET SP3_GATEWAY_CIDR=10.3.255.224/27
 SET SP3_ILB=10.3.127.254
+SET SP3_LOCATION=eastus
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Global variables
 ::
-SET ENVIRONMENT=dev
-:::::::::::::::::::::::::::::::::::::::
-:: on-prem network ONP data
-SET ONP_NAME=%PREFIX%-onp
-SET ONP_LOCACTION =%HUB_LOCATION%
-SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROPU%
-:::::::::::::::::::::::::::::::::::::::
-:: hub vnet data
-SET HUB_NAME=%PREFIX%-hub
+:: hub vnet variables
+SET HUB_NAME=%RESOURCE_PREFIX%-hub
 SET HUB_GATEWAY_NAME=%HUB_NAME%-vgw
 SET HUB_GATEWAY_PIP_NAME=%HUB_NAME%-pip
-SET HUB_LOCATION=eastus
 SET HUB_RESOURCE_GROUP=%HUB_NAME%-%ENVIRONMENT%-rg
+::
+:: on-prem network ONP variables
+SET ONP_NAME=%RESOURCE_PREFIX%-onp
+SET ONP_LOCACTION =%HUB_LOCATION%
+SET ONP_RESOURCE_GROUP=%HUB_RESOURCE_GROUP%
 :::::::::::::::::::::::::::::::::::::::
-:: spoke vnet SP1 data
-SET SP1_NAME=%PREFIX%-sp1
+:: spoke vnet SP1 variables
+SET SP1_NAME=%RESOURCE_PREFIX%-sp1
 SET SP1_GATEWAY_NAME=%SP1_NAME%-vgw
 SET SP1_GATEWAY_PIP_NAME=%SP1_NAME%-pip
-SET SP1_LOCATION=eastus
 SET SP1_RESOURCE_GROUP=%SP1_NAME%-%ENVIRONMENT%-rg
 :::::::::::::::::::::::::::::::::::::::
-:: spoke vnet SP2 data
-SET SP2_NAME=%PREFIX%-sp2
+:: spoke vnet SP2 variables
+SET SP2_NAME=%RESOURCE_PREFIX%-sp2
 SET SP2_GATEWAY_NAME=%SP2_NAME%-vgw
 SET SP2_GATEWAY_PIP_NAME=%SP2_NAME%-pip
-SET SP2_LOCATION=eastus
 SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
 :::::::::::::::::::::::::::::::::::::::
-:: spoke vnet SP3 data
-SET SP3_NAME=%PREFIX%-sp3
+:: spoke vnet SP3 variables
+SET SP3_NAME=%RESOURCE_PREFIX%-sp3
 SET SP3_GATEWAY_NAME=%SP3_NAME%-vgw
 SET SP3_GATEWAY_PIP_NAME=%SP3_NAME%-pip
-SET SP3_LOCATION=eastus
 SET SP3_RESOURCE_GROUP=%SP3_NAME%-%ENVIRONMENT%-rg
 :::::::::::::::::::::::::::::::::::::::
 :: gateway address space CIDR list
