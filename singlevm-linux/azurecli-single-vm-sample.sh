@@ -55,7 +55,7 @@ PUBLICKEYFILE=$2
 
 # ScriptVars
 LOCATION=eastus2
-APP_NAME=app201
+APP_NAME=app200
 ENVIRONMENT=dev
 USERNAME=testuser
 VM_NAME="${APP_NAME}-vm1"
@@ -133,6 +133,11 @@ azure vm create --name $VM_NAME --os-type Linux \
 azure vm disk attach-new -s $SUBSCRIPTION -g $RESOURCE_GROUP \
 --vm-name $VM_NAME --size-in-gb 128 --vhd-name data1.vhd \
 --storage-account-name $VHD_STORAGE
+
+#Install patching extension
+PATCH_CONFIG='{"rebootAfterPatch":"RebootIfNeed","startTime":"3:00","dayOfWeek":"Sunday","category":"ImportantAndRecommended"}'
+azure vm extension set --name OSPatchingForLinux --publisher-name Microsoft.OSTCExtensions --public-config \
+  $PATCH_CONFIG --vm-name $VM_NAME --version 2.0 --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION
 
 #Allow SSH
 azure network nsg rule create -s $SUBSCRIPTION -g $RESOURCE_GROUP \
