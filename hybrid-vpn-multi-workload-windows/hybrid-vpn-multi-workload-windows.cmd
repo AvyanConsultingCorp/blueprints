@@ -155,6 +155,11 @@ GOTO :eof
 :: SUBROUTINE
 :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create both local gateways SPK_TO_HUB_LGW and HUB_TO_SPK_LGW
+:: and both vpn connections HUB_TO_SPK_VPN-CONNECTION and SPK_TO_HUB_VPN-CONNECTION
+:: in SPK_RESOURCE_GROUP so that the spoke resource group is independant of the 
+:: hub resource group and spoke resource group can be deleted/modified without touch the 
+:: hub resource group
 
 :: input variable
 SET SPK_NAME=%1
@@ -216,8 +221,8 @@ CALL :CallCLI azure network local-gateway create ^
   --name %SPK_TO_HUB_LGW% ^
   --address-space %SPK_TO_HUB_CIDR_LIST% ^
   --ip-address %HUB_GATEWAY_PIP% ^
-  --location %HUB_LOCATION% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
+  --location %SPK_LOCATION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
 :: Create site-to-site vpn connection HUB_TO_SPK_VPN-CONNECTION
@@ -229,7 +234,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
   --type IPsec ^
   --shared-key %IPSEC_SHARED_KEY% ^
-  --location %HUB_LOCATION% ^
+  --location %SPK_LOCATION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
