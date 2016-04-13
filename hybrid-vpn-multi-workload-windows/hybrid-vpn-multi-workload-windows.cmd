@@ -245,7 +245,7 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   --vnet-gateway1 %SPK_GATEWAY_NAME% ^
   --vnet-gateway1-group %SPK_RESOURCE_GROUP% ^
   --lnet-gateway2 %SPK_TO_HUB_LGW% ^
-  --lnet-gateway2-group %HUB_RESOURCE_GROUP% ^
+  --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
   --type IPsec ^
   --shared-key %IPSEC_SHARED_KEY% ^
   --location %SPK_LOCATION% ^
