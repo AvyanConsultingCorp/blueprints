@@ -1,5 +1,5 @@
 @ECHO OFF
-SETLOCAL
+SETLOCAL EnableDelayedExpansion
 
 :: this script will setup a hub-spoke topology setup with one on-prem network, one hub, and three spokes.
 ::
