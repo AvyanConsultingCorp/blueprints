@@ -267,7 +267,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --type IPsec ^
   --shared-key %IPSEC_SHARED_KEY% ^
   --location %HUB_LOCATION% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
 :: Create site-to-site vpn connections SPK_TO_HUB_VPN-CONNECTION
@@ -285,7 +285,7 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   --type IPsec ^
   --shared-key %IPSEC_SHARED_KEY% ^
   --location %SPK_LOCATION% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 )
 
