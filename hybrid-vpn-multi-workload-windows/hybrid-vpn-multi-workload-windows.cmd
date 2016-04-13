@@ -271,7 +271,14 @@ SET APP_ILB_FRONTEND_IP_ADDRESS=%9
 :: Set up the azure resource names using recommended conventions
 SET APP_SUBSCRIPTION=%SUBSCRIPTION%
 SET APP_VNET_NAME=%APP_NAME%-vnet
-SET APP_INTERNAL_SUBNET_NAME=%APP_NAME%-internal-subnet
+
+IF "%APP_ILB_FRONTEND_IP_ADDRESS%" == "" (
+    ::hub vnet
+    SET APP_INTERNAL_SUBNET_NAME=%APP_NAME%-security-subnet
+) ELSE (
+    ::spoke vnet
+    SET APP_INTERNAL_SUBNET_NAME=%APP_NAME%-web-subnet
+)
 
 :: Prepare Azure CLI
 CALL azure config mode arm
