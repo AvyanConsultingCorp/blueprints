@@ -239,7 +239,7 @@ FOR /F "delims=" %%a in ('
 :: Remove the first 16 and last two charactors to get the ip address
 SET HUB_GATEWAY_PIP=%JSON_IP_ADDRESS_LINE:~16,-2%
 
-:: Create HUB_TO_SPK_LGW vpn local gateways
+:: Create HUB_TO_SPK_LGW vpn local gateway
 CALL :CallCLI azure network local-gateway create ^
   --name %HUB_TO_SPK_LGW% ^
   --address-space %SPK_CIDR% ^
@@ -248,7 +248,7 @@ CALL :CallCLI azure network local-gateway create ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
-:: Create SPK_TO_HUB_LGW vpn local gateways
+:: Create SPK_TO_HUB_LGW vpn local gateway
 CALL :CallCLI azure network local-gateway create ^
   --name %SPK_TO_HUB_LGW% ^
   --address-space %SPK_TO_HUB_CIDR_LIST% ^
@@ -257,7 +257,7 @@ CALL :CallCLI azure network local-gateway create ^
   --resource-group %HUB_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
-:: Create site-to-site vpn connections HUB_TO_SPK_VPN-CONNECTION
+:: Create site-to-site vpn connection HUB_TO_SPK_VPN-CONNECTION
 CALL :CallCLI azure network vpn-connection create ^
   --name %HUB_TO_SPK_VPN-CONNECTION% ^
   --vnet-gateway1 %HUB_GATEWAY_NAME% ^
@@ -270,11 +270,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
-:: Create site-to-site vpn connections SPK_TO_HUB_VPN-CONNECTION
-:: 
-:: You do not create on-prem to hub connection in azure. 
-:: Instead, you need to go to on premise network
-:: to route the traffic to the hub gateway pip.
+:: Create site-to-site vpn connection SPK_TO_HUB_VPN-CONNECTION
 IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   CALL :CallCLI azure network vpn-connection create ^
   --name %SPK_TO_HUB_VPN-CONNECTION% ^
@@ -288,6 +284,9 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 )
+:: ELSE IF "%ON_PREM_FLAG%" == "on_prem", you do not create on-prem to hub 
+:: connection in azure. Instead, you need to go to on premise network
+:: to route the traffic to the hub gateway pip.
 
 GOTO :eof
 
