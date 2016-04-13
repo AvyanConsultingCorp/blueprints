@@ -41,13 +41,6 @@ SET SP2_INTERNAL_CIDR=10.2.0.0/17
 SET SP2_GATEWAY_CIDR=10.2.255.224/27
 SET SP2_ILB=10.2.127.254
 SET SP2_LOCATION=eastus
-::
-:: spoke vnet SP3 data
-SET SP3_CIDR=10.3.0.0/16
-SET SP3_INTERNAL_CIDR=10.3.0.0/17
-SET SP3_GATEWAY_CIDR=10.3.255.224/27
-SET SP3_ILB=10.3.127.254
-SET SP3_LOCATION=eastus
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Global variables
 ::
@@ -75,23 +68,15 @@ SET SP2_GATEWAY_NAME=%SP2_NAME%-vgw
 SET SP2_GATEWAY_PIP_NAME=%SP2_NAME%-pip
 SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
 ::
-:: spoke vnet SP3 variables
-SET SP3_NAME=%RESOURCE_PREFIX%-sp3
-SET SP3_GATEWAY_NAME=%SP3_NAME%-vgw
-SET SP3_GATEWAY_PIP_NAME=%SP3_NAME%-pip
-SET SP3_RESOURCE_GROUP=%SP3_NAME%-%ENVIRONMENT%-rg
-::
 :: gateway address space CIDR list
 :: You need enclose the CIDR list in quotes because they are comma seperated, 
 :: If without the quotes, the script subroutine will treat each CIDR as a seperate variable.
 ::
-SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
+SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
 
-SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP3_CIDR%"
+SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%"
 
-SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP3_CIDR%"
-
-SET SP3_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
+SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%"
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: this is for initial hub-spoke topology setup with 
@@ -132,18 +117,6 @@ CALL :CREATE_VNET ^
     %SP2_RESOURCE_GROUP% ^
     %SP2_ILB%
 
-:: Create spoke vnet SP3
-CALL :CREATE_VNET ^
-    %SP3_NAME% ^
-    %SP3_CIDR% ^
-    %SP3_INTERNAL_CIDR% ^
-    %SP3_GATEWAY_CIDR% ^
-    %SP3_GATEWAY_NAME% ^
-    %SP3_GATEWAY_PIP_NAME% ^
-    %SP3_LOCATION% ^
-    %SP3_RESOURCE_GROUP% ^
-    %SP3_ILB%
-
 :: Create ONP_TO_HUB_TO_ONP connections
 CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %ONP_NAME% ^
@@ -174,16 +147,6 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP2_GATEWAY_PIP_NAME% ^
     %SP2_LOCATION% ^
     %SP2_RESOURCE_GROUP%
-
-:: Create SP3_TO_HUB_TO_SP3 connections
-CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
-    %SP3_NAME% ^
-    %SP3_CIDR% ^
-    %SP3_TO_HUB_CIDR_LIST% ^
-    %SP3_GATEWAY_NAME% ^
-    %SP3_GATEWAY_PIP_NAME% ^
-    %SP3_LOCATION% ^
-    %SP3_RESOURCE_GROUP%
 
 GOTO :eof
 
