@@ -18,7 +18,7 @@ SET IPSEC_SHARED_KEY=%3
 SET ONP_GATEWAY_PIP=%4
 SET ONP_CIDR=%5
 
-CALL load-default-data.cmd
+CALL function.cmd :LOAD_DEFAULT_DATA
 
 CALL function.cmd :CREATE_DEFAULT_VNETS
 

@@ -21,8 +21,8 @@ SET ONP_GATEWAY_PIP=%4
 SET ONP_CIDR=%5
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: load data for default topology
-CALL load-default-data.cmd
+:: load data for default hub-spoke topology
+CALL function.cmd :LOAD_DEFAULT_DATA
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: delete spoke connection or resource group

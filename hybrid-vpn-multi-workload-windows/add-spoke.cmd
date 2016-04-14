@@ -30,11 +30,10 @@ SET SP_NEW_ILB=10.3.0.254
 SET SP_NEW_LOCATION=eastus
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: load data and subroutines
-CALL load-default-data.cmd
+:: load data for default hub-spoke topology
+CALL function.cmd :LOAD_DEFAULT_DATA
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 :: delete the existing default vpn connections
 CALL function.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
 
