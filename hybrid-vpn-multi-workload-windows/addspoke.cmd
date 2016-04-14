@@ -33,26 +33,11 @@ SET SP_NEW_LOCATION=eastus
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: load data and subroutines
 ::
-CALL load-data-default.cmd
-
-:: Subroutines in load-subroutine-base.cmd
-::   :CREATE_VNET
-::   :CREATE_HUB_SPOKE_CONNECTION
-::   :DELETE_HUB_SPOKE_CONNECTION
-::   :CallCLI
-::   :ShowError
-CALL load-subroutine-base.cmd
-
-:: Subroutines in load-subroutine-default.cmd
-::   :CREATE_DEFAULT_VNETS
-::   :CREATE_DEFAULT_VPN_CONNECTIONS
-::   :DELETE_DEFAULT_VPN_CONNECTIONS
-CALL load-subroutine-default.cmd
-
+CALL load-data.cmd
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: re-create default vpn connections
 
-CALL :DELETE_DEFAULT_VPN_CONNECTIONS
+CALL function.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
 
 :: Modify existing gateway address space CIDR list by adding
 :: ,%SP_NEW_CIDR% 
@@ -62,7 +47,7 @@ SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP_NEW_CIDR%"
 
 :: re-create default vpn connectins use
 :: updated CIDR list 
-CALL :CREATE_DEFAULT_VPN_CONNECTIONS
+CALL function.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: new spoke vnet variables
@@ -72,7 +57,7 @@ SET SP_NEW_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
 SET SP_NEW_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
 
 :: create new spoke vnet
-CALL :CREATE_VNET ^
+CALL function.cmd :CREATE_VNET ^
     %SP_NEW_NAME% ^
     %SP_NEW_CIDR% ^
     %SP_NEW_INTERNAL_CIDR% ^
@@ -84,7 +69,7 @@ CALL :CREATE_VNET ^
     %SP_NEW_ILB%
 
 :: connect new spoke vnet to the hub
-CALL :CREATE_HUB_SPOKE_CONNECTION ^
+CALL function.cmd :CREATE_HUB_SPOKE_CONNECTION ^
     %SP_NEW_NAME% ^
     %SP_NEW_CIDR% ^
     %SP_NEW_TO_HUB_CIDR_LIST% ^
