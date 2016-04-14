@@ -1,9 +1,8 @@
 :: add-spoke.cmd
+:: This script will add a new spoke to the existing default hub-spoke topology. 
 ::
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: This script will add new spoke the the default hub-spoke topology. 
 
 IF "%~5"=="" (
     ECHO Usage: %0 resource-group-prefix subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
@@ -32,21 +31,20 @@ SET SP_NEW_LOCATION=eastus
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: load data and subroutines
-::
 CALL load-data.cmd
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: re-create default vpn connections
 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:: delete the existing default vpn connections
 CALL function.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
 
 :: Modify existing gateway address space CIDR list by adding
-:: ,%SP_NEW_CIDR% 
+:: ,%SP_NEW_CIDR% at the end
 SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%,%SP_NEW_CIDR%"
 SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%,%SP_NEW_CIDR%"
 SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP_NEW_CIDR%"
 
-:: re-create default vpn connectins use
-:: updated CIDR list 
+:: re-create default vpn connections with modified CIDR
 CALL function.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -79,3 +77,4 @@ CALL function.cmd :CREATE_HUB_SPOKE_CONNECTION ^
     %SP_NEW_RESOURCE_GROUP%
 
 GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

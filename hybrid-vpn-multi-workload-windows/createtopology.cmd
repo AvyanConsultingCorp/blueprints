@@ -1,12 +1,10 @@
 :: createtopology.cmd
-:: create default hub-and-spoke topology
+:: create default hub-and-spoke topology with
+:: one on-prem network, one hub, and two spokes.
 ::
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 
-:: This script will create or modify a hub-spoke topology. 
-:: By default it will have one on-prem network, one hub, and two spokes.
-::
 IF "%~5"=="" (
     ECHO Usage: %0 resource-group-prefix subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
     ECHO   For example: %0 mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24
