@@ -1,14 +1,11 @@
-:: delete-spoke.cmd
-:: This script will delete the spoke that you added with add-spoke.cmd. 
+:: reset-default-topology.cmd
+:: This script will reset the topology to default 
 :: Steps that lead to this script:
 ::    step1: create-default-topology.cmd
-::    step2: add-spoke.cmd
-::    step3: delete-spoke.cmd
+::    step2: do something to change the topology connnections, but don't delete vent or vpn gateways
+::    step3: reset-default-topology.cmd
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
-
-SET DELETE_RESOURCE_GROUP=TRUE
-::SET DELETE_RESOURCE_GROUP=FALSE
 
 IF "%~5"=="" (
     ECHO Usage: %0 resource-group-prefix subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
@@ -30,23 +27,6 @@ SET ONP_CIDR=%5
 :: load data for default hub-spoke topology
 CALL function.cmd :LOAD_DEFAULT_DATA
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: delete hub-spoke connection or resource group
-
-SET SP_NEW_NAME=%RESOURCE_PREFIX%-mynewsp
-SET SP_NEW_RESOURCE_GROUP=%SP_NEW_NAME%-%ENVIRONMENT%-rg
-
-IF "%DELETE_RESOURCE_GROUP%" == "TRUE" (
-  CALL function.cmd :CallCLI azure group delete ^
-  --name %SP_NEW_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-  --quiet
-) ELSE (
-  :: delete vpn connections for the spoke
-  CALL function.cmd :DELETE_HUB_SPOKE_CONNECTION ^
-    %SP_NEW_NAME% ^
-    %SP_NEW_RESOURCE_GROUP%
-)
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: delete the existing default vpn connections

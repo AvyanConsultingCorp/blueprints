@@ -444,7 +444,7 @@ CALL :CallCLI azure network vpn-connection delete ^
   --name %HUB_TO_SPK_VPN-CONNECTION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION% ^
-  --quite
+  --quiet
 
 :: Delete SPK_TO_HUB_VPN-CONNECTION
 IF NOT "%ON_PREM_FLAG%" == "on_prem" (
@@ -452,7 +452,7 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   --name %SPK_TO_HUB_VPN-CONNECTION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION% ^
-  --quite
+  --quiet
 
 ::::::::::::::::::::::::::::::::::::::
 :: Delete local gateways
@@ -462,14 +462,14 @@ CALL :CallCLI azure network local-gateway delete ^
   --name %HUB_TO_SPK_LGW% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION% ^
-  --quite
+  --quiet
 
 :: Delete SPK_TO_HUB_LGW
 CALL :CallCLI azure network local-gateway delete ^
   --name %SPK_TO_HUB_LGW% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION% ^
-  --quite
+  --quiet
 
 GOTO :eof
 
