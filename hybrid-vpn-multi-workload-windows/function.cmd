@@ -314,7 +314,7 @@ GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: FUNCTION
-::CREATE_HUB_SPOKE_CONNECTION
+:CREATE_HUB_SPOKE_CONNECTION
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create both local gateways SPK_TO_HUB_LGW and HUB_TO_SPK_LGW
 :: and both vpn connections HUB_TO_SPK_VPN-CONNECTION and SPK_TO_HUB_VPN-CONNECTION
