@@ -1,4 +1,4 @@
-:: createtopology.cmd
+:: create-default-topology.cmd
 :: create default hub-and-spoke topology with
 :: one on-prem network, one hub, and two spokes.
 ::
@@ -18,7 +18,7 @@ SET IPSEC_SHARED_KEY=%3
 SET ONP_GATEWAY_PIP=%4
 SET ONP_CIDR=%5
 
-CALL load-data.cmd
+CALL load-default-data.cmd
 
 CALL function.cmd :CREATE_DEFAULT_VNETS
 
