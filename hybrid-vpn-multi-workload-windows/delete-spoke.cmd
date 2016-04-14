@@ -1,8 +1,14 @@
 :: deletespoke.cmd
-:: This script will delete the spoke that you added with addspoke.cmd.
-::
+:: This script will delete the spoke that you added with add-spoke.cmd. 
+:: Steps that lead to this script:
+::    step1: create-default-topology.cmd
+::    step2: add-spoke.cmd
+::    step3: delete-spoke.cmd
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
+
+SET DELETE_RESOURCE_GROUP=TRUE
+::SET DELETE_RESOURCE_GROUP=FALSE
 
 IF "%~5"=="" (
     ECHO Usage: %0 resource-group-prefix subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
@@ -25,13 +31,11 @@ SET ONP_CIDR=%5
 CALL function.cmd :LOAD_DEFAULT_DATA
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: delete spoke connection or resource group
+:: delete hub-spoke connection or resource group
 
 SET SP_NEW_NAME=%RESOURCE_PREFIX%-mynewsp
-SET SP_NEW_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
+SET SP_NEW_RESOURCE_GROUP=%SP_NEW_NAME%-%ENVIRONMENT%-rg
 
-:: if you want to delete the resource group, set the following to TRUE
-SET DELETE_RESOURCE_GROUP=FALSE
 IF "%DELETE_RESOURCE_GROUP%" == "TRUE" (
   CALL function.cmd :CallCLI azure group delete ^
   --name %SP_NEW_RESOURCE_GROUP% ^
@@ -48,15 +52,8 @@ IF "%DELETE_RESOURCE_GROUP%" == "TRUE" (
 :: delete the existing default vpn connections
 CALL function.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
 
-:: Modify existing gateway address space CIDR list by deleting
-:: ,%SP_NEW_CIDR% from the end
-SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
-SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%"
-SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%"
-
 :: re-create default vpn connections with modified CIDR
 CALL function.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
-
 
 GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

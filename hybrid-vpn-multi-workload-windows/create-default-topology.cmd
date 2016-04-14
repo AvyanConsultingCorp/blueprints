@@ -1,5 +1,5 @@
 :: create-default-topology.cmd
-:: create default hub-and-spoke topology with
+:: This script will create default hub-and-spoke topology with
 :: one on-prem network, one hub, and two spokes.
 ::
 @ECHO OFF

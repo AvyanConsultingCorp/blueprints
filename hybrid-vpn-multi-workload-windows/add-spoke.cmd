@@ -1,6 +1,9 @@
 :: add-spoke.cmd
 :: This script will add a new spoke to the existing default hub-spoke topology. 
-::
+:: Steps that lead to this script:
+:: step1: create-default-topology.cmd
+:: step2: add-spoke.cmd
+
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 
@@ -48,9 +51,9 @@ CALL function.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: new spoke vnet variables
-SET SP_NEW_GATEWAY_NAME=%SP2_NAME%-vgw
-SET SP_NEW_GATEWAY_PIP_NAME=%SP2_NAME%-pip
-SET SP_NEW_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
+SET SP_NEW_GATEWAY_NAME=%SP_NEW_NAME%-vgw
+SET SP_NEW_GATEWAY_PIP_NAME=%SP_NEW_NAME%-pip
+SET SP_NEW_RESOURCE_GROUP=%SP_NEW_NAME%-%ENVIRONMENT%-rg
 SET SP_NEW_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
 
 :: create new spoke vnet
