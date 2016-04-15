@@ -7,8 +7,8 @@
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 
-SET DELETE_RESOURCE_GROUP=TRUE
-::SET DELETE_RESOURCE_GROUP=FALSE
+SET DELETE_RESOURCE_GROUP=FALSE
+::SET DELETE_RESOURCE_GROUP=TRUE
 
 IF "%~5"=="" (
     ECHO Usage: %0 resource-group-prefix subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
@@ -39,14 +39,13 @@ SET SP_NEW_RESOURCE_GROUP=%SP_NEW_NAME%-%ENVIRONMENT%-rg
 IF "%DELETE_RESOURCE_GROUP%" == "TRUE" (
   CALL pnp-hub-spoke-functions.cmd :CallCLI azure group delete ^
   --name %SP_NEW_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SUBSCRIPTION% ^
   --quiet
 ) ELSE (
   :: delete vpn connections for the spoke
   CALL pnp-hub-spoke-functions.cmd :DELETE_HUB_SPOKE_CONNECTION ^
     %SP_NEW_NAME% ^
     %SP_NEW_RESOURCE_GROUP%
-    --quiet
 )
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
