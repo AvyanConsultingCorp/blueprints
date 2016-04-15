@@ -1,4 +1,4 @@
-:: function.cmd
+:: pnp-hub-spoke-functions.cmd
 :: Functions defined in this file:
 ::   :LOAD_DEFAULT_DATA
 ::   :CREATE_DEFAULT_VNETS

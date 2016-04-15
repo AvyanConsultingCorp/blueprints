@@ -28,7 +28,7 @@ SET ONP_CIDR=%5
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: load data for default hub-spoke topology
-CALL function.cmd :LOAD_DEFAULT_DATA
+CALL pnp-hub-spoke-functions.cmd :LOAD_DEFAULT_DATA
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: delete hub-spoke connection or resource group
@@ -37,23 +37,23 @@ SET SP_NEW_NAME=%RESOURCE_PREFIX%-mynewsp
 SET SP_NEW_RESOURCE_GROUP=%SP_NEW_NAME%-%ENVIRONMENT%-rg
 
 IF "%DELETE_RESOURCE_GROUP%" == "TRUE" (
-  CALL function.cmd :CallCLI azure group delete ^
+  CALL pnp-hub-spoke-functions.cmd :CallCLI azure group delete ^
   --name %SP_NEW_RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
   --quiet
 ) ELSE (
   :: delete vpn connections for the spoke
-  CALL function.cmd :DELETE_HUB_SPOKE_CONNECTION ^
+  CALL pnp-hub-spoke-functions.cmd :DELETE_HUB_SPOKE_CONNECTION ^
     %SP_NEW_NAME% ^
     %SP_NEW_RESOURCE_GROUP%
 )
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: delete the existing default vpn connections
-CALL function.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
+CALL pnp-hub-spoke-functions.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
 
 :: re-create default vpn connections with modified CIDR
-CALL function.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
+CALL pnp-hub-spoke-functions.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
 
 GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

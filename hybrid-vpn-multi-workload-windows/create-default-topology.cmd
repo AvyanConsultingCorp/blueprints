@@ -18,11 +18,11 @@ SET IPSEC_SHARED_KEY=%3
 SET ONP_GATEWAY_PIP=%4
 SET ONP_CIDR=%5
 
-CALL function.cmd :LOAD_DEFAULT_DATA
+CALL pnp-hub-spoke-functions.cmd :LOAD_DEFAULT_DATA
 
-CALL function.cmd :CREATE_DEFAULT_VNETS
+CALL pnp-hub-spoke-functions.cmd :CREATE_DEFAULT_VNETS
 
-CALL function.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
+CALL pnp-hub-spoke-functions.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
 
 GOTO :eof
 

@@ -25,15 +25,15 @@ SET ONP_CIDR=%5
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: load data for default hub-spoke topology
-CALL function.cmd :LOAD_DEFAULT_DATA
+CALL pnp-hub-spoke-functions.cmd :LOAD_DEFAULT_DATA
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: delete the existing default vpn connections
-CALL function.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
+CALL pnp-hub-spoke-functions.cmd :DELETE_DEFAULT_VPN_CONNECTIONS
 
 :: re-create default vpn connections with modified CIDR
-CALL function.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
+CALL pnp-hub-spoke-functions.cmd :CREATE_DEFAULT_VPN_CONNECTIONS
 
 GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
