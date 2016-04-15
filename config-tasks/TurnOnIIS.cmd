@@ -28,10 +28,15 @@ ECHO Turning on IIS configuration for: %VM_NAME% under resource group: %RESOURCE
 :: Following assumes that you have
 ::  1. Logged into your Azure subscription using "azure login"
 ::  2. Set the active subscription using "azure account set <subscription-name>"
+REM CALL azure vm extension set --resource-group %RESOURCE_GROUP% --vm-name %VM_NAME% ^
+	REM --name DSC --publisher-name Microsoft.Powershell --version 2.9 ^
+	REM --public-config "{\"commandToExecute\": \" powershell.exe -NoProfile -ExecutionPolicy Unrestricted -File IISConfig.ps1 \"}"
+
 CALL azure vm extension set --resource-group %RESOURCE_GROUP% --vm-name %VM_NAME% ^
 	--name DSC --publisher-name Microsoft.Powershell --version 2.9 ^
 	--public-config "{\"commandToExecute\": \" powershell.exe -NoProfile -ExecutionPolicy Unrestricted -File IISConfig.ps1 \"}"
-	
+
+CALL azure vm restart --resource-group %RESOURCE_GROUP% --name %VM_NAME%
 	
 GOTO :eof
 	
