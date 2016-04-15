@@ -34,7 +34,8 @@ REM CALL azure vm extension set --resource-group %RESOURCE_GROUP% --vm-name %VM_
 
 CALL azure vm extension set --resource-group %RESOURCE_GROUP% --vm-name %VM_NAME% ^
 	--name DSC --publisher-name Microsoft.Powershell --version 2.9 ^
-	--public-config "{\"commandToExecute\": \" powershell.exe -NoProfile -ExecutionPolicy Unrestricted -File IISConfig.ps1 \"}"
+	--public-config "{\"ModulesUrl\":["https://github.com/mspnp/blueprints/tree/kirpas/config-dsc/config-tasks/IISConfig.ps1.zip"], ^
+					\"ConfigurationFunction\": \"IISConfig.ps1\\IIS\" }"
 
 CALL azure vm restart --resource-group %RESOURCE_GROUP% --name %VM_NAME%
 	
