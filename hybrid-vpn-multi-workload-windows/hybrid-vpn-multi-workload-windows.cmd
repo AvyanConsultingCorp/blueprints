@@ -1,9 +1,9 @@
+:: This script will create default hub-and-spoke topology with
+:: one on-prem network, one hub, and two spokes.
+::
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 
-:: This script will create or modify a hub-spoke topology. 
-:: By default it will have one on-prem network, one hub, and two spokes.
-::
 IF "%~5"=="" (
     ECHO Usage: %0 resource-group-prefix subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
     ECHO   For example: %0 mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24
@@ -11,14 +11,43 @@ IF "%~5"=="" (
     )
 
 :: input variables from the command line
-SET SUBSCRIPTION=%1
-SET ONP_GATEWAY_PIP=%2
-SET ONP_CIDR=%3
-SET IPSEC_SHARED_KEY=%4
-SET RESOURCE_PREFIX=%5
+SET RESOURCE_PREFIX=%1
+SET SUBSCRIPTION=%2
+SET IPSEC_SHARED_KEY=%3
+SET ONP_GATEWAY_PIP=%4
+SET ONP_CIDR=%5
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+CALL :LOAD_DEFAULT_DATA
+CALL :CREATE_DEFAULT_VNETS
+CALL :CREATE_DEFAULT_VPN_CONNECTIONS
+
+GOTO :eof
+
+:: pnp-hub-spoke-functions.cmd contain the same functions below
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: FUNCTIONS
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Functions defined in this file:
+::   :LOAD_DEFAULT_DATA
+::   :CREATE_DEFAULT_VNETS
+::   :CREATE_DEFAULT_VPN_CONNECTIONS
+::   :DELETE_DEFAULT_VPN_CONNECTIONS
+
+::   :CREATE_VNET
+::   :CREATE_HUB_SPOKE_CONNECTION
+::   :DELETE_HUB_SPOKE_CONNECTION
+::   :CallCLI
+::   :ShowError
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Modify data about your hub-and-spoke topology here. 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: FUNCTION
+:LOAD_DEFAULT_DATA
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Modify data about your default hub-and-spoke topology here. 
 :: Only modify the values, do not modify the variable names.
 ::
 SET ENVIRONMENT=dev
@@ -74,14 +103,16 @@ SET SP2_RESOURCE_GROUP=%SP2_NAME%-%ENVIRONMENT%-rg
 :: If without the quotes, the script subroutine will treat each CIDR as a seperate variable.
 ::
 SET ONP_TO_HUB_CIDR_LIST="%HUB_CIDR%,%SP1_CIDR%,%SP2_CIDR%"
-
 SET SP1_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP2_CIDR%"
-
 SET SP2_TO_HUB_CIDR_LIST="%HUB_CIDR%,%ONP_CIDR%,%SP1_CIDR%"
 
+GOTO :eof
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: this is for initial hub-spoke topology setup with 
-:: one on-prem net, one hub, and three spokes.
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: FUNCTION
+:CREATE_DEFAULT_VNETS
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :: Create hub vnet
 CALL :CREATE_VNET ^
@@ -118,8 +149,16 @@ CALL :CREATE_VNET ^
     %SP2_RESOURCE_GROUP% ^
     %SP2_ILB%
 
-:: Create ONP_TO_HUB_TO_ONP connections
-CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
+GOTO :eof
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: FUNCTION
+:CREATE_DEFAULT_VPN_CONNECTIONS
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:: Create ONP to/from HUB connections
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
     %ONP_NAME% ^
     %ONP_CIDR% ^
     %ONP_TO_HUB_CIDR_LIST% ^
@@ -129,8 +168,8 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
 
-:: Create SP1_TO_HUB_TO_SP1 connections
-CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
+:: Create SP1 to/from HUB connections
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
     %SP1_NAME% ^
     %SP1_CIDR% ^
     %SP1_TO_HUB_CIDR_LIST% ^
@@ -139,8 +178,8 @@ CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
     %SP1_LOCATION% ^
     %SP1_RESOURCE_GROUP%
 
-:: Create SP2_TO_HUB_TO_SP2 connections
-CALL :CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION ^
+:: Create SP2 to/from HUB connections
+CALL :CREATE_HUB_SPOKE_CONNECTION ^
     %SP2_NAME% ^
     %SP2_CIDR% ^
     %SP2_TO_HUB_CIDR_LIST% ^
@@ -153,115 +192,28 @@ GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUBROUTINE
-:CREATE_SPOKE_TO_AND_FROM_HUB_CONNECTION
+:: FUNCTION
+:DELETE_DEFAULT_VPN_CONNECTIONS
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Create both local gateways SPK_TO_HUB_LGW and HUB_TO_SPK_LGW
-:: and both vpn connections HUB_TO_SPK_VPN-CONNECTION and SPK_TO_HUB_VPN-CONNECTION
-:: in SPK_RESOURCE_GROUP so that the spoke resource group is independant of the 
-:: hub resource group and spoke resource group can be deleted/modified without touch the 
-:: hub resource group
 
-:: input variable
-SET SPK_NAME=%1
-SET SPK_CIDR=%2
-SET SPK_TO_HUB_CIDR_LIST=%3
-SET SPK_TO_HUB_CIDR_LIST=%SPK_TO_HUB_CIDR_LIST:~1,-1%
-SET SPK_GATEWAY_NAME=%4
-SET SPK_GATEWAY_PIP_NAME=%5
-SET SPK_LOCATION=%6
-SET SPK_RESOURCE_GROUP=%7
-SET ON_PREM_FLAG=%8
+CALL :DELETE_HUB_SPOKE_CONNECTION ^
+    %ONP_NAME% ^
+    %ONP_RESOURCE_GROUP% ^
+    on_prem
 
-:: azure resource names
-SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
-SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+CALL :DELETE_HUB_SPOKE_CONNECTION ^
+    %SP1_NAME% ^
+    %SP1_RESOURCE_GROUP%
 
-SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
-SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
-
-:: Retrieve SPK_GATEWAY_PIP
-IF "%ON_PREM_FLAG%" == "on_prem" (
-    SET SPK_GATEWAY_PIP=%SPK_GATEWAY_PIP_NAME%
-) ELSE (
-    :: Parse public-ip json to get the line that contains an ip address.
-    :: There is only one line that consists the ip address
-    :: Please ignore the message "The system cannot find the drive specified whe you run the script
-    FOR /F "delims=" %%a in ('
-    CALL azure network public-ip show -g %SPK_RESOURCE_GROUP% -n %SPK_GATEWAY_PIP_NAME% --json ^| 
-    FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
-    ') DO @SET JSON_IP_ADDRESS_LINE=%%a
-
-    :: Remove the first 16 and last two charactors to get the ip address
-    :: Note the use of ! instead of % since this is inside the IF statement
-    SET SPK_GATEWAY_PIP=!JSON_IP_ADDRESS_LINE:~16,-2!
-)
-
-:: Retrieve HUB_GATEWAY_PIP
-:: Parse public-ip json to get the line that contains an ip address.
-:: There is only one line that consists the ip address
-FOR /F "delims=" %%a in ('
-    CALL azure network public-ip show -g %HUB_RESOURCE_GROUP% -n %HUB_GATEWAY_PIP_NAME% --json ^| 
-    FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
-    ') DO @SET JSON_IP_ADDRESS_LINE=%%a
-
-:: Remove the first 16 and last two charactors to get the ip address
-SET HUB_GATEWAY_PIP=%JSON_IP_ADDRESS_LINE:~16,-2%
-
-:: Create HUB_TO_SPK_LGW vpn local gateway
-CALL :CallCLI azure network local-gateway create ^
-  --name %HUB_TO_SPK_LGW% ^
-  --address-space %SPK_CIDR% ^
-  --ip-address %SPK_GATEWAY_PIP% ^
-  --location %SPK_LOCATION% ^
-  --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create SPK_TO_HUB_LGW vpn local gateway
-CALL :CallCLI azure network local-gateway create ^
-  --name %SPK_TO_HUB_LGW% ^
-  --address-space %SPK_TO_HUB_CIDR_LIST% ^
-  --ip-address %HUB_GATEWAY_PIP% ^
-  --location %SPK_LOCATION% ^
-  --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create site-to-site vpn connection HUB_TO_SPK_VPN-CONNECTION
-CALL :CallCLI azure network vpn-connection create ^
-  --name %HUB_TO_SPK_VPN-CONNECTION% ^
-  --vnet-gateway1 %HUB_GATEWAY_NAME% ^
-  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
-  --lnet-gateway2 %HUB_TO_SPK_LGW% ^
-  --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
-  --type IPsec ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --location %SPK_LOCATION% ^
-  --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-
-:: Create site-to-site vpn connection SPK_TO_HUB_VPN-CONNECTION
-IF NOT "%ON_PREM_FLAG%" == "on_prem" (
-  CALL :CallCLI azure network vpn-connection create ^
-  --name %SPK_TO_HUB_VPN-CONNECTION% ^
-  --vnet-gateway1 %SPK_GATEWAY_NAME% ^
-  --vnet-gateway1-group %SPK_RESOURCE_GROUP% ^
-  --lnet-gateway2 %SPK_TO_HUB_LGW% ^
-  --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
-  --type IPsec ^
-  --shared-key %IPSEC_SHARED_KEY% ^
-  --location %SPK_LOCATION% ^
-  --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
-)
-:: ELSE IF "%ON_PREM_FLAG%" == "on_prem", you do not create on-prem to hub 
-:: connection in azure. Instead, you need to go to on premise network
-:: to route the traffic to the hub gateway pip.
+CALL :DELETE_HUB_SPOKE_CONNECTION ^
+    %SP2_NAME% ^
+    %SP2_RESOURCE_GROUP%
 
 GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUBROUTINE
+:: FUNCTION
 :CREATE_VNET
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET APP_NAME=%1
@@ -363,7 +315,6 @@ IF NOT "%APP_ILB_FRONTEND_IP_ADDRESS%" == "" (
   --resource-group %APP_RESOURCE_GROUP% ^
   --subscription %APP_SUBSCRIPTION%
 )
-
 :::::::::::::::::::::::::::::::::::::::
 :: Create the public IP address for VPN Gateway
 :: Note that the Azure VPN Gateway only supports
@@ -389,10 +340,176 @@ GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUBROUTINE
+:: FUNCTION
+:CREATE_HUB_SPOKE_CONNECTION
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create both local gateways SPK_TO_HUB_LGW and HUB_TO_SPK_LGW
+:: and both vpn connections HUB_TO_SPK_VPN-CONNECTION and SPK_TO_HUB_VPN-CONNECTION
+:: in SPK_RESOURCE_GROUP so that the spoke resource group is independant of the 
+:: hub resource group and spoke resource group can be deleted/modified without touch the 
+:: hub resource group
+
+:: input variable
+SET SPK_NAME=%1
+SET SPK_CIDR=%2
+SET SPK_TO_HUB_CIDR_LIST=%3
+SET SPK_TO_HUB_CIDR_LIST=%SPK_TO_HUB_CIDR_LIST:~1,-1%
+SET SPK_GATEWAY_NAME=%4
+SET SPK_GATEWAY_PIP_NAME=%5
+SET SPK_LOCATION=%6
+SET SPK_RESOURCE_GROUP=%7
+SET ON_PREM_FLAG=%8
+
+SET SPK_SUBSCRIPTION=%SUBSCRIPTION%
+
+:: azure resource names
+SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
+SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+
+SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
+SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
+
+:: Retrieve SPK_GATEWAY_PIP
+IF "%ON_PREM_FLAG%" == "on_prem" (
+    SET SPK_GATEWAY_PIP=%SPK_GATEWAY_PIP_NAME%
+) ELSE (
+    :: Parse public-ip json to get the line that contains an ip address.
+    :: There is only one line that consists the ip address
+    :: Please ignore the message "The system cannot find the drive specified whe you run the script
+    FOR /F "delims=" %%a in ('
+    CALL azure network public-ip show -g %SPK_RESOURCE_GROUP% -n %SPK_GATEWAY_PIP_NAME% --json ^| 
+    FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
+    ') DO @SET JSON_IP_ADDRESS_LINE=%%a
+
+    :: Remove the first 16 and last two charactors to get the ip address
+    :: Note the use of ! instead of % since this is inside the IF statement
+    SET SPK_GATEWAY_PIP=!JSON_IP_ADDRESS_LINE:~16,-2!
+)
+
+:: Retrieve HUB_GATEWAY_PIP
+:: Parse public-ip json to get the line that contains an ip address.
+:: There is only one line that consists the ip address
+FOR /F "delims=" %%a in ('
+    CALL azure network public-ip show -g %HUB_RESOURCE_GROUP% -n %HUB_GATEWAY_PIP_NAME% --json ^| 
+    FINDSTR /R "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"
+    ') DO @SET JSON_IP_ADDRESS_LINE=%%a
+
+:: Remove the first 16 and last two charactors to get the ip address
+SET HUB_GATEWAY_PIP=%JSON_IP_ADDRESS_LINE:~16,-2%
+
+:: Create HUB_TO_SPK_LGW vpn local gateway
+CALL :CallCLI azure network local-gateway create ^
+  --name %HUB_TO_SPK_LGW% ^
+  --address-space %SPK_CIDR% ^
+  --ip-address %SPK_GATEWAY_PIP% ^
+  --location %SPK_LOCATION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION%
+
+:: Create SPK_TO_HUB_LGW vpn local gateway
+CALL :CallCLI azure network local-gateway create ^
+  --name %SPK_TO_HUB_LGW% ^
+  --address-space %SPK_TO_HUB_CIDR_LIST% ^
+  --ip-address %HUB_GATEWAY_PIP% ^
+  --location %SPK_LOCATION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION%
+
+:: Create site-to-site vpn connection HUB_TO_SPK_VPN-CONNECTION
+CALL :CallCLI azure network vpn-connection create ^
+  --name %HUB_TO_SPK_VPN-CONNECTION% ^
+  --vnet-gateway1 %HUB_GATEWAY_NAME% ^
+  --vnet-gateway1-group %HUB_RESOURCE_GROUP% ^
+  --lnet-gateway2 %HUB_TO_SPK_LGW% ^
+  --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
+  --type IPsec ^
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --location %SPK_LOCATION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION%
+
+:: Create site-to-site vpn connection SPK_TO_HUB_VPN-CONNECTION
+IF NOT "%ON_PREM_FLAG%" == "on_prem" (
+  CALL :CallCLI azure network vpn-connection create ^
+  --name %SPK_TO_HUB_VPN-CONNECTION% ^
+  --vnet-gateway1 %SPK_GATEWAY_NAME% ^
+  --vnet-gateway1-group %SPK_RESOURCE_GROUP% ^
+  --lnet-gateway2 %SPK_TO_HUB_LGW% ^
+  --lnet-gateway2-group %SPK_RESOURCE_GROUP% ^
+  --type IPsec ^
+  --shared-key %IPSEC_SHARED_KEY% ^
+  --location %SPK_LOCATION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION%
+)
+:: ELSE IF "%ON_PREM_FLAG%" == "on_prem", you do not create on-prem to hub 
+:: connection in azure. Instead, you need to go to on premise network
+:: to route the traffic to the hub gateway pip.
+
+GOTO :eof
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: FUNCTION
+:DELETE_HUB_SPOKE_CONNECTION
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: input variable
+SET SPK_NAME=%1
+SET SPK_RESOURCE_GROUP=%2
+SET ON_PREM_FLAG=%3
+
+SET SPK_SUBSCRIPTION=%SUBSCRIPTION%
+
+:: azure resource names
+SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
+SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
+
+SET SPK_TO_HUB_LGW=%SPK_NAME%-to-%HUB_NAME%-lgw
+SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
+
+::::::::::::::::::::::::::::::::::::::
+:: Delete vpn connectrions
+
+:: Delete HUB_TO_SPK_VPN-CONNECTION
+CALL :CallCLI azure network vpn-connection delete ^
+  --name %HUB_TO_SPK_VPN-CONNECTION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION% ^
+  --quiet
+
+:: Delete SPK_TO_HUB_VPN-CONNECTION
+IF NOT "%ON_PREM_FLAG%" == "on_prem" (
+  CALL :CallCLI azure network vpn-connection delete ^
+  --name %SPK_TO_HUB_VPN-CONNECTION% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION% ^
+  --quiet
+)
+
+::::::::::::::::::::::::::::::::::::::
+:: Delete local gateways
+
+:: Delete HUB_TO_SPK_LGW
+CALL :CallCLI azure network local-gateway delete ^
+  --name %HUB_TO_SPK_LGW% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION% ^
+  --quiet
+
+:: Delete SPK_TO_HUB_LGW
+CALL :CallCLI azure network local-gateway delete ^
+  --name %SPK_TO_HUB_LGW% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION% ^
+  --quiet
+
+GOTO :eof
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: FUNCTION
 :CallCLI
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SETLOCAL
 CALL %*
 IF ERRORLEVEL 1 (
     CALL :ShowError "Error executing CLI Command: " %*
@@ -403,10 +520,9 @@ GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SUBROUTINE
+:: FUNCTION
 :ShowError
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SETLOCAL EnableDelayedExpansion
 :: Print the message
 ECHO %~1
 SHIFT
@@ -424,5 +540,6 @@ GOTO Loop
 :Continue
 ECHO %CLICommand%
 GOTO :eof
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
