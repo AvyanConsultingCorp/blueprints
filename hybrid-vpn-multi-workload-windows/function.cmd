@@ -333,6 +333,8 @@ SET SPK_LOCATION=%6
 SET SPK_RESOURCE_GROUP=%7
 SET ON_PREM_FLAG=%8
 
+SET SPK_SUBSCRIPTION=%SUBSCRIPTION%
+
 :: azure resource names
 SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
 SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
@@ -375,7 +377,7 @@ CALL :CallCLI azure network local-gateway create ^
   --ip-address %SPK_GATEWAY_PIP% ^
   --location %SPK_LOCATION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SPK_SUBSCRIPTION%
 
 :: Create SPK_TO_HUB_LGW vpn local gateway
 CALL :CallCLI azure network local-gateway create ^
@@ -384,7 +386,7 @@ CALL :CallCLI azure network local-gateway create ^
   --ip-address %HUB_GATEWAY_PIP% ^
   --location %SPK_LOCATION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SPK_SUBSCRIPTION%
 
 :: Create site-to-site vpn connection HUB_TO_SPK_VPN-CONNECTION
 CALL :CallCLI azure network vpn-connection create ^
@@ -397,7 +399,7 @@ CALL :CallCLI azure network vpn-connection create ^
   --shared-key %IPSEC_SHARED_KEY% ^
   --location %SPK_LOCATION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SPK_SUBSCRIPTION%
 
 :: Create site-to-site vpn connection SPK_TO_HUB_VPN-CONNECTION
 IF NOT "%ON_PREM_FLAG%" == "on_prem" (
@@ -411,7 +413,7 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   --shared-key %IPSEC_SHARED_KEY% ^
   --location %SPK_LOCATION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION%
+  --subscription %SPK_SUBSCRIPTION%
 )
 :: ELSE IF "%ON_PREM_FLAG%" == "on_prem", you do not create on-prem to hub 
 :: connection in azure. Instead, you need to go to on premise network
@@ -429,6 +431,8 @@ SET SPK_NAME=%1
 SET SPK_RESOURCE_GROUP=%2
 SET ON_PREM_FLAG=%3
 
+SET SPK_SUBSCRIPTION=%SUBSCRIPTION%
+
 :: azure resource names
 SET HUB_TO_SPK_LGW=%HUB_NAME%-to-%SPK_NAME%-lgw
 SET HUB_TO_SPK_VPN-CONNECTION=%HUB_NAME%-to-%SPK_NAME%-vpn-connection
@@ -443,7 +447,7 @@ SET SPK_TO_HUB_VPN-CONNECTION=%SPK_NAME%-to-%HUB_NAME%-vpn-connection
 CALL :CallCLI azure network vpn-connection delete ^
   --name %HUB_TO_SPK_VPN-CONNECTION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION% ^
+  --subscription %SPK_SUBSCRIPTION% ^
   --quiet
 
 :: Delete SPK_TO_HUB_VPN-CONNECTION
@@ -451,8 +455,9 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   CALL :CallCLI azure network vpn-connection delete ^
   --name %SPK_TO_HUB_VPN-CONNECTION% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION% ^
+  --subscription %SPK_SUBSCRIPTION% ^
   --quiet
+)
 
 ::::::::::::::::::::::::::::::::::::::
 :: Delete local gateways
@@ -461,14 +466,14 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
 CALL :CallCLI azure network local-gateway delete ^
   --name %HUB_TO_SPK_LGW% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION% ^
+  --subscription %SPK_SUBSCRIPTION% ^
   --quiet
 
 :: Delete SPK_TO_HUB_LGW
 CALL :CallCLI azure network local-gateway delete ^
   --name %SPK_TO_HUB_LGW% ^
   --resource-group %SPK_RESOURCE_GROUP% ^
-  --subscription %SUBSCRIPTION% ^
+  --subscription %SPK_SUBSCRIPTION% ^
   --quiet
 
 GOTO :eof
