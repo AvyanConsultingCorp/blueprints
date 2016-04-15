@@ -1,4 +1,4 @@
-::@ECHO OFF
+@ECHO OFF
 SETLOCAL
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -58,18 +58,18 @@ CALL azure config mode arm
 :: Create root level resources
 
 :: Create the enclosing resource group
-CALL azure group create --name %RESOURCE_GROUP% --location %PRIMARY_LOCATION% ^
+CALL :CALLCLI azure group create --name %RESOURCE_GROUP% --location %PRIMARY_LOCATION% ^
   --subscription %SUBSCRIPTION%
 
 :: Create the public IP address (dynamic)
-CALL azure network public-ip create --name %PRIMARYPUBLIC_IP_NAME% ^
+CALL :CALLCLI azure network public-ip create --name %PRIMARYPUBLIC_IP_NAME% ^
   --location %PRIMARY_LOCATION% --domain-name-label %PRIMARYPUBLIC_IP_NAME% %POSTFIX%
 
 :: Create the failover public IP address (dynamic)
-CALL azure network public-ip create --name %SECONDARYPUBLIC_IP_NAME% ^
+CALL :CALLCLI azure network public-ip create --name %SECONDARYPUBLIC_IP_NAME% ^
   --location %SECONDARY_LOCATION% --domain-name-label %SECONDARYPUBLIC_IP_NAME% %POSTFIX%
 
-CALL azure network traffic-manager profile create ^
+CALL :CALLCLI azure network traffic-manager profile create ^
   --name %TRAFFICMANAGERPROFILE_NAME% ^
   --relative-dns-name %TRAFFICMANAGERPROFILE_DNSNAME% ^
   --monitor-path %TRAFFICMANAGERPROFILE_MONITORPATH% ^
@@ -78,16 +78,31 @@ CALL azure network traffic-manager profile create ^
 SET PRIMARY_PUBLIC_IP_RESOURCEID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/publicIPAddresses/%PRIMARYPUBLIC_IP_NAME%
 SET SECONDARY_PUBLIC_IP_RESOURCEID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/publicIPAddresses/%SECONDARYPUBLIC_IP_NAME%
 
-CALL azure network traffic-manager endpoint create ^
+CALL :CALLCLI azure network traffic-manager endpoint create ^
   --name %TRAFFICMANAGERPROFILE_NAME%-ep-primary ^
   --profile-name %TRAFFICMANAGERPROFILE_NAME% ^
   --type AzureEndpoints ^
   --target-resource-id %PRIMARY_PUBLIC_IP_RESOURCEID% ^
   --priority 1 %POSTFIX%
 
-CALL azure network traffic-manager endpoint create ^
+CALL :CALLCLI azure network traffic-manager endpoint create ^
   --name %TRAFFICMANAGERPROFILE_NAME%-ep-secondary ^
   --profile-name %TRAFFICMANAGERPROFILE_NAME% ^
   --type AzureEndpoints ^
   --target-resource-id %SECONDARY_PUBLIC_IP_RESOURCEID% ^
   --priority 100 %POSTFIX%
+
+  
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Subroutine to facilitate error handling
+
+:CallCLI
+SETLOCAL
+CALL %*
+IF %ERRORLEVEL% NEQ 0 (
+    Echo Error executing CLI Command: %*
+    
+	REM This command executes in the main script context so we can exit the whole script on an error
+    (GOTO) 2> NUL & GOTO :eof
+)
+GOTO :eof
