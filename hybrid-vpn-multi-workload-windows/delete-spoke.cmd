@@ -46,6 +46,7 @@ IF "%DELETE_RESOURCE_GROUP%" == "TRUE" (
   CALL pnp-hub-spoke-functions.cmd :DELETE_HUB_SPOKE_CONNECTION ^
     %SP_NEW_NAME% ^
     %SP_NEW_RESOURCE_GROUP%
+    --quiet
 )
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
