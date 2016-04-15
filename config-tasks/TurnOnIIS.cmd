@@ -31,7 +31,7 @@ ECHO Turning on IIS configuration for: %VM_NAME% under resource group: %RESOURCE
 
 CALL azure vm extension set --resource-group %RESOURCE_GROUP% --vm-name %VM_NAME% ^
 	--name DSC --publisher-name Microsoft.Powershell --version 2.9 ^
-	--public-config "{\"ModulesUrl\": \"https://github.com/mspnp/blueprints/tree/kirpas/config-dsc/config-tasks/IISConfig.ps1.zip\", \"ConfigurationFunction\": \"IISConfig.ps1\\IIS\" }"
+	--public-config "{\"ModulesUrl\": \"https://github.com/mspnp/blueprints/tree/kirpas/config-dsc/config-tasks/IISConfig.zip\", \"ConfigurationFunction\": \"IISConfig.ps1\\ConfigureWeb\" }"
 
 REM CALL azure vm restart --resource-group %RESOURCE_GROUP% --name %VM_NAME%
 	
