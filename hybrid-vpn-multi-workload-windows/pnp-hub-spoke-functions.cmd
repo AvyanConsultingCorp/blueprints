@@ -170,15 +170,18 @@ GOTO :eof
 
 CALL :DELETE_HUB_SPOKE_CONNECTION ^
     %ONP_NAME% ^
+    %HUB_GATEWAY_NAME% ^
     %ONP_RESOURCE_GROUP% ^
     on_prem
 
 CALL :DELETE_HUB_SPOKE_CONNECTION ^
     %SP1_NAME% ^
+    %SP1_GATEWAY_NAME% ^
     %SP1_RESOURCE_GROUP%
 
 CALL :DELETE_HUB_SPOKE_CONNECTION ^
     %SP2_NAME% ^
+    %SP2_GATEWAY_NAME% ^
     %SP2_RESOURCE_GROUP%
 
 
@@ -328,6 +331,9 @@ SET HUB_SUBSCRIPTION=%SUBSCRIPTION%
 SET HUB_VNET_NAME=%HUB_NAME%-vnet
 SET HUB_TO_ONPRM_LGW_ID=/subscriptions/%HUB_SUBSCRIPTION%/resourceGroups/%HUB_RESOURCE_GROUP%/providers/Microsoft.Network/localNetworkGateways/%HUB_TO_ONPRM_LGW%
 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Hub to On-Prem connection
+
 :: Create HUB_TO_ONPRM_LGW vpn local gateway
 CALL :CallCLI azure network local-gateway create ^
   --name %HUB_TO_ONPRM_LGW% ^
@@ -338,6 +344,7 @@ CALL :CallCLI azure network local-gateway create ^
   --subscription %HUB_SUBSCRIPTION%
 
 :: Create the hub vpn gateway
+:: HUB_GATEWAY depends on HUB_TO_ONPRM_LGW.
 CALL :CallCLI azure network vpn-gateway create ^
   --name %HUB_GATEWAY_NAME% ^
   --type RouteBased ^
@@ -360,16 +367,7 @@ FOR /F "delims=" %%a in ('
 :: Remove the first 16 and last two charactors to get the ip address
 SET HUB_GATEWAY_PIP=%JSON_IP_ADDRESS_LINE:~16,-2%
 
-:: Create ONPRM_TO_HUB_LGW vpn local gateway
-CALL :CallCLI azure network local-gateway create ^
-  --name %ONPRM_TO_HUB_LGW% ^
-  --address-space %ONPRM_TO_HUB_CIDR_LIST% ^
-  --ip-address %HUB_GATEWAY_PIP% ^
-  --location %HUB_LOCATION% ^
-  --resource-group %HUB_RESOURCE_GROUP% ^
-  --subscription %HUB_SUBSCRIPTION%
-
-:: Create site-to-site vpn connection HUB_TO_ONPRM_VPN_CONNECTION
+:: Create HUB_TO_ONPRM_VPN_CONNECTION
 CALL :CallCLI azure network vpn-connection create ^
   --name %HUB_TO_ONPRM_VPN_CONNECTION% ^
   --vnet-gateway1 %HUB_GATEWAY_NAME% ^
@@ -382,7 +380,19 @@ CALL :CallCLI azure network vpn-connection create ^
   --resource-group %HUB_RESOURCE_GROUP% ^
   --subscription %HUB_SUBSCRIPTION%
 
-:: You do not create on-prem to hub connection in azure. 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::  On-Prem to Hub connection
+  
+:: Create ONPRM_TO_HUB_LGW vpn local gateway
+CALL :CallCLI azure network local-gateway create ^
+  --name %ONPRM_TO_HUB_LGW% ^
+  --address-space %ONPRM_TO_HUB_CIDR_LIST% ^
+  --ip-address %HUB_GATEWAY_PIP% ^
+  --location %HUB_LOCATION% ^
+  --resource-group %HUB_RESOURCE_GROUP% ^
+  --subscription %HUB_SUBSCRIPTION%
+
+:: You do not create On-Prem to Hub connection in azure. 
 :: Instead, you need to go to on premise network
 :: to route the traffic to the hub gateway pip.
 
@@ -444,7 +454,8 @@ CALL :CallCLI azure network local-gateway create ^
   --resource-group %SPK_RESOURCE_GROUP% ^
   --subscription %SPK_SUBSCRIPTION%
 
-  :: Create the spoke vpn gateway
+:: Create the spoke vpn gateway
+:: SPK_GATEWAY depends on SPK_TO_HUB_LGW. 
 CALL :CallCLI azure network vpn-gateway create ^
   --name %SPK_GATEWAY_NAME% ^
   --type RouteBased ^
@@ -515,7 +526,8 @@ GOTO :eof
 :: input variable
 SET SPK_NAME=%1
 SET SPK_RESOURCE_GROUP=%2
-SET ON_PREM_FLAG=%3
+SET SPK_GATEWAY_NAME=%3
+SET ON_PREM_FLAG=%4
 
 SET SPK_SUBSCRIPTION=%SUBSCRIPTION%
 
@@ -544,6 +556,14 @@ IF NOT "%ON_PREM_FLAG%" == "on_prem" (
   --subscription %SPK_SUBSCRIPTION% ^
   --quiet
 )
+
+::::::::::::::::::::::::::::::::::::::
+:: Delete vpn gateways
+CALL :CallCLI azure network vpn-gateway delete ^
+  --name %SPK_GATEWAY_NAME% ^
+  --resource-group %SPK_RESOURCE_GROUP% ^
+  --subscription %SPK_SUBSCRIPTION% ^
+  --quiet
 
 ::::::::::::::::::::::::::::::::::::::
 :: Delete local gateways
