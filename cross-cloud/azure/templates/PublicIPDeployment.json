@@ -23,11 +23,11 @@
   ],
 
   "outputs": {
-    "publicIPAddressName": {
+    "publicIPName": {
       "type": "string",
       "value": "[variables('publicIPAddressName')]"
     },
-    "azurePublicIP": {
+    "publicIPAddress": {
       "type": "string",
       "value": "[reference(variables('publicIPAddressName')).ipAddress]"
     }

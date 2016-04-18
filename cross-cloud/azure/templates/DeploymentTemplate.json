@@ -74,7 +74,6 @@
     "vmNameLinuxDB": "vm02psql",
     "vmSize": "Standard_D2",
     "virtualNetworkName": "vnetazure",
-    "publicIPRef": "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "subnetRefGW": "[concat(variables('vnetID'),'/subnets/', variables('subnetNameGW'))]",
     "subnetRefDB": "[concat(variables('vnetID'),'/subnets/', variables('subnetNameDB'))]"
@@ -91,6 +90,7 @@
         "accountType": "[variables('storageAccountType')]"
       }
     },
+
     {
       "type": "Microsoft.Network/routeTables",
       "name": "[variables('routeTableName')]",
@@ -109,22 +109,31 @@
         ]
       }
     },
+
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[variables('location')]",
+      "type": "Microsoft.Resources/deployments",
+      "name": "CreatePublicIP",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+      ],
       "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://ahnstorage.blob.core.windows.net/ahnscripts/azure/templates/PublicIPDeployment.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+        }
       }
     },
+
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('nsgNameGW')]",
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+        "Microsoft.Resources/deployments/CreatePublicIP"
       ],
       "properties": {
         "securityRules": [
@@ -183,6 +192,7 @@
         ]
       }
     },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
@@ -217,13 +227,14 @@
         ]
       }
     },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicNameLinuxGW')]",
       "location": "[variables('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "Microsoft.Resources/deployments/CreatePublicIP",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
         "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgNameGW'))]"
       ],
@@ -235,7 +246,7 @@
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[variables('PrivateIPAddressLinuxGW')]",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', reference('CreatePublicIP').outputs.publicIPName.value)]"
               },
               "subnet": {
                 "id": "[variables('subnetRefGW')]"
@@ -249,6 +260,7 @@
         "enableIPForwarding": true
       }
     },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
@@ -323,6 +335,7 @@
         "enableIPForwarding": false
       }
     },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
@@ -372,6 +385,7 @@
         }
       }
     },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
@@ -387,13 +401,15 @@
         "settings": {
           "fileUris": [
             "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common.sh",
-            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_final_updates.sh"
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_final_updates.sh",
+            "https://ahnstorage.blob.core.windows.net/ahnscripts/azure/scripts/vpn_azure_install_config.sh"
           ],
-          "commandToExecute": "sh vpn_common.sh",
+          "commandToExecute": "[concat('bash vpn_azure_install_config.sh --aws ', parameters('AWSPublicIP'), ' --azure ', reference('CreatePublicIP').outputs.publicIPAddress.value)]",
           "timestamp": 1
         }
       }
     },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
@@ -412,7 +428,7 @@
             "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common.sh",
             "https://ahnstorage.blob.core.windows.net/ahnscripts/azure/scripts/db_post_install.sh"
           ],
-          "commandToExecute": "sh db_common.sh",
+          "commandToExecute": "bash db_common.sh",
           "timestamp": 1
         }
       }
@@ -420,13 +436,17 @@
   ],
 
   "outputs": {
-    "AzurePublicIP": {
-      "type": "object",
-      "value": "[reference(variables('publicIPAddressName'))]"
-    },
     "ScriptExecWithAzurePublicIp": {
       "type": "string",
-      "value": "[concat('sh -c \"echo IP [', reference(variables('publicIPAddressName')).ipAddress, ']\" > /tmp/test2')]"
+      "value": "[concat('sh -c \"echo IP [', reference('CreatePublicIP').outputs.publicIPAddress.value, ']\" > /tmp/test2')]"
+    },
+    "PublicIPLinkedOutput": {
+      "type": "string",
+      "value": "[reference('CreatePublicIP').outputs.publicIPAddress.value]"
+    },
+    "PublicIPNameLinkedOutput": {
+      "type": "string",
+      "value": "[reference('CreatePublicIP').outputs.publicIPName.value]"
     }
   }
 }

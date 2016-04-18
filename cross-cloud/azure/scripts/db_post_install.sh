@@ -56,7 +56,7 @@ sudo /etc/init.d/postgresql stop
 # Update configuration for hot standby. 
 # For a discussion on some good values for these parameters, see: 
 # https://wiki.postgresql.org/wiki/Binary_Replication_Tutorial#Starting_Replication_with_only_a_Quick_Master_Restart
-echo "Adding the Replicaiton and WAL settings to postgresql.conf"
+echo "Adding the Replication and WAL settings to postgresql.conf"
 echo "
 wal_level = hot_standby
 checkpoint_segments = 16
