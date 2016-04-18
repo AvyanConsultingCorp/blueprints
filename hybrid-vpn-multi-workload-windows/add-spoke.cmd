@@ -76,7 +76,8 @@ CALL pnp-hub-spoke-functions.cmd :CREATE_HUB_SPOKE_CONNECTION ^
     %SP_NEW_GATEWAY_NAME% ^
     %SP_NEW_GATEWAY_PIP_NAME% ^
     %SP_NEW_LOCATION% ^
-    %SP_NEW_RESOURCE_GROUP%
+    %SP_NEW_RESOURCE_GROUP% ^
+    %IPSEC_SHARED_KEY%
 
 GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
