@@ -70,9 +70,9 @@ fi
 
 # Note that we need to call the scripts using bash directly because: 
 # 1) the script will not be marked as executable when it is downloaded by 
-#    ARM custom script extension
+#    the ARM custom script extension
 # 2) bash is needed instead of "sh". "sh" on Ubuntu points to "dash", which 
-#    errors on the "trap" with "trap: sigint: bad trap".
+#    errors on the "trap" with error "trap: sigint: bad trap".
 
 logger "Calling vpn_common.sh"
 bash vpn_common.sh
