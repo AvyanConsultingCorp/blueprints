@@ -347,7 +347,7 @@ CALL :CallCLI azure network local-gateway create ^
 :: HUB_GATEWAY depends on HUB_TO_ONPRM_LGW.
 CALL :CallCLI azure network vpn-gateway create ^
   --name %HUB_GATEWAY_NAME% ^
-  --type RouteBased ^
+  --vpn-type RouteBased ^
   --public-ip-name %HUB_GATEWAY_PIP_NAME% ^
   --vnet-name %HUB_VNET_NAME% ^
   --sku-name Standard ^
@@ -458,7 +458,7 @@ CALL :CallCLI azure network local-gateway create ^
 :: SPK_GATEWAY depends on SPK_TO_HUB_LGW. 
 CALL :CallCLI azure network vpn-gateway create ^
   --name %SPK_GATEWAY_NAME% ^
-  --type RouteBased ^
+  --vpn-type RouteBased ^
   --public-ip-name %SPK_GATEWAY_PIP_NAME% ^
   --vnet-name %SPK_VNET_NAME% ^
   --sku-name Standard ^
