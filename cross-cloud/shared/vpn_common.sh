@@ -1,7 +1,13 @@
 #!/bin/bash
+
 # Install Openswan on the VPN server
 
 SOURCEFILE=$0
+
+SUDO=''
+if [[ $EUID -ne 0 ]]; then
+    SUDO='sudo -E'
+fi
 
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
@@ -19,11 +25,6 @@ logger()
 }
 
 logger "STARTING"
-
-SUDO=''
-if [[ $EUID -ne 0 ]]; then
-    SUDO='sudo -E'
-fi
 
 # Wait for cloud-init to finish building the server
 #timeout 180 /bin/bash -c \

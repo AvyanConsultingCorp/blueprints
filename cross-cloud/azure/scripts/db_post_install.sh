@@ -5,6 +5,11 @@
 
 SOURCEFILE=$0
 
+SUDO=''
+if [[ $EUID -ne 0 ]]; then
+    SUDO='sudo'
+fi
+
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
 trap 'errhandle $LINENO $?' SIGINT ERR
@@ -83,7 +88,7 @@ else
 fi
 
 # shutdown the PostgreSQL server
-sudo /etc/init.d/postgresql stop
+$SUDO /etc/init.d/postgresql stop
 
 # Update configuration for hot standby. 
 # For a discussion on some good values for these parameters, see: 
@@ -94,14 +99,14 @@ wal_level = hot_standby
 checkpoint_segments = 16
 max_wal_senders = 5
 wal_keep_segments = 32
-hot_standby = on" | sudo tee -a /etc/postgresql/9.3/main/postgresql.conf
+hot_standby = on" | $SUDO tee -a /etc/postgresql/9.3/main/postgresql.conf
 echo
 
 # remove the current postgresql data directory on the slave
 DIRTOREMOVE="/var/lib/postgresql/9.3/main"
 echo "Removing directory $DIRTOREMOVE"
 set -x
-sudo -u postgres rm -rf $DIRTOREMOVE
+$SUDO -u postgres rm -rf $DIRTOREMOVE
 set +x
 echo
 
@@ -109,7 +114,7 @@ echo
 #PGPASSWORD="somestrongreplicationpassword" 
 echo "Restoring from master server ${MASTERIP}" 
 set -x
-sudo -u postgres pg_basebackup -h ${MASTERIP} -D /var/lib/postgresql/9.3/main -v -P -U replication --xlog-method=stream
+$SUDO -u postgres pg_basebackup -h ${MASTERIP} -D /var/lib/postgresql/9.3/main -v -P -U replication --xlog-method=stream
 set +x
 echo
 
@@ -137,10 +142,10 @@ trigger_file = '/var/lib/postgresql/9.3/main/failover.trigger'
 # a large workload can cause segments to be recycled before the standby
 # is fully synchronized, requiring you to start again from a new base backup.
 #restore_command = 'cp /path_to/archive/%f \"%p\"'
-" | sudo tee -a /var/lib/postgresql/9.3/main/recovery.conf
+" | $SUDO tee -a /var/lib/postgresql/9.3/main/recovery.conf
 echo
 
 #Restart PostgreSQL
-sudo /etc/init.d/postgresql start
+$SUDO /etc/init.d/postgresql start
 
 logger "COMPLETED"
