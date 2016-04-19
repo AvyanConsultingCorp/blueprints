@@ -1,12 +1,13 @@
 #!/bin/bash
-SUDO=''
-if [[ $EUID -ne 0 ]]; then
-    SUDO='sudo'
-fi
 
 # Install PostgreSQL and the client
 
 SOURCEFILE=$0
+
+SUDO=''
+if [[ $EUID -ne 0 ]]; then
+    SUDO='sudo'
+fi
 
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
