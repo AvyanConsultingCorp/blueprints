@@ -1,13 +1,20 @@
 #!/bin/bash
 
+SOURCEFILE=$0
+
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
 trap 'errhandle $LINENO $?' SIGINT ERR
 
 errhandle()
 {
-  echo "Error or Interruption at line ${1} exit code ${2}"
+  echo "====== ERROR or Interruption, [`date`], ${SOURCEFILE}, line ${1}, exit code ${2}"
   exit ${2}
+}
+
+logger()
+{
+  echo "====== [`date`], ${SOURCEFILE}, $*"
 }
 
 usage()
@@ -19,6 +26,8 @@ usage()
   echo "    AZURE_PUBLIC_IP:  Public IP address of the Azure OpenSwan VM"
   echo 
 }
+
+logger "STARTING"
 
 AZURE_PUBLICIP=""
 AWS_PUBLICIP=""
@@ -60,8 +69,10 @@ fi
 # 2) bash is needed instead of "sh". "sh" on Ubuntu points to "dash", which 
 #    errors on the "trap" with "trap: sigint: bad trap".
 
-echo "****** Calling vpn_common.sh"
+logger "Calling vpn_common.sh"
 bash vpn_common.sh
 
-echo "****** Calling vpn_final_updates.sh"
+logger "Calling vpn_final_updates.sh"
 bash vpn_final_updates.sh --configforazure --aws $AWS_PUBLICIP --azure $AZURE_PUBLICIP 
+
+logger "COMPLETED"

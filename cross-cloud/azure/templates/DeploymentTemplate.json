@@ -428,7 +428,7 @@
             "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common.sh",
             "https://ahnstorage.blob.core.windows.net/ahnscripts/azure/scripts/db_post_install.sh"
           ],
-          "commandToExecute": "bash db_common.sh",
+          "commandToExecute": "[concat('bash db_post_install.sh --masterip ', '192.168.1.4', ' --replpassword \"', 'somestrongreplicationpassword', '\"')]",
           "timestamp": 1
         }
       }

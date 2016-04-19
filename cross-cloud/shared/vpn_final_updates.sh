@@ -8,6 +8,8 @@
 # Command-line parameters determine if you are configuring the AWS or Azure
 # side and what the public IP addresses are for the AWS and Azure OpenSwan VMs
 
+SOURCEFILE=$0
+
 AZURE_PUBLICIP=""
 AWS_PUBLICIP=""
 CONFIGAZURE=""
@@ -17,12 +19,29 @@ LEFT=""
 LEFTSUBNET=""
 RIGHT=""
 
+# error handling or interruption via ctrl-c.
+# line number and error code of executed command is passed to errhandle function
+trap 'errhandle $LINENO $?' SIGINT ERR
+
+errhandle()
+{
+  echo "====== ERROR or Interruption, [`date`], ${SOURCEFILE}, line ${1}, exit code ${2}"
+  exit ${2}
+}
+
+logger()
+{
+  echo "====== [`date`], ${SOURCEFILE}, $*"
+}
+
 function usage
 {
     echo
     echo "usage: $0 <--configforazure | --configforaws> --aws AWS_PUBLIC_IP --azure AZURE_PUBLIC_IP"
     echo
 }
+
+logger "STARTING"
 
 # If no command-line arguements, just print the usage and exit.
 if [ "$1" == "" ]; then
@@ -128,3 +147,5 @@ echo "${AZURE_PUBLICIP} ${AWS_PUBLICIP} : PSK \"thelongsharedsupersecretkey\"
 
 # Restart the IPsec service for the changes to take affect
 sudo service ipsec restart
+
+logger "COMPLETED"

@@ -3,18 +3,39 @@
 # Everything that needs to happen in order for the Azure PostgreSQL instance to replicate from AWS
 # Right now, paths are hard-coded to PostgreSQL 9.3 install paths. 
 
-MASTERIP=""  #"10.0.1.4"
-PGPASSWORD=""  #"somestrongreplicationpassword"
+SOURCEFILE=$0
+
+# error handling or interruption via ctrl-c.
+# line number and error code of executed command is passed to errhandle function
+trap 'errhandle $LINENO $?' SIGINT ERR
+
+errhandle()
+{
+  # Ensure tracing is disabled from possibly being set elsewhere in the script
+  set +x
+  echo "====== ERROR or Interruption, [`date`], ${SOURCEFILE}, line ${1}, exit code ${2}"
+  exit ${2}
+}
+
+logger()
+{
+  echo "====== [`date`], ${SOURCEFILE}, $*"
+}
 
 function usage
 {
-    echo
-    echo "usage: $0 --masterip PSQL-MASTER-IP --replpassword PSQL-REPLICATION-ROLE-PASSWD"
-    echo
-    echo "    --masterip:  IP address of the PostgreSQL master DB" 
-    echo "    --replpassword:  password of the PostgreSQL replication role"
-    echo 
+  echo
+  echo "usage: $0 --masterip PSQL-MASTER-IP --replpassword PSQL-REPLICATION-ROLE-PASSWD"
+  echo
+  echo "    --masterip:  IP address of the PostgreSQL master DB" 
+  echo "    --replpassword:  password of the PostgreSQL replication role"
+  echo 
 }
+
+logger "STARTING"
+
+MASTERIP=""  #"192.168.1.4"
+PGPASSWORD=""  #"somestrongreplicationpassword"
 
 if [ "$1" == "" ]; then
     usage 
@@ -22,32 +43,43 @@ if [ "$1" == "" ]; then
 fi
 
 while [ "$1" != "" ]; do
-    case $1 in
-        --masterip )           
-            shift
-            MASTERIP="$1"
-            ;;
-        --replpassword )           
-            shift
-            PGPASSWORD="$1"
-            ;;
-        -h | -? | --help )           
-            usage
-            exit
-            ;;
-        * )
-            usage
-            exit 1
-            ;; 
-    esac
-    shift
+  case $1 in
+    --masterip )           
+      shift
+      MASTERIP="$1"
+      ;;
+    --replpassword )           
+      shift
+      PGPASSWORD="$1"
+      ;;
+    -h | -? | --help )           
+      usage
+      exit
+      ;;
+    * )
+      usage
+      exit 1
+      ;; 
+  esac
+  shift
 done
 
 if [ "$MASTERIP" == "" ] || [ "$PGPASSWORD" == "" ]; then 
-    # We need both command-line arguments in order to continue. 
-	echo "ERROR:  Required command line arguments are missing"
-    usage
-    exit 1
+  # We need both command-line arguments in order to continue. 
+  echo "****** ERROR:  Required command line arguments are missing"
+  usage
+  exit 1
+fi
+
+# Call the common/shared script to install/config PostgreSQL. 
+if test -e db_common.sh; then
+  bash db_common.sh
+elif test -e ../../shared/db_common.sh; then
+  # For local testing, see if db_common.sh is in the shared dir.
+  bash ../../shared/db_common.sh
+else
+  logger "ERROR: db_common.sh script not found!"
+  exit 1
 fi
 
 # shutdown the PostgreSQL server
@@ -110,3 +142,5 @@ echo
 
 #Restart PostgreSQL
 sudo /etc/init.d/postgresql start
+
+logger "COMPLETED"
