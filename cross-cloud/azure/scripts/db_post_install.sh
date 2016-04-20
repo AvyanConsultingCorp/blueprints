@@ -5,11 +5,6 @@
 
 SOURCEFILE=$0
 
-SUDO=''
-if [[ $EUID -ne 0 ]]; then
-    SUDO='sudo'
-fi
-
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
 trap 'errhandle $LINENO $?' SIGINT ERR
@@ -22,12 +17,17 @@ errhandle()
   exit ${2}
 }
 
+SUDO=''
+if [ "$EUID" != "0" ]; then
+  SUDO='sudo'
+fi
+
 logger()
 {
   echo "====== [`date`], ${SOURCEFILE}, $*"
 }
 
-function usage
+usage()
 {
   echo
   echo "usage: $0 --masterip PSQL-MASTER-IP --replpassword PSQL-REPLICATION-ROLE-PASSWD"
@@ -37,14 +37,14 @@ function usage
   echo 
 }
 
-logger "STARTING"
+logger "STARTING, command line params [$@]"
 
 MASTERIP=""  #"192.168.1.4"
 PGPASSWORD=""  #"somestrongreplicationpassword"
 
 if [ "$1" == "" ]; then
-    usage 
-	exit 1 
+  usage 
+  exit 1 
 fi
 
 while [ "$1" != "" ]; do
@@ -71,7 +71,7 @@ done
 
 if [ "$MASTERIP" == "" ] || [ "$PGPASSWORD" == "" ]; then 
   # We need both command-line arguments in order to continue. 
-  echo "****** ERROR:  Required command line arguments are missing"
+  echo "====== ERROR:  Required command line arguments are missing"
   usage
   exit 1
 fi
@@ -102,19 +102,18 @@ wal_keep_segments = 32
 hot_standby = on" | $SUDO tee -a /etc/postgresql/9.3/main/postgresql.conf
 echo
 
-# remove the current postgresql data directory on the slave
+# remove the current postgresql data directory on the slave as user "postgres"
 DIRTOREMOVE="/var/lib/postgresql/9.3/main"
 echo "Removing directory $DIRTOREMOVE"
 set -x
-$SUDO -u postgres rm -rf $DIRTOREMOVE
+su postgres -c "rm -rf $DIRTOREMOVE"
 set +x
 echo
 
-# restore the master db on the slave
-#PGPASSWORD="somestrongreplicationpassword" 
+# restore the master db on the slave as user "postgres"
 echo "Restoring from master server ${MASTERIP}" 
 set -x
-$SUDO -u postgres pg_basebackup -h ${MASTERIP} -D /var/lib/postgresql/9.3/main -v -P -U replication --xlog-method=stream
+su postgres -l -c "pg_basebackup -h ${MASTERIP} -D /var/lib/postgresql/9.3/main -v -P -U replication --xlog-method=stream"
 set +x
 echo
 

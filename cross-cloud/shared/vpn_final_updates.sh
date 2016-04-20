@@ -10,20 +10,6 @@
 
 SOURCEFILE=$0
 
-SUDO=''
-if [[ $EUID -ne 0 ]]; then
-    SUDO='sudo'
-fi
-
-AZURE_PUBLICIP=""
-AWS_PUBLICIP=""
-CONFIGAZURE=""
-CONFIGAWS=""
-CONFIG=""
-LEFT=""
-LEFTSUBNET=""
-RIGHT=""
-
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
 trap 'errhandle $LINENO $?' SIGINT ERR
@@ -34,19 +20,33 @@ errhandle()
   exit ${2}
 }
 
+SUDO=''
+if [ "$EUID" != "0" ]; then
+    SUDO='sudo'
+fi
+
 logger()
 {
   echo "====== [`date`], ${SOURCEFILE}, $*"
 }
 
-function usage
+usage()
 {
     echo
     echo "usage: $0 <--configforazure | --configforaws> --aws AWS_PUBLIC_IP --azure AZURE_PUBLIC_IP"
     echo
 }
 
-logger "STARTING"
+logger "STARTING, command line params [$@]"
+
+AZURE_PUBLICIP=""
+AWS_PUBLICIP=""
+CONFIGAZURE=""
+CONFIGAWS=""
+CONFIG=""
+LEFT=""
+LEFTSUBNET=""
+RIGHT=""
 
 # If no command-line arguements, just print the usage and exit.
 if [ "$1" == "" ]; then

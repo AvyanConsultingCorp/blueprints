@@ -4,11 +4,6 @@
 
 SOURCEFILE=$0
 
-SUDO=''
-if [[ $EUID -ne 0 ]]; then
-    SUDO='sudo'
-fi
-
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
 trap 'errhandle $LINENO $?' SIGINT ERR
@@ -19,12 +14,17 @@ errhandle()
   exit ${2}
 }
 
+SUDO=''
+if [ "$EUID" != "0" ]; then
+    SUDO='sudo'
+fi
+
 logger()
 {
   echo "====== [`date`], ${SOURCEFILE}, $*"
 }
 
-logger "STARTING"
+logger "STARTING, command line params [$@]"
 
 # Wait for cloud-init to finish building the server
 #timeout 180 /bin/bash -c \
