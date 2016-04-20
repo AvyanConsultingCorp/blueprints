@@ -2,12 +2,28 @@
 SETLOCAL
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+IF "%4"=="" (
+    ECHO Usage: %0 subscription-id admin-address-whitelist-CIDR-format admin-password appname
+    ECHO   For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx nnn.nnn.nnn.nnn/mm pwd app1
+    EXIT /B
+    )
+
+:: Explicitly set the subscription to avoid confusion as to which subscription
+:: is active/default
+
+SET SUBSCRIPTION=%1
+SET ADMIN_ADDRESS_PREFIX=%2
+SET PASSWORD=%3
+SET APP_NAME=%4
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up variables for deploying resources to Azure.
 :: Change these variables for your own deployment
 
 :: The APP_NAME variable must not exceed 4 characters in size.
 :: If it does the 15 character size limitation of the VM name may be exceeded.
-SET APP_NAME=app1
+
 SET LOCATION=centralus
 SET ENVIRONMENT=dev
 SET USERNAME=testuser
@@ -38,21 +54,6 @@ SET WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4
 :: 	azure vm sizes --location <<location>>
 SET VM_SIZE=Standard_DS1
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-IF "%3"=="" (
-    ECHO Usage: %0 subscription-id admin-address-whitelist-CIDR-format admin-password
-    ECHO   For example: %0 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx nnn.nnn.nnn.nnn/mm pwd
-    EXIT /B
-    )
-
-:: Explicitly set the subscription to avoid confusion as to which subscription
-:: is active/default
-
-SET SUBSCRIPTION=%1
-SET ADMIN_ADDRESS_PREFIX=%2
-SET PASSWORD=%3
-
 :: Set up the names of things using recommended conventions
 SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
 SET VNET_NAME=%APP_NAME%-vnet
@@ -65,7 +66,6 @@ SET JUMPBOX_NIC_NAME=%APP_NAME%-manage-vm1-nic1
 SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 
 CALL azure config mode arm
-
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create root level resources
@@ -248,6 +248,10 @@ CALL :CallCLI azure network vnet subnet set --vnet-name %VNET_NAME% ^
 GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Subroutine to create load balancer resouces: back-end address pool, health probe, and rule
 
 :CreateCommonLBResources
@@ -345,3 +349,74 @@ IF %ERRORLEVEL% NEQ 0 (
     (GOTO) 2> NUL & GOTO :eof
 )
 GOTO :eof
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+: Create UDR
+:::::::::::::::::::::::::::::::::::::::
+
+SET APP_DMZ_SUBNET_NAME=%APP_NAME%-dmz-subnet
+SET APP_DMZ_SUBNET_NIC_NAME=%APP_NAME%-dmz-subnet-nic
+SET DMZ_SUBNET_IP_RANGE=10.0.4.0/24
+SET VIRTUAL_APPLIANCE_IP=10.0.4.4
+
+:: Create DMZ Subnet
+CALL :CallCLI azure network vnet subnet create ^
+  --name %APP_DMZ_SUBNET_NAME% ^
+  --address-prefix %DMZ_SUBNET_IP_RANGE% ^
+  --vnet-name %VNET_NAME% ^
+  --resource-group %RESOURCE_GROUP% ^
+  --subscription %SUBSCRIPTION%
+
+  CALL :CallCLI azure network nic set
+  --name %APP_DMZ_SUBNET_NIC_NAME% ^
+  --enable-ip-forwarding true ^
+  --resource-group %RESOURCE_GROUP%
+
+:: Create UDR in web subnet
+
+SET APP_WEB_UDR=%APP_NAME%-web-udr
+SET APP_BIZ_UDR=%APP_NAME%-biz-udr
+
+SET APP_WEB_TO_BIZ_RT=%APP_NAME%-web-to-biz-rt
+SET APP_BIZ_TO_WEB_RT=%APP_NAME%-biz-to-web-rt
+
+
+CALL :CallCLI azure network route-table create ^
+  -name %APP_WEB_UDR% ^
+  --location %LOCATION% ^
+  %POSTFIX%
+
+CALL :CallCLI azure network route-table route create ^
+  --name %APP_WEB_TO_BIZ_RT% ^
+  --route-table-name %APP_WEB_UDR% ^
+  --address-prefix %BIZ_SUBNET_IP_RANGE% ^
+  --next-hop-type VirtualAppliance ^
+  --next-hop-ip-address %VIRTUAL_APPLIANCE_IP% ^
+  --resource-group %RESOURCE_GROUP%
+
+CALL :CallCLI azure network vnet subnet set ^
+  --name %APP_NAME%-web-subnet ^
+  --vnet-name %VNET_NAME% ^
+  --route-table-name %APP_WEB_UDR% ^
+  --resource-group %RESOURCE_GROUP% 
+
+:: Create UDR in biz subnet
+
+CALL :CallCLI azure network route-table create ^
+  --name %APP_BIZ_UDR% ^
+  --location %LOCATION% ^
+  %POSTFIX%
+
+CALL :CallCLI azure network route-table route create ^
+  --name %APP_BIZ_TO_WEB_RT% ^
+  --route-table-name %APP_BIZ_UDR% ^
+  --address-prefix %WEB_SUBNET_IP_RANGE% ^
+  --next-hop-type VirtualAppliance ^
+  --next-hop-ip-address %VIRTUAL_APPLIANCE_IP% ^
+  --resource-group %RESOURCE_GROUP% 
+
+CALL :CallCLI azure network vnet subnet set ^
+  --name %APP_NAME%-biz-subnet ^
+  --vnet-name %VNET_NAME% ^
+  --route-table-name %APP_BIZ_UDR% ^
+  --resource-group %RESOURCE_GROUP% 
