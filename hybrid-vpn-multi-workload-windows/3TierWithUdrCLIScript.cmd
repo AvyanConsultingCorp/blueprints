@@ -68,6 +68,12 @@ SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 CALL azure config mode arm
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+CALL :CreateUDR
+GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create root level resources
 
 :: Create the enclosing resource group
@@ -351,13 +357,27 @@ IF %ERRORLEVEL% NEQ 0 (
 GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-: Create UDR
+:CreateUDR
 :::::::::::::::::::::::::::::::::::::::
 
 SET APP_DMZ_SUBNET_NAME=%APP_NAME%-dmz-subnet
 SET APP_DMZ_SUBNET_NIC_NAME=%APP_NAME%-dmz-subnet-nic
+SET APP_DMZ_WEB_NIC_NAME=%APP_NAME%-dmz-web-nic
+SET APP_DMZ_BIZ_NIC_NAME=%APP_NAME%-dmz-biz-nic
+SET APP_DMZ_DB_NIC_NAME=%APP_NAME%-dmz-db-nic
 SET DMZ_SUBNET_IP_RANGE=10.0.4.0/24
 SET VIRTUAL_APPLIANCE_IP=10.0.4.4
+SET DMZ_NSA_PIP_NAME=nsa-pip
+SET VIRTUAL_APPLIANCE_VM=dmz-vm
+SET VIRTUAL_APPLIANCE_VHD_STORAGE=%VIRTUAL_APPLIANCE_VM:-=%st1
+SET APP_DMZ_AVAILSET_NAME=%APP_NAME%-dmz-as
+SET VIRTUAL_APPLIANCE_VM_SIZE=Standard_A4
+
+SET APP_WEB_UDR=%APP_NAME%-web-udr
+SET APP_BIZ_UDR=%APP_NAME%-biz-udr
+
+SET APP_WEB_TO_BIZ_RT=%APP_NAME%-web-to-biz-rt
+SET APP_BIZ_TO_WEB_RT=%APP_NAME%-biz-to-web-rt
 
 :: Create DMZ Subnet
 CALL :CallCLI azure network vnet subnet create ^
@@ -367,20 +387,90 @@ CALL :CallCLI azure network vnet subnet create ^
   --resource-group %RESOURCE_GROUP% ^
   --subscription %SUBSCRIPTION%
 
-  CALL :CallCLI azure network nic set
-  --name %APP_DMZ_SUBNET_NIC_NAME% ^
-  --enable-ip-forwarding true ^
+:: Create NSA PIP
+CALL :CallCLI azure network public-ip create ^
+  --name %DMZ_NSA_PIP_NAME% ^
+  --location %LOCATION% ^
   --resource-group %RESOURCE_GROUP%
 
+:: Create public NIC for dmz and connect to dmz subnet, 
+:: and set enable-ip-forwarding to true
+CALL :CallCLI azure network nic create ^
+  --name %APP_DMZ_SUBNET_NIC_NAME% ^
+  --public-ip-name %DMZ_NSA_PIP_NAME% ^
+  --subnet-vnet-name %VNET_NAME% ^
+  --subnet-name %APP_DMZ_SUBNET_NAME% ^
+  --enable-ip-forwarding true ^
+  --location %LOCATION% ^
+  %POSTFIX%
+
+:: Create NICs for connecting jump box to web tier VMs
+CALL :CallCLI azure network nic create ^
+  --name %APP_DMZ_WEB_NIC_NAME% ^
+  --subnet-vnet-name %VNET_NAME% ^
+  --subnet-name %APP_WEB_SUBNET_NAME% ^
+  --enable-ip-forwarding true ^
+  --location %LOCATION% ^
+  --resource-group %RESOURCE_GROUP%
+ 
+:: Create NICs for connecting jump box to biz tier VMs
+CALL :CallCLI azure network nic create ^
+  --name %APP_DMZ_BIZ_NIC_NAME% ^
+  --subnet-vnet-name %VNET_NAME% ^
+  --subnet-name %APP_BIZ_SUBNET_NAME% ^
+  --enable-ip-forwarding true ^
+  --location %LOCATION% ^
+  --resource-group %RESOURCE_GROUP%
+
+:: Create NICs for connecting jump box to db tier VMs
+CALL :CallCLI azure network nic create ^
+  --name %APP_DMZ_DB_NIC_NAME% ^
+  --subnet-vnet-name %VNET_NAME% ^
+  --subnet-name %APP_DB_SUBNET_NAME% ^
+  --enable-ip-forwarding true ^
+  --location %LOCATION% ^
+  --resource-group %RESOURCE_GROUP%
+
+:: Create the storage account for the OS VHD
+CALL :CallCLI azure storage account create ^
+  %VIRTUAL_APPLIANCE_VHD_STORAGE% ^
+  --type PLRS ^
+  --location %LOCATION% ^
+  %POSTFIX%
+
+:: Create the availability sets
+CALL :CallCLI azure availset create ^
+  --name %APP_DMZ_AVAILSET_NAME% ^
+  --location %LOCATION% ^
+  %POSTFIX%
+
+  :: For Ubuntu, use the following command to get the list of URNs:
+:: azure vm image list %LOCATION% canonical 
+SET UBUNTU_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
+
+:: For a list of VM sizes see: https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/
+:: To see the VM sizes available in a region:
+:: 	azure vm sizes --location <<location>>
+
+CALL :CallCLI azure vm create ^
+  --name %VIRTUAL_APPLIANCE_VM% ^ 
+  --os-type Linux ^
+  --image-urn %UBUNTU_IMAGE% ^
+  --vm-size %VIRTUAL_APPLIANCE_VM_SIZE% ^
+  --vnet-subnet-name %APP_DMZ_SUBNET_NAME% ^
+  --nic-names %APP_DMZ_SUBNET_NIC_NAME%,%APP_DMZ_WEB_NIC_NAME%,%APP_DMZ_BIZ_NIC_NAME%,%APP_DMZ_DB_NIC_NAME% ^
+  --vnet-name %VNET_NAME% ^
+  --storage-account-name %VIRTUAL_APPLIANCE_VHD_STORAGE% ^
+  --os-disk-vhd "%VIRTUAL_APPLIANCE_VM%-osdisk.vhd" ^
+  --admin-username "%USERNAME%" ^
+  --admin-password "%PASSWORD%" ^
+  --boot-diagnostics-storage-uri "https://%DIAGNOSTICS_STORAGE%.blob.core.windows.net/" ^
+  --availset-name %APP_DMZ_AVAILSET_NAME% ^
+  --location %LOCATION% ^
+  %POSTFIX%
+
+ 
 :: Create UDR in web subnet
-
-SET APP_WEB_UDR=%APP_NAME%-web-udr
-SET APP_BIZ_UDR=%APP_NAME%-biz-udr
-
-SET APP_WEB_TO_BIZ_RT=%APP_NAME%-web-to-biz-rt
-SET APP_BIZ_TO_WEB_RT=%APP_NAME%-biz-to-web-rt
-
-
 CALL :CallCLI azure network route-table create ^
   -name %APP_WEB_UDR% ^
   --location %LOCATION% ^
