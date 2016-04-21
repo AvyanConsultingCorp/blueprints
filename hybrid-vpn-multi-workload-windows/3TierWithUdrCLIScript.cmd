@@ -68,12 +68,6 @@ SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 CALL azure config mode arm
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-CALL :CreateUDR
-GOTO :eof
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create root level resources
 
 :: Create the enclosing resource group
@@ -251,12 +245,13 @@ CALL :CallCLI azure network vnet subnet set --vnet-name %VNET_NAME% ^
   --name %APP_NAME%-db-subnet ^
 	--network-security-group-name %DB_TIER_NSG_NAME% %POSTFIX%
 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+CALL :CreateUDR
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Subroutine to create load balancer resouces: back-end address pool, health probe, and rule
 
@@ -357,9 +352,12 @@ IF %ERRORLEVEL% NEQ 0 (
 GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :CreateUDR
 :::::::::::::::::::::::::::::::::::::::
-
+SET APP_WEB_SUBNET_NAME=%APP_NAME%-web-subnet
+SET APP_BIZ_SUBNET_NAME=%APP_NAME%-biz-subnet
+SET APP_DB_SUBNET_NAME=%APP_NAME%-db-subnet
 SET APP_DMZ_SUBNET_NAME=%APP_NAME%-dmz-subnet
 SET APP_DMZ_SUBNET_NIC_NAME=%APP_NAME%-dmz-subnet-nic
 SET APP_DMZ_WEB_NIC_NAME=%APP_NAME%-dmz-web-nic
@@ -372,10 +370,8 @@ SET VIRTUAL_APPLIANCE_VM=dmz-vm
 SET VIRTUAL_APPLIANCE_VHD_STORAGE=%VIRTUAL_APPLIANCE_VM:-=%st1
 SET APP_DMZ_AVAILSET_NAME=%APP_NAME%-dmz-as
 SET VIRTUAL_APPLIANCE_VM_SIZE=Standard_A4
-
 SET APP_WEB_UDR=%APP_NAME%-web-udr
 SET APP_BIZ_UDR=%APP_NAME%-biz-udr
-
 SET APP_WEB_TO_BIZ_RT=%APP_NAME%-web-to-biz-rt
 SET APP_BIZ_TO_WEB_RT=%APP_NAME%-biz-to-web-rt
 
@@ -444,23 +440,17 @@ CALL :CallCLI azure availset create ^
   --location %LOCATION% ^
   %POSTFIX%
 
-  :: For Ubuntu, use the following command to get the list of URNs:
+:: Use the following command to get the updated list of Ubuntu URNs:
 :: azure vm image list %LOCATION% canonical 
 SET UBUNTU_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
-
-:: For a list of VM sizes see: https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-size-specs/
-:: To see the VM sizes available in a region:
-:: 	azure vm sizes --location <<location>>
-
 CALL :CallCLI azure vm create ^
-  --name %VIRTUAL_APPLIANCE_VM% ^ 
+  --name %VIRTUAL_APPLIANCE_VM% ^
   --os-type Linux ^
   --image-urn %UBUNTU_IMAGE% ^
   --vm-size %VIRTUAL_APPLIANCE_VM_SIZE% ^
   --vnet-subnet-name %APP_DMZ_SUBNET_NAME% ^
   --nic-names %APP_DMZ_SUBNET_NIC_NAME%,%APP_DMZ_WEB_NIC_NAME%,%APP_DMZ_BIZ_NIC_NAME%,%APP_DMZ_DB_NIC_NAME% ^
   --vnet-name %VNET_NAME% ^
-  --storage-account-name %VIRTUAL_APPLIANCE_VHD_STORAGE% ^
   --os-disk-vhd "%VIRTUAL_APPLIANCE_VM%-osdisk.vhd" ^
   --admin-username "%USERNAME%" ^
   --admin-password "%PASSWORD%" ^
@@ -468,11 +458,10 @@ CALL :CallCLI azure vm create ^
   --availset-name %APP_DMZ_AVAILSET_NAME% ^
   --location %LOCATION% ^
   %POSTFIX%
-
  
 :: Create UDR in web subnet
 CALL :CallCLI azure network route-table create ^
-  -name %APP_WEB_UDR% ^
+  --name %APP_WEB_UDR% ^
   --location %LOCATION% ^
   %POSTFIX%
 
@@ -510,3 +499,10 @@ CALL :CallCLI azure network vnet subnet set ^
   --vnet-name %VNET_NAME% ^
   --route-table-name %APP_BIZ_UDR% ^
   --resource-group %RESOURCE_GROUP% 
+
+GOTO :eof
+
+:: End of :CreateUDR
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  
