@@ -443,13 +443,17 @@ CALL :CallCLI azure availset create ^
 :: Use the following command to get the updated list of Ubuntu URNs:
 :: azure vm image list %LOCATION% canonical 
 SET UBUNTU_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
-CALL :CallCLI azure vm create ^
+
+SET USE_LINUX=FALSE
+
+IF "%USE_LINUX%" == "TRUE" (
+  CALL :CallCLI azure vm create ^
   --name %VIRTUAL_APPLIANCE_VM% ^
   --os-type Linux ^
   --image-urn %UBUNTU_IMAGE% ^
   --vm-size %VIRTUAL_APPLIANCE_VM_SIZE% ^
   --vnet-subnet-name %APP_DMZ_SUBNET_NAME% ^
-  --nic-names %APP_DMZ_SUBNET_NIC_NAME%,%APP_DMZ_WEB_NIC_NAME%,%APP_DMZ_BIZ_NIC_NAME%,%APP_DMZ_DB_NIC_NAME% ^
+  --nic-name %APP_DMZ_SUBNET_NIC_NAME% ^
   --vnet-name %VNET_NAME% ^
   --os-disk-vhd "%VIRTUAL_APPLIANCE_VM%-osdisk.vhd" ^
   --admin-username "%USERNAME%" ^
@@ -458,6 +462,28 @@ CALL :CallCLI azure vm create ^
   --availset-name %APP_DMZ_AVAILSET_NAME% ^
   --location %LOCATION% ^
   %POSTFIX%
+
+  ::  --nic-names %APP_DMZ_SUBNET_NIC_NAME%,%APP_DMZ_WEB_NIC_NAME%,%APP_DMZ_BIZ_NIC_NAME%,%APP_DMZ_DB_NIC_NAME% ^
+
+) ELSE (
+
+  CALL :CallCLI azure vm create ^
+  --name %VIRTUAL_APPLIANCE_VM% ^
+  --os-type Windows ^
+  --image-urn %WINDOWS_BASE_IMAGE% ^
+  --vm-size %VM_SIZE% ^
+  --vnet-subnet-name %APP_DMZ_SUBNET_NAME% ^
+  --nic-name %APP_DMZ_SUBNET_NIC_NAME% ^
+  --vnet-name %VNET_NAME% ^
+  --os-disk-vhd "%VIRTUAL_APPLIANCE_VM%-osdisk.vhd" ^
+  --admin-username "%USERNAME%" ^
+  --admin-password "%PASSWORD%" ^
+  --boot-diagnostics-storage-uri "https://%DIAGNOSTICS_STORAGE%.blob.core.windows.net/" ^
+  --availset-name %APP_DMZ_AVAILSET_NAME% ^
+  --location %LOCATION% ^
+  %POSTFIX%
+
+)
  
 :: Create UDR in web subnet
 CALL :CallCLI azure network route-table create ^
