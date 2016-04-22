@@ -68,13 +68,6 @@ SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 CALL azure config mode arm
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-CALL :CreateUDR
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-GOTO :eof
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create root level resources
 
 :: Create the enclosing resource group
@@ -373,15 +366,13 @@ SET APP_DMZ_DB_NIC_NAME=%APP_NAME%-dmz-db-nic
 SET DMZ_SUBNET_IP_RANGE=10.0.4.0/24
 SET VIRTUAL_APPLIANCE_IP=10.0.4.4
 SET DMZ_NSA_PIP_NAME=nsa-pip
-SET VIRTUAL_APPLIANCE_VM=dmz-vm
+SET VIRTUAL_APPLIANCE_VM=%APP_NAME%-dmz-vm
 SET APP_DMZ_AVAILSET_NAME=%APP_NAME%-dmz-as
 SET VIRTUAL_APPLIANCE_VM_SIZE=Standard_A4
 SET APP_WEB_UDR=%APP_NAME%-web-udr
 SET APP_BIZ_UDR=%APP_NAME%-biz-udr
 SET APP_WEB_TO_BIZ_RT=%APP_NAME%-web-to-biz-rt
 SET APP_BIZ_TO_WEB_RT=%APP_NAME%-biz-to-web-rt
-
-GOTO :resume_here
 
 :: Create DMZ Subnet
 CALL :CallCLI azure network vnet subnet create ^
@@ -442,13 +433,9 @@ CALL :CallCLI azure availset create ^
   --location %LOCATION% ^
   %POSTFIX%
 
-:resume_here
-echo resume_here
-
 :: Use the following command to get the updated list of Ubuntu URNs:
 :: azure vm image list %LOCATION% canonical 
-SET UBUNTU_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
-
+::SET UBUNTU_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
 ::SET USE_LINUX=FALSE
 ::IF "%USE_LINUX%" == "TRUE" (
 ::  CALL :CallCLI azure vm create ^
@@ -469,13 +456,14 @@ SET UBUNTU_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
 
 ::  --nic-names %APP_DMZ_SUBNET_NIC_NAME%,%APP_DMZ_WEB_NIC_NAME%,%APP_DMZ_BIZ_NIC_NAME%,%APP_DMZ_DB_NIC_NAME% ^
 ::) ELSE (
+
   CALL :CallCLI azure vm create ^
   --name %VIRTUAL_APPLIANCE_VM% ^
   --os-type Windows ^
   --image-urn %WINDOWS_BASE_IMAGE% ^
-  --vm-size %VM_SIZE% ^
+  --vm-size %VIRTUAL_APPLIANCE_VM_SIZE% ^
   --vnet-subnet-name %APP_DMZ_SUBNET_NAME% ^
-  --nic-name %APP_DMZ_SUBNET_NIC_NAME% ^
+  --nic-names %APP_DMZ_SUBNET_NIC_NAME%,%APP_DMZ_WEB_NIC_NAME%,%APP_DMZ_BIZ_NIC_NAME%,%APP_DMZ_DB_NIC_NAME% ^
   --vnet-name %VNET_NAME% ^
   --os-disk-vhd "%VIRTUAL_APPLIANCE_VM%-osdisk.vhd" ^
   --admin-username "%USERNAME%" ^
@@ -485,6 +473,7 @@ SET UBUNTU_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
   --location %LOCATION% ^
   %POSTFIX%
 ::)
+GOTO :eof
  
 :: Create UDR in web subnet
 CALL :CallCLI azure network route-table create ^
