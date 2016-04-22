@@ -41,20 +41,25 @@ Keep in mind that this environment could support a number of different workloads
 
 ## VPN Scenario - Setting up the Environment
 ###  Azure Side
-####    Compute
-####    Storage -> Trivial
+#### Compute
+#### Storage -> Trivial
 #### Network -> the nasty bits
 #### Application -> Postgres Install
 ### AWS Side
 #### Compute
 ##### Finding Canonical's official Ubuntu AWS AMIs
-Amazon AWS AMIs (Amazon Machine Images) have different IDs in each region.  This ID is needed in the CloudFormation template for the region that you are deploying into. Specifically, it is the "ImageId" in the Properties for the "AWS::EC2::Instance" resources. Even if the image is the same, the AMI IDs will be different in each region.  In order to implement this in the CloudFormation template, a Mapping was used to map the region name to an AMI ID. The list of AMI IDs for Ubuntu images for each region was built using Canonical's Amazon EC2 AMI Locator, http://cloud-images.ubuntu.com/locator/ec2/. Using the site, we filtered on: 
+Amazon AWS AMIs (Amazon Machine Images) have different IDs in each region.  This ID is needed in the CloudFormation template for the region that you are deploying into.  Specifically, it is the "ImageId" in the Properties for the "AWS::EC2::Instance" resources. Even if the image is the same, the AMI IDs will be different in each region.  In order to implement this in the CloudFormation template, a Mapping was used to map the region name to an AMI ID. The list of AMI IDs for Ubuntu images for each region was built using Canonical's Amazon EC2 AMI Locator, http://cloud-images.ubuntu.com/locator/ec2/.  Using the site, we filtered on: 
   * Version:  14.04 LTS
   * Arch:  amd64
   * Instance Type: hvm:ebs-ssd
   
-and then copied / pasted the "Zone" and "AMI-ID" to the RegionMap mapping in the CloudFormation template. For more information on using CloudFormation Mappings, see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html. 
- 
+and then copied / pasted the returned "Zone" and "AMI-ID" to the RegionMap mapping in the CloudFormation template. For more information on using CloudFormation Mappings, see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/gettingstarted.templatebasics.html. 
+
+##### Troubleshooting cfn-init command script executions
+The AWS CloudFormation template uses cfn-init to download and execute scripts on the Azure EC2 instances in order to configure the OpenSwan IPSec tunnel and the PostgreSQL database.  See the properties "AWS::CloudFormation::Init" in the CloudFormation template, for the specifics on what scripts are downloaded and how they are executed.  For documentation on "AWS::CloudFormation::Init" see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-init.html. 
+
+In order to trouleshoot the script execution, after the EC2 instances have been deployed, SSH to the VM and view the log files in `/var/log`.  The files `cfn-init.log` and `cfn-init-cmd.log` will capture the output of the script executions, along with any script errors.
+
 #### Storage -> Trivial
 #### Network -> the nasty bits
 #### Application -> Postgres Install
