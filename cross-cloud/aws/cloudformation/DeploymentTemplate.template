@@ -1,5 +1,18 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS Hybrid Network Configuration 03.17.2016",
+
+  "Parameters": {
+    "AzurePublicIP": {
+      "Description": "Public IP address of the Azure OpenSwan server", 
+      "Type": "String"
+    },
+    "KeyPairName": {
+      "Description": "AWS Key Pair name to use for EC2 SSH",
+      "Type": "String"
+    }
+  },
+  
   "Mappings": {
     "RegionMap": {
       "ap-northeast-1": { "AMI": "ami-01ded66f" },
@@ -17,7 +30,7 @@
   },
 
   "Resources": {
-    "vpca75861c3": {
+    "vpcCrossCloud": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
         "CidrBlock": "192.168.0.0/16",
@@ -37,12 +50,12 @@
         }
       }
     },
-    "subnet5066d908": {
+    "subnetDB": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "CidrBlock": "192.168.1.0/24",
         "VpcId": {
-          "Ref": "vpca75861c3"
+          "Ref": "vpcCrossCloud"
         },
         "Tags": [
           {
@@ -57,12 +70,12 @@
         }
       }
     },
-    "subnet0f6c0b79": {
+    "subnetVpn": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "CidrBlock": "192.168.0.0/24",
         "VpcId": {
-          "Ref": "vpca75861c3"
+          "Ref": "vpcCrossCloud"
         },
         "Tags": [
           {
@@ -76,7 +89,7 @@
         }
       }
     },
-    "igw90ba08f4": {
+    "igwCrossCloud": {
       "Type": "AWS::EC2::InternetGateway",
       "Properties": { },
       "Metadata": {
@@ -103,7 +116,7 @@
       "Type": "AWS::EC2::NetworkAcl",
       "Properties": {
         "VpcId": {
-          "Ref": "vpca75861c3"
+          "Ref": "vpcCrossCloud"
         }
       },
       "Metadata": {
@@ -116,7 +129,7 @@
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
         "VpcId": {
-          "Ref": "vpca75861c3"
+          "Ref": "vpcCrossCloud"
         }
       },
       "Metadata": {
@@ -125,10 +138,10 @@
         }
       }
     },
-    "eip52877775": {
+    "eipVpnVm": {
       "Type": "AWS::EC2::EIP",
       "DependsOn": [
-        "gw2"
+        "gwAttach"
       ],
       "Properties": {
         "Domain": "vpc"
@@ -139,7 +152,7 @@
         }
       }
     },
-    "instancei01084c85": {
+    "instanceVPN": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
         "AWS::CloudFormation::Init": {
@@ -153,15 +166,32 @@
             "sources": { },
             "files": {
               "/tmp/vpn_common.sh": {
-                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common_ab.sh",
+                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_common.sh",
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              },
+              "/tmp/vpn_final_updates.sh": {
+                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/vpn_final_updates.sh",
                 "mode": "000644",
                 "owner": "root",
                 "group": "root"
               }
             },
             "commands": {
-              "installCommon": {
-                "command": "sh /tmp/vpn_common.sh",
+              "01_installCommon": {
+                "command": "bash /tmp/vpn_common.sh",
+                "ignoreErrors": "false"
+              },
+              "02_configFinal": {
+                "command": {
+                  "Fn::Join" : [ "", [ 
+                    "bash /tmp/vpn_final_updates.sh --configforaws --aws ", 
+                    { "Ref": "eipVpnVm" },
+                    " --azure ",
+                    { "Ref": "AzurePublicIP" }
+                  ] ]
+                },
                 "ignoreErrors": "false"
               }
             },
@@ -183,14 +213,14 @@
           ]
         },
         "InstanceType": "m3.large",
-        "KeyName": "AWStoAzureVPN",
+        "KeyName": { "Ref": "KeyPairName" },
         "Monitoring": "false",
         "NetworkInterfaces": [
           {
             "DeleteOnTermination": "true",
             "DeviceIndex": 0,
             "SubnetId": {
-              "Ref": "subnet0f6c0b79"
+              "Ref": "subnetVpn"
             },
             "PrivateIpAddresses": [
               {
@@ -222,50 +252,52 @@
              "# Install the files and packages from the metadata\n",
              "/usr/local/bin/cfn-init -v ",
              "         --stack ", { "Ref" : "AWS::StackName" },
-             "         --resource instancei01084c85 ",
+             "         --resource instanceVPN ",
              "         --configsets Install ",
              "         --region ", { "Ref" : "AWS::Region" }, "\n"
     ]]}}      }
     },
-    "instanceifbac0960": {
+    "instanceDB": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
         "AWS::CloudFormation::Init": {
-            "configSets" : {
-            "Install" : [ "config" ]
-          }, "config": {
-            "packages": { },
-            "groups": { },
-            "users": { },
-            "sources": { },
+          "configSets": { 
+            "Install": [ "config" ]
+          },
+          "config": {
+            "packages": {},
+            "groups": {},
+            "users": {},
+            "sources": {},
             "files": {
               "/tmp/db_common.sh": {
-                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common_ab.sh",
+                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/shared/db_common.sh",
                 "mode": "000644",
                 "owner": "root",
                 "group": "root"
               },
               "/tmp/db_post_install.sh": {
-                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/aws/scripts/db_post_install_ab.sh",
+                "source": "https://ahnstorage.blob.core.windows.net/ahnscripts/aws/scripts/db_post_install.sh",
                 "mode": "000644",
                 "owner": "root",
                 "group": "root"
               }
             },
             "commands": {
-              "installCommon": {
-                "command": "sh /tmp/db_common.sh",
+              "01_installCommon": {
+                "command": "bash /tmp/db_common.sh",
                 "ignoreErrors": "false"
               },
-              "installDB": {
-                "command": "sh /tmp/db_post_install.sh",
+              "02_installDB": {
+                "command": "bash /tmp/db_post_install.sh --replpassword \"somestrongreplicationpassword\"",
                 "ignoreErrors": "false"
               }
             },
-            "services": { }
+            "services": {}
           }
         },
         "AWS::CloudFormation::Designer": {
+          
           "id": "f3849a07-c996-469b-a65d-7e17a0a1fa3d"
         }
       },
@@ -280,14 +312,14 @@
           ]
         },
         "InstanceType": "m3.large",
-        "KeyName": "AWStoAzureVPN",
+        "KeyName": { "Ref": "KeyPairName" },
         "Monitoring": "false",
         "NetworkInterfaces": [
           {
             "DeleteOnTermination": "true",
             "DeviceIndex": 0,
             "SubnetId": {
-              "Ref": "subnet5066d908"
+              "Ref": "subnetDB"
             },
             "PrivateIpAddresses": [
               {
@@ -317,7 +349,7 @@
              "# Install the files and packages from the metadata\n",
              "/usr/local/bin/cfn-init -v ",
              "         --stack ", { "Ref" : "AWS::StackName" },
-             "         --resource instanceifbac0960 ",
+             "         --resource instanceDB ",
              "         --configsets Install ",
              "         --region ", { "Ref" : "AWS::Region" }, "\n"
     ]]}}
@@ -329,7 +361,7 @@
       "Properties": {
         "GroupDescription": "For accessing the hybrid network example",
         "VpcId": {
-          "Ref": "vpca75861c3"
+          "Ref": "vpcCrossCloud"
         }
       },
       "Metadata": {
@@ -380,7 +412,7 @@
           "Ref": "acl1880907c"
         },
         "SubnetId": {
-          "Ref": "subnet5066d908"
+          "Ref": "subnetDB"
         }
       },
       "Metadata": {
@@ -396,7 +428,7 @@
           "Ref": "acl1880907c"
         },
         "SubnetId": {
-          "Ref": "subnet0f6c0b79"
+          "Ref": "subnetVpn"
         }
       },
       "Metadata": {
@@ -405,14 +437,14 @@
         }
       }
     },
-    "gw2": {
+    "gwAttach": {
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
         "VpcId": {
-          "Ref": "vpca75861c3"
+          "Ref": "vpcCrossCloud"
         },
         "InternetGatewayId": {
-          "Ref": "igw90ba08f4"
+          "Ref": "igwCrossCloud"
         }
       },
       "Metadata": {
@@ -429,7 +461,7 @@
           "Ref": "rtba4a26cc3"
         },
         "InstanceId": {
-          "Ref": "instancei01084c85"
+          "Ref": "instanceVPN"
         }
       },
       "Metadata": {
@@ -446,10 +478,10 @@
           "Ref": "rtba4a26cc3"
         },
         "GatewayId": {
-          "Ref": "igw90ba08f4"
+          "Ref": "igwCrossCloud"
         }
       },
-      "DependsOn": "gw2",
+      "DependsOn": "gwAttach",
       "Metadata": {
         "AWS::CloudFormation::Designer": {
           "id": "634ea26a-a512-4cdc-826a-18ae7a788ad0"
@@ -460,23 +492,23 @@
     "GWSubnetRouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "SubnetId": { "Ref": "subnet0f6c0b79" },
+        "SubnetId": { "Ref": "subnetVpn" },
         "RouteTableId": { "Ref": "rtba4a26cc3" }
       }
     },
     "DBSubnetRouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "SubnetId": { "Ref": "subnet5066d908" },
+        "SubnetId": { "Ref": "subnetDB" },
         "RouteTableId": { "Ref": "rtba4a26cc3" }
       }
     },
 
-    "dchpassoc2": {
+    "dhcpassoc": {
       "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
       "Properties": {
         "VpcId": {
-          "Ref": "vpca75861c3"
+          "Ref": "vpcCrossCloud"
         },
         "DhcpOptionsId": {
           "Ref": "dopt9ac931ff"
@@ -488,17 +520,17 @@
         }
       }
     },
-    "assoc2": {
+    "assocEipVpnVm": {
       "Type": "AWS::EC2::EIPAssociation",
       "Properties": {
         "AllocationId": {
           "Fn::GetAtt": [
-            "eip52877775",
+            "eipVpnVm",
             "AllocationId"
           ]
         },
         "InstanceId": {
-          "Ref": "instancei01084c85"
+          "Ref": "instanceVPN"
         }
       },
       "Metadata": {
@@ -564,7 +596,12 @@
         "IpProtocol": "udp",
         "FromPort": "4500",
         "ToPort": "4500",
-        "CidrIp": "40.79.46.87/32"
+        "CidrIp": {
+          "Fn::Join" : [ "", [ 
+            { "Ref": "AzurePublicIP" },
+            "/32"
+          ] ]
+        }
       }
     },
     "ingress13": {
@@ -576,7 +613,12 @@
         "IpProtocol": "udp",
         "FromPort": "500",
         "ToPort": "500",
-        "CidrIp": "40.79.46.87/32"
+        "CidrIp": {
+          "Fn::Join" : [ "", [ 
+            { "Ref": "AzurePublicIP" },
+            "/32"
+          ] ]
+        }
       }
     },
     "ingress14": {
@@ -602,7 +644,30 @@
       }
     }
   },
-  "Description": "AWS Hybrid Network Configuration 03.17.2016",
+
+  "Outputs": {
+    "publicIPAddress": {
+      "Description": "Public IP Address of the OpenSwan VM",
+      "Value": { "Ref": "eipVpnVm"}
+    },
+    "TestBuildCommand": {
+      "Description": "Testing Join and other built-ins to build a command", 
+      "Value": { 
+        "Fn::Join" : [ "", [ 
+          "bash /tmp/vpn_final_updates.sh --configforaws --aws ", 
+          { "Ref": "eipVpnVm" },
+          " --azure ",
+          { "Ref": "AzurePublicIP" }
+        ] ] 
+      }
+       
+    },
+    "PassedKeyPairName": {
+      "Description": "Passed Key Pair Name",
+      "Value": { "Ref": "KeyPairName" }
+    }
+  },
+
   "Metadata": {
     "AWS::CloudFormation::Designer": {
       "ad15208d-4038-4d43-90ea-fadb9b6ce3ac": {
