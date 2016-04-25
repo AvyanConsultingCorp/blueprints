@@ -22,6 +22,8 @@ SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 SET VNET_NAME=%APP_NAME%-vnet
 SET VNET_IP_RANGE=10.20.0.0/16
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET VPN_GATEWAY_SUBNET_IP_RANGE=10.20.255.224/27
+SET VPN_GATEWAY_NAME=%APP_NAME%-vgw
 SET VPN_PUBLIC_IP_NAME=%APP_NAME%-pip
 SET VPN_LOCAL_GATEWAY_NAME=%APP_NAME%-lgw
 SET VPN_CONNECTION_NAME=%APP_NAME%-vpn
@@ -42,10 +44,10 @@ CALL azure config mode arm
 CALL :CallCLI azure group create --name %RESOURCE_GROUP% --location %LOCATION% --subscription %SUBSCRIPTION%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create vnet
-CALL :CallCLI azure network vnet create --address-prefixes %VNET_IP_RANGE% --name %VNET_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network vnet create --name %VNET_NAME% --address-prefixes %VNET_IP_RANGE% --location %LOCATION% %POSTFIX%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create vpn
-CALL :CallCLI azure network vnet subnet create --name GatewaySubnet --vnet-name %VNET_NAME% --address-prefix %GATEWAY_SUBNET_IP_RANGE% %POSTFIX%
+CALL :CallCLI azure network vnet subnet create --name GatewaySubnet --vnet-name %VNET_NAME% --address-prefix %VPN_GATEWAY_SUBNET_IP_RANGE% %POSTFIX%
 CALL :CallCLI azure network public-ip create --name %VPN_PUBLIC_IP_NAME% --allocation-method Dynamic --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network vpn-gateway create --name %VPN_GATEWAY_NAME% --vpn-type %VPN_GATEWAY_TYPE% --public-ip-name %VPN_PUBLIC_IP_NAME% --vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network local-gateway create --name %VPN_LOCAL_GATEWAY_NAME% --address-space %ON_PREMISES_ADDRESS_SPACE% --ip-address %ON_PREMISES_PUBLIC_IP% --location %LOCATION% %POSTFIX%
