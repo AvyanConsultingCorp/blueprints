@@ -59,10 +59,17 @@ SET NA_VM1_BE_NIC=%APP_NAME%-na-vm1-be-nic
 SET NA_VM1_FE_NIC_IP=10.20.1.4
 SET NA_VM1_BE_NIC_IP=10.20.2.4
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET WEB_TIER_NAME=web
+SET WEB_TIER_AVAILSET_NAME=%APP_NAME%-%TIER_NAME%-as
+SET WEB_TIER_SUBNET_IP_RANGE=10.20.3.0/24
+SET WEB_TIER_ILB_IP_ADDRESS=10.20.3.254
+SET WEB_TIER_NUM_VM_INSTANCES=2
+SET WEB_TIER_USING_AVAILSET=true
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CALL azure config mode arm
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 GOTO :RESUME
-
+:RESUME
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CALL :CallCLI azure group create --name %RESOURCE_GROUP% --location %LOCATION% --subscription %SUBSCRIPTION%
 :: Create the storage account for diagnostics logs
@@ -94,11 +101,119 @@ CALL :CallCLI azure network nic create --name %NA_VM1_FE_NIC% --subnet-name %NAF
 CALL :CallCLI azure network nic address-pool create --name %NA_VM1_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM1_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_FE_NIC%,%NA_VM1_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
-:RESUME
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create the web tier
+:: Web tier has a public IP, load balancer, availability set, and two VMs
+SET TIER_NAME=web
+SET TIER_AVAILSET_NAME=%APP_NAME%-%TIER_NAME%-as
+SET TIER_SUBNET_IP_RANGE=10.20.3.0/24
+SET TIER_ILB_IP_ADDRESS=10.20.3.254
+SET TIER_NUM_VM_INSTANCES=2
+SET TIER_USING_AVAILSET=true
 
+SET TIER_NAME=%WEB_TIER_NAME%
+SET TIER_AVAILSET_NAME=%WEB_TIER_AVAILSET_NAME%
+SET TIER_SUBNET_IP_RANGE=%WEB_TIER_SUBNET_IP_RANGE%
+SET TIER_ILB_IP_ADDRESS=%WEB_TIER_ILB_IP_ADDRESS%
+SET TIER_NUM_VM_INSTANCES=%WEB_TIER_NUM_VM_INSTANCES%
+SET TIER_USING_AVAILSET=%WEB_TIER_USING_AVAILSET%
+CALL :CreateTier
 GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Subroutine to create the web, biz, or data tier
+:CreateTier
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET TIER_LB_NAME=%APP_NAME%-%TIER_NAME%-lb
+SET TIER_SUBNET_NAME=%APP_NAME%-%TIER_NAME%-subnet
+CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix %TIER_SUBNET_IP_RANGE% --name %TIER_SUBNET_NAME% %POSTFIX%
+
+CALL :CreateLB %TIER_LB_NAME%
+
+IF "%TIER_USING_AVAILSET%"=="true" (
+  CALL :CallCLI azure availset create --name %TIER_AVAILSET_NAME% --location %LOCATION% %POSTFIX%
+)
+
+FOR /L %%I IN (1,1,%TIER_NUM_VM_INSTANCES%) DO CALL :CreateVM %%I %TIER_NAME% %TIER_SUBNET_NAME% %TIER_USING_AVAILSET% %TIER_LB_NAME%
+GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Subroutine to create load balancer resouces: back-end address pool, health probe, and rule
+:CreateLB
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET LB_NAME=%1
+SET LB_FRONTEND_NAME=%LB_NAME%-frontend
+SET LB_BACKEND_NAME=%LB_NAME%-backend-pool
+SET LB_PROBE_NAME=%LB_NAME%-probe
+SET LB_FRONT_IP_NAME=%LB_NAME%-frontend
+
+CALL :CallCLI azure network lb create --name %TIER_LB_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network lb frontend-ip create --name %LB_FRONT_IP_NAME% --lb-name %TIER_LB_NAME% --private-ip-address %TIER_ILB_IP_ADDRESS% --subnet-name %TIER_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% %POSTFIX%
+
+CALL :CallCLI azure network lb address-pool create --name %LB_BACKEND_NAME% --lb-name %LB_NAME% %POSTFIX%
+CALL :CallCLI azure network lb probe create --name %LB_PROBE_NAME% --lb-name %LB_NAME% --port 80 --interval 5 --count 2 --protocol http --path / %POSTFIX%
+CALL :CallCLI azure network lb rule create --name %LB_NAME%-rule-http --protocol tcp --lb-name %LB_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name %LB_FRONTEND_NAME% --probe-name %LB_PROBE_NAME% %POSTFIX%
+GOTO :eof
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Subroutine to create the VMs and per-VM resources
+:CreateVM
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET VM_TIER_NAME=%2
+SET VM_SUBNET_NAME=%3
+SET VM_NEEDS_AVAILABILITY_SET=%4
+SET VM_LB_NAME=%5
+
+SET VM_NAME=%APP_NAME%-%VM_TIER_NAME%-vm%1
+SET VM_AVAILSET_NAME=%TIER_AVAILSET_NAME%
+SET VM_NIC_NAME=%VM_NAME%-nic1
+SET VM_VHD_STORAGE=%VM_NAME:-=%st1
+SET /a RDP_PORT=50001 + %1
+SET WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
+SET VM_SIZE=Standard_DS1
+
+
+:: Create NIC for VM1
+CALL :CallCLI azure network nic create --name %VM_NIC_NAME% --subnet-name %VM_SUBNET_NAME% ^
+  --subnet-vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
+
+IF NOT "%VM_LB_NAME%"=="" (
+	:: Add NIC to back-end address pool
+	SET LB_BACKEND_NAME=%VM_LB_NAME%-backend-pool
+	CALL :CallCLI azure network nic address-pool create --name %VM_NIC_NAME% ^
+    --lb-name %VM_LB_NAME% --lb-address-pool-name %LB_BACKEND_NAME% %POSTFIX%
+)
+
+:: Create the storage account for the OS VHD
+CALL :CallCLI azure storage account create --type PLRS --location %LOCATION% ^
+ %VM_VHD_STORAGE% %POSTFIX%
+
+:: Create the VM
+IF "%VM_NEEDS_AVAILABILITY_SET%"=="true" (
+  CALL :CallCLI azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
+    %WINDOWS_BASE_IMAGE% --vm-size %VM_SIZE% --vnet-subnet-name %VM_SUBNET_NAME% ^
+    --nic-name %VM_NIC_NAME% --vnet-name %VNET_NAME% --storage-account-name ^
+    %VM_VHD_STORAGE% --os-disk-vhd "%VM_NAME%-osdisk.vhd" --admin-username ^
+    "%USERNAME%" --admin-password "%PASSWORD%" --boot-diagnostics-storage-uri ^
+    "https://%DIAGNOSTICS_STORAGE%.blob.core.windows.net/" --availset-name ^
+    %VM_AVAILSET_NAME% --location %LOCATION% %POSTFIX%
+) ELSE (
+  CALL :CallCLI azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
+    %WINDOWS_BASE_IMAGE% --vm-size %VM_SIZE% --vnet-subnet-name %VM_SUBNET_NAME% ^
+    --nic-name %VM_NIC_NAME% --vnet-name %VNET_NAME% --storage-account-name ^
+    %VM_VHD_STORAGE% --os-disk-vhd "%VM_NAME%-osdisk.vhd" --admin-username ^
+    "%USERNAME%" --admin-password "%PASSWORD%" --boot-diagnostics-storage-uri ^
+    "https://%DIAGNOSTICS_STORAGE%.blob.core.windows.net/" ^
+    --location %LOCATION% %POSTFIX%
+)
+
+:: Attach a data disk
+CALL :CallCLI azure vm disk attach-new --vm-name %VM_NAME% --size-in-gb 128 --vhd-name ^
+  %VM_NAME%-data1.vhd --storage-account-name %VM_VHD_STORAGE% %POSTFIX%
+
+goto :eof
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :CallCLI
