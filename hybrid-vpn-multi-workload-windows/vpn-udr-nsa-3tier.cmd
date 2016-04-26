@@ -59,6 +59,14 @@ SET NA_VM1_BE_NIC=%APP_NAME%-na-vm1-be-nic
 SET NA_VM1_FE_NIC_IP=10.20.1.4
 SET NA_VM1_BE_NIC_IP=10.20.2.4
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET NA_VM2_NAME=%APP_NAME%-na-vm2
+SET NA_VM2_OS_DISK_VHD_NAME="%NA_VM2_NAME%-osdisk.vhd"
+SET NA_VM2_WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
+SET NA_VM2_FE_NIC=%APP_NAME%-na-vm1-fe-nic
+SET NA_VM2_BE_NIC=%APP_NAME%-na-vm1-be-nic
+SET NA_VM2_FE_NIC_IP=10.20.1.5
+SET NA_VM2_BE_NIC_IP=10.20.2.5
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET WEB_TIER_NAME=web
 SET WEB_TIER_AVAILSET_NAME=%APP_NAME%-%TIER_NAME%-as
 SET WEB_TIER_SUBNET_IP_RANGE=10.20.3.0/24
@@ -101,6 +109,11 @@ CALL :CallCLI azure network nic create --name %NA_VM1_FE_NIC% --subnet-name %NAF
 CALL :CallCLI azure network nic address-pool create --name %NA_VM1_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM1_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_FE_NIC%,%NA_VM1_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
+:: create na_vm2
+CALL :CallCLI azure network nic create --name %NA_VM2_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
+CALL :CallCLI azure network nic address-pool create --name %NA_VM2_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
+CALL :CallCLI azure network nic create --name %NA_VM2_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
+CALL :CallCLI azure vm create --name %NA_VM2_NAME% --nic-names %NA_VM2_FE_NIC%,%NA_VM2_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM2_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM2_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the web tier
