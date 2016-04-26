@@ -65,6 +65,8 @@ GOTO :RESUME
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CALL :CallCLI azure group create --name %RESOURCE_GROUP% --location %LOCATION% --subscription %SUBSCRIPTION%
+:: Create the storage account for diagnostics logs
+CALL :CallCLI azure storage account create %DIAGNOSTICS_STORAGE% --type LRS --location %LOCATION% %POSTFIX%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create vnet
 CALL :CallCLI azure network vnet create --name %VNET_NAME% --address-prefixes %VNET_IP_RANGE% --location %LOCATION% %POSTFIX%
@@ -89,12 +91,11 @@ CALL :CallCLI azure network vnet subnet create --name %NABE_SUBNET_NAME% --vnet-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na_vm1
 CALL :CallCLI azure network nic create --name %NA_VM1_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
+CALL :CallCLI azure network nic address-pool create --name %NA_VM1_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM1_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
-
-:RESUME
-:: Create the storage account for diagnostics logs
-CALL :CallCLI azure storage account create %DIAGNOSTICS_STORAGE% --type LRS --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_FE_NIC%,%NA_VM1_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
+:RESUME
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 GOTO :eof
