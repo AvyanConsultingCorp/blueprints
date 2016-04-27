@@ -3,7 +3,7 @@
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up variables.
 :: Change these variables to match your deployment.
-SET APP_NAME=bc
+SET APP_NAME=app3
 SET ENVIRONMENT=dev
 SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
 
@@ -12,7 +12,7 @@ SET NUM_VMS=3
 
 :: Loop through all the VMs and call subroutine that installs IIS on each VM.
 :: Loop counter and the service tier name are passed as parameters.
-FOR /L %%I IN (1,1,%NUM_VMS%) DO CALL :ConfigureIIS %%I svc2
+FOR /L %%I IN (1,1,%NUM_VMS%) DO CALL :ConfigureIIS %%I svc
 
 GOTO :eof
 
@@ -31,10 +31,6 @@ ECHO Turning on IIS configuration for: %VM_NAME% under resource group: %RESOURCE
 
 CALL azure vm extension set --resource-group %RESOURCE_GROUP% --vm-name %VM_NAME% ^
 	--name DSC --publisher-name Microsoft.Powershell --version 2.9 ^
-	--public-config "{\"ModulesUrl\": \"https://github.com/mspnp/blueprints/tree/kirpas/config-dsc/config-tasks/IISConfig.zip\", \"ConfigurationFunction\": \"IISConfig.ps1\\ConfigureWeb\" }"
-
-REM CALL azure vm restart --resource-group %RESOURCE_GROUP% --name %VM_NAME%
+	--public-config "{\"ModulesUrl\": \"https://bcdiag.blob.core.windows.net/scripts/IISConfig.ps1.zip\", \"ConfigurationFunction\": \"IISConfig.ps1\\ConfigureWeb\" }"
 	
 GOTO :eof
-	
-
