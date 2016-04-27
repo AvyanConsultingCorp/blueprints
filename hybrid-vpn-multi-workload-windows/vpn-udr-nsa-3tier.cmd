@@ -43,6 +43,7 @@ SET NAFE_LOAD_BALANCER_PROBE_PROTOCOL=tcp
 SET NAFE_LOAD_BALANCER_PROBE_INTERVAL=300
 SET NAFE_LOAD_BALANCER_PROBE_COUNT=4
 SET NAFE_LOAD_BALANCER_PROBE_NAME=%NAFE_LOAD_BALANCER_NAME%-probe
+SET NAFE_LOAD_BALANCER_RULE_HTTP=%NAFE_LOAD_BALANCER_NAME%-rule-http
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET NABE_SUBNET_IP_RANGE=10.20.2.0/24
 SET NABE_SUBNET_NAME=%APP_NAME%-nabe-subnet
@@ -84,6 +85,9 @@ SET WEB_TIER_ILB_IP_ADDRESS=10.20.3.254
 SET WEB_TIER_NUM_VM_INSTANCES=2
 SET WEB_TIER_USING_AVAILSET=true
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET APP_GATEWAY_UDR=%APP_NAME%-gateway-udr
+SET APP_GATEWAY_TO_WEB_RT=%APP_NAME%-gateway-to-web-rt
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CALL azure config mode arm
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 GOTO :RESUME
@@ -105,11 +109,13 @@ CALL :CallCLI azure network vpn-connection create --name %VPN_CONNECTION_NAME% -
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-fe subnet
 CALL :CallCLI azure network vnet subnet create --name %NAFE_SUBNET_NAME% --vnet-name %VNET_NAME% --address-prefix %NAFE_SUBNET_IP_RANGE% %POSTFIX%
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: create na-fe internal load balancer
 CALL :CallCLI azure network lb create --name %NAFE_LOAD_BALANCER_NAME% --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network lb frontend-ip create --name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --subnet-vnet-name %VNET_NAME% --subnet-name %NAFE_SUBNET_NAME% --private-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
 CALL :CallCLI azure network lb address-pool create --name %NAFE_LOAD_BALANCER_POOL_NAME% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
 CALL :CallCLI azure network lb probe create --name %NAFE_LOAD_BALANCER_PROBE_NAME% --protocol %NAFE_LOAD_BALANCER_PROBE_PROTOCOL% --interval %NAFE_LOAD_BALANCER_PROBE_INTERVAL% --count %NAFE_LOAD_BALANCER_PROBE_COUNT% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
-
+::CALL :CallCLI azure network lb rule create --name %NAFE_LOAD_BALANCER_RULE_HTTP% --protocol tcp --lb-name %NAFE_LOAD_BALANCER_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --probe-name %NAFE_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-be subnet
 CALL :CallCLI azure network vnet subnet create --name %NABE_SUBNET_NAME% --vnet-name %VNET_NAME% --address-prefix %NABE_SUBNET_IP_RANGE% %POSTFIX%
@@ -119,13 +125,11 @@ CALL :CallCLI azure network nic create --name %NA_VM1_FE_NIC% --subnet-name %NAF
 CALL :CallCLI azure network nic address-pool create --name %NA_VM1_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM1_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_FE_NIC%,%NA_VM1_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
-
 :: create na_vm2
 CALL :CallCLI azure network nic create --name %NA_VM2_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure network nic address-pool create --name %NA_VM2_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM2_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure vm create --name %NA_VM2_NAME% --nic-names %NA_VM2_FE_NIC%,%NA_VM2_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM2_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM2_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
-
 :: create na_vm3
 CALL :CallCLI azure network nic create --name %NA_VM3_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM3_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure network nic address-pool create --name %NA_VM3_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
@@ -133,8 +137,6 @@ CALL :CallCLI azure network nic create --name %NA_VM3_BE_NIC% --subnet-name %NAB
 CALL :CallCLI azure network public-ip create --name %NA_VM3_PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM3_PUBLIC_NIC% --public-ip-name %NA_VM3_PUBLIC_IP_NAME% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --enable-ip-forwarding true --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure vm create --name %NA_VM3_NAME% --nic-names %NA_VM3_PUBLIC_NIC%,%NA_VM3_FE_NIC%,%NA_VM3_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
-GOTO :eof
-
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the web tier
 :: Web tier has a public IP, load balancer, availability set, and two VMs
@@ -152,7 +154,6 @@ SET TIER_ILB_IP_ADDRESS=%WEB_TIER_ILB_IP_ADDRESS%
 SET TIER_NUM_VM_INSTANCES=%WEB_TIER_NUM_VM_INSTANCES%
 SET TIER_USING_AVAILSET=%WEB_TIER_USING_AVAILSET%
 CALL :CreateTier
-:RESUME
 CALL :CreateGatewayUDR
 GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -286,8 +287,6 @@ GOTO :eof
 :CreateGatewayUDR
 :::::::::::::::::::::::::::::::::::::::
 :: Create UDR in gateway subnet
-SET APP_GATEWAY_UDR=%APP_NAME%-gateway-udr
-SET APP_GATEWAY_TO_WEB_RT=%APP_NAME%-gateway-to-web-rt
 CALL :CallCLI azure network route-table create --name %APP_GATEWAY_UDR% --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network route-table route create --name %APP_GATEWAY_TO_WEB_RT% --route-table-name %APP_GATEWAY_UDR% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
 CALL :CallCLI azure network vnet subnet set --name GatewaySubnet --vnet-name %VNET_NAME% --route-table-name %APP_GATEWAY_UDR% --resource-group %RESOURCE_GROUP% 
