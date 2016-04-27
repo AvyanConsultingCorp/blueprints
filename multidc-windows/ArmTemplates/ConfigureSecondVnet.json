@@ -1,0 +1,259 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "existingResourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing resource group. Must be in the same subscription."
+      }
+    },
+    "existingVnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing first VNET."
+      }
+    },
+    "existingGatewayName": {
+      "type": "string",
+      "defaultValue": "first-vnet-gateway",
+      "metadata": {
+        "description": "Name of the existing first gateway"
+      }
+    },
+    "secondVnetName": {
+      "type": "string",
+      "defaultValue": "second-vnet",
+      "metadata": {
+        "description": "Name of the second VNET."
+      }
+    },
+    "secondVnetAddressPrefix1": {
+      "type": "string",
+      "defaultValue": "10.41.0.0/16",
+      "metadata": {
+        "description": "First address space for the second VNET."
+      }
+    },
+    "secondVnetAddressPrefix2": {
+      "type": "string",
+      "defaultValue": "10.42.0.0/16",
+      "metadata": {
+        "description": "Second address space for the second VNET."
+      }
+    },
+    "secondVnetFrontendSubnetName": {
+      "type": "string",
+      "defaultValue": "v2-fe-subnet",
+      "metadata": {
+        "description": "Name of the frontend subnet in the second VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
+      }
+    },
+    "secondVnetFrontendSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.41.0.0/24",
+      "metadata": {
+        "description": "The IP address prefix for the frontend subnet in the second VNET."
+      }
+    },
+    "secondVnetBackendSubnetName": {
+      "type": "string",
+      "defaultValue": "v2-be-subnet",
+      "metadata": {
+        "description": "Name of the backend subnet in the second VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
+      }
+    },
+    "secondVnetBackendSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.42.0.0/24",
+      "metadata": {
+        "description": "The IP address prefix for the backend subnet in the second VNET."
+      }
+    },
+    "secondVnetGatewaySubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.42.255.0/27",
+      "metadata": {
+        "description": "The prefix for the GatewaySubnet where the second VirtualNetworkGateway will be deployed. This must be at least /29."
+      }
+    },
+    "secondVnetDnsAddress": {
+      "type": "string",
+      "defaultValue": "8.8.8.8",
+      "metadata": {
+        "description": "DNS address space of the second VNET"
+      }
+    },
+    "secondGatewayName": {
+      "type": "string",
+      "defaultValue": "second-vnet-gateway",
+      "metadata": {
+        "description": "Name of the second gateway"
+      }
+    },
+    "secondGatewayIpName": {
+      "type": "string",
+      "defaultValue": "v2-gateway-ip",
+      "metadata": {
+        "description": "Gateway IP address name of the second VNET"
+      }
+    },
+    "secondVnetGatewayIpConfigName": {
+      "type": "string",
+      "defaultValue": "v2-gateway-ip-conf",
+      "metadata": {
+        "description": "Gateway IP config name of the second VNET"
+      }
+    },
+    "secondVnetDomainLabel": {
+      "type": "string",
+      "defaultValue": "v2gateway",
+      "metadata": {
+        "description": "Domain label for the public IP address. Required for traffic manager setup."
+      }
+    },
+    "sharedKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The shared key used to establish connection between the two VirtualNetworkGateways."
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": "2016-03-30",
+    "region": "[resourceGroup().location]",
+    "secondGatewayPublicIpName": "[parameters('secondGatewayIpName')]",
+    "firstConnectionName": "[concat(parameters('existingVnetName'),'-gwcon')]",
+    "secondConnectionName": "[concat(parameters('secondVnetName'),'-gwcon')]",
+    "secondVnetId": "[resourceId('Microsoft.Network/virtualNetworks',parameters('secondVnetName'))]",
+    "secondGatewaySubnetRef": "[concat(variables('secondVnetId'),'/subnets/','GatewaySubnet')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('secondVnetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('secondVnetAddressPrefix1')]",
+            "[parameters('secondVnetAddressPrefix2')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('secondVnetFrontendSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('secondVnetFrontendSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[parameters('secondVnetBackendSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('secondVnetBackendSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "[parameters('secondVnetGatewaySubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('secondGatewayPublicIpName')]",
+      "location": "[variables('region')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('secondVnetDomainLabel')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "name": "[parameters('secondGatewayName')]",
+      "location": "[variables('region')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('secondGatewayPublicIpName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('secondVnetName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('secondGatewaySubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('secondGatewayPublicIpName'))]"
+              }
+            },
+            "name": "vnetGatewayConfig2"
+          }
+        ],
+        "gatewayType": "Vpn",
+        "vpnType": "RouteBased",
+        "enableBgp": "false"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/connections",
+      "name": "[variables('firstConnectionName')]",
+      "location": "[variables('region')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworkGateways/', parameters('secondGatewayName'))]"
+      ],
+      "properties": {
+        "virtualNetworkGateway1": {
+          "id": "[resourceId(subscription().subscriptionId, parameters('existingResourceGroupName'),'Microsoft.Network/virtualNetworkGateways', parameters('existingGatewayName'))]"
+        },
+        "virtualNetworkGateway2": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworkGateways',parameters('secondGatewayName'))]"
+        },
+        "connectionType": "Vnet2Vnet",
+        "routingWeight": 3,
+        "sharedKey": "[parameters('sharedKey')]"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/connections",
+      "name": "[variables('secondConnectionName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworkGateways/', parameters('secondGatewayName'))]",
+        "[concat('Microsoft.Network/connections/', variables('firstConnectionName'))]"
+      ],
+      "properties": {
+        "virtualNetworkGateway1": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworkGateways',parameters('secondGatewayName'))]"
+        },
+        "virtualNetworkGateway2": {
+          "id": "[resourceId(subscription().subscriptionId, parameters('existingResourceGroupName'),'Microsoft.Network/virtualNetworkGateways', parameters('existingGatewayName'))]"
+        },
+        "connectionType": "Vnet2Vnet",
+        "routingWeight": 3,
+        "sharedKey": "[parameters('sharedKey')]"
+      }
+    }
+  ],
+  "outputs": {
+    "firstGatewayName": {
+      "type": "string",
+      "value": "[resourceId(subscription().subscriptionId, parameters('existingResourceGroupName'),'Microsoft.Network/virtualNetworkGateways', parameters('existingGatewayName'))]"
+    },
+    "secondGatewayName": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworkGateways',parameters('secondGatewayName'))]"
+    }
+  }
+}

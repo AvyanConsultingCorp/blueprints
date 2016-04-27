@@ -1,0 +1,27 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "uniqueDnsName": {
+            "value": "app13dev"
+        },
+        "primaryResourceGroup": {
+            "value": "multidc-1-rg"
+        },
+        "primaryPublicIpName": {
+            "value": "v1-gateway-ip"
+        },
+        "secondaryResourceGroup": {
+            "value": "multidc-2-rg"
+        },
+        "secondaryPublicIpName": {
+            "value": "v2-gateway-ip"
+        },
+        "primaryLocation": {
+            "value": "West US"
+        },
+        "secondaryLocation": {
+            "value": "East US"
+        }
+    }
+}

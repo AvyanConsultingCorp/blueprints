@@ -1,0 +1,124 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "trafficManagerProfileName": {
+      "type": "string",
+      "defaultValue": "app13-dev-tm",
+      "metadata": {
+        "description": "Profile name for the traffic manager."
+      }
+    },
+    "uniqueDnsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Relative DNS name for the traffic manager profile, resulting FQDN will be <uniqueDnsName>.trafficmanager.net."
+      }
+    },
+    "monitorPath": {
+      "type": "string",
+      "defaultValue": "/healthprobe/index/123",
+      "metadata": {
+        "description": "Traffic manager profile monioring path."
+      }
+    },
+    "primaryResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "Primary datacenter resource group."
+      }
+    },
+    "primaryPublicIpName": {
+      "type": "string",
+      "metadata": {
+        "description": "Primary public IP name."
+      }
+    },
+    "secondaryResourceGroup": {
+      "type": "string",
+      "metadata": {
+        "description": "Secondary datacenter resource group."
+      }
+    },
+    "secondaryPublicIpName": {
+      "type": "string",
+      "metadata": {
+        "description": "Secondary public IP name."
+      }
+    },
+    "primaryLocation": {
+      "type": "string",
+      "allowedValues": [
+        "West US",
+        "East US"
+      ]
+    },
+    "secondaryLocation": {
+      "type": "string",
+      "allowedValues": [
+        "West US",
+        "East US"
+      ]
+    }
+  },
+  "variables": {
+    "apiVersion": "2015-11-01",
+    "primaryEndpointName": "[concat(parameters('trafficManagerProfileName'),'-ep-primary')]",
+    "secondaryEndpointName": "[concat(parameters('trafficManagerProfileName'),'-ep-secondary')]",
+    "primaryTargetResourceId": "[resourceId(subscription().subscriptionId, parameters('primaryResourceGroup'),'Microsoft.Network/publicIPAddresses', parameters('primaryPublicIpName'))]",
+    "secondaryTargetResourceId": "[resourceId(subscription().subscriptionId, parameters('secondaryResourceGroup'),'Microsoft.Network/publicIPAddresses', parameters('secondaryPublicIpName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/trafficManagerProfiles",
+      "name": "[parameters('trafficManagerProfileName')]",
+      "location": "global",
+      "properties": {
+        "profileStatus": "Enabled",
+        "trafficRoutingMethod": "Priority",
+        "dnsConfig": {
+          "relativeName": "[parameters('uniqueDnsName')]",
+          "ttl": 30
+        },
+        "monitorConfig": {
+          "path": "[parameters('monitorPath')]",
+          "port": 80,
+          "protocol": "HTTP"
+        },
+        "endpoints": [
+          {
+            "name": "[variables('primaryEndpointName')]",
+            "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+            "properties": {
+              "endpointLocation": "[parameters('primaryLocation')]",
+              "endpointStatus": "Enabled",
+              "targetResourceId": "[variables('primaryTargetResourceId')]",
+              "priority": 1
+            }
+          },
+          {
+            "name": "[variables('secondaryEndpointName')]",
+            "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+            "properties": {
+              "endpointLocation": "[parameters('secondaryLocation')]",
+              "endpointStatus": "Enabled",
+              "targetResourceId": "[variables('secondaryTargetResourceId')]",
+              "priority": 100
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "firstGatewayIp": {
+      "type": "string",
+      "value": "[variables('primaryTargetResourceId')]"
+    },
+    "secondGatewayIp": {
+      "type": "string",
+      "value": "[variables('secondaryTargetResourceId')]"
+    }
+  }
+}

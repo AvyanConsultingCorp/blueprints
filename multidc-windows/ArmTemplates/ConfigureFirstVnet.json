@@ -1,0 +1,222 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "firstVnetName": {
+      "type": "string",
+      "defaultValue": "first-vnet",
+      "metadata": {
+        "description": "Name of the first VNET."
+      }
+    },
+    "firstVnetAddressPrefix1": {
+      "type": "string",
+      "defaultValue": "10.11.0.0/16",
+      "metadata": {
+        "description": "Address space one for the first VNET"
+      }
+    },
+    "firstVnetAddressPrefix2": {
+      "type": "string",
+      "defaultValue": "10.12.0.0/16",
+      "metadata": {
+        "description": "Address space two for the first VNET"
+      }
+    },
+    "firstVnetFrontendSubnetName": {
+      "type": "string",
+      "defaultValue": "v1-fe-subnet",
+      "metadata": {
+        "description": "Name of the frontend subnet in the first VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
+      }
+    },
+    "firstVnetFrontendSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.11.0.0/24",
+      "metadata": {
+        "description": "The IP address prefix for the frontend subnet in the first VNET."
+      }
+    },
+    "firstVnetBackendSubnetName": {
+      "type": "string",
+      "defaultValue": "v1-be-subnet",
+      "metadata": {
+        "description": "Name of the backend subnet in the first VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
+      }
+    },
+    "firstVnetBackendSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.12.0.0/24",
+      "metadata": {
+        "description": "The IP address prefix for the backend subnet in the first VNET."
+      }
+    },
+    "firstVnetGatewaySubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.2.255.0/27",
+      "metadata": {
+        "description": "The prefix for the GatewaySubnet where the first VirtualNetworkGateway will be deployed. This must be at least /29."
+      }
+    },
+    "firstVnetDnsAddress": {
+      "type": "string",
+      "defaultValue": "8.8.8.8",
+      "metadata": {
+        "description": "DNS address space of the first VNET"
+      }
+    },
+    "firstGatewayName": {
+      "type": "string",
+      "defaultValue": "first-vnet-gateway",
+      "metadata": {
+        "description": "Gateway name of the first VNET"
+      }
+    },
+    "firstVnetGatewayIpName": {
+      "type": "string",
+      "defaultValue": "v1-gateway-ip",
+      "metadata": {
+        "description": "Gateway IP address name of the first VNET"
+      }
+    },
+    "firstVnetDomainLabel": {
+      "type": "string",
+      "defaultValue": "v1gateway",
+      "metadata": {
+        "description": "Domain label for the public IP address. Required for traffic manager setup."
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring"
+    },
+    "DeployVMsTemplateFolder": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "template location. This path is relative to the _artifactsLocation parameter"
+      }
+    },
+    "DeployVMsTemplateFileName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of the nested template file"
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": "2016-03-30",
+    "gatewayPublicIPName": "[parameters('firstVnetGatewayIpName')]",
+    "region": "[resourceGroup().location]",
+    "firstVnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('firstVnetName'))]",
+    "firstGatewaySubnetRef": "[concat(variables('firstVnetId'),'/subnets/','GatewaySubnet')]",
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('firstVnetName')]",
+      "location": "[variables('region')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('firstVnetAddressPrefix1')]",
+            "[parameters('firstVnetAddressPrefix2')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('firstVnetFrontendSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('firstVnetFrontendSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[parameters('firstVnetBackendSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('firstVnetBackendSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "[parameters('firstVnetGatewaySubnetPrefix')]"
+            }
+          }
+        ]
+      },
+      "tags": {
+        "displayName": "VirtualNetwork"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('gatewayPublicIPName')]",
+      "location": "[variables('region')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('firstVnetDomainLabel')]"
+        }
+      },
+      "tags": {
+        "displayName": "PublicIPAddress"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "name": "[parameters('firstGatewayName')]",
+      "location": "[variables('region')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('gatewayPublicIPName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('firstGatewaySubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPublicIpName'))]"
+              }
+            },
+            "name": "vnetGatewayConfig1"
+          }
+        ],
+        "gatewayType": "Vpn",
+        "vpnType": "RouteBased",
+        "enableBgp": "false"
+      },
+      "tags": {
+        "displayName": "VirtualNetworkGateway"
+      }
+    },
+    {
+      "name": "DeployVMs",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [ ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation'), '/', parameters('DeployVMsTemplateFolder'), '/', parameters('DeployVMsTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": { }
+      }
+    }
+  ],
+  "outputs": {
+    "vnetGatewayName": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('firstGatewayName'))]"
+    }
+  }
+}
