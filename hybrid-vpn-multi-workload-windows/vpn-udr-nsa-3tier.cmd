@@ -84,7 +84,7 @@ SET APP_GATEWAY_TO_WEB_RT=%APP_NAME%-gateway-to-web-rt
 CALL azure config mode arm
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 GOTO :RESUME
-::RESUME
+:RESUME
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CALL :CallCLI azure group create --name %RESOURCE_GROUP% --location %LOCATION% --subscription %SUBSCRIPTION%
 :: Create the storage account for diagnostics logs
