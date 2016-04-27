@@ -67,6 +67,16 @@ SET NA_VM2_BE_NIC=%APP_NAME%-na-vm2-be-nic
 SET NA_VM2_FE_NIC_IP=10.20.1.5
 SET NA_VM2_BE_NIC_IP=10.20.2.5
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET NA_VM3_NAME=%APP_NAME%-na-vm3
+SET NA_VM3_OS_DISK_VHD_NAME="%NA_VM3_NAME%-osdisk.vhd"
+SET NA_VM3_WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
+SET NA_VM3_FE_NIC=%APP_NAME%-na-vm3-fe-nic
+SET NA_VM3_BE_NIC=%APP_NAME%-na-vm3-be-nic
+SET NA_VM3_PUBLIC_NIC=%APP_NAME%-na-vm3-public-nic
+SET NA_VM3_FE_NIC_IP=10.20.1.6
+SET NA_VM3_BE_NIC_IP=10.20.2.6
+SET NA_VM3_PUBLIC_IP_NAME=%APP_NAME%-na-vm3-pip
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET WEB_TIER_NAME=web
 SET WEB_TIER_AVAILSET_NAME=%APP_NAME%-%TIER_NAME%-as
 SET WEB_TIER_SUBNET_IP_RANGE=10.20.3.0/24
@@ -77,6 +87,7 @@ SET WEB_TIER_USING_AVAILSET=true
 CALL azure config mode arm
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 GOTO :RESUME
+::RESUME
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CALL :CallCLI azure group create --name %RESOURCE_GROUP% --location %LOCATION% --subscription %SUBSCRIPTION%
 :: Create the storage account for diagnostics logs
@@ -108,12 +119,21 @@ CALL :CallCLI azure network nic create --name %NA_VM1_FE_NIC% --subnet-name %NAF
 CALL :CallCLI azure network nic address-pool create --name %NA_VM1_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM1_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_FE_NIC%,%NA_VM1_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
-:RESUME
+
 :: create na_vm2
 CALL :CallCLI azure network nic create --name %NA_VM2_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure network nic address-pool create --name %NA_VM2_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM2_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure vm create --name %NA_VM2_NAME% --nic-names %NA_VM2_FE_NIC%,%NA_VM2_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM2_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM2_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
+
+:: create na_vm3
+CALL :CallCLI azure network nic create --name %NA_VM3_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM3_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
+CALL :CallCLI azure network nic address-pool create --name %NA_VM3_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
+CALL :CallCLI azure network nic create --name %NA_VM3_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM3_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
+CALL :CallCLI azure network public-ip create --name %NA_VM3_PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network nic create --name %NA_VM3_PUBLIC_NIC% --public-ip-name %NA_VM3_PUBLIC_IP_NAME% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --enable-ip-forwarding true --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure vm create --name %NA_VM3_NAME% --nic-names %NA_VM3_PUBLIC_NIC%,%NA_VM3_FE_NIC%,%NA_VM3_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
+GOTO :eof
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the web tier
@@ -132,6 +152,8 @@ SET TIER_ILB_IP_ADDRESS=%WEB_TIER_ILB_IP_ADDRESS%
 SET TIER_NUM_VM_INSTANCES=%WEB_TIER_NUM_VM_INSTANCES%
 SET TIER_USING_AVAILSET=%WEB_TIER_USING_AVAILSET%
 CALL :CreateTier
+:RESUME
+CALL :CreateGatewayUDR
 GOTO :eof
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -259,3 +281,18 @@ ECHO %CLICommand%
 GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:CreateGatewayUDR
+:::::::::::::::::::::::::::::::::::::::
+:: Create UDR in gateway subnet
+SET APP_GATEWAY_UDR=%APP_NAME%-gateway-udr
+SET APP_GATEWAY_TO_WEB_RT=%APP_NAME%-gateway-to-web-rt
+CALL :CallCLI azure network route-table create --name %APP_GATEWAY_UDR% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network route-table route create --name %APP_GATEWAY_TO_WEB_RT% --route-table-name %APP_GATEWAY_UDR% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
+CALL :CallCLI azure network vnet subnet set --name GatewaySubnet --vnet-name %VNET_NAME% --route-table-name %APP_GATEWAY_UDR% --resource-group %RESOURCE_GROUP% 
+GOTO :eof
+:: End of :CreateUDR
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
