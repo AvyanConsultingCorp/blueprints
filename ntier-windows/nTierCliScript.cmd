@@ -3,15 +3,33 @@ SETLOCAL ENABLEEXTENSIONS
 SETLOCAL ENABLEDELAYEDEXPANSION
 SET me=%~n0
 
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: The following variables MUST match the template parameters that you provide 
+:: when you deploy the SQL Server AlwaysOn Cluster template. 
+
+::  Administrator user name
+SET USERNAME=testuser
+:: Resource group
+SET RESOURCE_GROUP=app1-dev-rg
+:: Location
+SET LOCATION=westus
+:: Virtual network name
+SET VNET_NAME=autohaVNET
+:: SQL Server subnet name
+SET SQL_SUBNET_NAME=subnet-2
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+	
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up variables for deploying resources to Azure.
-:: Change these variables for your own deployment
-	
+:: Change these variables for your own deployment as needed.
+
 :: The APP_NAME variable must not exceed 4 characters in size.
 :: If it does the 15 character size limitation of the VM name may be exceeded.
 SET APP_NAME=app1
 SET ENVIRONMENT=dev
-SET USERNAME=testuser
 
 SET NUM_VM_INSTANCES_SERVICE_TIER_1=3
 SET NUM_VM_INSTANCES_SERVICE_TIER_2=3
@@ -76,17 +94,6 @@ SET JUMPBOX_NIC_NAME=%APP_NAME%-mgt-vm1-nic1
 
 :: Make sure we are in ARM mode
 CALL azure config mode arm
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: SQL AlwaysOn AG is deployed using the [marketplace template]
-:: (http://azure.microsoft.com/marketplace/partners/sqlvm/sqlserveralwayson?utm_source=mkt-sqlserveralwaysonsqlvmsample&utm_content=65c1079874254a4ab4c0f49b27381029&utm_campaign=social&utm_medium=E)
-:: We use the resource group, VNET and other relevant resources in this script as described throughout.
-:: Since template is used for setting up SQL AlwaysOn cluster, we need to make sure that resource group name
-:: and other parameters match the ones used in the template.
-SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
-SET VNET_NAME=%APP_NAME%%ENVIRONMENT%Vnet
-SET SQL_SUBNET_NAME=sqlSubnet
-SET LOCATION=westus
 
 :: AlwaysOn template creates a public load balancer that we do not need.
 SET SQL_RDP_LB_NAME=rdpLoadBalancer
