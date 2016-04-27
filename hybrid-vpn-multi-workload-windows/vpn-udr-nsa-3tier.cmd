@@ -52,13 +52,16 @@ SET NABE_SUBNET_NAME=%APP_NAME%-nabe-subnet
 SET NA_VM_SIZE=Standard_A4
 SET NA_AVAILSET_NAME=%APP_NAME%-na-as
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET NA_VM1_NAME=%APP_NAME%-na-vm1
 SET NA_VM1_OS_DISK_VHD_NAME="%NA_VM1_NAME%-osdisk.vhd"
 SET NA_VM1_WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
 SET NA_VM1_FE_NIC=%APP_NAME%-na-vm1-fe-nic
 SET NA_VM1_BE_NIC=%APP_NAME%-na-vm1-be-nic
+SET NA_VM1_PUBLIC_NIC=%APP_NAME%-na-vm1-public-nic
 SET NA_VM1_FE_NIC_IP=10.20.1.4
 SET NA_VM1_BE_NIC_IP=10.20.2.4
+SET NA_VM1_PUBLIC_IP_NAME=%APP_NAME%-na-vm1-pip
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET NA_VM2_NAME=%APP_NAME%-na-vm2
 SET NA_VM2_OS_DISK_VHD_NAME="%NA_VM2_NAME%-osdisk.vhd"
@@ -67,16 +70,6 @@ SET NA_VM2_FE_NIC=%APP_NAME%-na-vm2-fe-nic
 SET NA_VM2_BE_NIC=%APP_NAME%-na-vm2-be-nic
 SET NA_VM2_FE_NIC_IP=10.20.1.5
 SET NA_VM2_BE_NIC_IP=10.20.2.5
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SET NA_VM3_NAME=%APP_NAME%-na-vm3
-SET NA_VM3_OS_DISK_VHD_NAME="%NA_VM3_NAME%-osdisk.vhd"
-SET NA_VM3_WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
-SET NA_VM3_FE_NIC=%APP_NAME%-na-vm3-fe-nic
-SET NA_VM3_BE_NIC=%APP_NAME%-na-vm3-be-nic
-SET NA_VM3_PUBLIC_NIC=%APP_NAME%-na-vm3-public-nic
-SET NA_VM3_FE_NIC_IP=10.20.1.6
-SET NA_VM3_BE_NIC_IP=10.20.2.6
-SET NA_VM3_PUBLIC_IP_NAME=%APP_NAME%-na-vm3-pip
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET WEB_TIER_NAME=web
 SET WEB_TIER_AVAILSET_NAME=%APP_NAME%-%TIER_NAME%-as
@@ -115,7 +108,8 @@ CALL :CallCLI azure network lb create --name %NAFE_LOAD_BALANCER_NAME% --locatio
 CALL :CallCLI azure network lb frontend-ip create --name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --subnet-vnet-name %VNET_NAME% --subnet-name %NAFE_SUBNET_NAME% --private-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
 CALL :CallCLI azure network lb address-pool create --name %NAFE_LOAD_BALANCER_POOL_NAME% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
 CALL :CallCLI azure network lb probe create --name %NAFE_LOAD_BALANCER_PROBE_NAME% --protocol %NAFE_LOAD_BALANCER_PROBE_PROTOCOL% --interval %NAFE_LOAD_BALANCER_PROBE_INTERVAL% --count %NAFE_LOAD_BALANCER_PROBE_COUNT% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
-::CALL :CallCLI azure network lb rule create --name %NAFE_LOAD_BALANCER_RULE_HTTP% --protocol tcp --lb-name %NAFE_LOAD_BALANCER_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --probe-name %NAFE_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
+CALL :CallCLI azure network lb rule create --name %NAFE_LOAD_BALANCER_RULE_HTTP% --protocol tcp --lb-name %NAFE_LOAD_BALANCER_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --probe-name %NAFE_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
+::GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-be subnet
 CALL :CallCLI azure network vnet subnet create --name %NABE_SUBNET_NAME% --vnet-name %VNET_NAME% --address-prefix %NABE_SUBNET_IP_RANGE% %POSTFIX%
@@ -124,19 +118,14 @@ CALL :CallCLI azure network vnet subnet create --name %NABE_SUBNET_NAME% --vnet-
 CALL :CallCLI azure network nic create --name %NA_VM1_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure network nic address-pool create --name %NA_VM1_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM1_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM1_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
-CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_FE_NIC%,%NA_VM1_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
+CALL :CallCLI azure network public-ip create --name %NA_VM1_PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network nic create --name %NA_VM1_PUBLIC_NIC% --public-ip-name %NA_VM1_PUBLIC_IP_NAME% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --enable-ip-forwarding true --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_PUBLIC_NIC%,%NA_VM1_FE_NIC%,%NA_VM1_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
 :: create na_vm2
 CALL :CallCLI azure network nic create --name %NA_VM2_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure network nic address-pool create --name %NA_VM2_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NA_VM2_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM2_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
 CALL :CallCLI azure vm create --name %NA_VM2_NAME% --nic-names %NA_VM2_FE_NIC%,%NA_VM2_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM2_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM2_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
-:: create na_vm3
-CALL :CallCLI azure network nic create --name %NA_VM3_FE_NIC% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM3_FE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
-CALL :CallCLI azure network nic address-pool create --name %NA_VM3_FE_NIC% --lb-name %NAFE_LOAD_BALANCER_NAME% --lb-address-pool-name %NAFE_LOAD_BALANCER_POOL_NAME% %POSTFIX%
-CALL :CallCLI azure network nic create --name %NA_VM3_BE_NIC% --subnet-name %NABE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --private-ip-address %NA_VM3_BE_NIC_IP% --enable-ip-forwarding true --location %LOCATION% --resource-group %RESOURCE_GROUP%
-CALL :CallCLI azure network public-ip create --name %NA_VM3_PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
-CALL :CallCLI azure network nic create --name %NA_VM3_PUBLIC_NIC% --public-ip-name %NA_VM3_PUBLIC_IP_NAME% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --enable-ip-forwarding true --location %LOCATION% %POSTFIX%
-CALL :CallCLI azure vm create --name %NA_VM3_NAME% --nic-names %NA_VM3_PUBLIC_NIC%,%NA_VM3_FE_NIC%,%NA_VM3_BE_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the web tier
 :: Web tier has a public IP, load balancer, availability set, and two VMs
