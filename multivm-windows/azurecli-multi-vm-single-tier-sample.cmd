@@ -124,7 +124,7 @@ CALL azure network nic create --name %NIC_NAME% --subnet-name %SUBNET_NAME% ^
   --subnet-vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
 
 :: Add NIC to back-end address pool
-CALL azure network nic address-pool add --name %NIC_NAME% --lb-name %LB_NAME% ^
+CALL azure network nic address-pool create --name %NIC_NAME% --lb-name %LB_NAME% ^
   --lb-address-pool-name %LB_BACKEND_NAME% %POSTFIX%
 
 :: Create NAT rule for RDP
