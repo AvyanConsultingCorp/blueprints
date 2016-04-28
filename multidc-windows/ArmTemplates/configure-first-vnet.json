@@ -85,26 +85,6 @@
       "metadata": {
         "description": "Domain label for the public IP address. Required for traffic manager setup."
       }
-    },
-    "_artifactsLocation": {
-      "type": "string"
-    },
-    "_artifactsLocationSasToken": {
-      "type": "securestring"
-    },
-    "DeployVMsTemplateFolder": {
-      "type": "string",
-      "minLength": 1,
-      "metadata": {
-        "description": "template location. This path is relative to the _artifactsLocation parameter"
-      }
-    },
-    "DeployVMsTemplateFileName": {
-      "type": "string",
-      "minLength": 1,
-      "metadata": {
-        "description": "Name of the nested template file"
-      }
     }
   },
   "variables": {

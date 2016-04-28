@@ -25,15 +25,6 @@
     },
     "firstVnetGatewaySubnetPrefix": {
       "value": "10.12.255.0/27"
-    },
-    "_artifactsLocation": {
-      "value": "someUrl"
-    },
-    "DeployVMsTemplateFolder": {
-      "value": "templates"
-    },
-    "DeployVMsTemplateFileName": {
-      "value": "azuredeploy.json"
     }
   }
 }
