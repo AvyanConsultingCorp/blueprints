@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>06c057fd-2159-461b-90af-f2551fa1c2e0</ProjectGuid>
+    <ProjectGuid>b7b33ae1-e56a-458d-93fb-d06ddb93cd7f</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFrameworkIdentifier>Deployment</TargetFrameworkIdentifier>
@@ -26,6 +26,7 @@
   <!-- vertag<:>end -->
   <ItemGroup>
     <Folder Include="Scripts\" />
+    <Folder Include="Templates\" />
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
@@ -33,21 +34,8 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
-    <None Include="Templates\bb-nsg-remote-access.json" />
-    <None Include="Templates\bb-nsg.json" />
-    <None Include="Templates\bb-vm-1nic-pip-static-private-ip.json" />
-    <None Include="Templates\bb-vm-1nic-pip.json" />
-    <None Include="Templates\bb-vm-1nic-static-private-ip.json" />
-    <None Include="Templates\bb-vm-1nic.json" />
-    <None Include="Templates\bb-vms-1nic.json" />
-    <None Include="Templates\bb-vnet-1subnet-nsg-udr.json" />
-    <None Include="Templates\bb-vnet-1subnet-nsg.json" />
-    <None Include="Templates\bb-vnet-1subnet-udr.json" />
-    <None Include="Templates\bb-vnet-1subnet.json" />
-    <None Include="Templates\bb-vnet-1subnet.parameters.json" />
-    <None Include="Templates\bb-vnet-3subnets.json" />
-    <None Include="Templates\bb-vpn-connection.json" />
-    <None Include="Templates\bb-vpn-gateway.json" />
+    <Content Include="Templates\azuredeploy.json" />
+    <Content Include="Templates\azuredeploy.parameters.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />

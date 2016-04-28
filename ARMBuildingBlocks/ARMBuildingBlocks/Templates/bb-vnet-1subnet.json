@@ -2,21 +2,10 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "type": "string"
-    },
-    "vnetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.0.0/16"
-    },
-    "subnetNamePrefix": {
-      "type": "string",
-      "defaultValue": "subnet1"
-    },
-    "subnetPrefix": {
-      "type": "string",
-      "defaultValue": "10.0.1.0/24"
-    }
+    "baseName": { "type": "string" },
+    "vnetAddressPrefix": { "type": "string" },
+    "subnetNamePrefix": { "type": "string" },
+    "subnetPrefix": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -33,16 +22,12 @@
       },
       "properties": {
         "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnetAddressPrefix')]"
-          ]
+          "addressPrefixes": [ "[parameters('vnetAddressPrefix')]" ]
         },
         "subnets": [
           {
             "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-sn')]",
-            "properties": {
-              "addressPrefix": "[parameters('subnetPrefix')]"
-            }
+            "properties": { "addressPrefix": "[parameters('subnetPrefix')]" }
           }
         ]
       }

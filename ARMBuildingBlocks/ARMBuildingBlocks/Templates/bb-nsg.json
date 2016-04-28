@@ -19,7 +19,7 @@
     },
     "rulesAccess": {
       "type": "array",
-      "defaultValue": [ "Allow", "Deny" ]
+      "defaultValue": [ "Allow", "Allow" ]
     },
     "rulesSourceAddressPrefixes": {
       "type": "array",
