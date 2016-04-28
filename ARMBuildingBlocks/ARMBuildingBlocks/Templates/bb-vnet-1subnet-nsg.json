@@ -16,6 +16,9 @@
     "subnetPrefix": {
       "type": "string",
       "defaultValue": "10.0.1.0/24"
+    },
+    "nsgId": {
+      "type": "string"
     }
   },
   "variables": {
@@ -41,7 +44,8 @@
           {
             "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-sn')]",
             "properties": {
-              "addressPrefix": "[parameters('subnetPrefix')]"
+              "addressPrefix": "[parameters('subnetPrefix')]",
+              "networkSecurityGroup": { "id": "[parameters('nsgId')]" }
             }
           }
         ]

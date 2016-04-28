@@ -16,6 +16,9 @@
         "description": "VM name prefix"
       }
     },
+    "vmIPaddress": {
+      "type": "string"
+    },
     "snid": {
       "type": "string",
       "metadata": {
@@ -69,10 +72,23 @@
     "vmStorageAccountContainerName": "vhds",
     "vmSetting": "[variables('VMSettings')[parameters('osType')]]",
     "vmName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-vm')]",
+    "vmPIPName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-pip')]",
     "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
     "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]"
   },
   "resources": [
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('vmPIPName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      },
+      "tags": {
+        "displayName": "VM PIP"
+      }
+    },
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/networkInterfaces",
@@ -81,12 +97,19 @@
       "tags": {
         "displayName": "VM NIC"
       },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/',variables('vmPIPName'))]"
+      ],
       "properties": {
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('vmIPaddress')]",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('vmPIPName'))]"
+              },
               "subnet": {
                 "id": "[parameters('snid')]"
               }
