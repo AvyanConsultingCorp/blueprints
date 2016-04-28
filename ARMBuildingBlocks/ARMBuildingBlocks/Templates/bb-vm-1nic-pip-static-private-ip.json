@@ -5,31 +5,29 @@
     "baseName": {
       "type": "string",
       "defaultValue": "mvnet",
-      "metadata": {
-        "description": "Base name"
-      }
+      "metadata": {"description": "Base name"}
     },
     "vmNamePrefix": {
       "type": "string",
       "defaultValue": "vm01",
-      "metadata": {
-        "description": "VM name prefix"
-      }
+      "metadata": {"description": "VM name prefix"}
+    },
+    "vmComputerName": {
+      "type": "string",
+      "maxLength": 15,
+      "defaultValue": "VM01",
+      "metadata": {"description": "Computer name"}
     },
     "vmIPaddress": {
       "type": "string"
     },
     "snid": {
       "type": "string",
-      "metadata": {
-        "description": "Subnet ID for NIC"
-      }
+      "metadata": {"description": "Subnet ID for NIC"}
     },
     "stgAccountName": {
       "type": "string",
-      "metadata": {
-        "description": "Storage account name"
-      }
+      "metadata": {"description": "Storage account name"}
     },
     "osType": {
       "type": "string",
@@ -38,9 +36,7 @@
         "Windows",
         "Ubuntu"
       ],
-      "metadata": {
-        "description": "Type of OS to use for VMs: Windows or Ubuntu."
-      }
+      "metadata": {"description": "Type of OS to use for VMs: Windows or Ubuntu."}
     },
     "adminUsername": {
       "type": "string",
@@ -74,29 +70,35 @@
     "vmName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-vm')]",
     "vmPIPName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-pip')]",
     "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
-    "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]"
+    "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
+    "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
   },
   "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "2015-06-15",
+      "name": "[variables('vmAvSetName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM Availability Set" },
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 3
+      }
+    },
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('vmPIPName')]",
       "location": "[variables('location')]",
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-      },
-      "tags": {
-        "displayName": "VM PIP"
-      }
+      "tags": { "displayName": "VM PIP" },
+      "properties": { "publicIPAllocationMethod": "Dynamic" }
     },
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('vmNICName')]",
       "location": "[variables('location')]",
-      "tags": {
-        "displayName": "VM NIC"
-      },
+      "tags": { "displayName": "VM NIC" },
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/',variables('vmPIPName'))]"
       ],
@@ -107,12 +109,8 @@
             "properties": {
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[parameters('vmIPaddress')]",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('vmPIPName'))]"
-              },
-              "subnet": {
-                "id": "[parameters('snid')]"
-              }
+              "publicIPAddress": { "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('vmPIPName'))]" },
+              "subnet": { "id": "[parameters('snid')]" }
             }
           }
         ]
@@ -123,18 +121,16 @@
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(variables('vmName'))]",
       "location": "[variables('location')]",
+      "tags": { "displayName": "VM" },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('vmAvSetName'))]"
       ],
-      "tags": {
-        "displayName": "VM"
-      },
       "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('VMSetting').vmSize]"
-        },
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvSetName'))]" },
+        "hardwareProfile": { "vmSize": "[variables('VMSetting').vmSize]" },
         "osProfile": {
-          "computerName": "[variables('vmName')]",
+          "computerName": "[parameters('vmComputerName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -147,18 +143,14 @@
           },
           "osDisk": {
             "name": "[variables('vmOSDiskName')]",
-            "vhd": {
-              "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]"
-            },
+            "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           }
         },
         "networkProfile": {
           "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]"
-            }
+            { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]" }
           ]
         }
       }
