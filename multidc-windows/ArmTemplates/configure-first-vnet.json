@@ -188,7 +188,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-vms.json')]",
+          "uri": "[concat('https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/', 'configure-vms.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
