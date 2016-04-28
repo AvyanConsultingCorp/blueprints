@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "numberOfInstances": {
-      "type": "string",
+      "type": "int",
       "metadata": {
         "description": "Number of VMs to deploy"
       }
