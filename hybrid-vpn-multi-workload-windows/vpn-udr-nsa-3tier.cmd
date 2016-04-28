@@ -30,8 +30,10 @@ SET VPN_GATEWAY_SUBNET_IP_RANGE=10.20.255.224/27
 SET VPN_GATEWAY_NAME=%APP_NAME%-vgw
 SET VPN_PUBLIC_IP_NAME=%APP_NAME%-pip
 SET VPN_LOCAL_GATEWAY_NAME=%APP_NAME%-lgw
+SET VPN_LOCAL_GATEWAY_ID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/localNetworkGateways/%VPN_LOCAL_GATEWAY_NAME%
 SET VPN_CONNECTION_NAME=%APP_NAME%-vpn
 SET VPN_GATEWAY_TYPE=RouteBased
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET NAFE_SUBNET_IP_RANGE=10.20.1.0/24
 SET NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS=10.20.1.254
@@ -92,13 +94,12 @@ CALL :CallCLI azure storage account create %DIAGNOSTICS_STORAGE% --type LRS --lo
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create vnet
 CALL :CallCLI azure network vnet create --name %VNET_NAME% --address-prefixes %VNET_IP_RANGE% --location %LOCATION% %POSTFIX%
-GOTO :skip
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create vpn
 CALL :CallCLI azure network vnet subnet create --name GatewaySubnet --vnet-name %VNET_NAME% --address-prefix %VPN_GATEWAY_SUBNET_IP_RANGE% %POSTFIX%
 CALL :CallCLI azure network public-ip create --name %VPN_PUBLIC_IP_NAME% --allocation-method Dynamic --location %LOCATION% %POSTFIX%
-CALL :CallCLI azure network vpn-gateway create --name %VPN_GATEWAY_NAME% --vpn-type %VPN_GATEWAY_TYPE% --public-ip-name %VPN_PUBLIC_IP_NAME% --vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network local-gateway create --name %VPN_LOCAL_GATEWAY_NAME% --address-space %ON_PREMISES_ADDRESS_SPACE% --ip-address %ON_PREMISES_PUBLIC_IP% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network vpn-gateway create --name %VPN_GATEWAY_NAME% --default-site-id %VPN_LOCAL_GATEWAY_ID% --vpn-type %VPN_GATEWAY_TYPE% --sku-name Standard --public-ip-name %VPN_PUBLIC_IP_NAME% --vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network vpn-connection create --name %VPN_CONNECTION_NAME% --vnet-gateway1 %VPN_GATEWAY_NAME% --vnet-gateway1-group %RESOURCE_GROUP% --lnet-gateway2 %VPN_LOCAL_GATEWAY_NAME% --lnet-gateway2-group %RESOURCE_GROUP% --type IPsec --shared-key %VPN_IPSEC_SHARED_KEY% --location %LOCATION% %POSTFIX%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-fe subnet
