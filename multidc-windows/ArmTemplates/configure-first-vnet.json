@@ -113,6 +113,8 @@
     "region": "[resourceGroup().location]",
     "firstVnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('firstVnetName'))]",
     "firstGatewaySubnetRef": "[concat(variables('firstVnetId'),'/subnets/','GatewaySubnet')]",
+    "backendSubnetRef": "[concat(variables('firstVnetId'),'/subnets/',parameters('firstVnetBackendSubnetName'))]",
+    "createVMsTemplateUri": "[uri(deployment().properties.templateLink.uri, 'configure-vms.json')]"
   },
   "resources": [
     {
@@ -206,10 +208,14 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(parameters('_artifactsLocation'), '/', parameters('DeployVMsTemplateFolder'), '/', parameters('DeployVMsTemplateFileName'), parameters('_artifactsLocationSasToken'))]",
+          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-vms.json')]",
           "contentVersion": "1.0.0.0"
         },
-        "parameters": { }
+        "parameters": {
+          "numberOfInstances": { "value": 4 },
+          "subnetRef": { "value": "[variables('backendSubnetRef')]" },
+          "lbFrontendPrivateIp": { "value": "10.12.0.250" }
+        }
       }
     }
   ],

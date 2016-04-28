@@ -2,13 +2,25 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "virtualNetworkName": {
+    "numberOfInstances": {
       "type": "string",
       "metadata": {
-        "description": "Name of the virtual network"
+        "description": "Number of VMs to deploy"
       }
     },
-    "networkInterfaceName": {
+    "subnetRef": {
+      "type": "string",
+      "metadata": {
+        "description": "Id of the subnet where VMs to be created"
+      }
+    },
+    "lbFrontendPrivateIp": {
+      "type": "string",
+      "metadata": {
+        "description": "Private IP address of the frontend configuration of load balancer"
+      }
+    },
+    "networkInterfacePrefix": {
       "type": "string",
       "metadata": {
         "description": "Prefix of the network interfaces"
@@ -67,12 +79,6 @@
         "description": "This is the storage account container name"
       }
     },
-    "vmName": {
-      "type": "string",
-      "metadata": {
-        "description": "This is the prefix name for the virtual machines"
-      }
-    },
     "storageAccountName": {
       "type": "string",
       "metadata": {
@@ -86,48 +92,38 @@
         "description": "This is the allowed list of VM sizes"
       }
     },
-      "_artifactsLocation": {
-          "type": "string",
-          "metadata": {
-              "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
-          }
-      },
-      "_artifactsLocationSasToken": {
-          "type": "securestring",
-          "metadata": {
-              "description": "Auto-generated token to access _artifactsLocation"
-          }
-      },
-      "projectName": {
-          "type": "string",
-          "minLength": 1,
-          "metadata": {
-              "description": "Name of this project"
-          }
+    "projectName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Name of this project"
       }
+    }
   },
   "variables": {
     "availabilitySetName": "AvSet",
     "storageAccountType": "Standard_LRS",
-    "subnetName": "backendSubnet",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables ('subnetName'))]",
-    "numberOfInstances": 4,
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
-      "SqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'CustomScripts')]",
-      "SqlAlwaysOnConfigScriptFileName": "SqlAlwaysOnConfig.ps1"
+    "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
+    "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
+    "sqlAlwaysOnConfigScriptFileName": "ActivateDirectory.ps1",
+    "storageCopyLoopName": "storageCopy",
+    "lbBackendPool": "backendPool1"
   },
   "resources": [
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[parameters('storageAccountName')]",
+      "name": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id),'-', copyIndex())]",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
       },
+      "copy": {
+        "name": "[variables('storageCopyLoopName')]",
+        "count": "[parameters('numberOfInstances')]"
+      },
       "tags": {
-        "displayName": "StorageAccount"
+        "displayName": "StorageAccounts"
       }
     },
     {
@@ -135,6 +131,10 @@
       "type": "Microsoft.Compute/availabilitySets",
       "name": "[variables('availabilitySetName')]",
       "location": "[resourceGroup().location]",
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 3
+      },
       "tags": {
         "displayName": "AvailabilitySet"
       }
@@ -142,14 +142,13 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(parameters('networkInterfaceName'), copyindex())]",
+      "name": "[concat(parameters('networkInterfacePrefix'), copyindex())]",
       "location": "[resourceGroup().location]",
       "copy": {
         "name": "nicLoop",
-        "count": "[variables('numberOfInstances')]"
+        "count": "[parameters('numberOfInstances')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
         "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
       ],
       "properties": {
@@ -159,11 +158,11 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('subnetRef')]"
+                "id": "[parameters('subnetRef')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[concat(variables('lbID'), '/backendAddressPools/BackendPool1')]"
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
                 }
               ]
             }
@@ -179,35 +178,32 @@
       "type": "Microsoft.Network/loadBalancers",
       "name": "[parameters('loadBalancerName')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[variables('vnetID')]"
-      ],
       "properties": {
         "frontendIPConfigurations": [
           {
             "properties": {
               "subnet": {
-                "id": "[variables('subnetRef')]"
+                "id": "[parameters('subnetRef')]"
               },
-              "privateIPAddress": "10.0.2.6",
+              "privateIPAddress": "[parameters('lbFrontendPrivateIp')]",
               "privateIPAllocationMethod": "Static"
             },
-            "name": "LoadBalancerFrontend"
+            "name": "lbFrontend1"
           }
         ],
         "backendAddressPools": [
           {
-            "name": "BackendPool1"
+            "name": "variables('lbBackendPool')"
           }
         ],
         "loadBalancingRules": [
           {
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/LoadBalancerFrontend')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/lbFrontend1')]"
               },
               "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/BackendPool1')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/',variables('lbBackendPool'))]"
               },
               "probe": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"
@@ -239,15 +235,15 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'), copyindex())]",
+      "name": "[concat(parameters('vmNamePrefix'),'-', copyindex())]",
       "copy": {
         "name": "virtualMachineLoop",
-        "count": "[variables('numberOfInstances')]"
+        "count": "[parameters('numberOfInstances')]"
       },
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'), copyindex())]",
+        "[variables('storageCopyLoopName')]",
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex())]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
       ],
       "properties": {
@@ -272,7 +268,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net/vhds/','osdisk', copyindex(), '.vhd')]"
+              "uri": "[concat('http://',variables('storageCopyLoopName')[copyIndex()],'.blob.core.windows.net/vhds/','osdisk', copyindex(), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -281,46 +277,46 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfaceName'),copyindex()))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfacePrefix'),copyindex()))]"
             }
           ]
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',variables('storageCopyLoopName')[copyIndex()],'.blob.core.windows.net')]"
           }
         }
       },
       "tags": {
         "displayName": "VirtualMachines"
       },
-        "resources": [
-            {
-                "name": "SqlAlwaysOnConfig",
-                "type": "extensions",
-                "location": "[resourceGroup().location]",
-                "apiVersion": "2015-06-15",
-                "dependsOn": [
-                    "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), copyindex()))]"
-                ],
-                "tags": {
-                    "displayName": "SqlAlwaysOnConfig"
-                },
-                "properties": {
-                    "publisher": "Microsoft.Compute",
-                    "type": "CustomScriptExtension",
-                    "typeHandlerVersion": "1.4",
-                    "autoUpgradeMinorVersion": true,
-                    "settings": {
-                        "fileUris": [
-                            "[concat(parameters('_artifactsLocation'), '/', variables('SqlAlwaysOnConfigScriptFolder'), '/', variables('SqlAlwaysOnConfigScriptFileName'), parameters('_artifactsLocationSasToken'))]"
-                        ],
-                        "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('SqlAlwaysOnConfigScriptFolder'), '/', variables('SqlAlwaysOnConfigScriptFileName'))]"
-                    }
-                }
+      "resources": [
+        {
+          "name": "SqlAlwaysOnConfig",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',copyindex()))]"
+          ],
+          "tags": {
+            "displayName": "SqlAlwaysOnConfig"
+          },
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.4",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),variables('sqlAlwaysOnConfigScriptFileName'))]",
+              ],
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFolder'), '/', variables('sqlAlwaysOnConfigScriptFileName'),'-',copyIndex(1),'.ps1')]"
             }
-        ]
+          }
+        }
+      ]
     }
   ]
 }
