@@ -4,29 +4,20 @@
   "parameters": {
     "baseName": {
       "type": "string",
-      "defaultValue": "mvnet",
-      "metadata": {
-        "description": "Base name"
-      }
+      "defaultValue": "mvnet"
     },
     "vmNamePrefix": {
       "type": "string",
-      "defaultValue": "vm01",
-      "metadata": {
-        "description": "VM name prefix"
-      }
+      "defaultValue": "vm01"
+    },
+    "vmIPaddress": {
+      "type": "string"
     },
     "snid": {
-      "type": "string",
-      "metadata": {
-        "description": "Subnet ID for NIC"
-      }
+      "type": "string"
     },
     "stgAccountName": {
-      "type": "string",
-      "metadata": {
-        "description": "Storage account name"
-      }
+      "type": "string"
     },
     "osType": {
       "type": "string",
@@ -34,18 +25,13 @@
       "allowedValues": [
         "Windows",
         "Ubuntu"
-      ],
-      "metadata": {
-        "description": "Type of OS to use for VMs: Windows or Ubuntu."
-      }
+      ]
     },
     "adminUsername": {
-      "type": "string",
-      "metadata": { "description": "Username for local admin account." }
+      "type": "string"
     },
     "adminPassword": {
-      "type": "securestring",
-      "metadata": { "description": "Password for local admin account." }
+      "type": "securestring"
     }
   },
   "variables": {
@@ -86,7 +72,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('vmIPaddress')]",
               "subnet": {
                 "id": "[parameters('snid')]"
               }
