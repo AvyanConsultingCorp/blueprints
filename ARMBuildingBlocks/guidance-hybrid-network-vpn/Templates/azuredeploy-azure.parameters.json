@@ -1,0 +1,27 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "baseName": {
+            "value": "onprem"
+        },
+        "adminUsername": {
+            "value": "adminUser"
+        },
+        "adminPassword": {
+            "value": "adminP@ssw0rd"
+        },
+        "vnet2Name": {
+            "value": "onprem-vnet"
+        },
+        "vnet2AddressPrefix": {
+            "value": "192.168.0.0/16"
+        },
+        "vnet2GWIP": {
+            "value": "40.86.85.177"
+        },
+        "vnet2GatewayId": {
+            "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/onprem/providers/Microsoft.Network/virtualNetworkGateways/onprem-vpngw"
+        }
+    }
+}
