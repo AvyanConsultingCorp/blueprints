@@ -107,7 +107,7 @@
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
     "sqlAlwaysOnConfigScriptFileName": "ActivateDirectory.ps1",
     "storageCopyLoopName": "storageCopy",
-    "lbBackendPool": "backendPool_"
+    "lbBackendPool": "backpool"
   },
   "resources": [
     {
