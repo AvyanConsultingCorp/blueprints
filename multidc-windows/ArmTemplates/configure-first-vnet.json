@@ -185,7 +185,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/',deployment().properties.templateLink.uri)]"
+        "[variables('backendSubnetRef')]"
       ],
       "properties": {
         "mode": "Incremental",
