@@ -3,10 +3,28 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "stgAccountName": {
-            "value": "vmtesthry5m5mfm3faastg"
+            "value": "onprem653qkfahiey74stg"
         },
-        "vmName": {
-            "value": "vmtest-web-vm"
+        "baseName": {
+            "value": "onprem"
+        },
+        "vmNamePrefix": {
+            "value": "web"
+        },
+        "vmComputerName": {
+            "value": "web1"
+        },
+        "snid": {
+            "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/onprem/providers/Microsoft.Network/virtualNetworks/onprem-vnet/subnets/onprem-subnet1-sn"
+        },
+        "osType": {
+            "value": "Ubuntu"
+        },
+        "adminUsername": {
+            "value": "adminUser"
+        },
+        "adminPassword": {
+            "value": "adminP@ssw0rd"
         }
     }
 }
