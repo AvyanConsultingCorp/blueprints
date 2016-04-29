@@ -2,31 +2,11 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "type": "string",
-      "metadata": {
-        "description": "Base name (prefix)"
-      }
-    },
-    "vnetName": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet name"
-      }
-    },
-    "gatewaySubnetPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.255.240/27",
-      "metadata": {
-        "description": "GatewaySubnet Prefix"
-      }
-    },
+    "baseName": { "type": "string" },
+    "vnetName": { "type": "string" },
+    "gatewaySubnetPrefix": { "type": "string" },
     "vpnType": {
       "type": "string",
-      "metadata": {
-        "description": "Route based (Dynamic Gateway) or Policy based (Static Gateway)"
-      },
-      "defaultValue": "RouteBased",
       "allowedValues": [
         "RouteBased",
         "PolicyBased"
@@ -46,21 +26,16 @@
       "type": "Microsoft.Network/virtualNetworks/subnets",
       "name": "[concat(parameters('vnetName'), '/GatewaySubnet')]",
       "location": "[resourceGroup().location]",
-      "properties": {
-        "addressPrefix": "[parameters('gatewaySubnetPrefix')]"
-      }
+      "tags": { "displayName": "Gateway Subnet" },
+      "properties": { "addressPrefix": "[parameters('gatewaySubnetPrefix')]" }
     },
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('gwPIPName')]",
       "location": "[variables('location')]",
-      "tags": {
-        "displayName": "Gateway PIP"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic"
-      }
+      "tags": { "displayName": "Gateway PIP" },
+      "properties": { "publicIPAllocationMethod": "Dynamic" }
     },
     {
       "apiVersion": "2016-03-30",
@@ -71,22 +46,16 @@
         "[concat('Microsoft.Network/publicIPAddresses/', variables('gwPIPName'))]",
         "[concat('Microsoft.Network/virtualNetworks/',parameters('vnetName'),'/subnets/GatewaySubnet')]"
       ],
-      "tags": {
-        "displayName": "VPN Gateway"
-      },
+      "tags": { "displayName": "VPN Gateway" },
       "properties": {
         "ipConfigurations": [
           {
+            "name": "vnetGatewayConfig",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[variables('gatewaySubnetRef')]"
-              },
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gwPIPName'))]"
-              }
-            },
-            "name": "vnetGatewayConfig"
+              "subnet": { "id": "[variables('gatewaySubnetRef')]" },
+              "publicIPAddress": { "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gwPIPName'))]" }
+            }
           }
         ],
         "gatewayType": "Vpn",

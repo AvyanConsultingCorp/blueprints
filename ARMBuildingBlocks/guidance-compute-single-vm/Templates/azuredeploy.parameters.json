@@ -3,13 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "baseName": {
-            "value": "vmtest"
+            "value": "thursday"
         },
         "adminUsername": {
             "value": "adminUser"
         },
         "adminPassword": {
             "value": "adminP@ssw0rd"
+        },
+        "osType": {
+            "value": "Windows"
         }
     }
 }
