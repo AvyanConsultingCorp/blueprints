@@ -14,6 +14,8 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
+    "udrResourceId": "[resourceId('Microsoft.Network/routeTables',concat(parameters('baseName'),'default-udr'))]",
+    "nsgResourceId": "[resourceId('Microsoft.Network/networkSecurityGroups',concat(parameters('baseName'),'default-udr'))]",
     "subnetsArray": {
       "1": "[variables('subnets')['1']]",
       "2": "[concat(variables('subnets')['1'],variables('subnets')['2'])]",
@@ -44,8 +46,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[0],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[0]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[0]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[0]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[0])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[0])]" }
           }
         }
       ],
@@ -54,8 +56,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[1],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[1]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[1]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[1]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[1])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[1])]" }
           }
         }
       ],
@@ -64,8 +66,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[2],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[2]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[2]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[2]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[2])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[2])]" }
           }
         }
       ],
@@ -74,8 +76,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[3],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[3]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[3]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[3]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[3])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[3])]" }
           }
         }
       ],
@@ -84,8 +86,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[4],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[4]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[4]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[4]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[4])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[4])]" }
           }
         }
       ],
@@ -94,8 +96,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[5],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[5]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[5]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[5]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[5])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[5])]" }
           }
         }
       ],
@@ -104,8 +106,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[6],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[6]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[6]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[6]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[6])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[6])]" }
           }
         }
       ],
@@ -114,8 +116,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[7],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[7]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[7]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[7]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[7])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[7])]" }
           }
         }
       ],
@@ -124,8 +126,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[8],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[8]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[8]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[8]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[8])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[8])]" }
           }
         }
       ],
@@ -134,8 +136,8 @@
           "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[9],'-sn')]",
           "properties": {
             "addressPrefix": "[parameters('subnetAddressPrefixes')[9]]",
-            "networkSecurityGroup": { "id": "[parameters('subnetNSGs')[9]]" },
-            "routeTable": { "id": "[parameters('subnetUDRs')[9]]" }
+            "networkSecurityGroup": { "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('subnetNSGs')[9])]" },
+            "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables',parameters('subnetUDRs')[9])]" }
           }
         }
       ]
@@ -175,14 +177,6 @@
     "subnetNames": {
       "type": "array",
       "value": "[variables('subnetNamesArray')[parameters('subnetCount')]]"
-    },
-    "nsgResourceId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Network/networkSecurityGroups',concat(parameters('baseName'),'default-nsg'))]"
-    },
-    "udrResourceId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Network/routeTables',concat(parameters('baseName'),'default-udr'))]"
     }
   }
 }
