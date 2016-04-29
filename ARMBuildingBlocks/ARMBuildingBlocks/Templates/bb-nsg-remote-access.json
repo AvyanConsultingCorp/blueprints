@@ -1,0 +1,58 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "nsgNamePrefix": { "type": "string" },
+    "osType": {
+      "type": "string",
+      "allowedValues": ["Windows","Ubuntu"]
+    }
+  },
+  "variables": {
+    "ruleConfigs": {
+      "Windows": {
+        "ruleName": "rdp",
+        "ruleDestinationPort": 3389
+      },
+      "Ubuntu": {
+        "ruleName": "ssh",
+        "ruleDestinationPort": 22
+      }
+    },
+    "nsgName": "[concat(parameters('baseName'),'-',parameters('nsgNamePrefix'),'-nsg')]",
+    "location": "[resourceGroup().location]",
+    "ruleConfig": "[variables('ruleConfigs')[parameters('osTYpe')]]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2016-03-30",
+      "name": "[variables('nsgName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "[variables('ruleConfig').ruleName]",
+            "properties": {
+              "direction": "Inbound",
+              "access": "Allow",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "[variables('ruleConfig').ruleDestinationPort]",
+              "priority": 100,
+              "protocol": "Tcp"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "nsgid": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
+    }
+  }
+}

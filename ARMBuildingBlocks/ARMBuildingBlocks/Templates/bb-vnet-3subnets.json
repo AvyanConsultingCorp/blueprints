@@ -1,0 +1,81 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "metadata": {
+        "description": "Base name (prefix)"
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/16",
+      "metadata": {
+        "description": "VNet Address prefix"
+      }
+    },
+    "subnetNamePrefixes": {
+      "type": "array",
+      "defaultValue": [ "web", "services", "data" ],
+      "metadata": {
+        "description": "Subnet name prefixes"
+      }
+    },
+    "subnetPrefixes": {
+      "type": "array",
+      "defaultValue": [ "192.168.1.0/24", "192.168.2.0/24", "192.168.3.0/24" ],
+      "metadata": {
+        "description": "Subnet prefixes"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vnetName": "[concat(parameters('baseName'),'-vnet')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('vnetName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "displayName": "VNet"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[0],'-sn')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetPrefixes')[0]]"
+            }
+          },
+          {
+            "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[1],'-sn')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetPrefixes')[1]]"
+            }
+          },
+          {
+            "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefixes')[2],'-sn')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetPrefixes')[2]]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "vnetName": {
+      "type": "string",
+      "value": "[variables('vnetName')]"
+    }
+  }
+}
