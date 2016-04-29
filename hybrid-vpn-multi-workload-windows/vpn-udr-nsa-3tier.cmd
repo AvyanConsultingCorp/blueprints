@@ -48,10 +48,10 @@ SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 SET VNET_NAME=%APP_NAME%-vnet
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET VPN_GATEWAY_NAME=%APP_NAME%-vgw
-SET VPN_PUBLIC_IP_NAME=%APP_NAME%-pip
-SET VPN_LOCAL_GATEWAY_NAME=%APP_NAME%-lgw
+SET VPN_PUBLIC_IP_NAME=%APP_NAME%-vpn-pip
+SET VPN_LOCAL_GATEWAY_NAME=%APP_NAME%-vpn-on-prem-lgw
 SET VPN_LOCAL_GATEWAY_ID=/subscriptions/%SUBSCRIPTION%/resourceGroups/%RESOURCE_GROUP%/providers/Microsoft.Network/localNetworkGateways/%VPN_LOCAL_GATEWAY_NAME%
-SET VPN_CONNECTION_NAME=%APP_NAME%-vpn
+SET VPN_CONNECTION_NAME=%APP_NAME%-vpn-connection
 SET VPN_GATEWAY_TYPE=RouteBased
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET NAFE_SUBNET_NAME=%APP_NAME%-nafe-subnet
