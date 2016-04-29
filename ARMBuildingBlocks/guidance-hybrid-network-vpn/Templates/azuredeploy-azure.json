@@ -5,7 +5,7 @@
     "baseName": { "type": "string" },
     "vnetAddressPrefix": {
       "type": "string",
-      "defaultValue": "192.168.0.0/16"
+      "defaultValue": "10.10.0.0/16"
     },
     "subnetNamePrefix": {
       "type": "string",
@@ -13,11 +13,11 @@
     },
     "subnetPrefix": {
       "type": "string",
-      "defaultValue": "192.168.1.0/24"
+      "defaultValue": "10.10.1.0/24"
     },
     "gatewaySubnetPrefix": {
       "type": "string",
-      "defaultValue": "192.168.255.224/27"
+      "defaultValue": "10.10.255.224/27"
     },
     "osType": {
       "type": "string",
@@ -33,6 +33,10 @@
       "maxLength": 15,
       "defaultValue": "web01"
     },
+    "vnet2Name": { "type": "string" },
+    "vnet2AddressPrefix": { "type": "string" },
+    "vnet2GWIP": { "type": "string" },
+    "vnet2GatewayId": { "type": "string" },
     "adminUsername": { "type": "string" },
     "adminPassword": { "type": "securestring" }
   },
@@ -41,8 +45,9 @@
     "templatePath": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/",
     "nsgTemplate": "bb-nsg-remote-access.json",
     "vnetTemplate": "bb-vnet-1subnet-nsg.json",
-    "vmTemplate": "bb-vm-1nic-pip.json",
+    "vmTemplate": "bb-vm-1nic.json",
     "vpnTemplate": "bb-vpn-gateway.json",
+    "connTemplate": "bb-vpn-connection.json",
     "vmStorageAccountName": "[concat(parameters('baseName'),uniqueString(resourceGroup().id),'stg')]",
     "subnetName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-sn')]"
   },
@@ -89,7 +94,10 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "vm",
-      "dependsOn": [ "Microsoft.Resources/deployments/vnet" ],
+      "dependsOn": [
+        "Microsoft.Resources/deployments/vnet",
+        "[concat('Microsoft.Storage/storageAccounts/',variables('vmStorageAccountName'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[concat(variables('templatePath'),variables('vmTemplate'))]" },
@@ -120,7 +128,31 @@
           "vpnType": { "value": "RouteBased" }
         }
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "conn",
+      "dependsOn": [ "Microsoft.Resources/deployments/vpn" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[concat(variables('templatePath'),variables('connTemplate'))]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vnet1Location": { "value": "[variables('location')]" },
+          "vnet2Location": { "value": "[variables('location')]" },
+          "vnet1Name": { "value": "[reference('vnet').outputs.vnetName.value]" },
+          "vnet1AddressPrefix": { "value": "[parameters('vnetAddressPrefix')]" },
+          "vnet1GWIP": { "value": "[reference('vpn').outputs.gwPIP.value]" },
+          "vnet1GatewayId": { "value": "[reference('vpn').outputs.vpnResourceId.value]" },
+          "vnet2Name": { "value": "[parameters('vnet2Name')]" },
+          "vnet2AddressPrefix": { "value": "[parameters('vnet2AddressPrefix')]" },
+          "vnet2GWIP": { "value": "[parameters('vnet2GWIP')]" },
+          "vnet2GatewayId": { "value": "[parameters('vnet2GatewayId')]" }
+        }
+      }
     }
+
   ],
   "outputs": {
   }
