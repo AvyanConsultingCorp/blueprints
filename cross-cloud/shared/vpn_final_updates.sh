@@ -8,10 +8,12 @@
 # Command-line parameters determine if you are configuring the AWS or Azure
 # side and what the public IP addresses are for the AWS and Azure OpenSwan VMs
 
-SOURCEFILE=$0
+# Set "trap" on ERR to be inherited by functions
+set -o errtrace
 
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
+SOURCEFILE=$0
 trap 'errhandle $LINENO $?' SIGINT ERR
 
 errhandle()

@@ -2,10 +2,12 @@
 
 # Install Openswan on the VPN server
 
-SOURCEFILE=$0
+# Set "trap" on ERR to be inherited by functions
+set -o errtrace
 
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
+SOURCEFILE=$0
 trap 'errhandle $LINENO $?' SIGINT ERR
 
 errhandle()
