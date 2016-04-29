@@ -23,10 +23,12 @@
     "location": "[resourceGroup().location]",
     "subnetNamePrefixes": "[concat(parameters('subnetNamePrefixes'),variables('fillerArray'))]",
     "subnetAddressPrefixes": "[concat(parameters('subnetAddressPrefixes'),variables('fillerArray'))]",
-    "subnetNSGs": "[concat(parameters('subnetNSGs'),variables('nsgName'),variables('nsgName'),variables('nsgName'),variables('nsgName'),variables('nsgName'),variables('nsgName'),variables('nsgName'),variables('nsgName'),variables('nsgName'),variables('nsgName'))]",
-    "subnetUDRs": "[concat(parameters('subnetUDRs'),variables('udrName'),variables('udrName'),variables('udrName'),variables('udrName'),variables('udrName'),variables('udrName'),variables('udrName'),variables('udrName'),variables('udrName'),variables('udrName'))]",
+    "subnetNSGs": "[concat(parameters('subnetNSGs'),variables('nsgNames'))]",
+    "subnetUDRs": "[concat(parameters('subnetUDRs'),variables('udrNames'))]",
     "nsgName": "[concat(parameters('baseName'),'-default-nsg')]",
     "udrName": "[concat(parameters('baseName'),'-default-udr')]",
+    "nsgNames": [ "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]" ],
+    "udrNames": [ "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]" ]
     "subnetsArray": {
       "1": "[variables('subnets')['1']]",
       "2": "[concat(variables('subnets')['1'],variables('subnets')['2'])]",
