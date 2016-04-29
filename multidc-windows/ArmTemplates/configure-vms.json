@@ -107,7 +107,7 @@
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
     "sqlAlwaysOnConfigScriptFileName": "ActivateDirectory.ps1",
     "storageCopyLoopName": "storageCopy",
-    "lbBackendPool": "backpool"
+    "lbBackendPool": "app13-dev-lb-pool"
   },
   "resources": [
     {
@@ -188,19 +188,19 @@
               "privateIPAddress": "[parameters('lbFrontendPrivateIp')]",
               "privateIPAllocationMethod": "Static"
             },
-            "name": "lbFrontend1"
+            "name": "app13-dev-lb-fe"
           }
         ],
         "backendAddressPools": [
           {
-            "name": "variables('lbBackendPool')"
+            "name": "[variables('lbBackendPool')]"
           }
         ],
         "loadBalancingRules": [
           {
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/lbFrontend1')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/app13-dev-lb-fe')]"
               },
               "backendAddressPool": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/',variables('lbBackendPool'))]"
