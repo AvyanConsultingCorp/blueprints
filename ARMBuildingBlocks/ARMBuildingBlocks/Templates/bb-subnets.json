@@ -175,6 +175,14 @@
     "subnetNames": {
       "type": "array",
       "value": "[variables('subnetNamesArray')[parameters('subnetCount')]]"
+    },
+    "nsgResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/networkSecurityGroups',concat(parameters('baseName'),'default-nsg'))]"
+    },
+    "udrResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/routeTables',concat(parameters('baseName'),'default-udr'))]"
     }
   }
 }
