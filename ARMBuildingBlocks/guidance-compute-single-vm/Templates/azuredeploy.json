@@ -33,7 +33,7 @@
     "adminPassword": { "type": "securestring" }
   },
   "variables": {
-    "location": "[resourceGroup().location]"
+    "location": "[resourceGroup().location]",
     "templatePath": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/",
     "nsgTemplate": "bb-nsg-remote-access.json",
     "vnetTemplate": "bb-vnet-1subnet-nsg.json",
@@ -58,7 +58,7 @@
         "templateLink": { "uri": "[concat(variables('templatePath'),variables('nsgTemplate'))]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "nsgPrefix": { "value": "rdp" },
+          "nsgNamePrefix": { "value": "rdp" },
           "osType": { "value": "[parameters('osTYpe')]" }
         }
       }
@@ -94,7 +94,9 @@
           "vmComputerName": { "value": "[parameters('vmComputerName')]" },
           "stgAccountName": { "value": "[variables('vmStorageAccountName')]" },
           "osType": { "value": "[parameters('osType')]" },
-          "snid": { "value": "[concat(reference('vnet').outputs.vnetId.value],'/subnets/',variables('subnetName'))" }
+          "snid": { "value": "[concat(reference('vnet').outputs.vnetId.value,'/subnets/',variables('subnetName'))]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" }
         }
       }
     }
