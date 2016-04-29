@@ -106,10 +106,8 @@ SET MANAGE_JUMPBOX_PUBLIC_IP_NAME=%MANAGE_NAME%-jumpbox-pip
 SET MANAGE_NSG_NAME=%MANAGE_NAME%-nsg
 SET REMOTE_ACCESS_PORT=3389
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SET APP_GATEWAY_UDR=%APP_NAME%-gateway-udr
-SET APP_GATEWAY_TO_WEB_RT=%APP_NAME%-gateway-to-web-rt
-SET APP_MANAGE_UDR=%APP_NAME%-manage-udr
-SET APP_MANAGE_TO_WEB_RT=%APP_NAME%-manage-to-web-rt
+SET APP_GATEWAY_ROUTE_TABLE=%APP_NAME%-gateway-udr
+SET APP_GATEWAY_VNET_TO_NAFE_LB_ROUTE=%APP_NAME%-gateway-to-web-rt
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: INPUT END
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -223,7 +221,6 @@ CALL :CallCLI azure network nsg rule create --nsg-name %NSG_NAME% ^
 CALL :CallCLI azure network nic set --name %NIC_NAME% --network-security-group-name %NSG_NAME% %POSTFIX%
 
 CALL :CreateGatewayUDR
-CALL :CreateManageUDR
 GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: EXECUTION END
@@ -350,16 +347,9 @@ GOTO :eof
 :CreateGatewayUDR
 :::::::::::::::::::::::::::::::::::::::
 :: Create UDR in gateway subnet
-CALL :CallCLI azure network route-table create --name %APP_GATEWAY_UDR% --location %LOCATION% %POSTFIX%
-CALL :CallCLI azure network route-table route create --name %APP_GATEWAY_TO_WEB_RT% --route-table-name %APP_GATEWAY_UDR% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
-CALL :CallCLI azure network vnet subnet set --name GatewaySubnet --vnet-name %VNET_NAME% --route-table-name %APP_GATEWAY_UDR% --resource-group %RESOURCE_GROUP% 
+CALL :CallCLI azure network route-table create --name %APP_GATEWAY_ROUTE_TABLE% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network route-table route create --name %APP_GATEWAY_VNET_TO_NAFE_LB_ROUTE% --route-table-name %APP_GATEWAY_ROUTE_TABLE% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
+CALL :CallCLI azure network vnet subnet set --name GatewaySubnet --vnet-name %VNET_NAME% --route-table-name %APP_GATEWAY_ROUTE_TABLE% --resource-group %RESOURCE_GROUP% 
 GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:CreateManageUDR
-:::::::::::::::::::::::::::::::::::::::
-:: Create UDR in manage subnet
-CALL :CallCLI azure network route-table create --name %APP_MANAGE_UDR% --location %LOCATION% %POSTFIX%
-CALL :CallCLI azure network route-table route create --name %APP_MANAGE_TO_WEB_RT% --route-table-name %APP_MANAGE_UDR% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
-CALL :CallCLI azure network vnet subnet set --name %MANAGE_SUBNET_NAME% --vnet-name %VNET_NAME% --route-table-name %APP_MANAGE_UDR% --resource-group %RESOURCE_GROUP% 
-GOTO :eof
