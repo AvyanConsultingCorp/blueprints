@@ -113,7 +113,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id),'-', copyIndex())]",
+      "name": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id), copyIndex())]",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
