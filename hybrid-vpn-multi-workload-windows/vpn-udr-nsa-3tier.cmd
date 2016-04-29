@@ -2,8 +2,8 @@
 SETLOCAL EnableDelayedExpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 IF "%~6"=="" (
-    ECHO Usage: %0 appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix you local box ip prefix
-    ECHO   For example: %0 mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24 13.26.0.0/16
+    ECHO Usage: %0 appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
+    ECHO   For example: %0 mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24
     EXIT /B
     )
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -102,9 +102,7 @@ SET MANAGE_JUMPBOX_VM_NAME=%MANAGE_NAME%-vm1
 SET MANAGE_JUMPBOX_VM_NIC_NAME=%MANAGE_JUMPBOX_VM_NAME%-nic1
 SET MANAGE_JUMPBOX_VM_NAME_STORAGE=%MANAGE_JUMPBOX_VM_NAME:-=%st1
 SET MANAGE_JUMPBOX_VM_SIZE=Standard_DS1
-SET MANAGE_JUMPBOX_PUBLIC_IP_NAME=%MANAGE_NAME%-jumpbox-pip
-SET MANAGE_NSG_NAME=%MANAGE_NAME%-nsg
-SET REMOTE_ACCESS_PORT=3389
+::SET REMOTE_ACCESS_PORT=3389
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET APP_GATEWAY_ROUTE_TABLE=%APP_NAME%-gateway-udr
 SET APP_GATEWAY_VNET_TO_NAFE_LB_ROUTE=%APP_NAME%-gateway-to-web-rt
@@ -185,19 +183,16 @@ FOR /L %%I IN (1,1,%TIER_NUM_VM_INSTANCES%) DO CALL :CreateVM %%I %TIER_NAME% %T
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the management subnet
-:: Management subnet has no load balancer, no availability set, and one jump box VM with a public ip address
-:: the jump box NSG rule allows inbound remote access traffic from admin-address-prefix script parameter.
+:: Management subnet has no load balancer, no availability set, and one jump box VM
 SET SUBNET_NAME=%MANAGE_SUBNET_NAME%
 SET SUBNET_IP_RANGE=%MANAGE_SUBNET_IP_RANGE%
 SET VM_NAME=%MANAGE_JUMPBOX_VM_NAME%
 SET NIC_NAME=%MANAGE_JUMPBOX_VM_NIC_NAME%
 SET VM_STORAGE=%MANAGE_JUMPBOX_VM_NAME_STORAGE%
-SET PUBLIC_IP_NAME=%MANAGE_JUMPBOX_PUBLIC_IP_NAME%
 SET VM_SIZE=%MANAGE_JUMPBOX_VM_SIZE%
 SET STORAGE_ACCOUNT_NAME=%MANAGE_JUMPBOX_VM_NAME_STORAGE%
 SET OS_TYPE=Windows
 SET IMAGE_URN=%WINDOWS_BASE_IMAGE%
-SET NSG_NAME=%MANAGE_NSG_NAME%
 
 CALL :CallCLI azure network vnet subnet create --name %SUBNET_NAME% --address-prefix %SUBNET_IP_RANGE% --vnet-name %VNET_NAME% %POSTFIX%
 CALL :CallCLI azure network nic create --name %NIC_NAME% --subnet-name %SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
@@ -210,6 +205,16 @@ CALL :CallCLI azure vm create --name %VM_NAME% --os-type %OS_TYPE% --image-urn ^
     %BOOT_DIAGNOSTICS_STORAGE_URI% ^
     --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure vm disk attach-new --vm-name %VM_NAME% --size-in-gb 128 --vhd-name %VM_NAME%-data1.vhd --storage-account-name %STORAGE_ACCOUNT_NAME% %POSTFIX%
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Add a public ip address to the jump box VM
+:: the jump box NSG rule allows inbound remote access traffic 
+:: from admin-address-prefix script parameter.
+GOTO :Skip_Creating_Jumpbox_Public_Ip
+SET MANAGE_JUMPBOX_PUBLIC_IP_NAME=%MANAGE_NAME%-jumpbox-pip
+SET MANAGE_NSG_NAME=%MANAGE_NAME%-nsg
+SET PUBLIC_IP_NAME=%MANAGE_JUMPBOX_PUBLIC_IP_NAME%
+SET NSG_NAME=%MANAGE_NSG_NAME%
 CALL :CallCLI azure network public-ip create --name %PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure network nic set --name %NIC_NAME% --public-ip-name %PUBLIC_IP_NAME% %POSTFIX%
 CALL :CallCLI azure network nsg create --name %NSG_NAME% --location %LOCATION% %POSTFIX%
@@ -219,8 +224,9 @@ CALL :CallCLI azure network nsg rule create --nsg-name %NSG_NAME% ^
 	--source-address-prefix %ADMIN_ADDRESS_PREFIX% --source-port-range * ^
 	--destination-address-prefix * --destination-port-range %REMOTE_ACCESS_PORT% %POSTFIX%
 CALL :CallCLI azure network nic set --name %NIC_NAME% --network-security-group-name %NSG_NAME% %POSTFIX%
+:Skip_Creating_Jumpbox_Public_Ip
 
-CALL :CreateGatewayUDR
+CALL :Create_UDR_In_Gateway_Subnet
 GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: EXECUTION END
@@ -344,7 +350,7 @@ ECHO %CLICommand%
 GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:CreateGatewayUDR
+:Create_UDR_In_Gateway_Subnet
 :::::::::::::::::::::::::::::::::::::::
 :: Create UDR in gateway subnet
 CALL :CallCLI azure network route-table create --name %APP_GATEWAY_ROUTE_TABLE% --location %LOCATION% %POSTFIX%
