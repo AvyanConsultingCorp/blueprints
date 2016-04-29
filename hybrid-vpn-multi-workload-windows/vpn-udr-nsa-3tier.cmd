@@ -297,7 +297,7 @@ CALL :CallCLI azure storage account create --type PLRS --location %LOCATION% ^
 
 :: Create the VM
 IF "%VM_NEEDS_AVAILABILITY_SET%"=="true" (
-  CALL :CallCLI azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
+  CALL :CallCLI azure vm create --name %VM_NAME% --os-type %OS_TYPE_Windows% --image-urn ^
     %WINDOWS_BASE_IMAGE% --vm-size %VM_SIZE% --vnet-subnet-name %VM_SUBNET_NAME% ^
     --nic-name %VM_NIC_NAME% --vnet-name %VNET_NAME% --storage-account-name ^
     %VM_VHD_STORAGE% --os-disk-vhd "%VM_NAME%-osdisk.vhd" --admin-username ^
@@ -305,7 +305,7 @@ IF "%VM_NEEDS_AVAILABILITY_SET%"=="true" (
     "https://%DIAGNOSTICS_STORAGE%.blob.core.windows.net/" --availset-name ^
     %VM_AVAILSET_NAME% --location %LOCATION% %POSTFIX%
 ) ELSE (
-  CALL :CallCLI azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
+  CALL :CallCLI azure vm create --name %VM_NAME% --os-type %OS_TYPE_Windows% --image-urn ^
     %WINDOWS_BASE_IMAGE% --vm-size %VM_SIZE% --vnet-subnet-name %VM_SUBNET_NAME% ^
     --nic-name %VM_NIC_NAME% --vnet-name %VNET_NAME% --storage-account-name ^
     %VM_VHD_STORAGE% --os-disk-vhd "%VM_NAME%-osdisk.vhd" --admin-username ^
@@ -356,7 +356,7 @@ GOTO :eof
 :::::::::::::::::::::::::::::::::::::::
 :: Create UDR in gateway subnet
 CALL :CallCLI azure network route-table create --name %APP_GATEWAY_ROUTE_TABLE% --location %LOCATION% %POSTFIX%
-CALL :CallCLI azure network route-table route create --name %APP_GATEWAY_VNET_TO_NAFE_LB_ROUTE% --route-table-name %APP_GATEWAY_ROUTE_TABLE% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
+CALL :CallCLI azure network route-table route create --name %APP_GATEWAY_VNET_TO_NAFE_LB_ROUTE% --route-table-name %APP_GATEWAY_ROUTE_TABLE% --address-prefix %VNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
 CALL :CallCLI azure network vnet subnet set --name GatewaySubnet --vnet-name %VNET_NAME% --route-table-name %APP_GATEWAY_ROUTE_TABLE% --resource-group %RESOURCE_GROUP% 
 GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
