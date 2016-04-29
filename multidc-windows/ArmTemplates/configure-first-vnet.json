@@ -194,7 +194,11 @@
         "parameters": {
           "numberOfInstances": { "value": 4 },
           "subnetRef": { "value": "[variables('backendSubnetRef')]" },
-          "lbFrontendPrivateIp": { "value": "10.12.0.250" }
+          "lbFrontendPrivateIp": { "value": "10.12.0.250" },
+          "projectName": {"value": "sqlAlwaysOn"}
+        },
+        "parametersLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-vms.param.json')]"
         }
       }
     }
