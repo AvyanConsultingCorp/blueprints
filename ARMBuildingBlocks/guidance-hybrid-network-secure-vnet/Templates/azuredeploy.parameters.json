@@ -1,0 +1,51 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "baseName": {
+            "value": "hybrid"
+        },
+        "vnetAddressPrefix": {
+            "value": "10.0.0.0/16"
+        },
+        "subnetNamePrefixes": {
+            "value": [
+                "nva-fe",
+                "nva-be",
+                "mgmt",
+                "web",
+                "data"
+            ]
+        },
+        "subnetAddressPrefixes": {
+            "value": [
+                "10.0.0.0/24",
+                "10.0.1.0/24",
+                "10.0.2.0/24",
+                "10.0.3.0/24",
+                "10.0.5.0/24"
+            ]
+        },
+        "subnetNSGs": {
+            "value": [
+                "hybrid-default-nsg",
+                "hybrid-default-nsg",
+                "hybrid-default-nsg",
+                "hybrid-default-nsg",
+                "hybrid-default-nsg"
+            ]
+        },
+        "subnetUDRs": {
+            "value": [
+                "hybrid-default-udr",
+                "hybrid-default-udr",
+                "hybrid-default-udr",
+                "hybrid-default-udr",
+                "hybrid-default-udr"
+            ]
+        },
+        "subnetCount": {
+            "value": "5"
+        }
+    }
+}
