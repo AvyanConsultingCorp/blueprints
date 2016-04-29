@@ -206,11 +206,11 @@ CALL :CallCLI azure vm create --name %VM_NAME% --os-type %OS_TYPE% --image-urn ^
     --location %LOCATION% %POSTFIX%
 CALL :CallCLI azure vm disk attach-new --vm-name %VM_NAME% --size-in-gb 128 --vhd-name %VM_NAME%-data1.vhd --storage-account-name %STORAGE_ACCOUNT_NAME% %POSTFIX%
 
+GOTO :Skip_Creating_Jumpbox_Public_Ip
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Add a public ip address to the jump box VM
 :: the jump box NSG rule allows inbound remote access traffic 
 :: from admin-address-prefix script parameter.
-GOTO :Skip_Creating_Jumpbox_Public_Ip
 SET MANAGE_JUMPBOX_PUBLIC_IP_NAME=%MANAGE_NAME%-jumpbox-pip
 SET MANAGE_NSG_NAME=%MANAGE_NAME%-nsg
 SET PUBLIC_IP_NAME=%MANAGE_JUMPBOX_PUBLIC_IP_NAME%
