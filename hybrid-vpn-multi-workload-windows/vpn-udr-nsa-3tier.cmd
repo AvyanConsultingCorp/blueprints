@@ -1,9 +1,9 @@
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-IF "%~5"=="" (
-    ECHO Usage: %0 appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix
-    ECHO   For example: %0 mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24
+IF "%~6"=="" (
+    ECHO Usage: %0 appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix you local box ip prefix
+    ECHO   For example: %0 mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24 13.26.0.0/16
     EXIT /B
     )
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -12,10 +12,18 @@ SET SUBSCRIPTION=%2
 SET VPN_IPSEC_SHARED_KEY=%3
 SET ON_PREMISES_PUBLIC_IP=%4
 SET ON_PREMISES_ADDRESS_SPACE=%5
+SET ADMIN_ADDRESS_PREFIX=%6
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: INPUT
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET USERNAME="testuser"
 SET PASSWORD="Passw0rd$1"
 SET DIAGNOSTICS_STORAGE=%APP_NAME:-=%diag
 SET BOOT_DIAGNOSTICS_STORAGE_URI="https://%DIAGNOSTICS_STORAGE%.blob.core.windows.net/"
+SET WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
+SET UBUNDU_BASE_IMAGE=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET LOCATION=centralus
 SET ENVIRONMENT=dev
@@ -45,7 +53,8 @@ SET NAFE_LOAD_BALANCER_PROBE_PROTOCOL=tcp
 SET NAFE_LOAD_BALANCER_PROBE_INTERVAL=300
 SET NAFE_LOAD_BALANCER_PROBE_COUNT=4
 SET NAFE_LOAD_BALANCER_PROBE_NAME=%NAFE_LOAD_BALANCER_NAME%-probe
-SET NAFE_LOAD_BALANCER_RULE_HTTP=%NAFE_LOAD_BALANCER_NAME%-rule-http
+SET NAFE_LOAD_BALANCER_RULE_HTTP=%NAFE_LOAD_BALANCER_NAME%-rule-http-allow
+SET NAFE_LOAD_BALANCER_RULE_RDP=%NAFE_LOAD_BALANCER_NAME%-rule-rdp-allow
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET NABE_SUBNET_IP_RANGE=10.20.2.0/24
 SET NABE_SUBNET_NAME=%APP_NAME%-nabe-subnet
@@ -55,9 +64,9 @@ SET NA_VM_OS_TYPE_Linux=Linux
 SET NA_VM_OS_TYPE_Windows=Windows
 SET NA_VM_OS_TYPE=%NA_VM_OS_TYPE_Windows%
 IF "%NA_VM_OS_TYPE%" == "Windows" (
-  SET NA_VM_OS_IMAGE_URN=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
+  SET NA_VM_OS_IMAGE_URN=%WINDOWS_BASE_IMAGE%
 ) ELSE (
-  SET NA_VM_OS_IMAGE_URN=canonical:UbuntuServer:16.04.0-LTS:16.04.201604203
+  SET NA_VM_OS_IMAGE_URN=%UBUNDU_BASE_IMAGE%
 )
 SET NA_VM_SIZE=Standard_A4
 SET NA_AVAILSET_NAME=%APP_NAME%-na-as
@@ -84,9 +93,33 @@ SET WEB_TIER_SUBNET_IP_RANGE=10.20.3.0/24
 SET WEB_TIER_ILB_IP_ADDRESS=10.20.3.254
 SET WEB_TIER_NUM_VM_INSTANCES=2
 SET WEB_TIER_USING_AVAILSET=true
+SET WEB_TIER_LB_NAME=%APP_NAME%-%TIER_NAME%-lb
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+SET MANAGE_NAME=manage
+SET MANAGE_SUBNET_NAME=%MANAGE_NAME%-subnet
+SET MANAGE_SUBNET_IP_RANGE=10.20.0.0/24
+SET MANAGE_JUMPBOX_VM_NAME=%MANAGE_NAME%-vm1
+SET MANAGE_JUMPBOX_VM_NIC_NAME=%MANAGE_JUMPBOX_VM_NAME%-nic1
+SET MANAGE_JUMPBOX_VM_NAME_STORAGE=%MANAGE_JUMPBOX_VM_NAME:-=%st1
+SET MANAGE_JUMPBOX_VM_SIZE=Standard_DS1
+SET MANAGE_JUMPBOX_PUBLIC_IP_NAME=%MANAGE_NAME%-jumpbox-pip
+SET MANAGE_NSG_NAME=%MANAGE_NAME%-nsg
+SET REMOTE_ACCESS_PORT=3389
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 SET APP_GATEWAY_UDR=%APP_NAME%-gateway-udr
 SET APP_GATEWAY_TO_WEB_RT=%APP_NAME%-gateway-to-web-rt
+SET APP_MANAGE_UDR=%APP_NAME%-manage-udr
+SET APP_MANAGE_TO_WEB_RT=%APP_NAME%-manage-to-web-rt
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: INPUT END
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+
+
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: EXECUTION START ...
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 CALL azure config mode arm
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -134,42 +167,79 @@ CALL :CallCLI azure vm create --name %NA_VM2_NAME% --nic-names %NA_VM2_FE_NIC%,%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-fe-load balancer rule
 CALL :CallCLI azure network lb rule create --name %NAFE_LOAD_BALANCER_RULE_HTTP% --protocol tcp --lb-name %NAFE_LOAD_BALANCER_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --probe-name %NAFE_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
+CALL :CallCLI azure network lb rule create --name %NAFE_LOAD_BALANCER_RULE_RDP% --protocol tcp --lb-name %NAFE_LOAD_BALANCER_NAME% --frontend-port %REMOTE_ACCESS_PORT% --backend-port %REMOTE_ACCESS_PORT% --frontend-ip-name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --probe-name %NAFE_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the web tier
 :: Web tier has a public IP, load balancer, availability set, and two VMs
-SET TIER_NAME=web
-SET TIER_AVAILSET_NAME=%APP_NAME%-%TIER_NAME%-as
-SET TIER_SUBNET_IP_RANGE=10.20.3.0/24
-SET TIER_ILB_IP_ADDRESS=10.20.3.254
-SET TIER_NUM_VM_INSTANCES=2
-SET TIER_USING_AVAILSET=true
-
 SET TIER_NAME=%WEB_TIER_NAME%
 SET TIER_AVAILSET_NAME=%WEB_TIER_AVAILSET_NAME%
 SET TIER_SUBNET_IP_RANGE=%WEB_TIER_SUBNET_IP_RANGE%
 SET TIER_ILB_IP_ADDRESS=%WEB_TIER_ILB_IP_ADDRESS%
 SET TIER_NUM_VM_INSTANCES=%WEB_TIER_NUM_VM_INSTANCES%
 SET TIER_USING_AVAILSET=%WEB_TIER_USING_AVAILSET%
-CALL :CreateTier
-CALL :CreateGatewayUDR
-GOTO :eof
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Subroutine to create the web, biz, or data tier
-:CreateTier
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SET TIER_LB_NAME=%APP_NAME%-%TIER_NAME%-lb
+SET TIER_LB_NAME=%WEB_TIER_LB_NAME%
 SET TIER_SUBNET_NAME=%APP_NAME%-%TIER_NAME%-subnet
+
 CALL :CallCLI azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix %TIER_SUBNET_IP_RANGE% --name %TIER_SUBNET_NAME% %POSTFIX%
-
 CALL :CreateLB %TIER_LB_NAME%
-
-IF "%TIER_USING_AVAILSET%"=="true" (
-  CALL :CallCLI azure availset create --name %TIER_AVAILSET_NAME% --location %LOCATION% %POSTFIX%
-)
-
+CALL :CallCLI azure availset create --name %TIER_AVAILSET_NAME% --location %LOCATION% %POSTFIX%
 FOR /L %%I IN (1,1,%TIER_NUM_VM_INSTANCES%) DO CALL :CreateVM %%I %TIER_NAME% %TIER_SUBNET_NAME% %TIER_USING_AVAILSET% %TIER_LB_NAME%
+
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Create the management subnet
+:: Management subnet has no load balancer, no availability set, and one jump box VM with a public ip address
+:: the jump box NSG rule allows inbound remote access traffic from admin-address-prefix script parameter.
+SET SUBNET_NAME=%MANAGE_SUBNET_NAME%
+SET SUBNET_IP_RANGE=%MANAGE_SUBNET_IP_RANGE%
+SET VM_NAME=%MANAGE_JUMPBOX_VM_NAME%
+SET NIC_NAME=%MANAGE_JUMPBOX_VM_NIC_NAME%
+SET VM_STORAGE=%MANAGE_JUMPBOX_VM_NAME_STORAGE%
+SET PUBLIC_IP_NAME=%MANAGE_JUMPBOX_PUBLIC_IP_NAME%
+SET VM_SIZE=%MANAGE_JUMPBOX_VM_SIZE%
+SET STORAGE_ACCOUNT_NAME=%MANAGE_JUMPBOX_VM_NAME_STORAGE%
+SET OS_TYPE=Windows
+SET IMAGE_URN=%WINDOWS_BASE_IMAGE%
+SET NSG_NAME=%MANAGE_NSG_NAME%
+
+CALL :CallCLI azure network vnet subnet create --name %SUBNET_NAME% --address-prefix %SUBNET_IP_RANGE% --vnet-name %VNET_NAME% %POSTFIX%
+CALL :CallCLI azure network nic create --name %NIC_NAME% --subnet-name %SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure storage account create %STORAGE_ACCOUNT_NAME% --type PLRS --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure vm create --name %VM_NAME% --os-type %OS_TYPE% --image-urn ^
+    %IMAGE_URN% --vm-size %VM_SIZE% --vnet-subnet-name %SUBNET_NAME% ^
+    --nic-name %NIC_NAME% --vnet-name %VNET_NAME% --storage-account-name ^
+    %STORAGE_ACCOUNT_NAME% --os-disk-vhd "%VM_NAME%-osdisk.vhd" --admin-username ^
+    "%USERNAME%" --admin-password "%PASSWORD%" --boot-diagnostics-storage-uri ^
+    %BOOT_DIAGNOSTICS_STORAGE_URI% ^
+    --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure vm disk attach-new --vm-name %VM_NAME% --size-in-gb 128 --vhd-name %VM_NAME%-data1.vhd --storage-account-name %STORAGE_ACCOUNT_NAME% %POSTFIX%
+CALL :CallCLI azure network public-ip create --name %PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network nic set --name %NIC_NAME% --public-ip-name %PUBLIC_IP_NAME% %POSTFIX%
+CALL :CallCLI azure network nsg create --name %NSG_NAME% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network nsg rule create --nsg-name %NSG_NAME% ^
+    --name admin-rdp-allow ^
+	--access Allow --protocol Tcp --direction Inbound --priority 100 ^
+	--source-address-prefix %ADMIN_ADDRESS_PREFIX% --source-port-range * ^
+	--destination-address-prefix * --destination-port-range %REMOTE_ACCESS_PORT% %POSTFIX%
+CALL :CallCLI azure network nic set --name %NIC_NAME% --network-security-group-name %NSG_NAME% %POSTFIX%
+
+CALL :CreateGatewayUDR
+CALL :CreateManageUDR
 GOTO :eof
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: EXECUTION END
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+
+
+
+
+
+
+
+
+
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Subroutine to create load balancer resouces: back-end address pool, health probe, and rule
@@ -203,14 +273,12 @@ SET VM_AVAILSET_NAME=%TIER_AVAILSET_NAME%
 SET VM_NIC_NAME=%VM_NAME%-nic1
 SET VM_VHD_STORAGE=%VM_NAME:-=%st1
 SET /a RDP_PORT=50001 + %1
-SET WINDOWS_BASE_IMAGE=MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:4.0.20160126
 SET VM_SIZE=Standard_DS1
-
 
 :: Create NIC for VM1
 CALL :CallCLI azure network nic create --name %VM_NIC_NAME% --subnet-name %VM_SUBNET_NAME% ^
   --subnet-vnet-name %VNET_NAME% --location %LOCATION% %POSTFIX%
-
+  
 IF NOT "%VM_LB_NAME%"=="" (
 	:: Add NIC to back-end address pool
 	SET LB_BACKEND_NAME=%VM_LB_NAME%-backend-pool
@@ -279,8 +347,6 @@ ECHO %CLICommand%
 GOTO :eof
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :CreateGatewayUDR
 :::::::::::::::::::::::::::::::::::::::
 :: Create UDR in gateway subnet
@@ -288,12 +354,12 @@ CALL :CallCLI azure network route-table create --name %APP_GATEWAY_UDR% --locati
 CALL :CallCLI azure network route-table route create --name %APP_GATEWAY_TO_WEB_RT% --route-table-name %APP_GATEWAY_UDR% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
 CALL :CallCLI azure network vnet subnet set --name GatewaySubnet --vnet-name %VNET_NAME% --route-table-name %APP_GATEWAY_UDR% --resource-group %RESOURCE_GROUP% 
 GOTO :eof
-:: End of :CreateUDR
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-::SET NA_VM1_PUBLIC_IP_NAME=%APP_NAME%-na-vm1-pip
-::SET NA_VM1_PUBLIC_NIC=%APP_NAME%-na-vm1-public-nic
-::CALL :CallCLI azure network public-ip create --name %NA_VM1_PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
-::CALL :CallCLI azure network nic create --name %NA_VM1_PUBLIC_NIC% --public-ip-name %NA_VM1_PUBLIC_IP_NAME% --subnet-name %NAFE_SUBNET_NAME% --subnet-vnet-name %VNET_NAME% --enable-ip-forwarding true --location %LOCATION% %POSTFIX%
-::CALL :CallCLI azure vm create --name %NA_VM1_NAME% --nic-names %NA_VM1_FE_NIC%,%NA_VM1_BE_NIC%,%NA_VM1_PUBLIC_NIC% --vnet-name %VNET_NAME% --os-type Windows --image-urn %NA_VM1_WINDOWS_BASE_IMAGE% --vm-size %NA_VM_SIZE% --os-disk-vhd %NA_VM1_OS_DISK_VHD_NAME% --admin-username %USERNAME% --admin-password %PASSWORD% --boot-diagnostics-storage-uri %BOOT_DIAGNOSTICS_STORAGE_URI% --availset-name %NA_AVAILSET_NAME% --location %LOCATION% --resource-group %RESOURCE_GROUP%
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:CreateManageUDR
+:::::::::::::::::::::::::::::::::::::::
+:: Create UDR in manage subnet
+CALL :CallCLI azure network route-table create --name %APP_MANAGE_UDR% --location %LOCATION% %POSTFIX%
+CALL :CallCLI azure network route-table route create --name %APP_MANAGE_TO_WEB_RT% --route-table-name %APP_MANAGE_UDR% --address-prefix %WEB_TIER_SUBNET_IP_RANGE% --next-hop-type VirtualAppliance --next-hop-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --resource-group %RESOURCE_GROUP% 
+CALL :CallCLI azure network vnet subnet set --name %MANAGE_SUBNET_NAME% --vnet-name %VNET_NAME% --route-table-name %APP_MANAGE_UDR% --resource-group %RESOURCE_GROUP% 
+GOTO :eof
