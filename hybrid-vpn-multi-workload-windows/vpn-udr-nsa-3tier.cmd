@@ -60,9 +60,9 @@ SET NABE_SUBNET_IP_RANGE=10.20.2.0/24
 SET NABE_SUBNET_NAME=%APP_NAME%-nabe-subnet
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-SET NA_VM_OS_TYPE_Linux=Linux
-SET NA_VM_OS_TYPE_Windows=Windows
-SET NA_VM_OS_TYPE=%NA_VM_OS_TYPE_Windows%
+SET OS_TYPE_Linux=Linux
+SET OS_TYPE_Windows=Windows
+SET NA_VM_OS_TYPE=%OS_TYPE_Windows%
 IF "%NA_VM_OS_TYPE%" == "Windows" (
   SET NA_VM_OS_IMAGE_URN=%WINDOWS_BASE_IMAGE%
 ) ELSE (
@@ -141,9 +141,7 @@ CALL :CallCLI azure network vnet subnet create --name %NAFE_SUBNET_NAME% --vnet-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-fe internal load balancer
 CALL :CallCLI azure network lb create --name %NAFE_LOAD_BALANCER_NAME% --location %LOCATION% %POSTFIX%
-CALL :CallCLI azure network lb frontend-ip create --name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --subnet-vnet-name %VNET_NAME% --subnet-name %NAFE_SUBNET_NAME% --private-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
 CALL :CallCLI azure network lb address-pool create --name %NAFE_LOAD_BALANCER_POOL_NAME% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
-CALL :CallCLI azure network lb probe create --name %NAFE_LOAD_BALANCER_PROBE_NAME% --protocol %NAFE_LOAD_BALANCER_PROBE_PROTOCOL% --interval %NAFE_LOAD_BALANCER_PROBE_INTERVAL% --count %NAFE_LOAD_BALANCER_PROBE_COUNT% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-be subnet
 CALL :CallCLI azure network vnet subnet create --name %NABE_SUBNET_NAME% --vnet-name %VNET_NAME% --address-prefix %NABE_SUBNET_IP_RANGE% %POSTFIX%
@@ -162,7 +160,11 @@ CALL :CallCLI azure vm create --name %NA_VM2_NAME% --nic-names %NA_VM2_FE_NIC%,%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: create na-fe-load balancer rule
+CALL :CallCLI azure network lb frontend-ip create --name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --subnet-vnet-name %VNET_NAME% --subnet-name %NAFE_SUBNET_NAME% --private-ip-address %NAFE_LOAD_BALANCER_FRONTEND_IP_ADDRESS% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
+CALL :CallCLI azure network lb probe create --name %NAFE_LOAD_BALANCER_PROBE_NAME% --protocol %NAFE_LOAD_BALANCER_PROBE_PROTOCOL% --interval %NAFE_LOAD_BALANCER_PROBE_INTERVAL% --count %NAFE_LOAD_BALANCER_PROBE_COUNT% --lb-name %NAFE_LOAD_BALANCER_NAME% %POSTFIX%
 CALL :CallCLI azure network lb rule create --name %NAFE_LOAD_BALANCER_RULE_HTTP% --protocol tcp --lb-name %NAFE_LOAD_BALANCER_NAME% --frontend-port 80 --backend-port 80 --frontend-ip-name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --probe-name %NAFE_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: create na-fe-load balancer NAT rule
 CALL :CallCLI azure network lb rule create --name %NAFE_LOAD_BALANCER_RULE_RDP% --protocol tcp --lb-name %NAFE_LOAD_BALANCER_NAME% --frontend-port %REMOTE_ACCESS_PORT% --backend-port %REMOTE_ACCESS_PORT% --frontend-ip-name %NAFE_LOAD_BALANCER_FRONTEND_IP_NAME% --probe-name %NAFE_LOAD_BALANCER_PROBE_NAME% %POSTFIX%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the web tier
@@ -191,7 +193,7 @@ SET NIC_NAME=%MANAGE_JUMPBOX_VM_NIC_NAME%
 SET VM_STORAGE=%MANAGE_JUMPBOX_VM_NAME_STORAGE%
 SET VM_SIZE=%MANAGE_JUMPBOX_VM_SIZE%
 SET STORAGE_ACCOUNT_NAME=%MANAGE_JUMPBOX_VM_NAME_STORAGE%
-SET OS_TYPE=Windows
+SET OS_TYPE=%OS_TYPE_Windows%
 SET IMAGE_URN=%WINDOWS_BASE_IMAGE%
 
 CALL :CallCLI azure network vnet subnet create --name %SUBNET_NAME% --address-prefix %SUBNET_IP_RANGE% --vnet-name %VNET_NAME% %POSTFIX%
