@@ -9,6 +9,8 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-compute-single-vm"
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-hybrid-network-vpn", "guidance-hybrid-network-vpn\guidance-hybrid-network-vpn.deployproj", "{832CB7C6-CECA-424E-A82A-FAA4C342FD85}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-hybrid-network-secure-vnet", "guidance-hybrid-network-secure-vnet\guidance-hybrid-network-secure-vnet.deployproj", "{5B5343CE-CAFF-42CF-893D-CABCC55858BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{832CB7C6-CECA-424E-A82A-FAA4C342FD85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{832CB7C6-CECA-424E-A82A-FAA4C342FD85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{832CB7C6-CECA-424E-A82A-FAA4C342FD85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B5343CE-CAFF-42CF-893D-CABCC55858BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B5343CE-CAFF-42CF-893D-CABCC55858BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B5343CE-CAFF-42CF-893D-CABCC55858BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B5343CE-CAFF-42CF-893D-CABCC55858BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

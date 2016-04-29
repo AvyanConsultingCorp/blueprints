@@ -26,7 +26,7 @@
       "9": "[concat(variables('subnets')['1'],variables('subnets')['2'],variables('subnets')['3'],variables('subnets')['4'],variables('subnets')['5'],variables('subnets')['6'],variables('subnets')['7'],variables('subnets')['8'],variables('subnets')['9'])]",
       "10": "[concat(variables('subnets')['1'],variables('subnets')['2'],variables('subnets')['3'],variables('subnets')['4'],variables('subnets')['5'],variables('subnets')['6'],variables('subnets')['7'],variables('subnets')['8'],variables('subnets')['9'],variables('subnets')['10'])]"
     },
-    "subnetNames": {
+    "subnetNamesArray": {
       "1": "[variables('subnetNames')['1']]",
       "2": "[concat(variables('subnetNames')['1'],variables('subnetNames')['2'])]",
       "3": "[concat(variables('subnetNames')['1'],variables('subnetNames')['2'],variables('subnetNames')['3'])]",
@@ -174,7 +174,7 @@
     },
     "subnetNames": {
       "type": "array",
-      "value": "[variables('subnetNames')[parameters('subnetCount')]]"
+      "value": "[variables('subnetNamesArray')[parameters('subnetCount')]]"
     }
   }
 }

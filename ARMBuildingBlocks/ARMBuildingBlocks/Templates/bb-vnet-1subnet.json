@@ -17,13 +17,9 @@
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('vnetName')]",
       "location": "[variables('location')]",
-      "tags": {
-        "displayName": "VNet"
-      },
+      "tags": { "displayName": "VNet" },
       "properties": {
-        "addressSpace": {
-          "addressPrefixes": [ "[parameters('vnetAddressPrefix')]" ]
-        },
+        "addressSpace": { "addressPrefixes": [ "[parameters('vnetAddressPrefix')]" ] },
         "subnets": [
           {
             "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-sn')]",
