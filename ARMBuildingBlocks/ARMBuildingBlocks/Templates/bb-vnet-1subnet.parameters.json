@@ -2,8 +2,11 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "baseName": {
-            "value": "test"
+        "stgAccountName": {
+            "value": "vmtesthry5m5mfm3faastg"
+        },
+        "vmName": {
+            "value": "vmtest-web-vm"
         }
     }
 }
