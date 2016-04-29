@@ -79,3 +79,12 @@ Test-AzureRmResourceGroupDeployment -ResourceGroupName $tmResourceGroupName -Tem
 New-AzureRmResourceGroupDeployment -ResourceGroupName $tmResourceGroupName -Name $tmDeploymentName -TemplateFile $templatePath -TemplateParameterFile $templateParamPath -Verbose
 
 
+#############################################################################
+# Uri validation
+
+$templateUri = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-first-vnet.json'
+$templatePathUri = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-first-vnet.param.json'
+$resourceGroup = 'multigoo'
+Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroup -TemplateUri $templateUri -TemplateParameterUri $templatePathUri -Verbose
+
+
