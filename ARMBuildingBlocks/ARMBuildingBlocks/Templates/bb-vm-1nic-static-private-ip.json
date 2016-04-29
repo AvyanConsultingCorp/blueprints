@@ -44,6 +44,7 @@
     "vmName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-vm')]",
     "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
     "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
+    "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]",
     "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
   },
   "resources": [
@@ -107,7 +108,16 @@
             "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
             "caching": "ReadWrite",
             "createOption": "FromImage"
-          }
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('vmDataDiskName')]",
+              "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
+              "diskSizeGB": "127",
+              "createOption": "Empty",
+              "lun": 0
+            }
+          ]
         },
         "networkProfile": {
           "networkInterfaces": [
