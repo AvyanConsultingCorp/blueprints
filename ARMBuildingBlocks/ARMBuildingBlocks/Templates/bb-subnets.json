@@ -160,13 +160,13 @@
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
-      "name": "[concat(parameters('baseName'),'default-nsg')]"
+      "name": "[concat(parameters('baseName'),'-default-nsg')]"
     },
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
-      "name": "[concat(parameters('baseName'),'default-udr')]"
+      "name": "[concat(parameters('baseName'),'-default-udr')]"
     }
   ],
   "outputs": {
