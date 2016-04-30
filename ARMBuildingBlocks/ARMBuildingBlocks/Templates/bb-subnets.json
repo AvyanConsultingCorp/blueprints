@@ -19,6 +19,7 @@
     }
   },
   "variables": {
+    "udrNames": [ "x" ],
     "fillerArray": [ "", "", "", "", "", "", "", "", "", "" ],
     "location": "[resourceGroup().location]",
     "subnetNamePrefixes": "[concat(parameters('subnetNamePrefixes'),variables('fillerArray'))]",
@@ -30,7 +31,6 @@
     "nsgName": "[concat(parameters('baseName'),'-default-nsg')]",
     "udrName": "[concat(parameters('baseName'),'-default-udr')]",
     "nsgNames": [ "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]" ],
-    "udrNames": [ "x" ],
     "subnetsArray": {
       "1": "[variables('subnets')['1']]",
       "2": "[concat(variables('subnets')['1'],variables('subnets')['2'])]",
