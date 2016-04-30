@@ -7,11 +7,11 @@
     "subnetAddressPrefixes": { "type": "array" },
     "subnetNSGs": {
       "type": "array",
-      "defaultValue": [  ]
+      "defaultValue": [ "&-default-nsg" ]
     },
     "subnetUDRs": {
       "type": "array",
-      "defaultValue": [  ]
+      "defaultValue": [ "&-default-udr" ]
     },
     "subnetCount": {
       "type": "string",
@@ -19,6 +19,7 @@
     }
   },
   "variables": {
+    "test": "[replace(parameters('subnetNSGs'),'&',parameters('baseName'))]",
     "fillerArray": [ "", "", "", "", "", "", "", "", "", "" ],
     "location": "[resourceGroup().location]",
     "subnetNamePrefixes": "[concat(parameters('subnetNamePrefixes'),variables('fillerArray'))]",
