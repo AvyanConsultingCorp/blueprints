@@ -7,11 +7,11 @@
     "subnetAddressPrefixes": { "type": "array" },
     "subnetNSGs": {
       "type": "array",
-      "defaultValue": [ "&-default-nsg" ]
+      "defaultValue": [  ]
     },
     "subnetUDRs": {
       "type": "array",
-      "defaultValue": [ "&-default-udr" ]
+      "defaultValue": [  ]
     },
     "subnetCount": {
       "type": "string",
@@ -19,7 +19,6 @@
     }
   },
   "variables": {
-    "test": "[replace(parameters('subnetNSGs'),'&',parameters('baseName'))]",
     "fillerArray": [ "", "", "", "", "", "", "", "", "", "" ],
     "location": "[resourceGroup().location]",
     "subnetNamePrefixes": "[concat(parameters('subnetNamePrefixes'),variables('fillerArray'))]",
@@ -29,7 +28,7 @@
     "nsgName": "[concat(parameters('baseName'),'-default-nsg')]",
     "udrName": "[concat(parameters('baseName'),'-default-udr')]",
     "nsgNames": [ "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]" ],
-    "udrNames": [ "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]", "[variables('udrName')]" ]
+    "udrNames": [ "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]" ],
     "subnetsArray": {
       "1": "[variables('subnets')['1']]",
       "2": "[concat(variables('subnets')['1'],variables('subnets')['2'])]",
