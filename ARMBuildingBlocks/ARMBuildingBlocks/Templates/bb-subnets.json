@@ -25,7 +25,7 @@
     "subnetNamePrefixes": "[concat(parameters('subnetNamePrefixes'),variables('fillerArray'))]",
     "subnetAddressPrefixes": "[concat(parameters('subnetAddressPrefixes'),variables('fillerArray'))]",
     "subnetNSGs": "[concat(variables('sanitizeNsgNames'),variables('nsgNames'))]",
-    "subnetUDRs": "[concat(variables('sanitizeUdrNames'),variables('udrNames'))]",
+    "subnetUDRs": "[concat(variables('sanitizeUdrNames'),variables('nsgNames'))]",
     "sanitizeNsgNames": "[replace(parameters('subnetNSGs'),'&',variables('nsgName'))]",
     "sanitizeUdrNames": "[replace(parameters('subnetUDRs'),'&',variables('udrName'))]",
     "nsgName": "[concat(parameters('baseName'),'-default-nsg')]",
