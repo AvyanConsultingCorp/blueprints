@@ -30,7 +30,7 @@
     "nsgName": "[concat(parameters('baseName'),'-default-nsg')]",
     "udrName": "[concat(parameters('baseName'),'-default-udr')]",
     "nsgNames": [ "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]", "[variables('nsgName')]" ],
-    "udrNames": [ "" ],
+    "udrNames": [ "x" ],
     "subnetsArray": {
       "1": "[variables('subnets')['1']]",
       "2": "[concat(variables('subnets')['1'],variables('subnets')['2'])]",
