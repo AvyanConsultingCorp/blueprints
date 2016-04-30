@@ -19,7 +19,7 @@
     }
   },
   "variables": {
-    "udrNames": [ "x" ],
+    "udrNames2": [ "x" ],
     "fillerArray": [ "", "", "", "", "", "", "", "", "", "" ],
     "location": "[resourceGroup().location]",
     "subnetNamePrefixes": "[concat(parameters('subnetNamePrefixes'),variables('fillerArray'))]",
