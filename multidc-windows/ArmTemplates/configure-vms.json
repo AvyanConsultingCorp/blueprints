@@ -107,20 +107,17 @@
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
     "sqlAlwaysOnConfigScriptFileName": "ActivateDirectory.ps1",
     "storageCopyLoopName": "storageCopy",
-    "lbBackendPool": "app13-dev-lb-pool"
+    "lbBackendPool": "app13-dev-lb-pool",
+    "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Storage/storageAccounts",
-      "name": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id), copyIndex())]",
+      "name": "[variables('storageAccountUniqueName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
-      },
-      "copy": {
-        "name": "[variables('storageCopyLoopName')]",
-        "count": "[parameters('numberOfInstances')]"
       },
       "tags": {
         "displayName": "StorageAccounts"
@@ -254,7 +251,7 @@
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'), copyIndex())]",
+          "computerName": "[concat(parameters('vmNamePrefix'),'-', copyIndex())]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -268,7 +265,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('storageCopyLoopName')[copyIndex()],'.blob.core.windows.net/vhds/','osdisk', copyindex(), '.vhd')]"
+              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), copyindex(), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
