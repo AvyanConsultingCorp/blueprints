@@ -1,0 +1,72 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "vmNamePrefix": { "type": "string" },
+    "snid1": { "type": "string" },
+    "snid2": { "type": "string" },
+    "snid3": { "type": "string" },
+    "lbBackendPoolId": { "type": "string" },
+    "stgAccountNames": { "type": "array" },
+    "osType": {
+      "type": "string",
+      "allowedValues": [
+        "Windows",
+        "Ubuntu"
+      ]
+    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+    "numberVMs": { "type": "int" }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "uri": "string",
+    "vmTemplate": "bb-vm-3nics-llbe.json",
+    "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[variables('vmAvSetName')]",
+      "properties": {
+        "platformFaultDomainCount": 3,        
+        "platformUpdateDomainCount": 5
+      }
+    },
+    {
+      "name": "[concat('vm',uniqueString(subscription().subscriptionId),copyindex())]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "copy": {
+        "name": "vmCount",
+        "count": "[parameters('numberVMs')]"
+      },
+      "dependsOn": [ "[concat('Microsoft.Compute/availabilitySets/',variables('vmAvSetName'))]" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('uri'), '/', variables('vmTemplate'))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
+          "snid1": { "value": "[parameters('snid1')]" },
+          "snid2": { "value": "[parameters('snid2')]" },
+          "snid3": { "value": "[parameters('snid3')]" },
+          "stgAccountName": { "value": "[concat(parameters('stgAccountNames')[copyindex(1)],'stg')]" },
+          "osType": { "value": "[parameters('osType')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "vmAvSetName": { "value": "[variables('vmAvSetName')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
