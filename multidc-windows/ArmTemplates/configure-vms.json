@@ -106,7 +106,6 @@
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
     "sqlAlwaysOnConfigScriptFileName": "ActivateDirectory.ps1",
-    "storageCopyLoopName": "storageCopy",
     "lbBackendPool": "app13-dev-lb-pool",
     "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]"
   },
@@ -239,7 +238,7 @@
       },
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[variables('storageCopyLoopName')]",
+        "[variables('storageAccountUniqueName')]",
         "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex())]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
       ],
@@ -281,7 +280,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('storageCopyLoopName')[copyIndex()],'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',variables('storageAccountUniqueName'), '4.blob.core.windows.net')]"
           }
         }
       },
