@@ -308,7 +308,7 @@
               "fileUris": [
                 "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'))]"
               ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFolder'), '/', variables('sqlAlwaysOnConfigScriptFileName'), ' -SafeModePassword QAZwsx123 -Domain poltergeist.local')]"
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), ' -SafeModePassword QAZwsx123 -Domain poltergeist.local')]"
             }
           }
         }
