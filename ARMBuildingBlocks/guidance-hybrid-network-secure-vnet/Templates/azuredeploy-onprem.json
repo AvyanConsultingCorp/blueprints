@@ -123,5 +123,17 @@
     }
   ],
   "outputs": {
+    "gwPIP": {
+      "type": "string",
+      "value": "[reference('vpn').outputs.gwPIP.value]"
+    },
+    "vpnResourceId": {
+      "type": "string",
+      "value": "[reference('vpn').outputs.vpnResourceId.value]"
+    },
+    "vnetName": {
+      "type": "string",
+      "value": "[reference('vnet').outputs.vnetName.value]"
+    }
   }
 }
