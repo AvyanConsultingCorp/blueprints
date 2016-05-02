@@ -63,7 +63,7 @@
         "templateLink": { "uri": "[concat(variables('templatePath'),variables('nsgTemplate'))]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "nsgNamePrefix": { "value": "rdp" },
+          "nsgNamePrefix": { "value": "ra" },
           "osType": { "value": "[parameters('osTYpe')]" }
         }
       }
