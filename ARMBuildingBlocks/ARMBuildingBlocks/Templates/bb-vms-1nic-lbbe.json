@@ -22,6 +22,7 @@
         "description": "Subnet ID for NIC"
       }
     },
+    "lbBackendPoolId": { "type": "string" },
     "stgAccountNames": {
       "type": "array",
       "metadata": {
@@ -56,9 +57,20 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "uri": "string",
-    "vmTemplate": "bb-vm-1nic.json"
+    "vmTemplate": "bb-vm-1nic.json",
+    "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
   },
   "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[variables('vmAvSetName')]",
+      "properties": {
+        "platformFaultDomainCount": 3,        
+        "platformUpdateDomainCount": 5
+      }
+    },
     {
       "name": "[concat('vm',uniqueString(subscription().subscriptionId),copyindex())]",
       "type": "Microsoft.Resources/deployments",
@@ -67,6 +79,7 @@
         "name": "vmCount",
         "count": "[parameters('numberVMs')]"
       },
+      "dependsOn": [ "[concat('Microsoft.Compute/availabilitySets/',variables('vmAvSetName'))]" ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -80,7 +93,8 @@
           "stgAccountName": { "value": "[concat(parameters('stgAccountNames')[copyindex(1)],'stg')]" },
           "osType": { "value": "[parameters('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" }
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "vmAvSetName": { "value": "[variables('vmAvSetName')]" }
         }
       }
     }

@@ -1,0 +1,86 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "subnetNamePrefix": { "type": "string" },
+    "ilbIpAddress": {"type": "string"}
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "lbName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-ilb')]",
+    "lbBEPoolName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-bep')]",
+    "lbBEPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools',variables('lbBEPoolName'))]",
+    "lbFEIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations','ipconfig1')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('lbName')]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ilbIpAddress')]"
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('lbBEPoolName')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "http-rule",
+            "properties": {
+              "backendAddressPool": { "id": "[variables('lbBEPoolId')]" },
+              "frontendIPConfiguration": { "id": "[variables('lbFEIpConfigId')]" },
+              "frontendPort": 80,
+              "backendPort": 80,
+              "protocol": "Tcp"
+            }
+          },
+          {
+            "name": "https-rule",
+            "properties": {
+              "backendAddressPool": { "id": "[variables('lbBEPoolId')]" },
+              "frontendIPConfiguration": { "id": "[variables('lbFEIpConfigId')]" },
+              "frontendPort": 443,
+              "backendPort": 443,
+              "protocol": "Tcp"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "ilb-probe",
+            "properties": {
+              "port": 80,
+              "protocol": "Http"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "vms-1nic-lbbe",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": "",
+        "parameters": {
+          "baseName": "[parameters('baseName')]",
+
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
