@@ -280,7 +280,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('storageAccountUniqueName'), '4.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',variables('storageAccountUniqueName'), '.blob.core.windows.net')]"
           }
         }
       },
