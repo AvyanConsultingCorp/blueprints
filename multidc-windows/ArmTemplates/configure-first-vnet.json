@@ -201,13 +201,13 @@
             "value": "app-dev-lb"
           },
           "adminUsername": {
-            "value": "admin1"
+            "value": "testuser"
           },
           "adminPassword": {
-            "value": "$QAZwsx123"
+            "value": "AweS0me@PW"
           },
           "vmNamePrefix": {
-            "value": "someVm"
+            "value": "vm"
           },
           "storageAccountName": {
             "value": "appdevst"
