@@ -306,7 +306,7 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "fileUris": [
-                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),variables('sqlAlwaysOnConfigScriptFileName'))]",
+                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'))]"
               ],
               "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFolder'), '/', variables('sqlAlwaysOnConfigScriptFileName'), ' -SafeModePassword QAZwsx123 -Domain poltergeist.local')]"
             }
