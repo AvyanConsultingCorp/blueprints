@@ -38,8 +38,7 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "uri": "string",
-    "vmTemplate": "bb-vm-3nics-llbe.json",
+    "vmTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-3nics-lbbe.json",
     "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
   },
   "resources": [
@@ -65,20 +64,21 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('uri'), '/', variables('vmTemplate'))]",
+          "uri": "[variables('vmTemplate')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
-          "vmComputerName": {"value": "[concat(parameters('vmComputerNamePrefix'),copyindex(1))]"},
+          "vmComputerName": { "value": "[concat(parameters('vmComputerNamePrefix'),copyindex(1))]" },
           "snid1": { "value": "[parameters('snid1')]" },
           "snid2": { "value": "[parameters('snid2')]" },
           "snid3": { "value": "[parameters('snid3')]" },
           "nic1IpForwarding": { "value": "[parameters('nic1IpForwarding')]" },
           "nic2IpForwarding": { "value": "[parameters('nic2IpForwarding')]" },
           "nic3IpForwarding": { "value": "[parameters('nic3IpForwarding')]" },
-          "stgAccountName": { "value": "[concat(parameters('stgAccountNames')[copyindex(1)],'stg')]" },
+          "lbBackendPoolId": { "value": "[parameters('lbBackendPoolId')]" },
+          "stgAccountName": { "value": "[parameters('stgAccountNames')[copyindex()]]" },
           "osType": { "value": "[parameters('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
