@@ -1,0 +1,128 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "vmNamePrefix": { "type": "string" },
+    "vmComputerName": {
+      "type": "string",
+      "maxLength": 15
+    },
+    "subnetNamePrefix": { "type": "string" },
+    "subnetId": { "type": "string" },
+    "ilbIpAddress": { "type": "string" },
+    "osType": {
+      "type": "string",
+      "defaultValue": "Ubuntu",
+      "allowedValues": [
+        "Windows",
+        "Ubuntu"
+      ],
+      "metadata": {
+        "description": "Type of OS to use for VMs: Windows or Ubuntu."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": { "description": "Username for local admin account." }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": { "description": "Password for local admin account." }
+    },
+    "numberVMs": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": { "description": "Number of VMs in subnet." }
+
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "lbName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-ilb')]",
+    "lbBEPoolName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-bep')]",
+    "lbBEPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools',variables('lbBEPoolName'))]",
+    "lbFEIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations','ipconfig1')]",
+    "createvms": "http://test/bb-vm-1nic-lbbe.json"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('lbName')]",
+      "properties": {
+        "S": null,
+        "frontendIPConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ilbIpAddress')]"
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('lbBEPoolName')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "http-rule",
+            "properties": {
+              "backendAddressPool": { "id": "[variables('lbBEPoolId')]" },
+              "frontendIPConfiguration": { "id": "[variables('lbFEIpConfigId')]" },
+              "frontendPort": 80,
+              "backendPort": 80,
+              "protocol": "Tcp"
+            }
+          },
+          {
+            "name": "https-rule",
+            "properties": {
+              "backendAddressPool": { "id": "[variables('lbBEPoolId')]" },
+              "frontendIPConfiguration": { "id": "[variables('lbFEIpConfigId')]" },
+              "frontendPort": 443,
+              "backendPort": 443,
+              "protocol": "Tcp"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "ilb-probe",
+            "properties": {
+              "port": 80,
+              "protocol": "Http"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "vms-1nic-lbbe",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('createvms')]"
+        },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vmNamePrefix": { "value": "[parameters('vmNamePrefix')]" },
+          "vmComputerName": { "value": "[parameters('vmComputerName')]" },
+          "snid": { "value": "[parameters('subnetId')]" },
+          "lbBackendPoolId": { "value": "[variables('lbBEPoolId')]" },
+          "osType": { "value": "[parameters('osType')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "numberVMs": { "value": "[parameters('numberVMs')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

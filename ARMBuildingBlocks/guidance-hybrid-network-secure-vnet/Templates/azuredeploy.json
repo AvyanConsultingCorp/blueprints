@@ -6,8 +6,14 @@
     "vnetAddressPrefix": { "type": "string" },
     "subnetNamePrefixes": { "type": "array" },
     "subnetAddressPrefixes": { "type": "array" },
-    "subnetNSGs": { "type": "array" },
-    "subnetUDRs": { "type": "array" },
+    "subnetNSGs": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "subnetUDRs": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
     "subnetCount": {
       "type": "string",
       "allowedValues": [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" ]
