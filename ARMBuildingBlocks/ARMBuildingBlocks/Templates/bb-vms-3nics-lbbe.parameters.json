@@ -1,0 +1,49 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "baseName": {
+            "value": "op"
+        },
+        "vmNamePrefix": {
+            "value": "nva"
+        },
+        "snid1": {
+            "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/op-rg/providers/Microsoft.Network/virtualNetworks/op-vnet/subnets/nva-fe-sn"
+        },
+        "snid2": {
+            "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/op-rg/providers/Microsoft.Network/virtualNetworks/op-vnet/subnets/nva-be-sn"
+        },
+        "snid3": {
+            "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/op-rg/providers/Microsoft.Network/virtualNetworks/op-vnet/subnets/mgmt-sn"
+        },
+        "nic1IpForwarding": {
+            "value": true
+        },
+        "nic2IpForwarding": {
+            "value": true
+        },
+        "lbBackendPoolId": {
+            "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/op-rg/providers/Microsoft.Network/loadBalancers/op-nva-fe-ilb/backendAddressPools/beAddPool"
+        },
+        "osType": {
+            "value": "Ubuntu"
+        },
+        "adminUsername": {
+            "value": "adminUser"
+        },
+        "adminPassword": {
+            "value": "adminP@ssw0rd"
+        },
+        "stgAccountNames": {
+            "value": [
+                "op1rq6johpnyzbfw",
+                "op2rq6johpnyzbfw"
+            ]
+        },
+        "numberVMs": {
+            "value": 2
+        }
+
+    }
+}
