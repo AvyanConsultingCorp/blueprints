@@ -4,9 +4,25 @@
   "parameters": {
     "baseName": { "type": "string" },
     "vmNamePrefix": { "type": "string" },
+    "vmComputerNamePrefix": {
+      "type": "string",
+      "maxLength": 15
+    },
     "snid1": { "type": "string" },
     "snid2": { "type": "string" },
     "snid3": { "type": "string" },
+    "nic1IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "nic2IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "nic3IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
     "lbBackendPoolId": { "type": "string" },
     "stgAccountNames": { "type": "array" },
     "osType": {
@@ -55,9 +71,13 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
+          "vmComputerName": {"value": "[concat(parameters('vmComputerNamePrefix'),copyindex(1))]"},
           "snid1": { "value": "[parameters('snid1')]" },
           "snid2": { "value": "[parameters('snid2')]" },
           "snid3": { "value": "[parameters('snid3')]" },
+          "nic1IpForwarding": { "value": "[parameters('nic1IpForwarding')]" },
+          "nic2IpForwarding": { "value": "[parameters('nic2IpForwarding')]" },
+          "nic3IpForwarding": { "value": "[parameters('nic3IpForwarding')]" },
           "stgAccountName": { "value": "[concat(parameters('stgAccountNames')[copyindex(1)],'stg')]" },
           "osType": { "value": "[parameters('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },

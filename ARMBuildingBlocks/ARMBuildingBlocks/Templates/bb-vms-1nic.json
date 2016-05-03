@@ -26,7 +26,8 @@
       "type": "array",
       "metadata": {
         "description": "Storage account name"
-      }
+      },
+      "defaultValue": ["a1","a2"]
     },
     "osType": {
       "type": "string",
