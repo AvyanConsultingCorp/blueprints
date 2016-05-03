@@ -11,6 +11,18 @@
     "snid1": { "type": "string" },
     "snid2": { "type": "string" },
     "snid3": { "type": "string" },
+    "nic1IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "nic2IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "nic3IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
     "lbBackendPoolId": { "type": "string" },
     "stgAccountName": { "type": "string" },
     "osType": {
@@ -66,7 +78,8 @@
               "subnet": { "id": "[parameters('snid1')]" }
             }
           }
-        ]
+        ],
+        "enableIPForwarding": "[parameters('nic1IpForwarding')]"
       }
     },
     {
@@ -84,7 +97,8 @@
               "subnet": { "id": "[parameters('snid2')]" }
             }
           }
-        ]
+        ],
+        "enableIPForwarding": "[parameters('nic2IpForwarding')]"
       }
     },
     {
@@ -102,7 +116,8 @@
               "subnet": { "id": "[parameters('snid3')]" }
             }
           }
-        ]
+        ],
+        "enableIPForwarding": "[parameters('nic3IpForwarding')]"
       }
     },
     {
