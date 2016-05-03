@@ -43,6 +43,9 @@
         },
         "numberVMs": {
             "value": 2
+        },
+        "vmComputerNamePrefix": {
+            "value": "nva"
         }
 
     }

@@ -10,8 +10,9 @@
     "mgmtSubnetNamePrefix": { "type": "string" },
     "mgmtSubnetAddressPrefix": { "type": "string" },
     "ilbIpAddress": { "type": "string" },
+    "jumpboxIpAddress": { "type": "string" },
     "adminUsername": { "type": "string" },
-    "adminPassword": {"type": "securestring"}
+    "adminPassword": { "type": "securestring" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -35,7 +36,7 @@
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "vmAvSetName": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),'-as')]",
     "vmsTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vms-3nics-lbbe.json",
-    "jumpBoxTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-pip.json"
+    "jumpBoxTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json"
   },
   "resources": [
     {
@@ -155,6 +156,30 @@
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
           "numberVMs": { "value": "[variables('numVMs')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "jumpBox",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'3',variables('uniqueString'))]",
+        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('mgmtSubnetNamePrefix'),'-sn')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": "[variables('jumpBoxTemplate')]",
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vmNamePrefix": { "value": "jump-box" },
+          "vmComputerName": { "value": "jumpbox" },
+          "vmIPaddress": { "value": "[parameters('jumpboxIpAddress')]"},
+          "snid": { "value": "[variables('mgmtSubnetId')]" },
+          "stgAccountName": { "value": "[concat(parameters('baseName'),'3',variables('uniqueString'))]" },
+          "osType": { "value": "[variables('osType')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" }
         }
       }
     }
