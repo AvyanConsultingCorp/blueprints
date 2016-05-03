@@ -52,7 +52,7 @@
     <None Include="Templates\bb-vnet-1subnet-nsg.json" />
     <None Include="Templates\bb-vnet-1subnet-udr.json" />
     <None Include="Templates\bb-vnet-1subnet.json" />
-    <None Include="Templates\bb-vms-3nics-lbbe.parameters.json" />
+    <None Include="Templates\bb-vm-1nic-pip-static-private-ip.parameters.json" />
     <None Include="Templates\bb-vnet-3subnets.json" />
     <None Include="Templates\bb-vpn-connection.json" />
     <None Include="Templates\bb-vpn-gateway.json" />

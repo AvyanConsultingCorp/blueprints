@@ -38,8 +38,7 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "uri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates",
-    "vmTemplate": "bb-vm-3nics-lbbe.json",
+    "vmTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-3nics-lbbe.json",
     "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
   },
   "resources": [
@@ -65,7 +64,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('uri'), '/', variables('vmTemplate'))]",
+          "uri": "[variables('vmTemplate')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {

@@ -3,31 +3,31 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "baseName": {
-            "value": "op"
-        },
-        "vnetName": {
-            "value": "op-vnet"
+            "value": "test"
         },
         "feSubnetNamePrefix": {
             "value": "nva-fe"
         },
         "feSubnetAddressPrefix": {
-            "value": "192.168.2.0/24"
+            "value": "192.168.1.0/24"
         },
         "beSubnetNamePrefix": {
             "value": "nva-be"
         },
         "beSubnetAddressPrefix": {
-            "value": "192.168.3.0/24"
+            "value": "192.168.2.0/24"
         },
         "mgmtSubnetNamePrefix": {
             "value": "mgmt"
         },
         "mgmtSubnetAddressPrefix": {
-            "value": "192.168.4.0/24"
+            "value": "192.168.3.0/24"
         },
         "ilbIpAddress": {
-            "value": "192.168.2.100"
+            "value": "192.168.1.100"
+        },
+        "jumpboxIpAddress": {
+            "value": "192.168.3.100"
         },
         "adminUsername": {
             "value": "adminUser"
@@ -35,6 +35,7 @@
         "adminPassword": {
             "value": "adminP@ssw0rd"
         }
+
 
     }
 }

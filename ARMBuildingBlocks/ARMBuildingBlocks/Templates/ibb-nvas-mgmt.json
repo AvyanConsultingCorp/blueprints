@@ -17,6 +17,7 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "vmNamePrefix": "nva",
+    "vmComputerNamePrefix": "nva",
     "vnetName": "[concat(parameters('baseName'),'-vnet')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
     "feSubnetName": "[concat(variables('vnetName'),'/',parameters('feSubnetNamePrefix'),'-sn')]",
@@ -138,10 +139,11 @@
       ],
       "properties": {
         "mode": "Incremental",
-        "templateLink": "[variables('vmsTemplate')]",
+        "templateLink": { "uri": "[variables('vmsTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "[variables('vmNamePrefix')]" },
+          "vmComputerNamePrefix": { "value": "[variables('vmComputerNamePrefix')]" },
           "snid1": { "value": "[variables('feSubnetId')]" },
           "snid2": { "value": "[variables('beSubnetId')]" },
           "snid3": { "value": "[variables('mgmtSubnetId')]" },
@@ -162,21 +164,17 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "jumpBox",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'3',variables('uniqueString'))]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('mgmtSubnetNamePrefix'),'-sn')]"
-      ],
+      "name": "jb",
       "properties": {
         "mode": "Incremental",
-        "templateLink": "[variables('jumpBoxTemplate')]",
+        "templateLink": { "uri": "[variables('jumpBoxTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "jump-box" },
           "vmComputerName": { "value": "jumpbox" },
-          "vmIPaddress": { "value": "[parameters('jumpboxIpAddress')]"},
+          "vmIPaddress": { "value": "[parameters('jumpboxIpAddress')]" },
           "snid": { "value": "[variables('mgmtSubnetId')]" },
-          "stgAccountName": { "value": "[concat(parameters('baseName'),'3',variables('uniqueString'))]" },
+          "stgAccountName": { "value": "test3wl2hprr2tmtwu" },
           "osType": { "value": "[variables('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" }
