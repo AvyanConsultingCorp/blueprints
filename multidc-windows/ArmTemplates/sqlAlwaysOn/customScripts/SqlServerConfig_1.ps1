@@ -10,4 +10,5 @@ Param(
 Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
 Install-windowsfeature -name DNS -IncludeAllSubFeature -IncludeManagementTools
 $secPwd = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
-Install-ADDSForest -DomainName $Domain -InstallDNS -SafeModeAdministratorPassword $secPwd
+Install-ADDSForest -DomainName $Domain -InstallDNS -SafeModeAdministratorPassword $secPwd -Force
+

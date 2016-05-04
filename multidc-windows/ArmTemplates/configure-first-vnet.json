@@ -192,22 +192,22 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "numberOfInstances": { "value": 2 },
+          "numberOfInstances": { "value": 5 },
           "subnetRef": { "value": "[variables('backendSubnetRef')]" },
           "lbFrontendPrivateIp": { "value": "10.12.0.250" },
           "projectName": { "value": "sqlAlwaysOn" },
           "networkInterfacePrefix": { "value": "app-dev-nic" },
           "loadBalancerName": {
-            "value": "app-dev-lb"
+            "value": "app13-dev-lb"
           },
           "adminUsername": {
-            "value": "administrator1"
+            "value": "sqladmin"
           },
           "adminPassword": {
             "value": "AweS0me@PW"
           },
           "vmNamePrefix": {
-            "value": "vm"
+            "value": "app13"
           },
           "storageAccountName": {
             "value": "appdevst"

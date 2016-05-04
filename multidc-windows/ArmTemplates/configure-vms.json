@@ -105,9 +105,25 @@
     "storageAccountType": "Standard_LRS",
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
-    "sqlAlwaysOnConfigScriptFileName": "ActivateDirectory.ps1",
+    "sqlAlwaysOnConfigScriptFileName": "SqlServerConfig_",
     "lbBackendPool": "app13-dev-lb-pool",
-    "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]"
+    "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]",
+    "sqlDomainName": "poltergeist.local",
+    "sqlDomainLogin": "[concat(variables('sqlDomainName'),'\\',parameters('adminUsername'))]",
+    "vmNames": [
+      "ad-1",
+      "ad-2",
+      "sql-1",
+      "sql-2",
+      "fsw"
+    ],
+    "psArguments": [
+      "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
+      "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
+      "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
+      "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
+      ""
+    ]
   },
   "resources": [
     {
@@ -231,7 +247,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'),'-', copyindex())]",
+      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmNames')[copyindex()])]",
       "copy": {
         "name": "virtualMachineLoop",
         "count": "[parameters('numberOfInstances')]"
@@ -264,11 +280,23 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), copyindex(), '-osdisk.vhd')]"
+              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmNames')[copyindex()], '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
-          }
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmNames')[copyindex()],'data-1.vhd')]"
+              },
+              "name": "[concat(variables('vmNames')[copyindex()],'-data-disk1')]",
+              "createOption": "Empty",
+              "caching": "None",
+              "diskSizeGB": "128",
+              "lun": 0
+            }
+          ]
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -294,7 +322,7 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',copyindex()))]"
+            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmNames')[copyindex()]))]"
           ],
           "tags": {
             "displayName": "SqlAlwaysOnConfig"
@@ -306,9 +334,9 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "fileUris": [
-                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'))]"
+                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(1),'.ps1')]"
               ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), ' -SafeModePassword QAZwsx123 -Domain poltergeist.local')]"
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1', variables('vmNames')[copyindex()])]"
             }
           }
         }
