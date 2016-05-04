@@ -37,7 +37,10 @@
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "vmAvSetName": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),'-as')]",
     "vmsTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vms-3nics-lbbe.json",
-    "jumpBoxTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json"
+    "jumpBoxTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json",
+    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-custom-linux-extension.json",
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/nva.sh",
+    "scriptName":  "nva.sh"
   },
   "resources": [
     {
@@ -45,6 +48,9 @@
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "name": "[variables('lbName')]",
+      "tags": {
+        "displayName": "Load balancer"
+      },
       "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]" ],
       "properties": {
         "frontendIPConfigurations": [
@@ -87,6 +93,9 @@
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
       "name": "[variables('vmAvSetName')]",
+      "tags": {
+        "displayName": "Availability set"
+      },
       "properties": {
         "platformFaultDomainCount": 3,
         "platformUpdateDomainCount": 5
@@ -97,6 +106,9 @@
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
       "name": "[concat(parameters('baseName'),copyindex(1),variables('uniqueString'))]",
+      "tags": {
+        "displayName": "Storage accounts"
+      },
       "copy": {
         "name": "stgCount",
         "count": "[add(variables('numVms'),1)]"
@@ -108,6 +120,9 @@
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "name": "[variables('feSubnetName')]",
+      "tags": {
+        "displayName": "NVA front end subnet"
+      },
       "properties": { "addressPrefix": "[parameters('feSubnetAddressPrefix')]" }
     },
     {
@@ -115,6 +130,9 @@
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "name": "[variables('beSubnetName')]",
+      "tags": {
+        "displayName": "NVA backend subnet"
+      },
       "properties": { "addressPrefix": "[parameters('beSubnetAddressPrefix')]" }
     },
     {
@@ -122,12 +140,18 @@
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "name": "[variables('mgmtSubnetName')]",
+      "tags": {
+        "displayName": "Management subnet"
+      },
       "properties": { "addressPrefix": "[parameters('mgmtSubnetAddressPrefix')]" }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "nvas",
+      "tags": {
+        "displayName": "VMs - NVAs"
+      },
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
         "[concat('Microsoft.Compute/availabilitySets/',variables('vmAvSetName'))]",
@@ -147,6 +171,8 @@
           "snid1": { "value": "[variables('feSubnetId')]" },
           "snid2": { "value": "[variables('beSubnetId')]" },
           "snid3": { "value": "[variables('mgmtSubnetId')]" },
+          "nic1IpForwarding": { "value": true },
+          "nic2IpForwarding": { "value": true },
           "lbBackendPoolId": { "value": "[variables('ilbBEId')]" },
           "stgAccountNames": {
             "value": [
@@ -164,9 +190,36 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
+      "name": "routing",
+      "tags": {
+        "displayName": "Custom extension - enable routing"
+      },
+      "dependsOn": [ "Microsoft.Resources/deployments/nvas" ],
+      "copy": {
+        "name": "extensionCount",
+        "count": "[variables('numVMs')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('extensionTemplate')]" },
+        "parameters": {
+          "vmName": { "value": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),copyindex(1),'-vm')]" },
+          "fileUri": { "value": "[variables('scriptUri')]" },
+          "scriptName": {"value": "[variables('scriptName')]"}
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
       "name": "jumpbox",
+      "tags": {
+        "displayName": "VM - Jumpbox"
+      },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'3',variables('uniqueString'))]",
+        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]",
+        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('beSubnetNamePrefix'),'-sn')]",
         "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('mgmtSubnetNamePrefix'),'-sn')]"
       ],
       "properties": {
