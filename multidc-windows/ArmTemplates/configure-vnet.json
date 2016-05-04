@@ -1,0 +1,178 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the VNET."
+      }
+    },
+    "vnetAddressPrefix1": {
+      "type": "string",
+      "metadata": {
+        "description": "Address space one for the VNET"
+      }
+    },
+    "vnetAddressPrefix2": {
+      "type": "string",
+      "metadata": {
+        "description": "Address space two for the VNET"
+      }
+    },
+    "vnetFrontendSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the frontend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
+      }
+    },
+    "vnetFrontendSubnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP address prefix for the frontend subnet in the VNET."
+      }
+    },
+    "vnetBackendSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the backend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
+      }
+    },
+    "vnetBackendSubnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The IP address prefix for the backend subnet in the VNET."
+      }
+    },
+    "vnetGatewaySubnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The prefix for the GatewaySubnet where the VirtualNetworkGateway will be deployed. This must be at least /29."
+      }
+    },
+    "vnetDnsAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "DNS address space of the VNET"
+      }
+    },
+    "gatewayName": {
+      "type": "string",
+      "metadata": {
+        "description": "Gateway name of the VNET"
+      }
+    },
+    "vnetGatewayIpName": {
+      "type": "string",
+      "metadata": {
+        "description": "Gateway IP address name of the VNET"
+      }
+    },
+    "vnetDomainLabel": {
+      "type": "string",
+      "metadata": {
+        "description": "Domain label for the public IP address. Required for traffic manager setup."
+      }
+    }
+  },
+  "variables": {
+    "apiVersion": "2016-03-30",
+    "gatewayPublicIPName": "[parameters('vnetGatewayIpName')]",
+    "region": "[resourceGroup().location]",
+    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "gatewaySubnetRef": "[concat(variables('vnetId'),'/subnets/','GatewaySubnet')]",
+    "backendSubnetRef": "[concat(variables('vnetId'),'/subnets/',parameters('vnetBackendSubnetName'))]",
+    "createVMsTemplateUri": "[uri(deployment().properties.templateLink.uri, 'configure-vms.json')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[parameters('vnetName')]",
+      "location": "[variables('region')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetAddressPrefix1')]",
+            "[parameters('vnetAddressPrefix2')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('vnetFrontendSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetFrontendSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[parameters('vnetBackendSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetBackendSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "[parameters('vnetGatewaySubnetPrefix')]"
+            }
+          }
+        ]
+      },
+      "tags": {
+        "displayName": "VirtualNetwork"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('gatewayPublicIPName')]",
+      "location": "[variables('region')]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('vnetDomainLabel')]"
+        }
+      },
+      "tags": {
+        "displayName": "PublicIPAddress"
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "name": "[parameters('gatewayName')]",
+      "location": "[variables('region')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('gatewayPublicIPName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('gatewaySubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('gatewayPublicIpName'))]"
+              }
+            },
+            "name": "vnetGatewayConfig1"
+          }
+        ],
+        "gatewayType": "Vpn",
+        "vpnType": "RouteBased",
+        "enableBgp": "false"
+      },
+      "tags": {
+        "displayName": "VirtualNetworkGateway"
+      }
+    }
+  ],
+  "outputs": {
+    "vnetGatewayName": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName'))]"
+    }
+  }
+}

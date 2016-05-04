@@ -1,0 +1,42 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "vnetName": {
+          "value": "app2-vnet"
+      },
+      "vnetAddressPrefix1": {
+          "value": "10.41.0.0/16"
+      },
+      "vnetAddressPrefix2": {
+          "value": "10.42.0.0/16"
+      },
+      "vnetFrontendSubnetName": {
+          "value": "v2-fe-subnet"
+      },
+      "vnetFrontendSubnetPrefix": {
+          "value": "10.41.0.0/24"
+      },
+      "vnetBackendSubnetName": {
+          "value": "v2-be-subnet"
+      },
+      "vnetBackendSubnetPrefix": {
+          "value": "10.42.0.0/24"
+      },
+      "vnetGatewaySubnetPrefix": {
+          "value": "10.42.255.0/27"
+      },
+      "vnetDnsAddress": {
+          "value": "8.8.8.8"
+      },
+      "gatewayName": {
+          "value": "v2-gateway"
+      },
+      "vnetGatewayIpName": {
+          "value": "v2-gwy-ip"
+      },
+      "vnetDomainLabel": {
+          "value": "v2contoso"
+      }
+  }
+}
