@@ -1,0 +1,223 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": { "type": "string" },
+    "environment": { "type": "string" },
+    "adminUserName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "WindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ]
+    },
+    "pipDnsName": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "variables": {
+    "vnetPrefix": "10.0.0.0/16",
+    "subnetPrefix": "10.0.0.0/24",
+    "vmSize": "Standard_DS1",
+    "dataDiskSizeInGB": "128",
+
+    "vnetName": "[concat(parameters('appName'), '-vnet')]",
+    "subnetName": "[concat(parameters('appName'), '-subnet')]",
+    "publicIPName": "[concat(parameters('appName'), '-pip')]",
+    "nsgName": "[concat(parameters('appName'), '-nsg')]",
+    "vmName": "[concat(parameters('appName'), '-vm1')]",
+    "nicName": "[concat(parameters('appName'), '-nic1')]",
+    "vhdStorageName": "[concat(replace(variables('vmName'),'-',''), 'st1')]",
+    "OSDiskName": "[concat(variables('vmName'), '-osdisk')]",
+    "DataDiskName": "[concat(variables('vmName'), '-data1')]",
+
+    "ImagePublisher": "MicrosoftWindowsServer",
+    "ImageOffer": "WindowsServer",
+    "vm1VnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'VNet')]",
+    "vm1SubnetRef": "[concat(variables('vm1VnetID'), '/subnets/', variables('subnetName'))]"
+  },
+  "resources": [
+    {
+      "name": "VNet",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIPName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "Public IP"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('pipDnsName')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NSG"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow-rdp",
+            "properties": {
+              "description": "Allow RDP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('vhdStorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "VHD storage"
+      },
+      "properties": {
+        "accountType": "Premium_LRS"
+      }
+    },
+    {
+      "name": "[variables('nicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', 'VNet')]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPName'))]"
+      ],
+      "tags": {
+        "displayName": "VM1 NIC"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('vm1SubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('vmName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdstorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "tags": {
+        "displayName": "VM1"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUserName')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('ImagePublisher')]",
+            "offer": "[variables('ImageOffer')]",
+            "sku": "[parameters('WindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "vmOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('vhdstorageName'), '.blob.core.windows.net/', variables('vhdStorageName'), '/', variables('OSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "datadisk1",
+              "diskSizeGB": "[variables('dataDiskSizeInGB')]",
+              "lun": 0,
+              "vhd": {
+                "uri": "[concat('http://', variables('vhdstorageName'), '.blob.core.windows.net/', variables('vhdStorageName'), '/', variables('DataDiskName'), '.vhd')]"
+              },
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
