@@ -3,16 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": {
-      "value": "myhr"
+      "value": "myhr1"
     },
     "vmNamePrefix": {
-      "value": "manivm"
+      "value": "manivm1"
     },
     "vmComputerName": {
       "value": "manivmcomputer"
-    },
-    "vmAvSetName": {
-      "value": "vmavsetname"
     },
     "subnetNamePrefix": {
       "value": "manisnet"
@@ -21,7 +18,7 @@
       "value": "/subscriptions/ce0f816f-6ffb-4e1c-bc6c-d8a5bc69765c/resourceGroups/manitestvnetrg/providers/Microsoft.Network/virtualNetworks/manitest123-vnet/subnets/manitest123-frontend-subnet"
     },
     "ilbIpAddress": {
-      "value": "10.20.1.12"
+      "value": "10.20.1.15"
     },
     "osType": {
       "value": "Windows"
@@ -36,7 +33,7 @@
       "value": 2
     },
     "stgAccountName": {
-      "value": "maniteststore123"
+      "value": "manistor"
     }
 
 

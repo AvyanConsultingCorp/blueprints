@@ -33,14 +33,10 @@
     },
     "numberVMs": {
       "type": "int",
-      "defaultValue": 1,
+      "defaultValue": 2,
       "metadata": { "description": "Number of VMs in subnet." }
-
-    },
-    "vmAvailabilitySetName": {
-      "type": "string"
-
     }
+   
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -49,6 +45,8 @@
     "ilbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
     "ilbBEId": "[concat(variables('ilbId'),'/backendAddressPools/',variables('lbBEPoolName'))]",
     "lbFEIpConfigId": "[concat(variables('ilbId'),'/frontendIPConfigurations/','ipconfig1')]",
+    "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('vmNamePRefix'),'-as')]",
+    "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "createavailset": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-avail-set.json",
     "createvms": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-lbbe.json"
   },
@@ -110,6 +108,17 @@
       }
     },
     {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('baseName'),copyindex(1),variables('uniqueString'))]",
+      "copy": {
+        "name": "stgCount",
+        "count": "[parameters('numberVMs')]"
+      },
+      "properties": { "accountType": "Premium_LRS" }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "vm-availabilityset-create",
@@ -119,14 +128,18 @@
           "uri": "[variables('createavailset')]"
         },
         "parameters": {
-          "vmAvSetName": { "value": "[parameters('vmAvailabilitySetName')]" }
+          "vmAvailabilitySetName": { "value": "[variables('vmAvailabilitySetName')]" }
         }
       }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "vms-1nic-lbbe",
+      "name": "[concat(parameters('baseName'),copyindex(1))]",
+      "copy": {
+        "name": "stgCount",
+        "count": "[parameters('numberVMs')]"
+      },
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -134,20 +147,21 @@
         },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "vmNamePrefix": { "value": "[parameters('vmNamePrefix')]" },
+          "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
           "vmComputerName": { "value": "[parameters('vmComputerName')]" },
           "snid": { "value": "[parameters('subnetId')]" },
           "lbBackendPoolId": { "value": "[variables('ilbBEId')]" },
           "osType": { "value": "[parameters('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "stgAccountName": { "value": "[parameters('stgAccountName')]" },
-          "vmAvSetName": { "value": "[parameters('vmAvailabilitySetName')]" }
+          "stgAccountName": { "value": "[concat(parameters('baseName'),copyindex(1),variables('uniqueString'))]" },
+          "vmAvSetName": { "value": "[variables('vmAvailabilitySetName')]" }
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
-        "[resourceId('Microsoft.Compute/availabilitySets',variables('lbName'))]"
+        "[resourceId('Microsoft.Resources/deployments','vm-availabilityset-create')]",
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),parameters('numberVMs'),variables('uniqueString'))]"
       ]
     }
   ],
