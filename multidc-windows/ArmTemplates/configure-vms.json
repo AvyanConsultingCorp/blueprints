@@ -122,7 +122,7 @@
       "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
       "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
       "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-      ""
+      "[concat(' -SafeModePassword QAZwsx123 -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]"
     ]
   },
   "resources": [
