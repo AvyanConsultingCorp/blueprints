@@ -9,25 +9,25 @@
             "value": "nva-fe"
         },
         "feSubnetAddressPrefix": {
-            "value": "192.168.1.0/24"
+            "value": "10.0.1.0/24"
         },
         "beSubnetNamePrefix": {
             "value": "nva-be"
         },
         "beSubnetAddressPrefix": {
-            "value": "192.168.2.0/24"
+            "value": "10.0.2.0/24"
         },
         "mgmtSubnetNamePrefix": {
             "value": "mgmt"
         },
         "mgmtSubnetAddressPrefix": {
-            "value": "192.168.3.0/24"
+            "value": "10.0.3.0/24"
         },
         "ilbIpAddress": {
-            "value": "192.168.1.100"
+            "value": "10.0.1.100"
         },
         "jumpboxIpAddress": {
-            "value": "192.168.3.100"
+            "value": "10.0.3.100"
         },
         "adminUsername": {
             "value": "adminUser"
