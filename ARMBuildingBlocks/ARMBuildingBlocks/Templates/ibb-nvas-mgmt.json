@@ -164,7 +164,11 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "jb",
+      "name": "jumpbox",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'3',variables('uniqueString'))]",
+        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('mgmtSubnetNamePrefix'),'-sn')]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('jumpBoxTemplate')]" },
