@@ -336,7 +336,7 @@
               "fileUris": [
                 "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(1),'.ps1')]"
               ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1 ', variables('vmNames')[copyindex()])]"
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1 ', variables('psArguments')[copyindex()])]"
             }
           }
         }
