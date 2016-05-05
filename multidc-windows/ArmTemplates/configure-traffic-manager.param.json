@@ -3,25 +3,31 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "uniqueDnsName": {
-            "value": "app13dev"
+            "value": "apptmdns"
         },
         "primaryResourceGroup": {
-            "value": "multidc-1-rg"
+            "value": "app-1-rg"
         },
         "primaryPublicIpName": {
-            "value": "v1-gateway-ip"
+            "value": "v1-gwy-ip"
         },
         "secondaryResourceGroup": {
-            "value": "multidc-2-rg"
+            "value": "app-2-rg"
         },
         "secondaryPublicIpName": {
-            "value": "v2-gateway-ip"
+            "value": "v2-gwy-ip"
         },
         "primaryLocation": {
             "value": "West US"
         },
         "secondaryLocation": {
             "value": "East US"
+        },
+        "trafficManagerProfileName": {
+            "value": "app-dev-tm"
+        },
+        "monitorPath": {
+            "value": "/"
         }
     }
 }

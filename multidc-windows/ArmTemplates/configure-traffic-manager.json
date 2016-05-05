@@ -4,7 +4,6 @@
   "parameters": {
     "trafficManagerProfileName": {
       "type": "string",
-      "defaultValue": "app13-dev-tm",
       "metadata": {
         "description": "Profile name for the traffic manager."
       }
@@ -17,7 +16,6 @@
     },
     "monitorPath": {
       "type": "string",
-      "defaultValue": "/healthprobe/index/123",
       "metadata": {
         "description": "Traffic manager profile monioring path."
       }
@@ -48,17 +46,15 @@
     },
     "primaryLocation": {
       "type": "string",
-      "allowedValues": [
-        "West US",
-        "East US"
-      ]
+      "metadata": {
+        "description": "First deployment region."
+      }
     },
     "secondaryLocation": {
       "type": "string",
-      "allowedValues": [
-        "West US",
-        "East US"
-      ]
+      "metadata": {
+        "description": "Second deployment region."
+      }
     }
   },
   "variables": {

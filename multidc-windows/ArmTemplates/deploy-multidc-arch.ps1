@@ -11,12 +11,11 @@ $location1='West US' # First region to deploy into (see regional pairing for opt
 # Create new resource group
 New-AzureRmResourceGroup -Name $firstResourceGroupName -Location $location1
 
-# Template and parameter files URI
-$templateUri = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-first-vnet.json'
-$templateParamUri = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-first-vnet.param.json'
+# Template and first parameter file URIs
+$templateUri = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-vnet.json'
+$templateParamUri1 = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-vnet.v1.param.json'
 
-# Deploy the first template in first region
-New-AzureRmResourceGroupDeployment -Name $firstDeploymentName -ResourceGroupName $firstResourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri -Verbose
+New-AzureRmResourceGroupDeployment -Name $firstDeploymentName -ResourceGroupName $firstResourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri1 -Verbose
 
 #############################################################################
 # Deploy infrastructure in second region
@@ -28,11 +27,10 @@ $location2='East US' # Second region to deploy into (see regional pairing for op
 # Create new resource group
 New-AzureRmResourceGroup -Name $secondResourceGroupName -Location $location2
 
-# Template and parameter files URI
-$templateUri1 = "https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-second-vnet.json"
-$templateParamUri1 = "https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-second-vnet.param.json"
+# Second parameter file URI
+$templateParamUri2 = "https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-vnet.v2.param.json"
 
-New-AzureRmResourceGroupDeployment -Name $secondDeploymentName -ResourceGroupName $secondResourceGroupName -TemplateUri $templateUri1 -TemplateParameterUri $templateParamUri1 -Verbose
+New-AzureRmResourceGroupDeployment -Name $secondDeploymentName -ResourceGroupName $secondResourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri2 -Verbose
 
 ##############################################################################
 # Establish gateway VPN connections
@@ -41,13 +39,13 @@ New-AzureRmResourceGroupDeployment -Name $secondDeploymentName -ResourceGroupNam
 $firstConnection = 'Vnet1-to-Vnet2'
 $secondConnection = 'Vnet2-to-Vnet1'
 
-# Create the connections between first and the second gateway.
-$vnetGateway1 = Get-AzureRmVirtualNetworkGateway -Name app1-vnet-gateway -ResourceGroupName $firstResourceGroupName
+# Create the connections between first and the second gateway. Make sure that the gateway name matches the one specified in parameter file for each deployment.
+$vnetGateway1 = Get-AzureRmVirtualNetworkGateway -Name v1-gateway -ResourceGroupName $firstResourceGroupName
 
-$vnetGateway2 = Get-AzureRmVirtualNetworkGateway -Name app2-vnet-gateway -ResourceGroupName $secondResourceGroupName
+$vnetGateway2 = Get-AzureRmVirtualNetworkGateway -Name v2-gateway -ResourceGroupName $secondResourceGroupName
 
 # Read the shared key from console
-$sharedKey =  Read-Host 'Enter your shared key' -AsSecureString
+$sharedKey =  Read-Host 'Enter your shared key'
 
 # Vnet 1 to Vnet 2
 New-AzureRmVirtualNetworkGatewayConnection -Name $firstConnection -ResourceGroupName $firstResourceGroupName -VirtualNetworkGateway1 $vnetGateway1 -VirtualNetworkGateway2 $vnetGateway2 -Location $location1 -ConnectionType Vnet2Vnet -SharedKey $sharedKey
