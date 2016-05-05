@@ -133,6 +133,7 @@
       "tags": {
         "displayName": "NVA backend subnet"
       },
+      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]" ],
       "properties": { "addressPrefix": "[parameters('beSubnetAddressPrefix')]" }
     },
     {
@@ -143,15 +144,13 @@
       "tags": {
         "displayName": "Management subnet"
       },
+      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('beSubnetNamePrefix'),'-sn')]" ],
       "properties": { "addressPrefix": "[parameters('mgmtSubnetAddressPrefix')]" }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "nvas",
-      "tags": {
-        "displayName": "VMs - NVAs"
-      },
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
         "[concat('Microsoft.Compute/availabilitySets/',variables('vmAvSetName'))]",
@@ -190,10 +189,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "routing",
-      "tags": {
-        "displayName": "Custom extension - enable routing"
-      },
+      "name": "[concat('routing',copyindex(1))]",
       "dependsOn": [ "Microsoft.Resources/deployments/nvas" ],
       "copy": {
         "name": "extensionCount",
@@ -213,9 +209,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "jumpbox",
-      "tags": {
-        "displayName": "VM - Jumpbox"
-      },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'3',variables('uniqueString'))]",
         "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]",
@@ -231,7 +224,7 @@
           "vmComputerName": { "value": "jumpbox" },
           "vmIPaddress": { "value": "[parameters('jumpboxIpAddress')]" },
           "snid": { "value": "[variables('mgmtSubnetId')]" },
-          "stgAccountName": { "value": "test3wl2hprr2tmtwu" },
+          "stgAccountName": { "value": "[concat(parameters('baseName'),'3',variables('uniqueString'))]" },
           "osType": { "value": "[variables('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" }

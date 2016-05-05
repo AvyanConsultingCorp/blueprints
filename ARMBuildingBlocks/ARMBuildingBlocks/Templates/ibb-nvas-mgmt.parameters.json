@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "baseName": {
-            "value": "test"
+            "value": "test2"
         },
         "feSubnetNamePrefix": {
             "value": "nva-fe"
