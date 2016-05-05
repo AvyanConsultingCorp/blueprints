@@ -44,32 +44,11 @@
         "description": "Admin password"
       }
     },
-    "imagePublisher": {
-      "type": "string",
-      "defaultValue": "MicrosoftWindowsServer",
-      "metadata": {
-        "description": "Image Publisher"
-      }
-    },
     "vmNamePrefix": {
       "type": "string",
       "defaultValue": "vm",
       "metadata": {
         "description": "Prefix to use for VM names"
-      }
-    },
-    "imageOffer": {
-      "type": "string",
-      "defaultValue": "WindowsServer",
-      "metadata": {
-        "description": "Image Offer"
-      }
-    },
-    "imageSKU": {
-      "type": "string",
-      "defaultValue": "2012-R2-Datacenter",
-      "metadata": {
-        "description": "Image SKU"
       }
     },
     "vmStorageAccountContainerName": {
@@ -110,20 +89,49 @@
     "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]",
     "sqlDomainName": "poltergeist.local",
     "sqlDomainLogin": "[concat(variables('sqlDomainName'),'\\',parameters('adminUsername'))]",
-    "vmNames": [
-      "ad-1",
-      "ad-2",
-      "sql-1",
-      "sql-2",
-      "fsw"
-    ],
-    "psArguments": [
-      "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
-      "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-      "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-      "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-      "[concat(' -SafeModePassword QAZwsx123 -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]"
-    ]
+    "vmSettings": {
+      "vmName": [
+        "ad-1",
+        "ad-2",
+        "sql-1",
+        "sql-2",
+        "fsw"
+      ],
+      "vmImage": [
+        [
+          "MicrosoftWindowsServer",
+          "WindowsServer",
+          "2012-R2-Datacenter"
+        ],
+        [
+          "MicrosoftWindowsServer",
+          "WindowsServer",
+          "2012-R2-Datacenter"
+        ],
+        [
+          "MicrosoftSQLServer",
+          "SQL2014SP1-WS2012R2",
+          "Enterprise"
+        ],
+        [
+          "MicrosoftSQLServer",
+          "SQL2014SP1-WS2012R2",
+          "Enterprise"
+        ],
+        [
+          "MicrosoftWindowsServer",
+          "WindowsServer",
+          "2012-R2-Datacenter"
+        ]
+      ],
+      "psArgument": [
+        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
+        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
+        "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
+        "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
+        "[concat(' -SafeModePassword QAZwsx123 -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]"
+      ]
+    }
   },
   "resources": [
     {
@@ -247,7 +255,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmNames')[copyindex()])]",
+      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
       "copy": {
         "name": "virtualMachineLoop",
         "count": "[parameters('numberOfInstances')]"
@@ -266,21 +274,21 @@
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmNames')[copyindex()])]",
+          "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[parameters('imagePublisher')]",
-            "offer": "[parameters('imageOffer')]",
-            "sku": "[parameters('imageSKU')]",
+            "publisher": "[variables('vmSettings').vmImage[copyIndex()][0]]",
+            "offer": "[variables('vmSettings').vmImage[copyIndex()][1]]",
+            "sku": "[variables('vmSettings').vmImage[copyIndex()][2]]",
             "version": "latest"
           },
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmNames')[copyindex()], '-osdisk.vhd')]"
+              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmSettings').vmName[copyindex()], '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -288,9 +296,9 @@
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmNames')[copyindex()],'data-1.vhd')]"
+                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmSettings').vmName[copyindex()],'data-1.vhd')]"
               },
-              "name": "[concat(variables('vmNames')[copyindex()],'-data-disk1')]",
+              "name": "[concat(variables('vmSettings').vmName[copyindex()],'-data-disk1')]",
               "createOption": "Empty",
               "caching": "None",
               "diskSizeGB": "128",
@@ -322,7 +330,7 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmNames')[copyindex()]))]"
+            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmSettings').vmName[copyindex()]))]"
           ],
           "tags": {
             "displayName": "SqlAlwaysOnConfig"
@@ -336,7 +344,7 @@
               "fileUris": [
                 "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(1),'.ps1')]"
               ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1 ', variables('psArguments')[copyindex()])]"
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1 ', variables('vmSettings').psArgument[copyindex()])]"
             }
           }
         }

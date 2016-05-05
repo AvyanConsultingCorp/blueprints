@@ -39,7 +39,7 @@
       "value": "v2contoso"
     },
     "lbFrontendPrivateIp": {
-      "value": "10.12.0.250"
+      "value": "10.42.0.250"
     },
     "networkInterfacePrefix": {
       "value": "app1-dev-nic" 
