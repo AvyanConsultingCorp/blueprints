@@ -159,7 +159,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
-        "[resourceId('Microsoft.Resources/deployments','vm-availabilityset-create')]",
+        "[resourceId('Microsoft.Resources/deployments','vm-availabilityset1-create')]",
         "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),parameters('numberVMs'),variables('uniqueString'))]"
       ]
     }
