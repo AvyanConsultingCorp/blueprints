@@ -6,7 +6,7 @@
     "vmNamePrefix": { "type": "string" },
     "vmComputerName": {
       "type": "string",
-      "maxLength": 15
+      "maxLength": 13
     },
     "subnetNamePrefix": { "type": "string" },
     "subnetId": { "type": "string" },
@@ -147,7 +147,7 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
-          "vmComputerName": { "value": "[parameters('vmComputerName')]" },
+          "vmComputerName": { "value": "[concat(parameters('vmComputerName'),copyindex(1))]" },
           "snid": { "value": "[parameters('subnetId')]" },
           "lbBackendPoolId": { "value": "[variables('ilbBEId')]" },
           "osType": { "value": "[parameters('osType')]" },

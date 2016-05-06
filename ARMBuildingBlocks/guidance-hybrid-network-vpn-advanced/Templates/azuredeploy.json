@@ -39,9 +39,8 @@
     "vnetGatewaySubnetName": "GatewaySubnet",
 
     "createIlbBackend": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json",
-    "vmNamePrefix": "vmNamePrefix",
-    "vmComputerName": "vmComputerName",
-
+    "webVmNamePrefix": "web-vm",
+    "vmComputerNamePrefix": "[concat(parameters('baseName'),'-web-vm')]",
     "webSubnetNamePrefix": "web",
     "webOsType": "[variables('osTypeWindows')]",
     "webNumberVMs": 2
@@ -128,8 +127,8 @@
           "osType": { "value": "[variables('webOsType')]" },
           "subnetId": { "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetWebSubnetName'))]" },
           "numberVMs": { "value": "[variables('webNumberVMs')]" },
-          "vmNamePrefix": { "value": "[variables('vmNamePrefix')]" },
-          "vmComputerName": { "value": "[variables('vmComputerName')]" }
+          "vmNamePrefix": { "value": "[variables('webVmNamePrefix')]" },
+          "vmComputerName": { "value": "[variables('vmComputerNamePrefix')]" }
         }
       }
     }
