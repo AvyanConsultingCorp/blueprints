@@ -25,7 +25,9 @@
     "vnetDBSubnetPrefix": "10.0.5.0/24",
 
     "vnetGatewaySubnetName": "GatewaySubnet",
-    "vnetGatewaySubnetPrefix": "10.0.255.224/27"
+    "vnetGatewaySubnetPrefix": "10.0.255.224/27",
+
+    "createIlbBackend": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json"
   },
   "resources": [
     {
@@ -38,6 +40,7 @@
         "displayName": "vnet"
       },
       "properties": {
+        "mode": "Incremental",
         "addressSpace": {
           "addressPrefixes": [
             "[variables('vnetPrefix')]"
@@ -88,8 +91,31 @@
           }
         ]
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "ilb-vms-create",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('createIlbBackend')]"
+        },
+        "parameters": {
+          "baseName": { "value": "basename" },
+          "vmNamePrefix": { "value": "webvm" },
+          "vmComputerName": { "value": "vmComputerName" },
+          "subnetNamePrefix": { "value": "Web" },
+          "stgAccountName": { "value": "hz31231354802" },
+          "subnetId": { "value": "/subscriptions/15ed8653-1601-4c52-a3d4-afcfc38ddad3/resourceGroups/hz3-dev-rg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/WebSubnet" },
+          "ilbIpAddress": { "value": "10.0.3.254" },
+          "osType": { "value": "Windows" },
+          "adminUsername": { "value": "hanzuser1" },
+          "adminPassword": { "value": "Passw0rd$1" },
+          "numberVMs": { "value": 2 }
+        }
+      }
     }
-
   ],
   "outputs": {
   }
