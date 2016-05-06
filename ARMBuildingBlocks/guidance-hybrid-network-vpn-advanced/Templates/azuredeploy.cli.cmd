@@ -1,4 +1,4 @@
-@ECHO OFF
+::@ECHO OFF
 SETLOCAL EnableDelayedExpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 IF "%~5"=="" (
@@ -19,7 +19,7 @@ SET ON_PREMISES_ADDRESS_SPACE=%5
 SET LOCATION=centralus
 SET ENVIRONMENT=dev
 SET RESOURCE_GROUP=%APP_NAME%-%ENVIRONMENT%-rg
-SET DEPLOYMENT_NAME=%APP_NAME%-%ENVIRONMENT%-deployment
+SET DEPLOYMENT_NAME=%APP_NAME%-%ENVIRONMENT%-deployment-%RANDOM%
 CALL azure config mode arm
 
 CALL azure group create --name %RESOURCE_GROUP% --location %LOCATION% --subscription %SUBSCRIPTION%
