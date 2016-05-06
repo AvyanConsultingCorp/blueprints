@@ -12,7 +12,8 @@
     },
     "baseName": {
       "type": "string",
-      "metadata": { "description": "base name" }
+      "maxLength": 4,
+      "metadata": { "description": "Base name" }
     }
   },
   "variables": {
