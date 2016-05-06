@@ -120,7 +120,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "vm-availabilityset-create",
+      "name": "vm-availabilityset1-create",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
