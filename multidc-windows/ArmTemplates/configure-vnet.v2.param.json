@@ -42,16 +42,25 @@
       "value": "10.42.0.250"
     },
     "networkInterfacePrefix": {
-      "value": "app1-dev-nic" 
+      "value": "app2-dev-nic"
     },
     "loadBalancerName": {
-      "value": "app1-dev-lb"
+      "value": "app2-dev-lb"
     },
     "vmNamePrefix": {
-      "value": "app1"
+      "value": "app2"
     },
     "storageAccountName": {
-      "value": "app1st"
+      "value": "app2st"
+    },
+    "lbBackendPool": {
+      "value": "app2-dev-lb-pool"
+    },
+    "sqlStaticIp": {
+      "value": "10.42.0.25"
+    },
+    "appName": {
+      "value": "app2"
     }
   }
 }

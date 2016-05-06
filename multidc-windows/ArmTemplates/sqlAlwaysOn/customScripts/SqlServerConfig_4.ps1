@@ -10,7 +10,16 @@ Param(
   [string]$SafeModePassword,
 
   [Parameter(Mandatory=$True)]
-  [string]$Domain
+  [string]$Domain,
+  
+  [Parameter(Mandatory=$True)]
+  [string]$AppName,
+
+  [Parameter(Mandatory=$True)]
+  [string]$ClusterName,
+  
+  [Parameter(Mandatory=$True)]
+  [string]$StaticIp,
 )
 
 Import-Module "sqlps" -DisableNameChecking
@@ -21,12 +30,11 @@ $SqlUser.LoginType = "WindowsUser"
 $SqlUser.create($AdminPassword)
 $sqlUser.AddToRole("sysadmin")
 
-
 $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
 
-#Enable-PSRemoting -Force
+Enable-PSRemoting -Force
 
 # Join domain
 Add-Computer -Credential $credential -DomainName $Domain -Force -Restart

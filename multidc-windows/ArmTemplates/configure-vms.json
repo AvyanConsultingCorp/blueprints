@@ -77,6 +77,24 @@
       "metadata": {
         "description": "Name of this project"
       }
+    },
+    "lbBackendPool": {
+      "type": "string",
+      "metadata": {
+        "description": "Loadbalancer backend pool name"
+      }
+    },
+    "sqlStaticIp": {
+      "type": "string",
+      "metadata": {
+        "description": "Static IP of the Sql server"
+      }
+    },
+    "appName": {
+      "type": "string",
+      "metadata": {
+        "description": "App name to be used for SQL configuration"
+      }
     }
   },
   "variables": {
@@ -85,10 +103,10 @@
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
     "sqlAlwaysOnConfigScriptFileName": "SqlServerConfig_",
-    "lbBackendPool": "app13-dev-lb-pool",
     "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]",
     "sqlDomainName": "poltergeist.local",
     "sqlDomainLogin": "[concat(variables('sqlDomainName'),'\\',parameters('adminUsername'))]",
+    "clusterName": "app1cluster",
     "vmSettings": {
       "vmName": [
         "ad-1",
@@ -127,9 +145,9 @@
       "psArgument": [
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-        "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-        "[concat(' -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-        "[concat(' -SafeModePassword QAZwsx123 -Domain', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]"
+        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('projectName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
+        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('projectName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
+        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]"
       ]
     }
   },
@@ -182,7 +200,7 @@
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', parameters('lbBackendPool'))]"
                 }
               ]
             }
@@ -213,7 +231,7 @@
         ],
         "backendAddressPools": [
           {
-            "name": "[variables('lbBackendPool')]"
+            "name": "[parameters('lbBackendPool')]"
           }
         ],
         "loadBalancingRules": [
@@ -223,7 +241,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/app13-dev-lb-fe')]"
               },
               "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/',variables('lbBackendPool'))]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', parameters('lbBackendPool'))]"
               },
               "probe": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"

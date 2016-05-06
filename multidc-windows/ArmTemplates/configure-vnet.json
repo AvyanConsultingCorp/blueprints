@@ -103,6 +103,24 @@
       "metadata": {
         "description": "Prefix for the storage account created for the VMs in the subnet."
       }
+    },
+    "appName": {
+      "type": "string",
+      "metadata": {
+        "description": "App name to be used for SQL configuration."
+      }
+    },
+    "lbBackendPool": {
+      "type": "string",
+      "metadata": {
+        "description": "Loadbalancer backend pool name."
+      }
+    },
+    "sqlStaticIp": {
+      "type": "string",
+      "metadata": {
+        "description": "Static IP address of the SQL server."
+      }
     }
   },
   "variables": {
@@ -210,6 +228,12 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "appName": {
+            "value": "[parameters('appName')]"
+          },
+          "lbBackendPool": {
+            "value": "[parameters('lbBackendPool')]"
+          },
           "numberOfInstances": {
             "value": 5
           },
@@ -223,7 +247,7 @@
             "value": "sqlAlwaysOn"
           },
           "networkInterfacePrefix": {
-            "value": "[parameters('networkInterfacePrefix')]" 
+            "value": "[parameters('networkInterfacePrefix')]"
           },
           "loadBalancerName": {
             "value": "[parameters('loadBalancerName')]"
@@ -239,6 +263,9 @@
           },
           "storageAccountName": {
             "value": "[parameters('storageAccountName')]"
+          },
+          "sqlStaticIp": {
+            "value": "[parameters('sqlStaticIp')]"
           }
         }
       }
