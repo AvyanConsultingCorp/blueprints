@@ -9,7 +9,6 @@
       "maxLength": 15
     },
     "subnetNamePrefix": { "type": "string" },
-    "stgAccountName": { "type": "string" },
     "subnetId": { "type": "string" },
     "ilbIpAddress": { "type": "string" },
     "osType": {
