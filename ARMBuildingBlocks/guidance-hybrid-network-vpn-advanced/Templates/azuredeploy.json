@@ -154,7 +154,11 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "biztier-create",
-      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]" ],
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]",
+        "[resourceId('Microsoft.Resources/deployments','webtier-create')]"
+      ],
+
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -179,7 +183,11 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "dbtier-create",
-      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]" ],
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]",
+        "[resourceId('Microsoft.Resources/deployments','biztier-create')]"
+      ],
+
       "properties": {
         "mode": "Incremental",
         "templateLink": {
