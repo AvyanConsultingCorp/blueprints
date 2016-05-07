@@ -46,6 +46,7 @@
     "lbFEIpConfigId": "[concat(variables('ilbId'),'/frontendIPConfigurations/','ipconfig1')]",
     "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('vmNamePRefix'),'-as')]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
+    "vmAvailabilitysetCreate": "[concat('vm-availabilityset-create', variables('uniqueString'))]",
     "createavailset": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-avail-set.json",
     "createvms": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-lbbe.json"
   },
@@ -120,7 +121,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "vm-availabilityset1-create",
+      "name": "[variables('vmAvailabilitysetCreate')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -159,7 +160,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
-        "[resourceId('Microsoft.Resources/deployments','vm-availabilityset1-create')]",
+        "[resourceId('Microsoft.Resources/deployments',variables('vmAvailabilitysetCreate'))]",
         "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),parameters('numberVMs'),variables('uniqueString'))]"
       ]
     }
