@@ -17,7 +17,7 @@ $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Fo
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
 
-#Enable-PSRemoting -Force
+Enable-PSRemoting -Force
 
 # Join domain
 Add-Computer -Credential $credential -DomainName $Domain -Force -Restart

@@ -36,6 +36,9 @@ $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, 
 
 Enable-PSRemoting -Force
 
+# Join domain
+Add-Computer -Credential $credential -DomainName $Domain -Force -Restart
+
 Install-WindowsFeature -Name FailOver-Clustering -IncludeManagementTools
 
 Install-WindowsFeature -ComputerName "$AppName-sql-2" -Name FailOver-Clustering -IncludeManagementTools
@@ -110,6 +113,3 @@ New-SqlAvailabilityGroup -Name "ag1" -Path "SQLSERVER:\SQL\$Sql1ServerName\DEFAU
 Join-SqlAvailabilityGroup -Path "SQLSERVER:\SQL\$Sql2ServerName\DEFAULT" -Name "ag1"
 Add-SqlAvailabilityDatabase -Path "SQLSERVER:\SQL\$Sql2ServerName\DEFAULT\AvailabilityGroups\ag1" -Database "TestDb"
 New-SqlAvailabilityGroupListener -Name "listener1" -StaticIp '$StaticIp/255.255.255.0' -Path SQLSERVER:\sql\$Sql1ServerName\DEFAULT\AvailabilityGroups\ag1
-
-# Join domain
-Add-Computer -Credential $credential -DomainName $Domain -Force -Restart
