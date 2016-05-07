@@ -110,12 +110,6 @@
         "description": "App name to be used for SQL configuration."
       }
     },
-    "lbBackendPool": {
-      "type": "string",
-      "metadata": {
-        "description": "Loadbalancer backend pool name."
-      }
-    },
     "sqlStaticIp": {
       "type": "string",
       "metadata": {
@@ -230,9 +224,6 @@
         "parameters": {
           "appName": {
             "value": "[parameters('appName')]"
-          },
-          "lbBackendPool": {
-            "value": "[parameters('lbBackendPool')]"
           },
           "numberOfInstances": {
             "value": 5

@@ -78,12 +78,6 @@
         "description": "Name of this project"
       }
     },
-    "lbBackendPool": {
-      "type": "string",
-      "metadata": {
-        "description": "Loadbalancer backend pool name"
-      }
-    },
     "sqlStaticIp": {
       "type": "string",
       "metadata": {
@@ -107,6 +101,8 @@
     "sqlDomainName": "poltergeist.local",
     "sqlDomainLogin": "[concat(variables('sqlDomainName'),'\\',parameters('adminUsername'))]",
     "clusterName": "app1cluster",
+    "lbBackendPool": "[concat(parameters('loadBalancerName'),'-pool')]",
+    "lbFrontendIpName": "[concat(parameters('loadBalancerName'),'-fe')]",
     "vmSettings": {
       "vmName": [
         "ad-1",
@@ -200,7 +196,7 @@
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[concat(variables('lbID'), '/backendAddressPools/', parameters('lbBackendPool'))]"
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
                 }
               ]
             }
@@ -226,22 +222,22 @@
               "privateIPAddress": "[parameters('lbFrontendPrivateIp')]",
               "privateIPAllocationMethod": "Static"
             },
-            "name": "app13-dev-lb-fe"
+            "name": "[variables('lbFrontendIpName')]"
           }
         ],
         "backendAddressPools": [
           {
-            "name": "[parameters('lbBackendPool')]"
+            "name": "[variables('lbBackendPool')]"
           }
         ],
         "loadBalancingRules": [
           {
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/app13-dev-lb-fe')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/', variables('lbFrontendIpName'))]"
               },
               "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', parameters('lbBackendPool'))]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackendPool'))]"
               },
               "probe": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"

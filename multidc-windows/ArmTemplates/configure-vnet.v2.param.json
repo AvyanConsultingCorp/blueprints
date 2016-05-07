@@ -53,9 +53,6 @@
     "storageAccountName": {
       "value": "app2st"
     },
-    "lbBackendPool": {
-      "value": "app2-dev-lb-pool"
-    },
     "sqlStaticIp": {
       "value": "10.42.0.25"
     },
