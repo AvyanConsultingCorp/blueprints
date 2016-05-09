@@ -1,0 +1,106 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string"
+    },
+    "nsgNamePrefix": {
+      "type": "string",
+      "defaultValue": "defaultNSG"
+    },
+    "rulesNames": {
+      "type": "array",
+      "defaultValue": [ "rdp", "ssh" ]
+    },
+    "rulesDirections": {
+      "type": "array",
+      "defaultValue": [ "Inbound", "Inbound" ]
+    },
+    "rulesAccess": {
+      "type": "array",
+      "defaultValue": [ "Allow", "Allow" ]
+    },
+    "rulesSourceAddressPrefixes": {
+      "type": "array",
+      "defaultValue": [ "Internet", "Internet" ]
+    },
+    "rulesSourcePorts": {
+      "type": "array",
+      "defaultValue": [ "*", "*" ]
+    },
+    "rulesDestinationAddressPrefixes": {
+      "type": "array",
+      "defaultValue": [ "*", "*" ]
+    },
+    "rulesDestinationPorts": {
+      "type": "array",
+      "defaultValue": [ 3389, 22 ]
+    },
+    "rulesProtocol": {
+      "type": "array",
+      "defaultValue": ["TCP","TCP"]
+    }
+  },
+  "variables": {
+    "nsgName": "[concat(parameters('baseName'),'-',parameters('nsgNamePrefix'),'-nsg')]",
+    "location": "[resourceGroup().location]",
+    "rules": "[sub(length(parameters('rulesNames')),1)]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2016-03-30",
+      "name": "[variables('nsgName')]",
+      "location": "[variables('location')]"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[concat(variables('nsgName'),'/',parameters('rulesNames')[0])]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('nsgName'))]"
+      ],
+      "properties": {
+        "direction": "[parameters('rulesDirections')[0]]",
+        "access": "[parameters('rulesAccess')[0]]",
+        "sourceAddressPrefix": "[parameters('rulesSourceAddressPrefixes')[0]]",
+        "sourcePortRange": "[parameters('rulesSourcePorts')[0]]",
+        "destinationAddressPrefix": "[parameters('rulesDestinationAddressPrefixes')[0]]",
+        "destinationPortRange": "[parameters('rulesDestinationPorts')[0]]",
+        "priority": 100,
+        "protocol": "[parameters('rulesProtocol')[0]]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[concat(variables('nsgName'),'/',parameters('rulesNames')[copyindex(1)])]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/',variables('nsgName'),'/securityRules/',parameters('rulesNames')[copyindex()])]"
+      ],
+      "copy": {
+        "name": "nsgRuleCount",
+        "count": "[variables('rules')]"
+      },
+      "properties": {
+        "direction": "[parameters('rulesDirections')[copyindex(1)]]",
+        "access": "[parameters('rulesAccess')[copyindex(1)]]",
+        "sourceAddressPrefix": "[parameters('rulesSourceAddressPrefixes')[copyindex(1)]]",
+        "sourcePortRange": "[parameters('rulesSourcePorts')[copyindex(1)]]",
+        "destinationAddressPrefix": "[parameters('rulesDestinationAddressPrefixes')[copyindex(1)]]",
+        "destinationPortRange": "[parameters('rulesDestinationPorts')[copyindex(1)]]",
+        "priority": "[add(100,mul(copyindex(1),10))]",
+        "protocol": "[parameters('rulesProtocol')[copyindex(1)]]"
+      }
+    }
+  ],
+  "outputs": {
+    "nsgid": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/networkSecurityGroups',variables('nsgName'))]"
+    }
+  }
+}

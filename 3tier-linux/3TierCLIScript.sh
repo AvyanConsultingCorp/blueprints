@@ -51,7 +51,7 @@ CreateVm()
 
      # Add NIC to back-end address pool
      LB_BACKEND_NAME="${LB_NAME}-backend-pool"
-     azure network nic address-pool add --name $NIC_NAME --lb-name $LB_NAME \
+     azure network nic address-pool create --name $NIC_NAME --lb-name $LB_NAME \
 	  --lb-address-pool-name $LB_BACKEND_NAME $POSTFIX
   fi
 

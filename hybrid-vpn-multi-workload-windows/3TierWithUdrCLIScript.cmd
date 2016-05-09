@@ -306,7 +306,7 @@ CALL :CallCLI azure network nic create --name %NIC_NAME% --subnet-name %SUBNET_N
 IF NOT "%LB_NAME%"=="" (
 	:: Add NIC to back-end address pool
 	SET LB_BACKEND_NAME=%LB_NAME%-backend-pool
-	CALL :CallCLI azure network nic address-pool add --name %NIC_NAME% ^
+	CALL :CallCLI azure network nic address-pool create --name %NIC_NAME% ^
     --lb-name %LB_NAME% --lb-address-pool-name %LB_BACKEND_NAME% %POSTFIX%
 )
 

@@ -2,78 +2,18 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "type": "string",
-      "metadata": {
-        "description": "Base name (prefix)"
-      }
-    },
-    "vnet1Location": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet1 - Deployment location"
-      }
-    },
-    "vnet2Location": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet2 - Deployment location"
-      }
-    },
-    "vnet1Name": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet1 - Name"
-      }
-    },
-    "vnet1AddressPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet1 - Address prefix"
-      }
-    },
-    "vnet1GWIP": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet1 - VPN gateway public IP address"
-      }
-    },
-    "vnet1GatewayId": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet1 - VPN gateway resource id"
-      }
-    },
-    "vnet2Name": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet2 - Name"
-      }
-    },
-    "vnet2AddressPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet2 - Address prefix"
-      }
-    },
-    "vnet2GWIP": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet2 - VPN gateway public IP address"
-      }
-    },
-    "vnet2GatewayId": {
-      "type": "string",
-      "metadata": {
-        "description": "VNet2 - VPN gateway resource id"
-      }
-    },
-    "sharedKey": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Shared key (PSK) for IPSec tunnel"
-      }
-    }
+    "baseName": { "type": "string" },
+    "vnet1Location": { "type": "string"},
+    "vnet2Location": { "type": "string" },
+    "vnet1Name": { "type": "string" },
+    "vnet1AddressPrefix": { "type": "string" },
+    "vnet1GWIP": { "type": "string" },
+    "vnet1GatewayId": { "type": "string" },
+    "vnet2Name": { "type": "string" },
+    "vnet2AddressPrefix": { "type": "string" },
+    "vnet2GWIP": { "type": "string" },
+    "vnet2GatewayId": { "type": "string" },
+    "sharedKey": { "type": "securestring" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -88,14 +28,10 @@
       "type": "Microsoft.Network/localNetworkGateways",
       "name": "[variables('vnet1LocalGWName')]",
       "location": "[parameters('vnet1Location')]",
-      "tags": {
-        "displayName": "Local gateway for vnet2"
-      },
+      "tags": { "displayName": "Local gateway for vnet2" },
       "properties": {
         "localNetworkAddressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnet2AddressPrefix')]"
-          ]
+          "addressPrefixes": [ "[parameters('vnet2AddressPrefix')]" ]
         },
         "gatewayIpAddress": "[parameters('vnet2GWIP')]"
       }
@@ -105,14 +41,10 @@
       "type": "Microsoft.Network/localNetworkGateways",
       "name": "[variables('vnet2LocalGWName')]",
       "location": "[parameters('vnet2Location')]",
-      "tags": {
-        "displayName": "Local gateway for vnet1"
-      },
+      "tags": { "displayName": "Local gateway for vnet1" },
       "properties": {
         "localNetworkAddressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnet1AddressPrefix')]"
-          ]
+          "addressPrefixes": [ "[parameters('vnet1AddressPrefix')]" ]
         },
         "gatewayIpAddress": "[parameters('vnet1GWIP')]"
       }
@@ -122,9 +54,7 @@
       "name": "[variables('vnet1ConnName')]",
       "type": "Microsoft.Network/connections",
       "location": "[parameters('vnet1Location')]",
-      "tags": {
-        "displayName": "Connection to vnet2"
-      },
+      "tags": { "displayName": "Connection to vnet2" },
       "dependsOn": [
         "[concat('Microsoft.Network/localNetworkGateways/', variables('vnet1LocalGWName'))]"
       ],
@@ -145,9 +75,7 @@
       "name": "[concat(parameters('baseName'),'-',parameters('vnet1Name'),'-vpnconn')]",
       "type": "Microsoft.Network/connections",
       "location": "[parameters('vnet2Location')]",
-      "tags": {
-        "displayName": "Connection to vnet1"
-      },
+      "tags": { "displayName": "Connection to vnet1" },
       "dependsOn": [
         "[concat('Microsoft.Network/localNetworkGateways/', variables('vnet2LocalGWName'))]"
       ],

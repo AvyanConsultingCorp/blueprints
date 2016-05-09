@@ -25,7 +25,6 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
-    <Folder Include="Scripts\" />
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
@@ -33,12 +32,32 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <None Include="Scripts\nva.sh" />
+    <None Include="Templates\bb-custom-linux-extension.json" />
+    <None Include="Templates\bb-data-disk-add.json" />
+    <None Include="Templates\bb-ilb-backend-http-https.json" />
+    <None Include="Templates\bb-nsg-remote-access.json" />
+    <None Include="Templates\bb-nsg.json" />
+    <None Include="Templates\bb-subnets.json" />
+    <None Include="Templates\bb-vm-3nics-lbbe.json" />
+    <None Include="Templates\bb-vm-1nic-lbbe.json" />
+    <None Include="Templates\bb-vm-1nic-pip-static-private-ip.json" />
+    <None Include="Templates\bb-vm-1nic-pip.json" />
+    <None Include="Templates\bb-vm-1nic-static-private-ip.json" />
     <None Include="Templates\bb-vm-1nic.json" />
+    <None Include="Templates\bb-vms-3nics-lbbe.json" />
+    <None Include="Templates\bb-vms-1nic-lbbe.json" />
     <None Include="Templates\bb-vms-1nic.json" />
+    <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
+    <None Include="Templates\bb-vnet-1subnet-nsg-udr.json" />
+    <None Include="Templates\bb-vnet-1subnet-nsg.json" />
+    <None Include="Templates\bb-vnet-1subnet-udr.json" />
     <None Include="Templates\bb-vnet-1subnet.json" />
+    <None Include="Templates\bb-vm-1nic-pip-static-private-ip.parameters.json" />
     <None Include="Templates\bb-vnet-3subnets.json" />
     <None Include="Templates\bb-vpn-connection.json" />
     <None Include="Templates\bb-vpn-gateway.json" />
+    <None Include="Templates\ibb-nvas-mgmt.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />

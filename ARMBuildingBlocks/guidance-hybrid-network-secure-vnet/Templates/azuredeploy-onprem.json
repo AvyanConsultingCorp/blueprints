@@ -1,0 +1,139 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/16"
+    },
+    "subnetNamePrefix": {
+      "type": "string",
+      "defaultValue": "subnet1"
+    },
+    "subnetPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.1.0/24"
+    },
+    "gatewaySubnetPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.255.224/27"
+    },
+    "osType": {
+      "type": "string",
+      "allowedValues": [ "Windows", "Ubuntu" ],
+      "defaultValue": "Ubuntu"
+    },
+    "vmNamePrefix": {
+      "type": "string",
+      "defaultValue": "web"
+    },
+    "vmComputerName": {
+      "type": "string",
+      "maxLength": 15,
+      "defaultValue": "web01"
+    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "templatePath": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/",
+    "nsgTemplate": "bb-nsg-remote-access.json",
+    "vnetTemplate": "bb-vnet-1subnet-nsg.json",
+    "vmTemplate": "bb-vm-1nic-pip.json",
+    "vpnTemplate": "bb-vpn-gateway.json",
+    "vmStorageAccountName": "[concat(parameters('baseName'),uniqueString(resourceGroup().id),'stg')]",
+    "subnetName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-sn')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "name": "[variables('vmStorageAccountName')]",
+      "location": "[variables('location')]",
+      "properties": { "accountType": "Premium_LRS" }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[concat(variables('templatePath'),variables('nsgTemplate'))]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "ra" },
+          "osType": { "value": "[parameters('osTYpe')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "vnet",
+      "dependsOn": [ "Microsoft.Resources/deployments/nsg" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[concat(variables('templatePath'),variables('vnetTemplate'))]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vnetAddressPrefix": { "value": "[parameters('vnetAddressPrefix')]" },
+          "subnetNamePrefix": { "value": "[parameters('subnetNamePrefix')]" },
+          "subnetPrefix": { "value": "[parameters('subnetPrefix')]" },
+          "nsgId": { "value": "[reference('nsg').outputs.nsgid.value]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "vm",
+      "dependsOn": [ "Microsoft.Resources/deployments/vnet" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[concat(variables('templatePath'),variables('vmTemplate'))]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vmNamePrefix": { "value": "[parameters('vmNamePrefix')]" },
+          "vmComputerName": { "value": "[parameters('vmComputerName')]" },
+          "stgAccountName": { "value": "[variables('vmStorageAccountName')]" },
+          "osType": { "value": "[parameters('osType')]" },
+          "snid": { "value": "[concat(reference('vnet').outputs.vnetId.value,'/subnets/',variables('subnetName'))]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "vpn",
+      "dependsOn": [ "Microsoft.Resources/deployments/vnet" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[concat(variables('templatePath'),variables('vpnTemplate'))]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vnetName": { "value": "[reference('vnet').outputs.vnetName.value]" },
+          "gatewaySubnetPrefix": { "value": "[parameters('gatewaySubnetPrefix')]" },
+          "vpnType": { "value": "RouteBased" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "gwPIP": {
+      "type": "string",
+      "value": "[reference('vpn').outputs.gwPIP.value]"
+    },
+    "vpnResourceId": {
+      "type": "string",
+      "value": "[reference('vpn').outputs.vpnResourceId.value]"
+    },
+    "vnetName": {
+      "type": "string",
+      "value": "[reference('vnet').outputs.vnetName.value]"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "vnetAddressPrefix": { "type": "string" },
+    "subnetNamePrefixes": { "type": "array" },
+    "subnetAddressPrefixes": { "type": "array" },
+    "subnetNSGs": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "subnetUDRs": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "subnetCount": {
+      "type": "string",
+      "allowedValues": [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" ]
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "templatePath": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/",
+    "subnetsTemplate": "bb-subnets.json",
+    "vnetName": "[concat(parameters('baseName'),'-vnet')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "subnets",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[concat(variables('templatePath'),variables('subnetsTemplate'))]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "subnetNamePrefixes": { "value": "[parameters('subnetNamePrefixes')]" },
+          "subnetAddressPrefixes": { "value": "[parameters('subnetAddressPrefixes')]" },
+          "subnetNSGs": { "value": "[parameters('subnetNSGs')]" },
+          "subnetUDRs": { "value": "[parameters('subnetUDRs')]" },
+          "subnetCount": { "value": "[parameters('subnetCount')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2016-03-30",
+      "name": "[variables('vnetName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VNet" },
+      "dependsOn": [ "Microsoft.Resources/deployments/subnets" ],
+      "properties": {
+        "addressSpace": { "addressPrefixes": [ "[parameters('vnetAddressPrefix')]" ] },
+        "subnets": "[reference('subnets').outputs.subnetsArray.value]"
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

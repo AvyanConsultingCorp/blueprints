@@ -1,0 +1,184 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "vmNamePrefix": { "type": "string" },
+    "vmComputerName": {
+      "type": "string",
+      "maxLength": 15
+    },
+    "snid1": { "type": "string" },
+    "snid2": { "type": "string" },
+    "snid3": { "type": "string" },
+    "nic1IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "nic2IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "nic3IpForwarding": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "lbBackendPoolId": { "type": "string" },
+    "stgAccountName": { "type": "string" },
+    "osType": {
+      "type": "string",
+      "allowedValues": [
+        "Windows",
+        "Ubuntu"
+      ]
+    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+    "vmAvSetName": { "type": "string" }
+  },
+  "variables": {
+    "VMSettings": {
+      "Windows": {
+        "vmSize": "Standard_DS3",
+        "publisher": "MicrosoftWindowsServer",
+        "offer": "WindowsServer",
+        "sku": "2012-R2-Datacenter",
+        "version": "latest"
+      },
+      "Ubuntu": {
+        "vmSize": "Standard_DS3",
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "14.04.2-LTS",
+        "version": "latest"
+      }
+    },
+    "location": "[resourceGroup().location]",
+    "vmStorageAccountContainerName": "vhds",
+    "vmSetting": "[variables('VMSettings')[parameters('osType')]]",
+    "vmName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-vm')]",
+    "vmNICNamePrefix": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'))]",
+    "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
+    "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('vmNICNamePrefix'),'1-nic')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM NIC" },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "loadBalancerBackendAddressPools": [ { "id": "[parameters('lbBackendPoolId')]" } ],
+              "subnet": { "id": "[parameters('snid1')]" }
+            }
+          }
+        ],
+        "enableIPForwarding": "[parameters('nic1IpForwarding')]"
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('vmNICNamePrefix'),'2-nic')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM NIC" },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": { "id": "[parameters('snid2')]" }
+            }
+          }
+        ],
+        "enableIPForwarding": "[parameters('nic2IpForwarding')]"
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('vmNICNamePrefix'),'3-nic')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM NIC" },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": { "id": "[parameters('snid3')]" }
+            }
+          }
+        ],
+        "enableIPForwarding": "[parameters('nic3IpForwarding')]"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(variables('vmName'))]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICNamePrefix'), '1-nic')]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICNamePrefix'), '2-nic')]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICNamePrefix'), '3-nic')]"
+      ],
+      "properties": {
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('vmAvSetName'))]" },
+        "hardwareProfile": { "vmSize": "[variables('VMSetting').vmSize]" },
+        "osProfile": {
+          "computerName": "[parameters('vmComputerName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('VMSetting').publisher]",
+            "offer": "[variables('VMSetting').offer]",
+            "sku": "[variables('VMSetting').sku]",
+            "version": "[variables('VMSetting').version]"
+          },
+          "osDisk": {
+            "name": "[variables('vmOSDiskName')]",
+            "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('vmDataDiskName')]",
+              "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
+              "diskSizeGB": "127",
+              "createOption": "Empty",
+              "lun": 0
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmNICNamePrefix'),'1-nic'))]",
+              "properties": { "primary": true }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmNICNamePrefix'),'2-nic'))]",
+              "properties": { "primary": false }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmNICNamePrefix'),'3-nic'))]",
+              "properties": { "primary": false }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
