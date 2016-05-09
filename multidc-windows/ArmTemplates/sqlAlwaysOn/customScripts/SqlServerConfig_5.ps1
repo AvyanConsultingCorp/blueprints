@@ -12,8 +12,8 @@ Param(
   [Parameter(Mandatory=$True)]
   [string]$Domain,
 
-  [Parameter(Mandatory=$False)]
-  [string]$ClusterName='cluster1-fsw',
+  [Parameter(Mandatory=$True)]
+  [string]$ClusterName,
   
   [Parameter(Mandatory=$False)]
   [string]$Step='PRE'
@@ -78,7 +78,7 @@ function Clear-Any-Restart([string] $key=$global:restartKey)
 
 function Restart-And-Resume([string] $script, [string] $step) 
 {
-	Restart-And-Run $global:restartKey "$global:powershell $script -Step $step"
+	Restart-And-Run $global:restartKey "$global:powershell $script -SafeModePassword $SafeModePassword -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -ClusterName $ClusterName -Step $step"
 }
 
 #endregion

@@ -21,7 +21,7 @@ Param(
   [Parameter(Mandatory=$True)]
   [string]$StaticIp,
 
-  [Parameter(Mandatory=$FALSE)]
+  [Parameter(Mandatory=$False)]
   [string]$Step='PRE'
 )
 
@@ -84,7 +84,7 @@ function Clear-Any-Restart([string] $key=$global:restartKey)
 
 function Restart-And-Resume([string] $script, [string] $step) 
 {
-	Restart-And-Run $global:restartKey "$global:powershell $script -Step $step"
+	Restart-And-Run $global:restartKey "$global:powershell $script -SafeModePassword $SafeModePassword -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -AppName $AppName -ClusterName $ClusterName -StaticIp $StaticIp -Step $step"
 }
 
 #endregion

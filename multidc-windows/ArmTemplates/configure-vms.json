@@ -141,8 +141,8 @@
       "psArgument": [
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('projectName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
-        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('projectName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
+        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('appName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
+        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('appName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -ClusterName ', variables('clusterName'))]"
       ]
     }
