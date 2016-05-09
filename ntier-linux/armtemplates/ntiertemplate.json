@@ -75,18 +75,18 @@
 
     "variables": {
         "APP_NAME": "app2222",
-        "VNET_IP_RANGE": "10.5.0.0/16",
-        "SUBNET_DEFAULT": "10.5.0.0/24",
-        "SERVICE_SUBNET_IP_RANGE_1": "10.5.2.0/24",
-        "MGT_SUBNET_IP_RANGE": "10.5.4.0/26",
-        "SERVICE_SUBNET_IP_RANGE_2": "10.5.3.0/24",
-        "DMZ_SUBNET_IP_RANGE_1": "10.5.5.0/26",
-        "DMZ_SUBNET_IP_RANGE_2": "10.5.6.0/26",
-        "CASSANDRA_SUBNET_IP_RANGE": "10.5.7.0/24",
-        "CASSANDRA_SUBNET_NAME" "cassandra-subnet",
+        "VNET_IP_RANGE": "10.8.0.0/16",
+        "SUBNET_DEFAULT": "10.8.0.0/24",
+        "SERVICE_SUBNET_IP_RANGE_1": "10.8.10.0/24",
+        "MGT_SUBNET_IP_RANGE": "10.8.4.0/26",
+        "SERVICE_SUBNET_IP_RANGE_2": "10.8.3.0/24",
+        "DMZ_SUBNET_IP_RANGE_1": "10.8.5.0/26",
+        "DMZ_SUBNET_IP_RANGE_2": "10.8.6.0/26",
+        "CASSANDRA_SUBNET_IP_RANGE": "10.8.2.0/24",
+        "CASSANDRA_SUBNET_NAME": "cass-dc0-subnet",
         "SERVICE_TIER_COUNT": 2,
-        "SERVICE_ILB_IP_1": "10.5.2.250",
-        "SERVICE_ILB_IP_2": "10.5.3.250",
+        "SERVICE_ILB_IP_1": "10.8.10.250",
+        "SERVICE_ILB_IP_2": "10.8.3.250",
         "REMOTE_ACCESS_PORT": 22,
         "LOCATION": "[resourcegroup().location]",
         "DMZ_LB_NAME": "[concat(variables('APP_NAME'),'-dmz-lb')]",
@@ -103,7 +103,7 @@
         "SVC2_LB_FRONTEND": "[concat(variables('SVC2_LB_NAME'),'-frontend')]",
         "SVC2_LB_PROBE": "[concat(variables('SVC2_LB_NAME'),'-probe')]",
         "SVC2_SUBNET_NAME": "[concat(variables('APP_NAME'),'-svc2-subnet')]",
-        "VNET_NAME": "vnetcass",
+        "VNET_NAME": "primary-dc0-vnet",
         "osSettings": {
             "imageReference": {
                 "publisher": "Canonical",
@@ -842,7 +842,7 @@
                         "properties": {
                             "protocol": "Tcp",
                             "sourcePortRange": "*",
-                            "destinationPortRange": "^",
+                            "destinationPortRange": "*",
                             "sourceAddressPrefix": "[variables('MGT_SUBNET_IP_RANGE')]",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
@@ -1005,12 +1005,6 @@
                 },
                 "subnets": [
                     {
-                        "name": "default",
-                        "properties": {
-                            "addressPrefix": "[variables('SUBNET_DEFAULT')]"
-                        }
-                    },
-                    {
                         "name": "[variables('SVC1_SUBNET_NAME')]",
                         "properties": {
                             "addressPrefix": "[variables('SERVICE_SUBNET_IP_RANGE_1')]",
@@ -1020,7 +1014,7 @@
                         }
                     },
                     {
-                        "name": "[variables('CASSANDRA_SUBNET_NAME')}",
+                        "name": "[variables('CASSANDRA_SUBNET_NAME')]",
                         "properties": {
                             "addressPrefix": "[variables('CASSANDRA_SUBNET_IP_RANGE')]",
                             "networkSecurityGroup": {
@@ -1029,7 +1023,7 @@
                         }
                     },
                     {
-                        "name": "[concat(variables('APP_NAME'),'-svc2-subnet')]",
+                        "name": "[variables('SVC2_SUBNET_NAME')]",
                         "properties": {
                             "addressPrefix": "[variables('SERVICE_SUBNET_IP_RANGE_2')]",
                             "networkSecurityGroup": {

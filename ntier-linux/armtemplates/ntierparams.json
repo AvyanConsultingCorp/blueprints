@@ -1,6 +1,33 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "NUM_VM_INSTANCES_SERVICE_TIER_1": {
+            "value": "2"
+        },
+        "NUM_VM_INSTANCES_SERVICE_TIER_2": {
+            "value": "2"
+        },
+        "NUM_VM_INSTANCES_DMZ_TIER": {
+            "value": "2"
+        },
+        "NUM_VM_INSTANCES_MANAGE_TIER": {
+            "value": "1"
+        },
+        "vmSize": {
+            "value": "Standard_DS1"
+        },
+        "adminUsername": {
+            "value": "someadmin1"
+        },
+        "adminPassword": {
+            "value": "testAdmin$#1000"
+        },
+        "SOURCEPREFIX": {
+            "value": "100.102.8.8/24"
+        },
+        "VnetDomainLabel": {
+            "value": "datacenter1domain"
+        }
     }
 }
