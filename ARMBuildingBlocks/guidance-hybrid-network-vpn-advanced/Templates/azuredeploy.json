@@ -85,7 +85,59 @@
           }
         ]
       }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "biztier-create",
+      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('createIlbBackend')]"
+        },
+        "parameters": {
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "baseName": { "value": "[parameters('baseName')]" },
+          "subnetNamePrefix": { "value": "[variables('bizSubnetNamePrefix')]" },
+          "ilbIpAddress": { "value": "[variables('bizIlbIpAddress')]" },
+          "osType": { "value": "[variables('bizOsType')]" },
+          "subnetId": { "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetBizSubnetName'))]" },
+          "numberVMs": { "value": "[variables('bizNumberVMs')]" },
+          "vmNamePrefix": { "value": "[variables('bizVmNamePrefix')]" },
+          "vmComputerName": { "value": "[variables('bizVmComputerNamePrefix')]" }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "dbtier-create",
+      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('createIlbBackend')]"
+        },
+        "parameters": {
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "baseName": { "value": "[parameters('baseName')]" },
+          "subnetNamePrefix": { "value": "[variables('dbSubnetNamePrefix')]" },
+          "ilbIpAddress": { "value": "[variables('dbIlbIpAddress')]" },
+          "osType": { "value": "[variables('dbOsType')]" },
+          "subnetId": { "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetDBSubnetName'))]" },
+          "numberVMs": { "value": "[variables('dbNumberVMs')]" },
+          "vmNamePrefix": { "value": "[variables('dbVmNamePrefix')]" },
+          "vmComputerName": { "value": "[variables('dbVmComputerNamePrefix')]" }
+        }
+      }
     }
+
   ],
   "outputs": {
   }
