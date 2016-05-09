@@ -19,7 +19,7 @@
 
         "VnetFrontendSubnetName": {
             "type": "string",
-            "defaultValue": "dc1-fe-subnet",
+            "defaultValue": "dc0-fe-subnet",
             "metadata": {
                 "description": "Name of the frontend subnet in the VNET on dc."
             }
@@ -40,7 +40,7 @@
         },
         "VnetBackendSubnetName": {
             "type": "string",
-            "defaultValue": "dc1-be-subnet",
+            "defaultValue": "dc0-be-subnet",
             "metadata": {
                 "description": "Name of the backend subnet in the VNET on dc."
             }
