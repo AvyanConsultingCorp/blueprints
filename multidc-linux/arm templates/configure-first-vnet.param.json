@@ -1,0 +1,33 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
+  "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VnetName": {
+            "value": "primary-dc0-vnet"
+        },
+        "VnetAddressPrefix1": {
+            "value": "10.8.0.0/16"
+        },
+        "VnetFrontendSubnetName": {
+            "value": "dc0-fe-subnet"
+        },
+        "cassdcSubnetPrefix": {
+            "value": "10.8.2.0/24"
+        },
+        "VnetFrontendSubnetPrefix": {
+            "value": "10.8.7.0/24"
+        },
+        "VnetBackendSubnetName": {
+            "value": "dc0-be-subnet"
+        },
+        "VnetBackendSubnetPrefix": {
+            "value": "10.8.8.0/24"
+        },
+        "VnetDnsAddress": {
+            "value": "8.8.8.8"
+        },
+        "VnetDomainLabel": {
+            "value": "datacenter0domain"
+        }
+    }
+    }

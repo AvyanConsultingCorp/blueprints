@@ -1,0 +1,30 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json",
+  "contentVersion": "1.0.0.0",
+    "parameters": {
+        "nodeCount": {
+            "value": "3"
+        },
+        "vmSize": {
+            "value": "Standard_DS4"
+        },
+        "adminUsername": {
+            "value": "someAdmin1"
+        },
+        "adminPassword": {
+            "value": "somePassword"
+        },
+        "location": {
+            "value": "westus"
+        },
+        "dlocation": {
+            "value": "eastus2"
+        },
+        "VnetAddressPrefix": {
+            "value": "10.12.0.0/16"
+        },
+        "cassdcSubnetPrefix": {
+            "value": "10.12.2.0/24"
+        }
+    }
+}

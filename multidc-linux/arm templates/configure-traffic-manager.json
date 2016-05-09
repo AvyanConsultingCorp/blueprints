@@ -29,10 +29,11 @@
       }
     },
     "primaryPublicIpName": {
-      "type": "string",
-      "metadata": {
-        "description": "Primary public IP name."
-      }
+        "type": "string",
+        "defaultValue": "public-dc0-ip-name",
+        "metadata": {
+            "description": "Primary public IP name."
+        }
     },
     "secondaryResourceGroup": {
       "type": "string",
@@ -41,10 +42,11 @@
       }
     },
     "secondaryPublicIpName": {
-      "type": "string",
-      "metadata": {
-        "description": "Secondary public IP name."
-      }
+        "type": "string",
+        "defaultValue": "public-dc1-ip-name",
+        "metadata": {
+            "description": "Secondary public IP name."
+        }
     },
     "primaryLocation": {
       "type": "string",

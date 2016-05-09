@@ -1,0 +1,27 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "uniqueDnsName": {
+            "value": "app130dev"
+        },
+        "primaryResourceGroup": {
+            "value": "dc-1-rg"
+        },
+        "primaryPublicIpName": {
+            "value": "public-dc0-ip-name"
+        },
+        "secondaryResourceGroup": {
+            "value": "dc-2-rg"
+        },
+        "secondaryPublicIpName": {
+            "value": "public-dc1-ip-name"
+        },
+        "primaryLocation": {
+            "value": "East US2"
+        },
+        "secondaryLocation": {
+            "value": "West US"
+        }
+    }
+}
