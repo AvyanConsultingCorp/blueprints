@@ -3,12 +3,9 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
-    "feSubnetNamePrefix": { "type": "string" },
-    "feSubnetAddressPrefix": { "type": "string" },
-    "beSubnetNamePrefix": { "type": "string" },
-    "beSubnetAddressPrefix": { "type": "string" },
-    "mgmtSubnetNamePrefix": { "type": "string" },
-    "mgmtSubnetAddressPrefix": { "type": "string" },
+    "feSubnetId": { "type": "string" },
+    "beSubnetId": { "type": "string" },
+    "mgmtSubnetId": { "type": "string" },
     "ilbIpAddress": { "type": "string" },
     "jumpboxIpAddress": { "type": "string" },
     "adminUsername": { "type": "string" },
@@ -18,17 +15,9 @@
     "location": "[resourceGroup().location]",
     "vmNamePrefix": "nva",
     "vmComputerNamePrefix": "nva",
-    "vnetName": "[concat(parameters('baseName'),'-vnet')]",
-    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
-    "feSubnetName": "[concat(variables('vnetName'),'/',parameters('feSubnetNamePrefix'),'-sn')]",
-    "beSubnetName": "[concat(variables('vnetName'),'/',parameters('beSubnetNamePrefix'),'-sn')]",
-    "mgmtSubnetName": "[concat(variables('vnetName'),'/',parameters('mgmtSubnetNamePrefix'),'-sn')]",
-    "feSubnetId": "[concat(variables('vnetId'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]",
-    "beSubnetId": "[concat(variables('vnetId'),'/subnets/',parameters('beSubnetNamePrefix'),'-sn')]",
-    "mgmtSubnetId": "[concat(variables('vnetId'),'/subnets/',parameters('mgmtSubnetNamePrefix'),'-sn')]",
     "numVMs": 2,
     "osType": "Ubuntu",
-    "lbName": "[concat(parameters('baseName'),'-', parameters('feSubnetNamePrefix'),'-ilb')]",
+    "lbName": "[concat(parameters('baseName'),'-nva-ilb')]",
     "ilbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
     "ilbFEName": "feIpConfig1",
     "ilbFEId": "[concat(variables('ilbId'),'/frontendIPConfigurations/',variables('ilbFEName'))]",
@@ -51,7 +40,6 @@
       "tags": {
         "displayName": "Load balancer"
       },
-      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]" ],
       "properties": {
         "frontendIPConfigurations": [
           {
@@ -59,7 +47,7 @@
             "properties": {
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[parameters('ilbIpAddress')]",
-              "subnet": { "id": "[variables('feSubnetId')]" }
+              "subnet": { "id": "[parameters('feSubnetId')]" }
             }
           }
         ],
@@ -116,38 +104,6 @@
       "properties": { "accountType": "Premium_LRS" }
     },
     {
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "apiVersion": "2016-03-30",
-      "location": "[variables('location')]",
-      "name": "[variables('feSubnetName')]",
-      "tags": {
-        "displayName": "NVA front end subnet"
-      },
-      "properties": { "addressPrefix": "[parameters('feSubnetAddressPrefix')]" }
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "apiVersion": "2016-03-30",
-      "location": "[variables('location')]",
-      "name": "[variables('beSubnetName')]",
-      "tags": {
-        "displayName": "NVA backend subnet"
-      },
-      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]" ],
-      "properties": { "addressPrefix": "[parameters('beSubnetAddressPrefix')]" }
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "apiVersion": "2016-03-30",
-      "location": "[variables('location')]",
-      "name": "[variables('mgmtSubnetName')]",
-      "tags": {
-        "displayName": "Management subnet"
-      },
-      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('beSubnetNamePrefix'),'-sn')]" ],
-      "properties": { "addressPrefix": "[parameters('mgmtSubnetAddressPrefix')]" }
-    },
-    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "nvas",
@@ -155,10 +111,7 @@
         "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
         "[concat('Microsoft.Compute/availabilitySets/',variables('vmAvSetName'))]",
         "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'1',variables('uniqueString'))]",
-        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'2',variables('uniqueString'))]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('beSubnetNamePrefix'),'-sn')]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('mgmtSubnetNamePrefix'),'-sn')]"
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'2',variables('uniqueString'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -167,9 +120,9 @@
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "[variables('vmNamePrefix')]" },
           "vmComputerNamePrefix": { "value": "[variables('vmComputerNamePrefix')]" },
-          "snid1": { "value": "[variables('feSubnetId')]" },
-          "snid2": { "value": "[variables('beSubnetId')]" },
-          "snid3": { "value": "[variables('mgmtSubnetId')]" },
+          "snid1": { "value": "[parameters('feSubnetId')]" },
+          "snid2": { "value": "[parameters('beSubnetId')]" },
+          "snid3": { "value": "[parameters('mgmtSubnetId')]" },
           "nic1IpForwarding": { "value": true },
           "nic2IpForwarding": { "value": true },
           "lbBackendPoolId": { "value": "[variables('ilbBEId')]" },
@@ -210,10 +163,7 @@
       "apiVersion": "2015-01-01",
       "name": "jumpbox",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'3',variables('uniqueString'))]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('feSubnetNamePrefix'),'-sn')]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('beSubnetNamePrefix'),'-sn')]",
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'),'/subnets/',parameters('mgmtSubnetNamePrefix'),'-sn')]"
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'3',variables('uniqueString'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -223,7 +173,7 @@
           "vmNamePrefix": { "value": "jump-box" },
           "vmComputerName": { "value": "jumpbox" },
           "vmIPaddress": { "value": "[parameters('jumpboxIpAddress')]" },
-          "snid": { "value": "[variables('mgmtSubnetId')]" },
+          "snid": { "value": "[parameters('mgmtSubnetId')]" },
           "stgAccountName": { "value": "[concat(parameters('baseName'),'3',variables('uniqueString'))]" },
           "osType": { "value": "[variables('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
