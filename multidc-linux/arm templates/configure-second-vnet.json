@@ -1,0 +1,137 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VnetName": {
+            "type": "string",
+            "defaultValue": "secondary-dc1-vnet",
+            "metadata": {
+                "description": "Name of the  VNET on the dc."
+            }
+        },
+        "VnetAddressPrefix1": {
+            "type": "string",
+            "defaultValue": "10.12.0.0/16",
+            "metadata": {
+                "description": "Address space one for the  VNET on dc"
+            }
+        },
+
+        "VnetFrontendSubnetName": {
+            "type": "string",
+            "defaultValue": "dc1-fe-subnet",
+            "metadata": {
+                "description": "Name of the frontend subnet in the VNET on dc."
+            }
+        },
+        "cassdcSubnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.12.2.0/24",
+            "metadata": {
+                "description": "The IP address prefix for the frontend subnet in the VNET on dc."
+            }
+        },
+        "VnetFrontendSubnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.12.7.0/24",
+            "metadata": {
+                "description": "The IP address prefix for the frontend subnet in the VNET on dc."
+            }
+        },
+        "VnetBackendSubnetName": {
+            "type": "string",
+            "defaultValue": "dc1-be-subnet",
+            "metadata": {
+                "description": "Name of the backend subnet in the VNET on dc."
+            }
+        },
+        "VnetBackendSubnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.12.8.0/24",
+            "metadata": {
+                "description": "The IP address prefix for the backend subnet in the VNET on dc."
+            }
+        },
+
+        "VnetDnsAddress": {
+            "type": "string",
+            "defaultValue": "8.8.8.8",
+            "metadata": {
+                "description": "DNS address space of the VNET on dc"
+            }
+        },
+        "VnetDomainLabel": {
+            "type": "string",
+            "defaultValue": "dc1gateway",
+            "metadata": {
+                "description": "Domain label for the public IP address. Required for traffic manager setup."
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": "2016-03-30",
+        "gatewayPublicIPName": "public-dc1-ip-name",
+        "region": "[resourceGroup().location]",
+        "VnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('VnetName'))]",
+        "casssubnet": "cass-dc1-subnet",
+        "backendSubnetRef": "[concat(variables('VnetId'),'/subnets/',parameters('VnetBackendSubnetName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "[variables('apiVersion')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('VnetName')]",
+            "location": "[variables('region')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('VnetAddressPrefix1')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('casssubnet')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('cassdcSubnetPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('VnetFrontendSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('VnetFrontendSubnetPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('VnetBackendSubnetName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('VnetBackendSubnetPrefix')]"
+                        }
+                    }
+                ]
+            },
+            "tags": {
+                "displayName": "VirtualNetwork"
+            }
+        },
+        {
+            "apiVersion": "[variables('apiVersion')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('gatewayPublicIPName')]",
+            "location": "[variables('region')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('VnetDomainLabel')]"
+                }
+            },
+            "tags": {
+                "displayName": "PublicIPAddress"
+            }
+        }
+
+    ],
+    "outputs": {
+
+    }
+
+}

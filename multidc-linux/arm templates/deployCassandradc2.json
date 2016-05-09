@@ -1,0 +1,287 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "nodeCount": {
+            "type": "int",
+            "defaultValue": 3,
+            "minValue": 1,
+            "maxValue": 10,
+            "metadata": {
+                "description": "Number of virtual machines to provision for service tier 1"
+            }
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS1",
+            "allowedValues": [
+                "Standard_DS1",
+                "Standard_DS2",
+                "Standard_D53",
+                "Standard_DS4",
+                "Standard_DS14"
+            ],
+            "metadata": {
+                "description": "Size of virtual machines"
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Admin user name for the virtual machines"
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Admin password for the virtual machines"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westus",
+            "metadata": {
+                "description": "Location of cassandra data center, defaults to rg location"
+            }
+        },
+        "dclocation": {
+            "type": "string",
+            "defaultValue": "eastus2",
+            "metadata": {
+                "description": "Location of first cassandra data center"
+            }
+        },
+
+        "VnetAddressPrefix": {
+            "type": "string",
+            "defaultValue": "10.12.0.0/16",
+            "metadata": {
+                "description": "Address space one for the first VNET"
+            }
+        },
+        "cassdcSubnetPrefix": {
+            "type": "string",
+            "defaultValue": "10.12.2.0/24",
+            "metadata": {
+                "description": "The IP address prefix for the frontend subnet in the first VNET."
+            }
+        }
+    },
+    "variables": {
+        "osSettings": {
+            "imageReference": {
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "14.04.4-LTS",
+                "version": "latest"
+            }
+        },
+
+        "avalset": "dc1",
+        "vnetname": "secondary-dc1-vnet",
+        "casssubnet": "cass-dc1-subnet",
+        "vmname": "dc1vm",
+        "uniqueString": "2t4mq67ouk57c"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "name": "[variables('avalset')]",
+            "properties": {
+                "platformFaultDomainCount": 3,
+                "platformUpdateDomainCount": 18
+            }
+
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('vnetname')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('VnetAddressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('casssubnet')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('cassdcSubnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(variables('vmname'),copyIndex(0))]",
+            "copy": {
+                "name": "nicloop",
+                "count": "[parameters('nodeCount')]"
+            },
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[parameters('location')]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('vnetname'))]",
+                "[concat('Microsoft.Network/publicIPAddresses/', concat(variables('vmname'),copyIndex(0)))]"
+            ],
+            "tags": {
+                "displayName": "[concat(variables('vmname'),copyIndex(0))]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', variables('vnetname')), '/subnets/',variables('casssubnet'))]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('vmname'),copyIndex(0)))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[concat(variables('vmname'),copyIndex(0))]",
+            "copy": {
+                "name": "publiciploop",
+                "count": "[parameters('nodeCount')]"
+            },
+            "type": "Microsoft.Network/publicIPAddresses",
+            "location": "[parameters('location')]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [ ],
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(variables('vmname'), copyIndex(0), variables('uniqueString'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(variables('vmname'),copyIndex(0),variables('uniqueString'))]",
+            "copy": {
+                "name": "storageloop",
+                "count": "[parameters('nodeCount')]"
+            },
+            "properties": {
+                "accountType": "Premium_LRS"
+            }
+
+        },
+        {
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(variables('vmname'),copyIndex(0))]",
+            "copy": {
+                "name": "vmloop",
+                "count": "[parameters('nodeCount')]"
+            },
+            "properties": {
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('avalset'))]"
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('vmname'),copyIndex(0)))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('vmname'),copyIndex(0))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    },
+                    "secrets": [ ],
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": "[variables('osSettings').imageReference]",
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage",
+                        "name": "osdisk",
+                        "vhd": {
+                            "uri": "[concat('http://',variables('vmname'),copyIndex(0),variables('uniqueString'),'.blob.core.windows.net/vhds/',concat(variables('vmname'),copyIndex(0)),'-osdisk.vhd')]"
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/availabilitySets', variables('avalset'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', concat(variables('vmname'), copyIndex(0), variables('uniqueString')))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmname'), copyIndex(0)))]"
+            ]
+              
+               
+        },
+        {
+            "apiVersion": "2015-06-15",
+
+            "location": "[parameters('location')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('vmname'),copyIndex(0),'/installdsenode')]",
+            "copy": {
+                "name": "xtensionsloop",
+                "count": "[parameters('nodeCount')]"
+            },
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.OSTCExtensions",
+                "settings": {
+                    "commandToExecute": "[concat('bash node.sh ',parameters('dclocation'),' ', variables('uniqueString'), ' dc1-',parameters('location'))]",
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/benofben/azure-resource-manager-dse/master/extensions/node.sh"
+                    ]
+                },
+                "type": "CustomScriptForLinux",
+                "typeHandlerVersion": "1.4"
+            },
+
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmname'),copyIndex(0)))]"
+            ]
+        }
+    ],
+
+    "outputs": {
+
+        "xtensioncmd": {
+            "type": "string",
+            "value": "[concat('bash node.sh ',parameters('dclocation'),' ', variables('uniqueString'), ' dc1-',parameters('location'))]"
+        },
+
+        "uniquestr": {
+            "type": "string",
+            "value": "[variables('uniqueString')]"
+        },
+
+        "opsCenterURL": {
+            "type": "string",
+            "value": "[concat('http://opscenter', variables('uniqueString'), '.', parameters('dclocation'), '.cloudapp.azure.com:8888')]"
+        }
+
+    }
+
+
+}
+
+
+   
