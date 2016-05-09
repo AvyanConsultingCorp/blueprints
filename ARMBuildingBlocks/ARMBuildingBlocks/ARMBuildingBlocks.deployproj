@@ -48,6 +48,7 @@
     <None Include="Templates\bb-vms-3nics-lbbe.json" />
     <None Include="Templates\bb-vms-1nic-lbbe.json" />
     <None Include="Templates\bb-vms-1nic.json" />
+    <None Include="Templates\bb-vpn-gateway-connection.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
     <None Include="Templates\bb-vnet-1subnet-nsg-udr.json" />
     <None Include="Templates\bb-vnet-1subnet-nsg.json" />
