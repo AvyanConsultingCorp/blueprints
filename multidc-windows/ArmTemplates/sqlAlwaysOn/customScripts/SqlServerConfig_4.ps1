@@ -19,7 +19,7 @@ Param(
   [string]$ClusterName,
   
   [Parameter(Mandatory=$True)]
-  [string]$StaticIp,
+  [string]$StaticIp
 )
 
 Import-Module "sqlps" -DisableNameChecking
