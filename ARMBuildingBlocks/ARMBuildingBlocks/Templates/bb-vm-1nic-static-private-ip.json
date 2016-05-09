@@ -8,9 +8,9 @@
       "type": "string",
       "maxLength": 15
     },
-    "vmIPaddress": {"type": "string"},
-    "snid": {"type": "string"},
-    "stgAccountName": {"type": "string"},
+    "vmIPaddress": { "type": "string" },
+    "snid": { "type": "string" },
+    "stgAccountName": { "type": "string" },
     "osType": {
       "type": "string",
       "allowedValues": [
@@ -18,20 +18,49 @@
         "Ubuntu"
       ]
     },
-    "adminUsername": {"type": "string"},
-    "adminPassword": {"type": "securestring"}
+    "vmSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_GS1",
+        "Standard_GS2",
+        "Standard_GS3",
+        "Standard_GS4",
+        "Standard_GS5",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2"
+      ],
+      "defaultValue": "Standard_DS3"
+    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" }
   },
   "variables": {
     "VMSettings": {
       "Windows": {
-        "vmSize": "Standard_DS3",
+        "vmSize": "[parameters('vmSize')]",
         "publisher": "MicrosoftWindowsServer",
         "offer": "WindowsServer",
         "sku": "2012-R2-Datacenter",
         "version": "latest"
       },
       "Ubuntu": {
-        "vmSize": "Standard_DS3",
+        "vmSize": "[parameters('vmSize')]",
         "publisher": "Canonical",
         "offer": "UbuntuServer",
         "sku": "14.04.2-LTS",
@@ -45,7 +74,8 @@
     "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
     "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
     "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]",
-    "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
+    "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]",
+    
   },
   "resources": [
     {
