@@ -3,15 +3,51 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
+    "vmNamePrefix": { "type": "string" },
+    "vmComputerName": {
+      "type": "string",
+      "maxLength": 13
+    },
     "subnetNamePrefix": { "type": "string" },
-    "ilbIpAddress": {"type": "string"}
+    "subnetId": { "type": "string" },
+    "ilbIpAddress": { "type": "string" },
+    "osType": {
+      "type": "string",
+      "defaultValue": "Ubuntu",
+      "allowedValues": [
+        "Windows",
+        "Ubuntu"
+      ],
+      "metadata": {
+        "description": "Type of OS to use for VMs: Windows or Ubuntu."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": { "description": "Username for local admin account." }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": { "description": "Password for local admin account." }
+    },
+    "numberVMs": {
+      "type": "int",
+      "defaultValue": 2,
+      "metadata": { "description": "Number of VMs in subnet." }
+    }
+   
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "lbName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-ilb')]",
     "lbBEPoolName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-bep')]",
-    "lbBEPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools',variables('lbBEPoolName'))]",
-    "lbFEIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations','ipconfig1')]"
+    "ilbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+    "ilbBEId": "[concat(variables('ilbId'),'/backendAddressPools/',variables('lbBEPoolName'))]",
+    "lbFEIpConfigId": "[concat(variables('ilbId'),'/frontendIPConfigurations/','ipconfig1')]",
+    "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('vmNamePRefix'),'-as')]",
+    "uniqueString": "[uniqueString(resourceGroup().Id)]",
+    "createavailset": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-avail-set.json",
+    "createvms": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-lbbe.json"
   },
   "resources": [
     {
@@ -20,12 +56,14 @@
       "location": "[variables('location')]",
       "name": "[variables('lbName')]",
       "properties": {
+        "S": null,
         "frontendIPConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('ilbIpAddress')]"
+              "privateIPAddress": "[parameters('ilbIpAddress')]",
+              "subnet": { "id": "[parameters('subnetId')]" }
             }
           }
         ],
@@ -38,7 +76,7 @@
           {
             "name": "http-rule",
             "properties": {
-              "backendAddressPool": { "id": "[variables('lbBEPoolId')]" },
+              "backendAddressPool": { "id": "[variables('ilbBEId')]" },
               "frontendIPConfiguration": { "id": "[variables('lbFEIpConfigId')]" },
               "frontendPort": 80,
               "backendPort": 80,
@@ -48,7 +86,7 @@
           {
             "name": "https-rule",
             "properties": {
-              "backendAddressPool": { "id": "[variables('lbBEPoolId')]" },
+              "backendAddressPool": { "id": "[variables('ilbBEId')]" },
               "frontendIPConfiguration": { "id": "[variables('lbFEIpConfigId')]" },
               "frontendPort": 443,
               "backendPort": 443,
@@ -61,24 +99,69 @@
             "name": "ilb-probe",
             "properties": {
               "port": 80,
-              "protocol": "Http"
+              "protocol": "Http",
+              "requestPath": "/"
             }
           }
         ]
       }
     },
     {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('baseName'),copyindex(1),variables('uniqueString'))]",
+      "copy": {
+        "name": "stgCount",
+        "count": "[parameters('numberVMs')]"
+      },
+      "properties": { "accountType": "Premium_LRS" }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "vms-1nic-lbbe",
+      "name": "vm-availabilityset-create",
       "properties": {
         "mode": "Incremental",
-        "templateLink": "",
+        "templateLink": {
+          "uri": "[variables('createavailset')]"
+        },
         "parameters": {
-          "baseName": "[parameters('baseName')]",
-
+          "vmAvailabilitySetName": { "value": "[variables('vmAvailabilitySetName')]" }
         }
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('baseName'),copyindex(1))]",
+      "copy": {
+        "name": "stgCount",
+        "count": "[parameters('numberVMs')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('createvms')]"
+        },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
+          "vmComputerName": { "value": "[concat(parameters('vmComputerName'),copyindex(1))]" },
+          "snid": { "value": "[parameters('subnetId')]" },
+          "lbBackendPoolId": { "value": "[variables('ilbBEId')]" },
+          "osType": { "value": "[parameters('osType')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "stgAccountName": { "value": "[concat(parameters('baseName'),copyindex(1),variables('uniqueString'))]" },
+          "vmAvSetName": { "value": "[variables('vmAvailabilitySetName')]" }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+        "[resourceId('Microsoft.Resources/deployments','vm-availabilityset-create')]",
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),parameters('numberVMs'),variables('uniqueString'))]"
+      ]
     }
   ],
   "outputs": {
