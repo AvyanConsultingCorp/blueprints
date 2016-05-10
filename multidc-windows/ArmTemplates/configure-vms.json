@@ -8,10 +8,16 @@
         "description": "Number of VMs to deploy"
       }
     },
-    "subnetRef": {
+    "subnetDcRef": {
       "type": "string",
       "metadata": {
-        "description": "Id of the subnet where VMs to be created"
+        "description": "Id of the domain controller subnet where AD VMs are to be created"
+      }
+    },
+    "subnetSqlRef": {
+      "type": "string",
+      "metadata": {
+        "description": "Id of the SQL subnet where SQL VMs are to be created"
       }
     },
     "lbFrontendPrivateIp": {
@@ -89,6 +95,12 @@
       "metadata": {
         "description": "App name to be used for SQL configuration"
       }
+    },
+    "dnsServers": {
+      "type": "array",
+      "metadata": {
+        "description": "DNS addresses for the DC VMs."
+      }
     }
   },
   "variables": {
@@ -138,6 +150,68 @@
           "2012-R2-Datacenter"
         ]
       ],
+      "ipConfig": [
+        [
+          { "name": "ipconfig1" },
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('dnsServers')[0]]",
+              "subnet": { "id": "[parameters('subnetDcRef')]" }
+            }
+          }
+        ],
+        [
+          { "name": "ipconfig2" },
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('dnsServers')[1]]",
+              "subnet": { "id": "[parameters('subnetDcRef')]" }
+            }
+          }
+        ],
+        [
+          { "name": "ipconfig3" },
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAddress": "",
+              "subnet": { "id": "[parameters('subnetSqlRef')]" },
+              "loadBalancerBackendAddressPools": [
+                  {
+                    "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
+                  }
+                ]
+            }
+          }
+        ],
+        [
+          { "name": "ipconfig4" },
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAddress": "",
+              "subnet": { "id": "[parameters('subnetSqlRef')]" },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
+                }
+              ]
+            }
+          }
+        ],
+        [
+          { "name": "ipconfig5" },
+          {
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAddress": "",
+              "subnet": { "id": "[parameters('subnetSqlRef')]" }
+            }
+          }
+        ]
+      ],
       "psArgument": [
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
@@ -147,224 +221,225 @@
       ]
     }
   },
-  "resources": [
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storageAccountUniqueName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "accountType": "[variables('storageAccountType')]"
-      },
-      "tags": {
-        "displayName": "StorageAccounts"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('availabilitySetName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "platformFaultDomainCount": 3,
-        "platformUpdateDomainCount": 3
-      },
-      "tags": {
-        "displayName": "AvailabilitySet"
-      }
-    },
-    {
-      "apiVersion": "2016-03-30",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(parameters('networkInterfacePrefix'), copyindex())]",
-      "location": "[resourceGroup().location]",
-      "copy": {
-        "name": "nicLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
-                }
-              ]
-            }
-          }
-        ]
-      },
-      "tags": {
-        "displayName": "NetworkInterfaces"
-      }
-    },
-    {
-      "apiVersion": "2016-03-30",
-      "type": "Microsoft.Network/loadBalancers",
-      "name": "[parameters('loadBalancerName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "frontendIPConfigurations": [
-          {
-            "properties": {
-              "subnet": {
-                "id": "[parameters('subnetRef')]"
-              },
-              "privateIPAddress": "[parameters('lbFrontendPrivateIp')]",
-              "privateIPAllocationMethod": "Static"
-            },
-            "name": "[variables('lbFrontendIpName')]"
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "[variables('lbBackendPool')]"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/', variables('lbFrontendIpName'))]"
-              },
-              "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackendPool'))]"
-              },
-              "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 80,
-              "backendPort": 80,
-              "idleTimeoutInMinutes": 15
-            },
-            "Name": "lbrule"
-          }
-        ],
-        "probes": [
-          {
-            "properties": {
-              "protocol": "Tcp",
-              "port": 80,
-              "intervalInSeconds": 15,
-              "numberOfProbes": 2
-            },
-            "name": "lbprobe"
-          }
-        ]
-      },
-      "tags": {
-        "displayName": "LoadBalancer"
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
-      "copy": {
-        "name": "virtualMachineLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[variables('storageAccountUniqueName')]",
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex())]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
-      ],
-      "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+    "resources": [
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Storage/storageAccounts",
+        "name": "[variables('storageAccountUniqueName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "accountType": "[variables('storageAccountType')]"
         },
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('vmSettings').vmImage[copyIndex()][0]]",
-            "offer": "[variables('vmSettings').vmImage[copyIndex()][1]]",
-            "sku": "[variables('vmSettings').vmImage[copyIndex()][2]]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmSettings').vmName[copyindex()], '-osdisk.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "vhd": {
-                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmSettings').vmName[copyindex()],'data-1.vhd')]"
-              },
-              "name": "[concat(variables('vmSettings').vmName[copyindex()],'-data-disk1')]",
-              "createOption": "Empty",
-              "caching": "None",
-              "diskSizeGB": "128",
-              "lun": 0
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfacePrefix'),copyindex()))]"
-            }
-          ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('storageAccountUniqueName'), '.blob.core.windows.net')]"
-          }
+        "tags": {
+          "displayName": "StorageAccounts"
         }
       },
-      "tags": {
-        "displayName": "VirtualMachines"
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Compute/availabilitySets",
+        "name": "[variables('availabilitySetName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "platformFaultDomainCount": 3,
+          "platformUpdateDomainCount": 3
+        },
+        "tags": {
+          "displayName": "AvailabilitySet"
+        }
       },
-      "resources": [
-        {
-          "name": "SqlAlwaysOnConfig",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmSettings').vmName[copyindex()]))]"
+      {
+        "apiVersion": "2016-03-30",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[concat(parameters('networkInterfacePrefix'), copyindex())]",
+        "location": "[resourceGroup().location]",
+        "copy": {
+          "name": "nicLoop",
+          "count": "[parameters('numberOfInstances')]"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
+        ],
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "[variables('vmSettings').ipConfig[copyIndex()].name]",
+              "properties": {
+                "privateIPAllocationMethod": "[variables('vmSettings').ipConfig[copyIndex()].properties.privateIPAllocationMethod]",
+                "privateIPAddress": "[variables('vmSettings').ipConfig[copyIndex()].properties.privateIPAddress]",
+                "subnet": {
+                  "id": "[variables('vmSettings').ipConfig[copyIndex()].properties.subnet.id]"
+                },
+                "loadBalancerBackendAddressPools": [
+                  {
+                    "id": "[variables('vmSettings').ipConfig[copyIndex()].properties.loadBalancerBackendAddressPools.id]"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "tags": {
+          "displayName": "NetworkInterfaces"
+        }
+      },
+      {
+        "apiVersion": "2016-03-30",
+        "type": "Microsoft.Network/loadBalancers",
+        "name": "[parameters('loadBalancerName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "frontendIPConfigurations": [
+            {
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('subnetSqlRef')]"
+                },
+                "privateIPAddress": "[parameters('lbFrontendPrivateIp')]",
+                "privateIPAllocationMethod": "Static"
+              },
+              "name": "[variables('lbFrontendIpName')]"
+            }
           ],
-          "tags": {
-            "displayName": "SqlAlwaysOnConfig"
+          "backendAddressPools": [
+            {
+              "name": "[variables('lbBackendPool')]"
+            }
+          ],
+          "loadBalancingRules": [
+            {
+              "properties": {
+                "frontendIPConfiguration": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/', variables('lbFrontendIpName'))]"
+                },
+                "backendAddressPool": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackendPool'))]"
+                },
+                "probe": {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"
+                },
+                "protocol": "Tcp",
+                "frontendPort": 80,
+                "backendPort": 80,
+                "idleTimeoutInMinutes": 15
+              },
+              "Name": "lbrule"
+            }
+          ],
+          "probes": [
+            {
+              "properties": {
+                "protocol": "Tcp",
+                "port": 80,
+                "intervalInSeconds": 15,
+                "numberOfProbes": 2
+              },
+              "name": "lbprobe"
+            }
+          ]
+        },
+        "tags": {
+          "displayName": "LoadBalancer"
+        }
+      },
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
+        "copy": {
+          "name": "virtualMachineLoop",
+          "count": "[parameters('numberOfInstances')]"
+        },
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[variables('storageAccountUniqueName')]",
+          "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex())]",
+          "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
+        ],
+        "properties": {
+          "availabilitySet": {
+            "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
           },
-          "properties": {
-            "publisher": "Microsoft.Compute",
-            "type": "CustomScriptExtension",
-            "typeHandlerVersion": "1.4",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "fileUris": [
-                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(1),'.ps1')]"
-              ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1 ', variables('vmSettings').psArgument[copyindex()])]"
+          "hardwareProfile": {
+            "vmSize": "[parameters('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('vmSettings').vmImage[copyIndex()][0]]",
+              "offer": "[variables('vmSettings').vmImage[copyIndex()][1]]",
+              "sku": "[variables('vmSettings').vmImage[copyIndex()][2]]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "osdisk",
+              "vhd": {
+                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmSettings').vmName[copyindex()], '-osdisk.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            },
+            "dataDisks": [
+              {
+                "vhd": {
+                  "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmSettings').vmName[copyindex()],'data-1.vhd')]"
+                },
+                "name": "[concat(variables('vmSettings').vmName[copyindex()],'-data-disk1')]",
+                "createOption": "Empty",
+                "caching": "None",
+                "diskSizeGB": "128",
+                "lun": 0
+              }
+            ]
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfacePrefix'),copyindex()))]"
+              }
+            ]
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": "true",
+              "storageUri": "[concat('http://',variables('storageAccountUniqueName'), '.blob.core.windows.net')]"
             }
           }
-        }
-      ]
-    }
-  ]
-}
+        },
+        "tags": {
+          "displayName": "VirtualMachines"
+        },
+        "resources": [
+          {
+            "name": "SqlAlwaysOnConfig",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmSettings').vmName[copyindex()]))]"
+            ],
+            "tags": {
+              "displayName": "SqlAlwaysOnConfig"
+            },
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "CustomScriptExtension",
+              "typeHandlerVersion": "1.4",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "fileUris": [
+                  "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(1),'.ps1')]"
+                ],
+                "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1 ', variables('vmSettings').psArgument[copyindex()])]"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
 
 

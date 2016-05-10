@@ -17,17 +17,26 @@
     "vnetFrontendSubnetPrefix": {
       "value": "10.11.0.0/24"
     },
-    "vnetBackendSubnetName": {
-      "value": "v1-be-subnet"
+    "vnetBackendSubnetNameDc": {
+      "value": "v1-be-dc-subnet"
     },
-    "vnetBackendSubnetPrefix": {
+    "vnetBackendSubnetPrefixDc": {
       "value": "10.12.0.0/24"
+    },
+    "vnetBackendSubnetNameSql": {
+      "value": "v1-be-sql-subnet"
+    },
+    "vnetBackendSubnetPrefixSql": {
+      "value": "10.12.1.0/24"
     },
     "vnetGatewaySubnetPrefix": {
       "value": "10.12.255.0/27"
     },
-    "vnetDnsAddress": {
-      "value": "8.8.8.8"
+    "vnetDnsServers": {
+      "value": [
+        "10.11.0.4",
+        "10.11.0.6"
+      ]
     },
     "gatewayName": {
       "value": "v1-gateway"
@@ -54,7 +63,7 @@
       "value": "app1st"
     },
     "sqlStaticIp": {
-      "value": "10.12.0.25"
+      "value": "10.12.1.25"
     },
     "appName": {
       "value": "app1"
