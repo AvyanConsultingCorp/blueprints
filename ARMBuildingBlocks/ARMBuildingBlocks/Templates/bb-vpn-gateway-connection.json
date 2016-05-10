@@ -1,17 +1,11 @@
 ﻿{
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": {
-    "baseName": { "type": "string" },
+  "parameters": 
+  {
+    "baseName": {"type": "string", "maxLength": 10},
     "vnetName": { "type": "string" },
     "gatewaySubnetAddressPrefix": { "type": "string" },
-    "pipAllocationMethod": {
-      "type": "string",
-      "allowedValues": [
-        "Dynamic",
-        "Static"
-      ]
-    },
     "vpnType": {
       "type": "string",
       "allowedValues": [
@@ -19,10 +13,13 @@
         "PolicyBased"
       ]
     },
-    "onpremisesPIP": { "type": "string" },
-    "onpremisesAddressSpace": { "type": "string" },
+    "udrName": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "onPremisesPIP": { "type": "string" },
+    "onPremisesAddressSpace": { "type": "string" },
     "sharedKey": { "type": "string" }
-  
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -31,18 +28,32 @@
     "gatewayName": "[concat(parameters('baseName'),'-vpngw')]",
     "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/GatewaySubnet')]",
     "vnetLocalGWName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-lgw')]",
-    "onpremisesLGWName": "on-premises-lgw",
-    "vnetOnPremConnName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-vpnconn')]"
-
+    "onPremisesLGWName": "on-premises-lgw",
+    "vnetOnPremConnName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-vpnconn')]",
+    "subnetTemplates": [
+      "https://francis123.blob.core.windows.net/templates/bb-subnet.json",
+      "https://francis123.blob.core.windows.net/templates/bb-subnet-udr.json"
+    ],
+    "subnetTemplatePath": "[variables('subnetTemplates')[mod(add(length(parameters('udrName')), 2), add(length(parameters('udrName')), 1))]]"
   },
   "resources": [
     {
-      "apiVersion": "2016-03-30",
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "name": "[concat(parameters('vnetName'), '/GatewaySubnet')]",
-      "location": "[resourceGroup().location]",
-      "tags": { "displayName": "Gateway Subnet" },
-      "properties": { "addressPrefix": "[parameters('gatewaySubnetAddressPrefix')]" }
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-02-01",
+      "name": "subnet-template",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('subnetTemplatePath')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vnetName": { "value": "[parameters('vnetName')]" },
+          "gatewaySubnetAddressPrefix": { "value": "[parameters('gatewaySubnetAddressPrefix')]" },
+          "udrName": { "value": "[parameters('udrName')]" },
+          "displayName": { "value": "Gateway UDR" }
+        }
+      }
     },
     {
       "apiVersion": "2016-03-30",
@@ -50,7 +61,7 @@
       "name": "[variables('gwPIPName')]",
       "location": "[variables('location')]",
       "tags": { "displayName": "Gateway PIP" },
-      "properties": { "publicIPAllocationMethod": "[parameters('pipAllocationMethod')]" }
+      "properties": { "publicIPAllocationMethod": "Dynamic" }
     },
     {
       "apiVersion": "2016-03-30",
@@ -59,7 +70,7 @@
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('gwPIPName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/',parameters('vnetName'),'/subnets/GatewaySubnet')]"
+        "Microsoft.Resources/deployments/subnet-template"
       ],
       "tags": { "displayName": "VPN Gateway" },
       "properties": {
@@ -81,30 +92,14 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/localNetworkGateways",
-      "name": "[variables('vnetLocalGWName')]",
-      "location": "[variables('location')]",
-      "tags": { "displayName": "[concat('Local gateway for ', parameters('vnetName'))]" },
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('gwPIPName'))]"
-      ],
-      "properties": {
-        "localNetworkAddressSpace": {
-          "addressPrefixes": "[resourceId('Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/addressSpace/addressPrefixes')]"
-        },
-        "gatewayIpAddress": "[resourceId('Microsoft.Network/publicIPAddresses', variables('gwPIPName'))]"
-      }
-    },
-    {
-      "apiVersion": "2016-03-30",
-      "type": "Microsoft.Network/localNetworkGateways",
-      "name": "[variables('onpremisesLGWName')]",
+      "name": "[variables('onPremisesLGWName')]",
       "location": "[variables('location')]",
       "tags": { "displayName": "Local gateway for on-premises" },
       "properties": {
         "localNetworkAddressSpace": {
-          "addressPrefixes": [ "[parameters('onpremisesAddressSpace')]" ]
+          "addressPrefixes": [ "[parameters('onPremisesAddressSpace')]" ]
         },
-        "gatewayIpAddress": "[parameters('onpremisesPIP')]"
+        "gatewayIpAddress": "[parameters('onPremisesPIP')]"
       }
     },
     {
@@ -115,14 +110,14 @@
       "tags": { "displayName": "Connection to on-premises" },
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworkGateways/', variables('gatewayName'))]",
-        "[concat('Microsoft.Network/localNetworkGateways/', variables('onpremisesLGWName'))]"
+        "[concat('Microsoft.Network/localNetworkGateways/', variables('onPremisesLGWName'))]"
       ],
       "properties": {
         "virtualNetworkGateway1": {
           "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('gatewayName'))]"
         },
         "localNetworkGateway2": {
-          "id": "[resourceId('Microsoft.Network/localNetworkGateways', variables('onpremisesLGWName'))]"
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways', variables('onPremisesLGWName'))]"
         },
         "connectionType": "IPsec",
         "routingWeight": 10,
