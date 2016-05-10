@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
-    "feSubnetPrefix": {"type": "string"},
+    "feSubnetPrefix": { "type": "string" },
     "feSubnetId": { "type": "string" },
     "beSubnetId": { "type": "string" },
     "mgmtSubnetId": { "type": "string" },
@@ -58,7 +58,8 @@
     "jumpBoxTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json",
     "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-custom-linux-extension.json",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/nva.sh",
-    "scriptName":  "nva.sh"
+    "scriptName": "nva.sh",
+    "udrName": "[concat(parameters('baseName'), 'gw-udr')]"
   },
   "resources": [
     {
@@ -136,7 +137,7 @@
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
-      "name": "[concat(parameters('baseName'),'gw-udr')]",
+      "name": "[variables('udrName')]",
       "properties": {
         "routes": [
           {
@@ -202,7 +203,7 @@
         "parameters": {
           "vmName": { "value": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),copyindex(1),'-vm')]" },
           "fileUri": { "value": "[variables('scriptUri')]" },
-          "scriptName": {"value": "[variables('scriptName')]"}
+          "scriptName": { "value": "[variables('scriptName')]" }
         }
       }
     },
@@ -229,5 +230,15 @@
         }
       }
     }
-  ]
+  ],
+  "outputs": {
+    "udrName": {
+      "type": "string",
+      "value": "[variables('udrName')]"
+    },
+    "resourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().Name]"
+    }
+  }
 }
