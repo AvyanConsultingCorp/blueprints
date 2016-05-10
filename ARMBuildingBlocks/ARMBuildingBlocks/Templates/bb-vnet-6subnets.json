@@ -2,6 +2,8 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "baseName": { "type": "string" },
+    "onpremNetPrefix": { "type": "string" },
     "vnetPrefix": { "type": "string" },
     "vnetManageSubnetPrefix": { "type": "string" },
     "vnetNvaFeSubnetPrefix": { "type": "string" },
@@ -17,15 +19,110 @@
     "vnetManageSubnetName": "manage",
     "vnetWebSubnetName": "web",
     "vnetBizSubnetName": "biz",
-    "vnetDbSubnetName": "db"
+    "vnetDbSubnetName": "db",
+    "nsgTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nsg.json"
   },
   "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "manage-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "web-nsg" },
+          "rulesNames": { "value": [ "on-prem-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ 3389, "*" ] },
+          "rulesProtocol": { "value": [ "TCP", "*" ] }
+        }
+      }
+    },
+
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "web-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "web-nsg" },
+          "rulesNames": { "value": [ "on-prem-allow", "vnet-allow", "manage-rdp-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('vnetPrefix')]", "[parameters('vnetManageSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ 80, 80, 3389, "*", "*" ] },
+          "rulesProtocol": { "value": [ "TCP", "TCP", "TCP", "*" ] }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "biz-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "biz-nsg" },
+          "rulesNames": { "value": [ "web-allow", "manage-rdp-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetWebSubnetPrefix')]", "[parameters('vnetManageSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ "*", 3389, "*" ] },
+          "rulesProtocol": { "value": [ "*", "TCP", "*" ] }
+        }
+      }
+    },
+
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "db-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "db-nsg" },
+          "rulesNames": { "value": [ "biz-allow", "manage-rdp-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetBizSubnetPrefix')]", "[parameters('vnetManageSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ "*", 3389, "*" ] },
+          "rulesProtocol": { "value": [ "*", "TCP", "*" ] }
+        }
+      }
+    },
     {
       "name": "[variables('vnetName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
-      "dependsOn": [ ],
+      "dependsOn": [
+        "Microsoft.Resources/deployments/manage-nsg",
+        "Microsoft.Resources/deployments/web-nsg",
+        "Microsoft.Resources/deployments/biz-nsg",
+        "Microsoft.Resources/deployments/db-nsg"
+      ],
       "tags": {
         "displayName": "vnet"
       },
@@ -40,7 +137,8 @@
           {
             "name": "[variables('vnetManageSubnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('vnetManageSubnetPrefix')]"
+              "addressPrefix": "[parameters('vnetManageSubnetPrefix')]",
+              "networkSecurityGroup": { "id": "[reference('manage-nsg').outputs.nsgid.value]" }
             }
           },
           {
@@ -58,19 +156,22 @@
           {
             "name": "[variables('vnetWebSubnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('vnetWebSubnetPrefix')]"
+              "addressPrefix": "[parameters('vnetWebSubnetPrefix')]",
+              "networkSecurityGroup": { "id": "[reference('web-nsg').outputs.nsgid.value]" }
             }
           },
           {
             "name": "[variables('vnetBizSubnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('vnetBizSubnetPrefix')]"
+              "addressPrefix": "[parameters('vnetBizSubnetPrefix')]",
+              "networkSecurityGroup": { "id": "[reference('biz-nsg').outputs.nsgid.value]" }
             }
           },
           {
             "name": "[variables('vnetDbSubnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('vnetDbSubnetPrefix')]"
+              "addressPrefix": "[parameters('vnetDbSubnetPrefix')]",
+              "networkSecurityGroup": { "id": "[reference('db-nsg').outputs.nsgid.value]" }
             }
           }
         ]
