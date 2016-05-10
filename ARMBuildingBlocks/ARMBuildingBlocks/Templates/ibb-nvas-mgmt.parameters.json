@@ -1,41 +1,15 @@
 ﻿{
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "baseName": {
-            "value": "test2"
-        },
-        "feSubnetNamePrefix": {
-            "value": "nva-fe"
-        },
-        "feSubnetAddressPrefix": {
-            "value": "10.0.1.0/24"
-        },
-        "beSubnetNamePrefix": {
-            "value": "nva-be"
-        },
-        "beSubnetAddressPrefix": {
-            "value": "10.0.2.0/24"
-        },
-        "mgmtSubnetNamePrefix": {
-            "value": "mgmt"
-        },
-        "mgmtSubnetAddressPrefix": {
-            "value": "10.0.3.0/24"
-        },
-        "ilbIpAddress": {
-            "value": "10.0.1.100"
-        },
-        "jumpboxIpAddress": {
-            "value": "10.0.3.100"
-        },
-        "adminUsername": {
-            "value": "adminUser"
-        },
-        "adminPassword": {
-            "value": "adminP@ssw0rd"
-        }
-
-
-    }
+  "parameters": {
+    "baseName": { "value": "test" },
+    "feSubnetPrefix": { "value": "10.0.0.0/24" },
+    "feSubnetId": { "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/test-rg/providers/Microsoft.Network/virtualNetworks/test-vnet/subnets/nva-fe-subnet" },
+    "beSubnetId": { "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/test-rg/providers/Microsoft.Network/virtualNetworks/test-vnet/subnets/nva-be-subnet" },
+    "mgmtSubnetId": { "value": "/subscriptions/12c67ab7-8269-46f0-a21f-05e2c641a291/resourceGroups/test-rg/providers/Microsoft.Network/virtualNetworks/test-vnet/subnets/nva-mgmt-subnet" },
+    "ilbIpAddress": { "value": "10.0.0.254" },
+    "jumpboxIpAddress": { "value": "10.0.2.254" },
+    "adminUsername": { "value": "adminUser" },
+    "adminPassword": { "value": "adminP@ssw0rd" }
+  }
 }

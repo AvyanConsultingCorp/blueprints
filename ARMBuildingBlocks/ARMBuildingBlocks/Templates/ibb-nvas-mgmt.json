@@ -3,6 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
+    "feSubnetPrefix": {"type": "string"},
     "feSubnetId": { "type": "string" },
     "beSubnetId": { "type": "string" },
     "mgmtSubnetId": { "type": "string" },
@@ -142,7 +143,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('baseName'),variables('vmNamePrefix'),copyindex(1),'/routing',copyindex(1))]",
+      "name": "[concat('routing',copyindex(1))]",
       "dependsOn": [ "Microsoft.Resources/deployments/nvas" ],
       "copy": {
         "name": "extensionCount",
@@ -181,7 +182,5 @@
         }
       }
     }
-  ],
-  "outputs": {
-  }
+  ]
 }
