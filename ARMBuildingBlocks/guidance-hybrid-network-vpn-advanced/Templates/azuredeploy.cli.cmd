@@ -24,6 +24,6 @@ CALL azure config mode arm
 
 CALL azure group create --name %RESOURCE_GROUP% --location %LOCATION% --subscription %SUBSCRIPTION%
 
-CALL azure group deployment create -f azuredeploy.json -e azuredeploy.param.json -g %RESOURCE_GROUP% -n %DEPLOYMENT_NAME%
+CALL azure group deployment create -f azuredeploy.json -e azuredeploy.param.json -g %RESOURCE_GROUP%
 
 GOTO :eof

@@ -2,14 +2,14 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "value": "app1"
-    },
-    "adminUsername": {
-      "value": "adminUser"
-    },
-    "adminPassword": {
-      "value": "adminP@ssw0rd"
-    }
+    "baseName": { "value": "app1" },
+    "onpremNetPrefix": { "value": "192.168.0.0/24" },
+    "vnetPrefix": { "value": "10.0.0.0/16" },
+    "vnetManageSubnetPrefix": { "value": "10.0.0.0/24" },
+    "vnetNvaFeSubnetPrefix": { "value": "10.0.1.0/24" },
+    "vnetNvaBeSubnetPrefix": { "value": "10.0.2.0/24" },
+    "vnetWebSubnetPrefix": { "value": "10.0.3.0/24" },
+    "vnetBizSubnetPrefix": { "value": "10.0.4.0/24" },
+    "vnetDbSubnetPrefix": { "value": "10.0.5.0/24" }
   }
 }

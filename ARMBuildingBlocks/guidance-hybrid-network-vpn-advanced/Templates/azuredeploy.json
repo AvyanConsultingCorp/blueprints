@@ -2,212 +2,40 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "adminUsername": {
-      "type": "string",
-      "metadata": { "description": "Username for local admin account." }
-    },
-    "adminPassword": {
-      "type": "securestring",
-      "metadata": { "description": "Password for local admin account." }
-    },
-    "baseName": {
-      "type": "string",
-      "maxLength": 4,
-      "metadata": { "description": "Base name" }
-    }
+    "baseName": { "type": "string" },
+    "onpremNetPrefix": { "type": "string" },
+    "vnetPrefix": { "type": "string" },
+    "vnetManageSubnetPrefix": { "type": "string" },
+    "vnetNvaFeSubnetPrefix": { "type": "string" },
+    "vnetNvaBeSubnetPrefix": { "type": "string" },
+    "vnetWebSubnetPrefix": { "type": "string" },
+    "vnetBizSubnetPrefix": { "type": "string" },
+    "vnetDbSubnetPrefix": { "type": "string" }
   },
   "variables": {
-    "osTypeWindows": "Windows",
-    "osTypeUbuntu": "Ubuntu",
-
-    "vnetName": "[concat(parameters('baseName'),'-vnet')]",
-    "vnetPrefix": "10.0.0.0/16",
-    "vnetManageSubnetPrefix": "10.0.0.0/24",
-    "vnetNVAFrontSubnetPrefix": "10.0.1.0/24",
-    "vnetNVABackSubnetPrefix": "10.0.2.0/24",
-    "vnetWebSubnetPrefix": "10.0.3.0/24",
-    "vnetBizSubnetPrefix": "10.0.4.0/24",
-    "vnetDBSubnetPrefix": "10.0.5.0/24",
-    "vnetGatewaySubnetPrefix": "10.0.255.224/27",
-
-    "vnetManageSubnetName": "[concat(parameters('baseName'),'-manage-subnet')]",
-    "vnetNVAFrontSubnetName": "[concat(parameters('baseName'),'-nva-fe-subnet')]",
-    "vnetNVABackSubnetName": "[concat(parameters('baseName'),'-nva-be-subnet')]",
-    "vnetWebSubnetName": "[concat(parameters('baseName'),'-web-subnet')]",
-    "vnetBizSubnetName": "[concat(parameters('baseName'),'-biz-subnet')]",
-    "vnetDBSubnetName": "[concat(parameters('baseName'),'-db-subnet')]",
-    "vnetGatewaySubnetName": "GatewaySubnet",
-
-    "createIlbBackend": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json",
-
-    "webIlbIpAddress": "10.0.3.254",
-    "webVmNamePrefix": "web-vm",
-    "webVmComputerNamePrefix": "[concat(parameters('baseName'),'-web-vm')]",
-    "webSubnetNamePrefix": "web",
-    "webOsType": "[variables('osTypeWindows')]",
-    "webNumberVMs": 2,
-
-    "bizIlbIpAddress": "10.0.4.254",
-    "bizVmNamePrefix": "biz-vm",
-    "bizVmComputerNamePrefix": "[concat(parameters('baseName'),'-biz-vm')]",
-    "bizSubnetNamePrefix": "biz",
-    "bizOsType": "[variables('osTypeWindows')]",
-    "bizNumberVMs": 2,
-
-    "dbIlbIpAddress": "10.0.5.254",
-    "dbVmNamePrefix": "db-vm",
-    "dbVmComputerNamePrefix": "[concat(parameters('baseName'),'-db-vm')]",
-    "dbSubnetNamePrefix": "db",
-    "dbOsType": "[variables('osTypeWindows')]",
-    "dbNumberVMs": 2
+    "vnet6subnetsTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vnet-6subnets.json"
   },
   "resources": [
     {
-      "name": "[variables('vnetName')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [ ],
-      "tags": {
-        "displayName": "vnet"
-      },
-      "properties": {
-        "mode": "Incremental",
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('vnetPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('vnetManageSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('vnetManageSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetNVAFrontSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('vnetNVAFrontSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetNVABackSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('vnetNVABackSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetWebSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('vnetWebSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetBizSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('vnetBizSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetDBSubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('vnetDBSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetGatewaySubnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('vnetGatewaySubnetPrefix')]"
-            }
-          }
-        ]
-      }
-    },
-
-    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "webtier-create",
-      "dependsOn": [ "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]" ],
+      "name": "manage-nsg",
       "properties": {
         "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('createIlbBackend')]"
-        },
+        "templateLink": { "uri": "[variables('vnet6subnetsTemplate')]" },
         "parameters": {
-          "adminUsername": { "value": "[parameters('adminUsername')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" },
           "baseName": { "value": "[parameters('baseName')]" },
-          "subnetNamePrefix": { "value": "[variables('webSubnetNamePrefix')]" },
-          "ilbIpAddress": { "value": "[variables('webIlbIpAddress')]" },
-          "osType": { "value": "[variables('webOsType')]" },
-          "subnetId": { "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetWebSubnetName'))]" },
-          "numberVMs": { "value": "[variables('webNumberVMs')]" },
-          "vmNamePrefix": { "value": "[variables('webVmNamePrefix')]" },
-          "vmComputerName": { "value": "[variables('webVmComputerNamePrefix')]" }
-        }
-      }
-    },
-
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "biztier-create",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]",
-        "[resourceId('Microsoft.Resources/deployments','webtier-create')]"
-      ],
-
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('createIlbBackend')]"
-        },
-        "parameters": {
-          "adminUsername": { "value": "[parameters('adminUsername')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "baseName": { "value": "[parameters('baseName')]" },
-          "subnetNamePrefix": { "value": "[variables('bizSubnetNamePrefix')]" },
-          "ilbIpAddress": { "value": "[variables('bizIlbIpAddress')]" },
-          "osType": { "value": "[variables('bizOsType')]" },
-          "subnetId": { "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetBizSubnetName'))]" },
-          "numberVMs": { "value": "[variables('bizNumberVMs')]" },
-          "vmNamePrefix": { "value": "[variables('bizVmNamePrefix')]" },
-          "vmComputerName": { "value": "[variables('bizVmComputerNamePrefix')]" }
-        }
-      }
-    },
-
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "dbtier-create",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/',variables('vnetName'))]",
-        "[resourceId('Microsoft.Resources/deployments','biztier-create')]"
-      ],
-
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('createIlbBackend')]"
-        },
-        "parameters": {
-          "adminUsername": { "value": "[parameters('adminUsername')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "baseName": { "value": "[parameters('baseName')]" },
-          "subnetNamePrefix": { "value": "[variables('dbSubnetNamePrefix')]" },
-          "ilbIpAddress": { "value": "[variables('dbIlbIpAddress')]" },
-          "osType": { "value": "[variables('dbOsType')]" },
-          "subnetId": { "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetDBSubnetName'))]" },
-          "numberVMs": { "value": "[variables('dbNumberVMs')]" },
-          "vmNamePrefix": { "value": "[variables('dbVmNamePrefix')]" },
-          "vmComputerName": { "value": "[variables('dbVmComputerNamePrefix')]" }
+          "onpremNetPrefix": { "value": "[parameters('onpremNetPrefix')]" },
+          "vnetPrefix": { "value": "[parameters('vnetPrefix')]" },
+          "vnetManageSubnetPrefix": { "value": "[parameters('vnetManageSubnetPrefix')]" },
+          "vnetNvaFeSubnetPrefix": { "value": "[parameters('vnetNvaFeSubnetPrefix')]" },
+          "vnetNvaBeSubnetPrefix": { "value": "[parameters('vnetNvaBeSubnetPrefix')]" },
+          "vnetWebSubnetPrefix": { "value": "[parameters('vnetWebSubnetPrefix')]" },
+          "vnetBizSubnetPrefix": { "value": "[parameters('vnetBizSubnetPrefix')]" },
+          "vnetDbSubnetPrefix": { "value": "[parameters('vnetDbSubnetPrefix')]" }
         }
       }
     }
-
   ],
   "outputs": {
   }

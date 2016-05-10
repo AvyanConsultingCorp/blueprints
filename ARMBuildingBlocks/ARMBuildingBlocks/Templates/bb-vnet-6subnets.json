@@ -13,13 +13,14 @@
     "vnetDbSubnetPrefix": { "type": "string" }
   },
   "variables": {
-    "vnetName": "web",
-    "vnetNvaFeSubnetName": "nva-fe",
-    "vnetNvaBeSubnetName": "nva-be",
-    "vnetManageSubnetName": "manage",
-    "vnetWebSubnetName": "web",
-    "vnetBizSubnetName": "biz",
-    "vnetDbSubnetName": "db",
+    "vnetName": "[concat(parameters('baseName'),'-vnet')]",
+    "vnetNvaFeSubnetName": "[concat(parameters('baseName'),'-nva-fe-subnet')]",
+    "vnetNvaBeSubnetName": "[concat(parameters('baseName'),'-nva-be-subnet')]",
+    "vnetManageSubnetName": "[concat(parameters('baseName'),'-manage-subnet')]",
+    "vnetWebSubnetName": "[concat(parameters('baseName'),'-web-subnet')]",
+    "vnetBizSubnetName": "[concat(parameters('baseName'),'-biz-subnet')]",
+    "vnetDbSubnetName": "[concat(parameters('baseName'),'-db-subnet')]",
+
     "nsgTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nsg.json"
   },
   "resources": [
@@ -32,7 +33,7 @@
         "templateLink": { "uri": "[variables('nsgTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "nsgNamePrefix": { "value": "web-nsg" },
+          "nsgNamePrefix": { "value": "manage" },
           "rulesNames": { "value": [ "on-prem-allow", "vnet-deny" ] },
           "rulesDirections": { "value": [ "Inbound", "Inbound" ] },
           "rulesAccess": { "value": [ "Allow", "Deny" ] },
@@ -55,7 +56,7 @@
         "templateLink": { "uri": "[variables('nsgTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "nsgNamePrefix": { "value": "web-nsg" },
+          "nsgNamePrefix": { "value": "web" },
           "rulesNames": { "value": [ "on-prem-allow", "vnet-allow", "manage-rdp-allow", "vnet-deny" ] },
           "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
           "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
@@ -77,7 +78,7 @@
         "templateLink": { "uri": "[variables('nsgTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "nsgNamePrefix": { "value": "biz-nsg" },
+          "nsgNamePrefix": { "value": "biz" },
           "rulesNames": { "value": [ "web-allow", "manage-rdp-allow", "vnet-deny" ] },
           "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
           "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
@@ -100,7 +101,7 @@
         "templateLink": { "uri": "[variables('nsgTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "nsgNamePrefix": { "value": "db-nsg" },
+          "nsgNamePrefix": { "value": "db" },
           "rulesNames": { "value": [ "biz-allow", "manage-rdp-allow", "vnet-deny" ] },
           "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
           "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
