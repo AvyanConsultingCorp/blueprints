@@ -1,0 +1,111 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetPrefix": { "type": "string" },
+    "vnetManageSubnetPrefix": { "type": "string" },
+    "vnetNvaFeSubnetPrefix": { "type": "string" },
+    "vnetNvaBeSubnetPrefix": { "type": "string" },
+    "vnetWebSubnetPrefix": { "type": "string" },
+    "vnetBizSubnetPrefix": { "type": "string" },
+    "vnetDbSubnetPrefix": { "type": "string" }
+  },
+  "variables": {
+    "vnetName": "web",
+    "vnetNvaFeSubnetName": "nva-fe",
+    "vnetNvaBeSubnetName": "nva-be",
+    "vnetManageSubnetName": "manage",
+    "vnetWebSubnetName": "web",
+    "vnetBizSubnetName": "biz",
+    "vnetDbSubnetName": "db"
+  },
+  "resources": [
+    {
+      "name": "[variables('vnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "vnet"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('vnetManageSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetManageSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('vnetNvaFeSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetNvaFeSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('vnetNvaBeSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetNvaBeSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('vnetWebSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetWebSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('vnetBizSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetBizSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('vnetDbSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetDbSubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "VnetId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
+    },
+
+    "ManageSubnetId": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetManageSubnetName'))]"
+    },
+    "NvaFeSubnetId": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetNvaFeSubnetName'))]"
+    },
+    "NvaBeSubnetId": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetNvaBeSubnetName'))]"
+    },
+    "WebSubnetId": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetWebSubnetName'))]"
+    },
+    "BizSubnetId": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetBizSubnetName'))]"
+    },
+    "DbSubnetId": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetDbSubnetName'))]"
+    }
+  }
+}
