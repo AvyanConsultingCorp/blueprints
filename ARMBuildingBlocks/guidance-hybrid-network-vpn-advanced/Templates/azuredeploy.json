@@ -19,7 +19,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "manage-nsg",
+      "name": "vnet6subnetsTemplate",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('vnet6subnetsTemplate')]" },
@@ -38,5 +38,35 @@
     }
   ],
   "outputs": {
+    "VnetId": {
+      "type": "string",
+      "value": "[reference('vnet6subnetsTemplate').outputs.VnetId.value]"
+    },
+
+    "ManageSubnetId": {
+      "type": "string",
+      "value": "[reference('vnet6subnetsTemplate').outputs.ManageSubnetId.value]"
+    },
+    "NvaFeSubnetId": {
+      "type": "string",
+      "value": "[reference('vnet6subnetsTemplate').outputs.NvaFeSubnetId.value]"
+    },
+    "NvaBeSubnetId": {
+      "type": "string",
+      "value": "[reference('vnet6subnetsTemplate').outputs.NvaBeSubnetId.value]"
+    },
+    "WebSubnetId": {
+      "type": "string",
+      "value": "[reference('vnet6subnetsTemplate').outputs.WebSubnetId.value]"
+    },
+    "BizSubnetId": {
+      "type": "string",
+      "value": "[reference('vnet6subnetsTemplate').outputs.BizSubnetId.value]"
+    },
+    "DbSubnetId": {
+      "type": "string",
+      "value": "[reference('vnet6subnetsTemplate').outputs.DbSubnetId.value]"
+    }
+
   }
 }
