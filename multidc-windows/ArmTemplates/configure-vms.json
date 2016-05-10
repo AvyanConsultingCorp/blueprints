@@ -53,7 +53,7 @@
     },
     "vmStorageAccountContainerName": {
       "type": "string",
-      "defaultValue": "vhds",
+      "defaultValue": "datavhd",
       "metadata": {
         "description": "This is the storage account container name"
       }

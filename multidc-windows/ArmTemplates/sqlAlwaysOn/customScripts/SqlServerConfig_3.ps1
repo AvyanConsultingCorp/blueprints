@@ -117,7 +117,7 @@ function CustomPreRestartActions([string]$outputStr="Empty")
     Enable-PSRemoting -Force
 
     # Add domain user
-    AddDomainUser
+    Add-DomainUser
 
     # Join domain
 	Add-Computer -Credential $credential -DomainName $Domain -Force
@@ -128,18 +128,16 @@ function CustomRestartActions([string]$outputStr="Empty")
    	Write-Host $outputStr + ": Creating failover cluster and configuring AlwaysOn..."
 
    # Install cluster
-   InstallFailoverCluster
+   Install-FailoverCluster
 
    # Configure SQL AlwaysOn
-   ConfigureAlwaysOn
+   Configure-AlwaysOn
 	
 }
 
 #endregion
 
-Restart-Call "Configuring SQL Server AlwaysOn feature using a scheduled restart job!"
-
-function AddDomainUser
+function Add-DomainUser
 {
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server "(local)"
     $SqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $AdminUser)
@@ -148,7 +146,7 @@ function AddDomainUser
     $sqlUser.AddToRole("sysadmin")
 }
 
-function InstallFailoverCluster
+function Install-FailoverCluster
 {
     Install-WindowsFeature -Name FailOver-Clustering -IncludeManagementTools
     Install-WindowsFeature -ComputerName $Sql2ServerName -Name FailOver-Clustering -IncludeManagementTools
@@ -156,7 +154,7 @@ function InstallFailoverCluster
     Set-ClusterQuorum -InputObject $cluster -FileShareWitness "\\$AppName-fsw\$ClusterName"
 }
 
-function ConfigureAlwaysOn
+function Configure-AlwaysOn
 {
     $sql1 = new-Object Microsoft.SqlServer.Management.Smo.Server($Sql1ServerName)
     $sql2 = new-Object Microsoft.SqlServer.Management.Smo.Server($Sql2ServerName)
@@ -169,13 +167,13 @@ function ConfigureAlwaysOn
     foreach($sqlServer in $servers)
     {
         # Change SQL service log on. This allows MSSQLSERVER to access the file share
-        ChangeSqlLogon $sqlServer
+        Change-SqlLogon $sqlServer
         
         # Enable AlwaysOn
         Enable-SqlAlwaysOn -ServerInstance $sqlServer
 
         # Set firewall rules and open ports
-        SetFirewallRule $sqlServer
+        Set-FirewallRule $sqlServer
     }
 
     # Back up database to a file share that both SQL server instances can access, and restore to sql2
@@ -185,10 +183,10 @@ function ConfigureAlwaysOn
     Restore-SqlDatabase -Database "TestDb" -BackupFile "\\$AppName-fsw\$ClusterName\db.log" -ServerInstance $Sql2ServerName -NoRecovery -RestoreAction Log
 
     # Create AGs
-    CreateAvailabilityGroup
+    Create-AvailabilityGroup
 }
 
-function SetFirewallRule([string]$sqlServer)
+function Set-FirewallRule([string]$sqlServer)
 {
     $cim = New-CimSession -ComputerName $sqlServer
     New-NetFirewallRule -DisplayName "SQL AlwaysOn: DB Mirror" -Action "Allow" -Direction "Inbound" -Protocol TCP -LocalPort 5022 -CimSession $cim
@@ -197,7 +195,7 @@ function SetFirewallRule([string]$sqlServer)
     Remove-CimSession -CimSession $cim
 }
 
-function ChangeSqlLogon([string]$sqlServer)
+function Change-SqlLogon([string]$sqlServer)
 {
     $mc = new-object Microsoft.SQLServer.Management.SMO.WMI.ManagedComputer $sqlServer
     $service = $mc.Services["MSSQLSERVER"]
@@ -207,7 +205,7 @@ function ChangeSqlLogon([string]$sqlServer)
     #$service.Start()
 }
 
-function CreateAvailabilityGroup
+function Create-AvailabilityGroup
 {
     $primaryUri = "tcp://$Sql1ServerName.$Domain:5022"
     $primary = New-SqlAvailabilityReplica -Name $Sql1ServerName -EndpointUrl $primaryUrl -AvailabilityMode "SynchronousCommit" -FailoverMode "Automatic" -Version 12 -AsTemplate
@@ -220,3 +218,6 @@ function CreateAvailabilityGroup
     Add-SqlAvailabilityDatabase -Path "SQLSERVER:\SQL\$Sql2ServerName\DEFAULT\AvailabilityGroups\sqlAg007" -Database "TestDb"
     New-SqlAvailabilityGroupListener -Name "listener1" -StaticIp '$StaticIp/255.255.255.0' -Path "SQLSERVER:\sql\$Sql1ServerName\DEFAULT\AvailabilityGroups\sqlAg007"
 }
+
+
+Restart-Call "Configuring SQL Server AlwaysOn feature using a scheduled restart job!"

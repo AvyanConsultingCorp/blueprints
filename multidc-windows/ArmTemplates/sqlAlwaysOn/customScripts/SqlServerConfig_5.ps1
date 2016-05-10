@@ -112,11 +112,11 @@ function CustomRestartActions([string]$outputStr="Empty")
 {
    	Write-Host $outputStr + ": Initalizing and formatting disks..."
     
-    FormatDrive F
-    CreateFileShare	F:
+    Format-Drive F
+    Create-FileShare 'F:'
 }
 
-function FormatDrive([string]$driveLetter='F')
+function Format-Drive([string]$driveLetter='F')
 {
     # Format F: drive
 	Initialize-Disk -Number 2
@@ -125,7 +125,7 @@ function FormatDrive([string]$driveLetter='F')
 
 }
 
-function CreateFileShare([string]$driveLetter='F:')
+function Create-FileShare([string]$driveLetter='F:')
 {
     # Create new share
     $clusterShare = Join-Path $driveLetter $ClusterName
