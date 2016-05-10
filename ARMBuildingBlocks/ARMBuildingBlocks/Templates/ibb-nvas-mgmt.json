@@ -133,6 +133,24 @@
       "properties": { "accountType": "Premium_LRS" }
     },
     {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('baseName'),'gw-udr')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "toFrontEnd",
+            "properties": {
+              "addressPrefix": "[parameters('feSubnetPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('ilbIpAddress')]"
+            }
+          }
+        ]
+      }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "nvas",
