@@ -5,7 +5,8 @@
     "vnetName": { "type": "string" },
     "gatewaySubnetAddressPrefix": { "type": "string" },
     "udrName": { "type": "string" },
-    "displayName": {"type": "string"}
+    "udrResourceGroup": {"type": "string"},
+    "displayName": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]"
