@@ -10,7 +10,7 @@
     "location": "[resourceGroup().location]",
     "publisher": "Microsoft.OSTCExtensions",
     "type": "CustomScriptForLinux",
-    "typeHandlerVersion": "1.29",    
+    "typeHandlerVersion": "1.4",
     "commandToExecute": "[concat('sh ',parameters('scriptName'))]"
   },
   "resources": [

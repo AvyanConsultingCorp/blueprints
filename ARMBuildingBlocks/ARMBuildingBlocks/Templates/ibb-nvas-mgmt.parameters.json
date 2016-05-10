@@ -10,6 +10,7 @@
     "ilbIpAddress": { "value": "10.0.0.254" },
     "jumpboxIpAddress": { "value": "10.0.2.254" },
     "adminUsername": { "value": "adminUser" },
-    "adminPassword": { "value": "adminP@ssw0rd" }
+    "adminPassword": { "value": "adminP@ssw0rd" },
+    "vmSize": { "value": "Standard_DS3" }
   }
 }
