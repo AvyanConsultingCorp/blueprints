@@ -1,0 +1,25 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetName": { "type": "string" },
+    "gatewaySubnetAddressPrefix": { "type": "string" },
+    "udrName": { "type": "string" },
+    "displayName": {"type": "string"}
+  },
+  "variables": {
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "name": "[concat(parameters('vnetName'), '/GatewaySubnet')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "[parameters('displayName')]" },
+      "properties": { "addressPrefix": "[parameters('gatewaySubnetAddressPrefix')]" }
+    }
+  ],
+  "outputs": {
+  }
+}
