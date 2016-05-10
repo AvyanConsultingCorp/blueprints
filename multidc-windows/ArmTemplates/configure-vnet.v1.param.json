@@ -32,7 +32,7 @@
     "vnetGatewaySubnetPrefix": {
       "value": "10.12.255.0/27"
     },
-    "vnetDnsServers": {
+    "dnsServers": {
       "value": [
         "10.11.0.4",
         "10.11.0.6"

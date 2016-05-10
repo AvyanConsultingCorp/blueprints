@@ -62,7 +62,7 @@
         "description": "The prefix for the GatewaySubnet where the VirtualNetworkGateway will be deployed. This must be at least /29."
       }
     },
-    "vnetDnsServers": {
+    "dnsServers": {
       "type": "array",
       "metadata": {
         "description": "DNS address spaces of the VNET to be used for AD domain controller VMs."
@@ -153,7 +153,7 @@
           ]
         },
         "dhcpOptions": {
-          "dnsServers": "[parameters('vnetDnsServers')]"
+          "dnsServers": "[parameters('dnsServers')]"
         },
         "subnets": [
           {
@@ -279,6 +279,9 @@
           },
           "storageAccountName": {
             "value": "[parameters('storageAccountName')]"
+          },
+          "dnsServers": {
+            "value": "[parameters('dnsServers')]"
           },
           "sqlStaticIp": {
             "value": "[parameters('sqlStaticIp')]"
