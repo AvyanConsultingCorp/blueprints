@@ -32,17 +32,28 @@ LOCATION=centralus
 azure config mode arm
 
 ## create network 
-RESOURCE_GROUP=${APP_NAME}-ntwk-rg
-vnet6subnetsTemplate=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vnet-6subnets.json
-azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-parameters="{\"baseName\":{\"value\":\"app2\"},\"onpremNetPrefix\":{\"value\":\"192.168.0.0/24\"},\"vnetPrefix\":{\"value\":\"10.0.0.0/16\"},\"vnetManageSubnetPrefix\":{\"value\":\"10.0.0.0/24\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"10.0.1.0/24\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"10.0.2.0/24\"},\"vnetWebSubnetPrefix\":{\"value\":\"10.0.3.0/24\"},\"vnetBizSubnetPrefix\":{\"value\":\"10.0.4.0/24\"},\"vnetDbSubnetPrefix\":{\"value\":\"10.0.5.0/24\"}}"
-azure group deployment create --template-uri ${vnet6subnetsTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
-##azure group deployment create --template-uri ${vnet6subnetsTemplate} -g ${RESOURCE_GROUP} -e azuredeploy.param.json 
+#RESOURCE_GROUP=${APP_NAME}-ntwk-rg
+#vnet6subnetsTemplate=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vnet-6subnets.json
+#azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+#parameters="{\"baseName\":{\"value\":\"app2\"},\"onpremNetPrefix\":{\"value\":\"192.168.0.0/24\"},\"vnetPrefix\":{\"value\":\"10.0.0.0/16\"},\"vnetManageSubnetPrefix\":{\"value\":\"10.0.0.0/24\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"10.0.1.0/24\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"10.0.2.0/24\"},\"vnetWebSubnetPrefix\":{\"value\":\"10.0.3.0/24\"},\"vnetBizSubnetPrefix\":{\"value\":\"10.0.4.0/24\"},\"vnetDbSubnetPrefix\":{\"value\":\"10.0.5.0/24\"}}"
+#azure group deployment create --template-uri ${vnet6subnetsTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
+
+tierTemplate=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
 
 ## create web vms and ILB
-##RESOURCE_GROUP=${APP_NAME}-sn-web-rg
-##webTemplate=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
-##azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-##azure group deployment create --template-uri ${webTemplate} -g ${RESOURCE_GROUP} -e azuredeploy.param.json 
+#RESOURCE_GROUP=${APP_NAME}-sn-web-rg
+#azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+#parameters="{\"baseName\":{\"value\":\"app2\"},\"adminUsername\":{\"value\":\"adminUser\"},\"adminPassword\":{\"value\":\"adminP@ssw0rd\"},\"subnetNamePrefix\":{\"value\":\"web\"},\"ilbIpAddress\":{\"value\":\"10.0.3.254\"},\"osType\":{\"value\":\"Windows\"},\"subnetId\":{\"value\":\"/subscriptions/15ed8653-1601-4c52-a3d4-afcfc38ddad3/resourceGroups/hanz4-ntwk-rg/providers/Microsoft.Network/virtualNetworks/app2-vnet/subnets/app2-web-subnet\"},\"numberVMs\":{\"value\":2},\"vmNamePrefix\":{\"value\":\"web\"},\"vmComputerName\":{\"value\":\"web\"}}"
+#azure group deployment create --template-uri ${tierTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
 
+## create biz vms and ILB
+RESOURCE_GROUP=${APP_NAME}-sn-biz-rg
+azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+parameters="{\"baseName\":{\"value\":\"app2\"},\"adminUsername\":{\"value\":\"adminUser\"},\"adminPassword\":{\"value\":\"adminP@ssw0rd\"},\"subnetNamePrefix\":{\"value\":\"biz\"},\"ilbIpAddress\":{\"value\":\"10.0.4.254\"},\"osType\":{\"value\":\"Windows\"},\"subnetId\":{\"value\":\"/subscriptions/15ed8653-1601-4c52-a3d4-afcfc38ddad3/resourceGroups/hanz4-ntwk-rg/providers/Microsoft.Network/virtualNetworks/app2-vnet/subnets/app2-biz-subnet\"},\"numberVMs\":{\"value\":2},\"vmNamePrefix\":{\"value\":\"biz\"},\"vmComputerName\":{\"value\":\"biz\"}}"
+azure group deployment create --template-uri ${tierTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
 
+## create db vms and ILB
+RESOURCE_GROUP=${APP_NAME}-sn-db-rg
+azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+parameters="{\"baseName\":{\"value\":\"app2\"},\"adminUsername\":{\"value\":\"adminUser\"},\"adminPassword\":{\"value\":\"adminP@ssw0rd\"},\"subnetNamePrefix\":{\"value\":\"db\"},\"ilbIpAddress\":{\"value\":\"10.0.5.254\"},\"osType\":{\"value\":\"Windows\"},\"subnetId\":{\"value\":\"/subscriptions/15ed8653-1601-4c52-a3d4-afcfc38ddad3/resourceGroups/hanz4-ntwk-rg/providers/Microsoft.Network/virtualNetworks/app2-vnet/subnets/app2-db-subnet\"},\"numberVMs\":{\"value\":2},\"vmNamePrefix\":{\"value\":\"db\"},\"vmComputerName\":{\"value\":\"db\"}}"
+azure group deployment create --template-uri ${tierTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
