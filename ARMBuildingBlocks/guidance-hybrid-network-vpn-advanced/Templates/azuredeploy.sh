@@ -109,7 +109,7 @@ azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscriptio
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 # create nva and mgmt tier
-RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-nva-mgmt-rg
+RESOURCE_GROUP=${BASE_NAME}-mgmt-subnet-nva-rg
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-nvas-mgmt.json
 
 MGMT_SUBNET_NAME_PREFIX=${RETURNED_MGMT_SUBNET_NAME_PREFIX}
