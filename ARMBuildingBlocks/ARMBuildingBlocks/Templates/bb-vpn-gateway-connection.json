@@ -32,8 +32,8 @@
     "onPremisesLGWName": "on-premises-lgw",
     "vnetOnPremConnName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-vpnconn')]",
     "subnetTemplates": [
-      "https://francis123.blob.core.windows.net/templates/bb-subnet.json",
-      "https://francis123.blob.core.windows.net/templates/bb-subnet-udr.json"
+      "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-gatewaysubnet.json",
+      "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-gatewaysubnet-udr.json"
     ],
     "udrResourceGroups": [
       "[resourceGroup().location]",
