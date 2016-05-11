@@ -277,7 +277,7 @@
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[variables('vmSettings').ipConfig[copyIndex()].properties.loadBalancerBackendAddressPools.id]"
+                  "id": "[variables('vmSettings').ipConfig[copyIndex()].properties.loadBalancerBackendAddressPools[0].id]"
                 }
               ]
             }
