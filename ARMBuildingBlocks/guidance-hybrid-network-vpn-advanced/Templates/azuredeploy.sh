@@ -46,7 +46,6 @@ PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"onpremNetPrefix\":{\"va
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-exit
 # the following variables are used in the above resource group, you need to use them later to create web/biz/db tier. don't change their values.
 RETURNED_VNET_NAME=${BASE_NAME}-vnet
 RETURNED_MGMT_SUBNET_NAME_PREFIX=mgmt
