@@ -5,6 +5,7 @@
     "vnetName": { "type": "string" },
     "gatewaySubnetAddressPrefix": { "type": "string" },
     "udrName": { "type": "string" },
+    "udrResourceGroup": { "type": "string" },
     "displayName": { "type": "string" }
   },
   "variables": {
@@ -20,7 +21,7 @@
       "properties": {
         "addressPrefix": "[parameters('gatewaySubnetAddressPrefix')]",
         "routeTable": {
-          "id": "[resourceId('Microsoft.Network/routeTables', parameters('udrName'))]"
+          "id": "[resourceId(parameters('udrResourceGroup'), 'Microsoft.Network/routeTables', parameters('udrName'))]"
         }
       }
     }

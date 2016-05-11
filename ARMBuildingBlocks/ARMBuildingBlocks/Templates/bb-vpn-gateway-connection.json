@@ -17,6 +17,7 @@
       "type": "string",
       "defaultValue": ""
     },
+    "udrResourceGroup": { "type": "string", "defaultValue": "" },
     "onPremisesPIP": { "type": "string" },
     "onPremisesAddressSpace": { "type": "string" },
     "sharedKey": { "type": "string" }
@@ -34,7 +35,12 @@
       "https://francis123.blob.core.windows.net/templates/bb-subnet.json",
       "https://francis123.blob.core.windows.net/templates/bb-subnet-udr.json"
     ],
-    "subnetTemplatePath": "[variables('subnetTemplates')[mod(add(length(parameters('udrName')), 2), add(length(parameters('udrName')), 1))]]"
+    "udrResourceGroups": [
+      "[resourceGroup().location]",
+      "[parameters('udrResourceGroup')]"
+    ],
+    "subnetTemplatePath": "[variables('subnetTemplates')[mod(add(length(parameters('udrName')), 2), add(length(parameters('udrName')), 1))]]",
+    "udrResourceGroupValue": "[variables('udrResourceGroups')[mod(add(length(parameters('udrResourceGroup')), 2), add(length(parameters('udrResourceGroup')), 1))]]"
   },
   "resources": [
     {
@@ -51,6 +57,7 @@
           "vnetName": { "value": "[parameters('vnetName')]" },
           "gatewaySubnetAddressPrefix": { "value": "[parameters('gatewaySubnetAddressPrefix')]" },
           "udrName": { "value": "[parameters('udrName')]" },
+          "udrResourceGroup": { "value": "[variables('udrResourceGroupValue')]" },
           "displayName": { "value": "Gateway UDR" }
         }
       }
