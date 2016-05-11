@@ -22,7 +22,7 @@ fi
 ############################################################################
 ## Command Arguments
 ############################################################################
-APP_NAME=$1
+BASE_NAME=$1
 SUBSCRIPTION=$2
 VPN_IPSEC_SHARED_KEY=$3
 ON_PREMISES_PUBLIC_IP=$4
@@ -31,29 +31,75 @@ ON_PREMISES_ADDRESS_SPACE=$5
 LOCATION=centralus
 azure config mode arm
 
-## create network 
-#RESOURCE_GROUP=${APP_NAME}-ntwk-rg
-#vnet6subnetsTemplate=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vnet-6subnets.json
-#azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-#parameters="{\"baseName\":{\"value\":\"app2\"},\"onpremNetPrefix\":{\"value\":\"192.168.0.0/24\"},\"vnetPrefix\":{\"value\":\"10.0.0.0/16\"},\"vnetManageSubnetPrefix\":{\"value\":\"10.0.0.0/24\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"10.0.1.0/24\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"10.0.2.0/24\"},\"vnetWebSubnetPrefix\":{\"value\":\"10.0.3.0/24\"},\"vnetBizSubnetPrefix\":{\"value\":\"10.0.4.0/24\"},\"vnetDbSubnetPrefix\":{\"value\":\"10.0.5.0/24\"}}"
-#azure group deployment create --template-uri ${vnet6subnetsTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
-
-tierTemplate=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
-
-## create web vms and ILB
-#RESOURCE_GROUP=${APP_NAME}-sn-web-rg
-#azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-#parameters="{\"baseName\":{\"value\":\"app2\"},\"adminUsername\":{\"value\":\"adminUser\"},\"adminPassword\":{\"value\":\"adminP@ssw0rd\"},\"subnetNamePrefix\":{\"value\":\"web\"},\"ilbIpAddress\":{\"value\":\"10.0.3.254\"},\"osType\":{\"value\":\"Windows\"},\"subnetId\":{\"value\":\"/subscriptions/15ed8653-1601-4c52-a3d4-afcfc38ddad3/resourceGroups/hanz4-ntwk-rg/providers/Microsoft.Network/virtualNetworks/app2-vnet/subnets/app2-web-subnet\"},\"numberVMs\":{\"value\":2},\"vmNamePrefix\":{\"value\":\"web\"},\"vmComputerName\":{\"value\":\"web\"}}"
-#azure group deployment create --template-uri ${tierTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
-
-## create biz vms and ILB
-RESOURCE_GROUP=${APP_NAME}-sn-biz-rg
+# create network 
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vnet-6subnets.json
+RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
+ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
+VNET_PREFIX=10.0.0.0/16
+VNET_MANAGE_SUBNET_PREFIX=10.0.0.0/24
+VNET_NVA_FE_SUBNET_PREFIX=10.0.1.0/24
+VNET_NVA_BE_SUBNET_PREFIX=10.0.2.0/24
+VNET_WEB_SUBNET_PREFIX=10.0.3.0/24
+VNET_BIZ_SUBNET_PREFIX=10.0.4.0/24
+VNET_DB_SUBNET_PREFIX=10.0.5.0/24
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetManageSubnetPrefix\":{\"value\":\"${VNET_MANAGE_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"}}"
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-parameters="{\"baseName\":{\"value\":\"app2\"},\"adminUsername\":{\"value\":\"adminUser\"},\"adminPassword\":{\"value\":\"adminP@ssw0rd\"},\"subnetNamePrefix\":{\"value\":\"biz\"},\"ilbIpAddress\":{\"value\":\"10.0.4.254\"},\"osType\":{\"value\":\"Windows\"},\"subnetId\":{\"value\":\"/subscriptions/15ed8653-1601-4c52-a3d4-afcfc38ddad3/resourceGroups/hanz4-ntwk-rg/providers/Microsoft.Network/virtualNetworks/app2-vnet/subnets/app2-biz-subnet\"},\"numberVMs\":{\"value\":2},\"vmNamePrefix\":{\"value\":\"biz\"},\"vmComputerName\":{\"value\":\"biz\"}}"
-azure group deployment create --template-uri ${tierTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
+azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-## create db vms and ILB
-RESOURCE_GROUP=${APP_NAME}-sn-db-rg
+# the following variables are used in the above resource group, you need to use them later to create web/biz/db tier. don't change their values.
+NTWK_RESOURCE_GROUP=${RESOURCE_GROUP}
+WEB_SUBNET_NAME_PREFIX=web
+BIZ_SUBNET_NAME_PREFIX=biz
+DB_SUBNET_NAME_PREFIX=db
+
+# create ilb and vm in web/biz/db tier
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
+
+WEB_ILB_IP_ADDRESS=10.0.3.254
+BIZ_ILB_IP_ADDRESS=10.0.4.254
+DB_ILB_IP_ADDRESS=10.0.5.254
+
+# use the following same parameters for web, biz, and db tiere. you can change them for each tier.
+ADMIN_USER_NAME=adminUser
+ADMIN_PASSWORD=adminP@ssw0rd
+OS_TYPE=Windows
+
+# create web tier
+SUBNET_NAME_PREFIX=${WEB_SUBNET_NAME_PREFIX}
+ILB_IP_ADDRESS=${WEB_ILB_IP_ADDRESS}
+NUMBER_VMS=2
+
+RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
+VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
+VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
+SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-parameters="{\"baseName\":{\"value\":\"app2\"},\"adminUsername\":{\"value\":\"adminUser\"},\"adminPassword\":{\"value\":\"adminP@ssw0rd\"},\"subnetNamePrefix\":{\"value\":\"db\"},\"ilbIpAddress\":{\"value\":\"10.0.5.254\"},\"osType\":{\"value\":\"Windows\"},\"subnetId\":{\"value\":\"/subscriptions/15ed8653-1601-4c52-a3d4-afcfc38ddad3/resourceGroups/hanz4-ntwk-rg/providers/Microsoft.Network/virtualNetworks/app2-vnet/subnets/app2-db-subnet\"},\"numberVMs\":{\"value\":2},\"vmNamePrefix\":{\"value\":\"db\"},\"vmComputerName\":{\"value\":\"db\"}}"
-azure group deployment create --template-uri ${tierTemplate} -g ${RESOURCE_GROUP} -p ${parameters}
+azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+
+# create biz tier
+SUBNET_NAME_PREFIX=${BIZ_SUBNET_NAME_PREFIX}
+ILB_IP_ADDRESS=${BIZ_ILB_IP_ADDRESS}
+NUMBER_VMS=2
+
+RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
+VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
+VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
+SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
+azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+
+# create db tier
+SUBNET_NAME_PREFIX=${DB_SUBNET_NAME_PREFIX}
+ILB_IP_ADDRESS=${DB_ILB_IP_ADDRESS}
+NUMBER_VMS=2
+
+RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
+VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
+VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
+SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
+azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+
