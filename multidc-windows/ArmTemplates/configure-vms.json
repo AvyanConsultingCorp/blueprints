@@ -150,74 +150,6 @@
           "2012-R2-Datacenter"
         ]
       ],
-
-      "ipConfig": [
-        {
-          "name": "ipConfig1",
-          "properties": {
-            "privateIPAllocationMethod": "Static",
-            "privateIPAddress": "[parameters('dnsServers')[0]]",
-            "subnet": { "id": "[parameters('subnetDcRef')]" },
-            "loadBalancerBackendAddressPools": [
-              {
-                "id": ""
-              }
-            ]
-          }
-        },
-        {
-          "name": "ipConfig2",
-          "properties": {
-            "privateIPAllocationMethod": "Static",
-            "privateIPAddress": "[parameters('dnsServers')[1]]",
-            "subnet": { "id": "[parameters('subnetDcRef')]" },
-            "loadBalancerBackendAddressPools": [
-              {
-                "id": ""
-              }
-            ]
-          }
-        },
-        {
-          "name": "ipConfig3",
-          "properties": {
-            "privateIPAllocationMethod": "Dynamic",
-            "privateIPAddress": "",
-            "subnet": { "id": "[parameters('subnetSqlRef')]" },
-            "loadBalancerBackendAddressPools": [
-              {
-                "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
-              }
-            ]
-          }
-        },
-        {
-          "name": "ipConfig4",
-          "properties": {
-            "privateIPAllocationMethod": "Dynamic",
-            "privateIPAddress": "",
-            "subnet": { "id": "[parameters('subnetSqlRef')]" },
-            "loadBalancerBackendAddressPools": [
-              {
-                "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
-              }
-            ]
-          }
-        },
-        {
-          "name": "ipConfig5",
-          "properties": {
-            "privateIPAllocationMethod": "Dynamic",
-            "privateIPAddress": "",
-            "subnet": { "id": "[parameters('subnetSqlRef')]" },
-            "loadBalancerBackendAddressPools": [
-              {
-                "id": ""
-              }
-            ]
-          }
-        }
-      ],
       "psArgument": [
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
@@ -256,30 +188,123 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(parameters('networkInterfacePrefix'), copyindex())]",
+      "name": "[concat(parameters('networkInterfacePrefix'), '0')]",
       "location": "[resourceGroup().location]",
-      "copy": {
-        "name": "nicLoop",
-        "count": "[parameters('numberOfInstances')]"
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('dnsServers')[0]]",
+              "subnet": {
+                "id": "[parameters('subnetDcRef')]"
+              }
+            }
+          }
+        ]
       },
+      "tags": {
+        "displayName": "NetworkInterfaces"
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('networkInterfacePrefix'), '1')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfig2",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('dnsServers')[1]]",
+              "subnet": {
+                "id": "[parameters('subnetDcRef')]"
+              }
+            }
+          }
+        ]
+      },
+      "tags": {
+        "displayName": "NetworkInterfaces"
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('networkInterfacePrefix'), '2')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
-            "name": "[variables('vmSettings').ipConfig[copyIndex()].name]",
+            "name": "ipConfig3",
             "properties": {
-              "privateIPAllocationMethod": "[variables('vmSettings').ipConfig[copyIndex()].properties.privateIPAllocationMethod]",
-              "privateIPAddress": "[variables('vmSettings').ipConfig[copyIndex()].properties.privateIPAddress]",
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('vmSettings').ipConfig[copyIndex()].properties.subnet.id]"
+                "id": "[parameters('subnetSqlRef')]"
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[variables('vmSettings').ipConfig[copyIndex()].properties.loadBalancerBackendAddressPools[0].id]"
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
                 }
               ]
+            }
+          }
+        ]
+      },
+      "tags": {
+        "displayName": "NetworkInterfaces"
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('networkInterfacePrefix'), '3')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfig4",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[parameters('subnetSqlRef')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', variables('lbBackendPool'))]"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "tags": {
+        "displayName": "NetworkInterfaces"
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(parameters('networkInterfacePrefix'), '4')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipConfig5",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[parameters('subnetSqlRef')]"
+              }
             }
           }
         ]
