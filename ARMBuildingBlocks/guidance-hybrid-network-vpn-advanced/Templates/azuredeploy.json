@@ -5,7 +5,7 @@
     "baseName": { "type": "string" },
     "onpremNetPrefix": { "type": "string" },
     "vnetPrefix": { "type": "string" },
-    "vnetManageSubnetPrefix": { "type": "string" },
+    "vnetMgmtSubnetPrefix": { "type": "string" },
     "vnetNvaFeSubnetPrefix": { "type": "string" },
     "vnetNvaBeSubnetPrefix": { "type": "string" },
     "vnetWebSubnetPrefix": { "type": "string" },
@@ -27,7 +27,7 @@
           "baseName": { "value": "[parameters('baseName')]" },
           "onpremNetPrefix": { "value": "[parameters('onpremNetPrefix')]" },
           "vnetPrefix": { "value": "[parameters('vnetPrefix')]" },
-          "vnetManageSubnetPrefix": { "value": "[parameters('vnetManageSubnetPrefix')]" },
+          "vnetMgmtSubnetPrefix": { "value": "[parameters('vnetMgmtSubnetPrefix')]" },
           "vnetNvaFeSubnetPrefix": { "value": "[parameters('vnetNvaFeSubnetPrefix')]" },
           "vnetNvaBeSubnetPrefix": { "value": "[parameters('vnetNvaBeSubnetPrefix')]" },
           "vnetWebSubnetPrefix": { "value": "[parameters('vnetWebSubnetPrefix')]" },
@@ -38,34 +38,34 @@
     }
   ],
   "outputs": {
-    "VnetId": {
+    "vnetId": {
       "type": "string",
-      "value": "[reference('vnet6subnetsTemplate').outputs.VnetId.value]"
+      "value": "[reference('vnet6subnetsTemplate').outputs.vnetId.value]"
     },
 
-    "ManageSubnetId": {
+    "mgmtSubnetId": {
       "type": "string",
-      "value": "[reference('vnet6subnetsTemplate').outputs.ManageSubnetId.value]"
+      "value": "[reference('vnet6subnetsTemplate').outputs.mgmtSubnetId.value]"
     },
-    "NvaFeSubnetId": {
+    "nvaFeSubnetId": {
       "type": "string",
-      "value": "[reference('vnet6subnetsTemplate').outputs.NvaFeSubnetId.value]"
+      "value": "[reference('vnet6subnetsTemplate').outputs.nvaFeSubnetId.value]"
     },
-    "NvaBeSubnetId": {
+    "nvaBeSubnetId": {
       "type": "string",
-      "value": "[reference('vnet6subnetsTemplate').outputs.NvaBeSubnetId.value]"
+      "value": "[reference('vnet6subnetsTemplate').outputs.nvaBeSubnetId.value]"
     },
-    "WebSubnetId": {
+    "webSubnetId": {
       "type": "string",
-      "value": "[reference('vnet6subnetsTemplate').outputs.WebSubnetId.value]"
+      "value": "[reference('vnet6subnetsTemplate').outputs.webSubnetId.value]"
     },
-    "BizSubnetId": {
+    "bizSubnetId": {
       "type": "string",
-      "value": "[reference('vnet6subnetsTemplate').outputs.BizSubnetId.value]"
+      "value": "[reference('vnet6subnetsTemplate').outputs.bizSubnetId.value]"
     },
-    "DbSubnetId": {
+    "dbSubnetId": {
       "type": "string",
-      "value": "[reference('vnet6subnetsTemplate').outputs.DbSubnetId.value]"
+      "value": "[reference('vnet6subnetsTemplate').outputs.dbSubnetId.value]"
     }
 
   }
