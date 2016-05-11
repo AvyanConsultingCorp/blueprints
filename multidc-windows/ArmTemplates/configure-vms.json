@@ -150,28 +150,28 @@
           "2012-R2-Datacenter"
         ]
       ],
+
       "ipConfig": [
-        { "name": "ipconfig1" },
         {
+          "name": "ipConfig1",
           "properties": {
             "privateIPAllocationMethod": "Static",
             "privateIPAddress": "[parameters('dnsServers')[0]]",
             "subnet": { "id": "[parameters('subnetDcRef')]" }
           }
         },
-        { "name": "ipconfig2" },
         {
+          "name": "ipConfig2",
           "properties": {
             "privateIPAllocationMethod": "Static",
             "privateIPAddress": "[parameters('dnsServers')[1]]",
             "subnet": { "id": "[parameters('subnetDcRef')]" }
           }
         },
-        { "name": "ipconfig3" },
         {
+          "name": "ipConfig3",
           "properties": {
             "privateIPAllocationMethod": "Dynamic",
-            "privateIPAddress": "",
             "subnet": { "id": "[parameters('subnetSqlRef')]" },
             "loadBalancerBackendAddressPools": [
               {
@@ -180,11 +180,10 @@
             ]
           }
         },
-        { "name": "ipconfig4" },
         {
+          "name": "ipConfig4",
           "properties": {
             "privateIPAllocationMethod": "Dynamic",
-            "privateIPAddress": "",
             "subnet": { "id": "[parameters('subnetSqlRef')]" },
             "loadBalancerBackendAddressPools": [
               {
@@ -193,11 +192,10 @@
             ]
           }
         },
-        { "name": "ipconfig5" },
         {
+          "name": "ipConfig5",
           "properties": {
             "privateIPAllocationMethod": "Dynamic",
-            "privateIPAddress": "",
             "subnet": { "id": "[parameters('subnetSqlRef')]" }
           }
         }
