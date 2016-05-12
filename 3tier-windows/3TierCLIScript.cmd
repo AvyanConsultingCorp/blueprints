@@ -190,7 +190,7 @@ FOR /L %%I IN (1,1,%NUM_VM_INSTANCES_MANAGE_TIER%) DO CALL :CreateVM %%I manage 
 :: The Jump box NSG rule allows inbound remote access traffic from admin-address-prefix script parameter.
 :: To view the provisioned NSG rules, go to the portal (portal.azure.com) and view the
 :: Inbound and Outbound rules for the NSG.
-:: Don't forget that there are default rules that are also visible through the portal.
+:: NSGs have default rules that are also visible through the portal.
 
 SET MANAGE_NSG_NAME=%APP_NAME%-manage-nsg
 
