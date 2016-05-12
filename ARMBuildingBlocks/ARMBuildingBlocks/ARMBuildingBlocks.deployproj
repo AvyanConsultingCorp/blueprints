@@ -53,6 +53,7 @@
     <None Include="Templates\bb-avail-set.json" />
     <None Include="Templates\bb-custom-linux-extension.json" />
     <None Include="Templates\bb-dsc-extension.json" />
+    <None Include="Templates\bb-dsc-extension2.json" />
     <None Include="Templates\bb-ilb-backend-http-https.json" />
     <None Include="Templates\bb-ilb-backend-http-https.parameters.json" />
     <None Include="Templates\bb-nsg.json" />
@@ -68,6 +69,8 @@
     <None Include="Templates\bb-vnet-6subnets.json" />
     <None Include="Templates\bb-vpn-gateway-connection.json" />
     <None Include="Templates\bb-vpn-gateway-connection.parameters.json" />
+    <None Include="Templates\ibb-vm-iis.json" />
+    <None Include="Templates\ibb-vm-apache.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
     <None Include="Templates\ibb-nvas-mgmt.json" />
   </ItemGroup>
