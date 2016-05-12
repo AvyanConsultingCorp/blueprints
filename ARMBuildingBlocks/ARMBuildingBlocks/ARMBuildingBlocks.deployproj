@@ -46,9 +46,13 @@
     <None Include="Not used\bb-vpn-connection.json" />
     <None Include="Not used\bb-vpn-gateway.json" />
     <None Include="Not used\bb-vpn-gateway.parameters.json" />
+    <None Include="Scripts\apache.sh" />
+    <None Include="Scripts\iisaspnet.ps1" />
+    <None Include="Scripts\iisaspnet.ps1.zip" />
     <None Include="Scripts\nva.sh" />
     <None Include="Templates\bb-avail-set.json" />
     <None Include="Templates\bb-custom-linux-extension.json" />
+    <None Include="Templates\bb-dsc-extension.json" />
     <None Include="Templates\bb-ilb-backend-http-https.json" />
     <None Include="Templates\bb-ilb-backend-http-https.parameters.json" />
     <None Include="Templates\bb-nsg.json" />
