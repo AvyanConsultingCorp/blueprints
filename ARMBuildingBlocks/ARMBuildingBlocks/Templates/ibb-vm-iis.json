@@ -5,9 +5,7 @@
     "vmName": { "type": "string" }
   },
   "variables": {
-    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-dsc-extension.json",
-    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/iisaspnet.ps1",
-    "scriptName": "nva.sh"
+    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-dsc-extension2.json",
   },
   "resources": [
     {
@@ -18,9 +16,7 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('extensionTemplate')]" },
         "parameters": {
-          "vmName": { "value": "[parameters('vmName')]" },
-          "fileUri": { "value": "[variables('scriptUri')]" },
-          "scriptName": { "value": "[variables('scriptName')]" }
+          "vmName": { "value": "[parameters('vmName')]" }
         }
       }
     }
