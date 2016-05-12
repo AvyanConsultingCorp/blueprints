@@ -132,6 +132,7 @@ azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP
 RETURNED_UDR_NAME=${BASE_NAME}gw-udr
 # create vpn 
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vpn-gateway-connection.json
+RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
 VNET_NAME=${RETURNED_VNET_NAME}
 UDR_NAME=${RETURNED_UDR_NAME}
