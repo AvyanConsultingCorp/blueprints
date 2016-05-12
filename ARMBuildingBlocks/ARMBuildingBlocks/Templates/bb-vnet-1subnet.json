@@ -5,11 +5,12 @@
     "baseName": { "type": "string" },
     "vnetAddressPrefix": { "type": "string" },
     "subnetNamePrefix": { "type": "string" },
-    "subnetPrefix": { "type": "string" }
+    "subnetAddressPrefix": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "vnetName": "[concat(parameters('baseName'),'-vnet')]"
+    "vnetName": "[concat(parameters('baseName'),'-vnet')]",
+    "subnetName": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-sn')]"
   },
   "resources": [
     {
@@ -22,8 +23,8 @@
         "addressSpace": { "addressPrefixes": [ "[parameters('vnetAddressPrefix')]" ] },
         "subnets": [
           {
-            "name": "[concat(parameters('baseName'),'-',parameters('subnetNamePrefix'),'-sn')]",
-            "properties": { "addressPrefix": "[parameters('subnetPrefix')]" }
+            "name": "[variables('subnetName')]",
+            "properties": { "addressPrefix": "[parameters('subnetAddressPrefix')]" }
           }
         ]
       }
@@ -33,6 +34,10 @@
     "vnetName": {
       "type": "string",
       "value": "[variables('vnetName')]"
+    },
+    "subnetId": {
+      "type": "string",
+      "value": "[concat(resourceId('Microsoft.Network/virtualNetowrks',variables('vnetName')),'/subnets/',variables('subnetName'))]"
     }
   }
 }

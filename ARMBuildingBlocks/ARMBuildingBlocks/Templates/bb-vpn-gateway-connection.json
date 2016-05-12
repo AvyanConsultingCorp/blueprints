@@ -1,26 +1,52 @@
 ﻿{
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
-  "parameters": 
-  {
-    "baseName": {"type": "string", "maxLength": 10},
-    "vnetName": { "type": "string" },
-    "gatewaySubnetAddressPrefix": { "type": "string" },
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "maxLength": 10,
+      "defaultValue": "vpn",
+      "metadata": { "description": "Prefix used for all resources created by this template." }
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": { "description": "Name of the existing Azure virtual network you want to connect to your on-premises network, or other virtual network." }
+    },
+    "gatewaySubnetAddressPrefix": {
+      "type": "string",
+      "metadata": { "description": "Subnet prefix used for the GatewaySubnet." }
+    },
     "vpnType": {
       "type": "string",
       "allowedValues": [
         "RouteBased",
         "PolicyBased"
-      ]
+      ],
+      "defaultValue": "RouteBased",
+      "metadata": { "description": "Type of VPN gatgeway, which must coincide with the type of VPM appliance on-premises." }
     },
     "udrName": {
       "type": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "metadata": { "description": "Name of an optional UDR to be placed in the GatewaySubnet." }
     },
-    "udrResourceGroup": { "type": "string", "defaultValue": "" },
-    "onPremisesPIP": { "type": "string" },
-    "onPremisesAddressSpace": { "type": "string" },
-    "sharedKey": { "type": "string" }
+    "udrResourceGroup": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": { "description": "Name of the resource group for the optional UDR." }
+    },
+    "onPremisesPIP": {
+      "type": "string",
+      "metadata": { "description": "Public IP address for you on-premises VPN appliance." }
+    },
+    "onPremisesAddressSpace": {
+      "type": "string",
+      "metadata": { "description": "Address prefix for your on-premises network in CIDR format." }
+    },
+    "sharedKey": {
+      "type": "string",
+      "metadata": { "description": "Shared key for VPN devices authentication." }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
