@@ -32,10 +32,7 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
-    <Content Include="Templates\azuredeploy-workload.json" />
-    <Content Include="Templates\azuredeploy-onprem.json" />
     <Content Include="Templates\azuredeploy.json" />
-    <Content Include="Templates\azuredeploy.parameters.json" />
     <None Include="Scripts\DeploySecureVNet.ps1" />
   </ItemGroup>
   <ItemGroup>
