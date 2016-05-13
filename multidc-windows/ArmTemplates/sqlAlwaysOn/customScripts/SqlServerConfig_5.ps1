@@ -25,10 +25,10 @@ $global:startingStep = $Step
 $global:restartKey = "Restart-And-Resume"
 $global:RegRunKey ="HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 $global:powershell = (Join-Path $env:windir "system32\WindowsPowerShell\v1.0\powershell.exe")
-
+$domainUser = "$Domain\$AdminUser"
 $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
+$credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
 
 # -------------------------------------
 # Collection of Utility functions.

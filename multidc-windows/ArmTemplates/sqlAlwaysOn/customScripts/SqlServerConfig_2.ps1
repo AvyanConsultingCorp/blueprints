@@ -19,6 +19,7 @@ Install-windowsfeature -name DNS -IncludeAllSubFeature -IncludeManagementTools
 
 $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+$domainUser = "$Domain\$AdminUser"
 $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
 
 Install-ADDSDomainController -DomainName $Domain -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force

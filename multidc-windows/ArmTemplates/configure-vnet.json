@@ -269,7 +269,7 @@
             "value": "[parameters('loadBalancerName')]"
           },
           "adminUsername": {
-            "value": "sqladmin"
+            "value": "administrator1"
           },
           "adminPassword": {
             "value": "AweS0me@PW"

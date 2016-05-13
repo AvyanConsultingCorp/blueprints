@@ -139,8 +139,10 @@ function CustomRestartActions([string]$outputStr="Empty")
 
 function Add-DomainUser
 {
+    $domainUser = "$Domain\$AdminUser"
+    Write-Host 'Calling Add-DomainUser with: ' $domainUser
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server "(local)"
-    $SqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $AdminUser)
+    $SqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $domainUser)
     $SqlUser.LoginType = "WindowsUser"
     $SqlUser.create($AdminPassword)
     $sqlUser.AddToRole("sysadmin")
@@ -199,7 +201,8 @@ function Change-SqlLogon([string]$sqlServer)
 {
     $mc = new-object Microsoft.SQLServer.Management.SMO.WMI.ManagedComputer $sqlServer
     $service = $mc.Services["MSSQLSERVER"]
-    $service.SetServiceAccount("$Domain\sqladmin", $AdminPassword)
+    $domainUser = "$Domain\$AdminUser"
+    $service.SetServiceAccount($domainUser, $AdminPassword)
     #$service.Stop()
     #$service.Refresh()
     #$service.Start()
