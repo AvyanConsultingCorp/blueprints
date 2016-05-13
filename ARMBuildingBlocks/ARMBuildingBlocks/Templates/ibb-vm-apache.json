@@ -7,7 +7,7 @@
   "variables": {
     "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-custom-linux-extension.json",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/apache.sh",
-    "scriptName": "nva.sh"
+    "scriptName": "apache.sh"
   },
   "resources": [
     {
