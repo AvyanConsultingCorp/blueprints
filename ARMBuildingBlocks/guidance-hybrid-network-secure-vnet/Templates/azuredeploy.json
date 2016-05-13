@@ -57,14 +57,14 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "nsgNamePrefix": { "value": "web" },
-          "rulesNames": { "value": [ "on-prem-allow", "vnet-allow", "mgmt-rdp-allow", "vnet-deny" ] },
-          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
-          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
-          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('vnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
-          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
-          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
-          "rulesDestinationPorts": { "value": [ 80, 80, 3389, "*", "*" ] },
-          "rulesProtocol": { "value": [ "TCP", "TCP", "TCP", "*" ] }
+          "rulesNames": { "value": [ "on-prem-allow", "vnet-allow", "mgmt-rdp-allow", "mgmt-ssh-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('vnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ 80, 80, 3389, 22, "*" ] },
+          "rulesProtocol": { "value": [ "TCP", "TCP", "TCP", "TCP", "*" ] }
         }
       }
     },
@@ -79,14 +79,14 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "nsgNamePrefix": { "value": "biz" },
-          "rulesNames": { "value": [ "web-allow", "mgmt-rdp-allow", "vnet-deny" ] },
-          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
-          "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
-          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetWebSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
-          "rulesSourcePorts": { "value": [ "*", "*", "*" ] },
-          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*" ] },
-          "rulesDestinationPorts": { "value": [ "*", 3389, "*" ] },
-          "rulesProtocol": { "value": [ "*", "TCP", "*" ] }
+          "rulesNames": { "value": [ "web-allow", "mgmt-rdp-allow", "mgmt-ssh-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetWebSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ "*", 3389, 22, "*" ] },
+          "rulesProtocol": { "value": [ "*", "TCP", "TCP", "*" ] }
         }
       }
     },
@@ -102,14 +102,14 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "nsgNamePrefix": { "value": "db" },
-          "rulesNames": { "value": [ "biz-allow", "mgmt-rdp-allow", "vnet-deny" ] },
-          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
-          "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
-          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetBizSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
-          "rulesSourcePorts": { "value": [ "*", "*", "*" ] },
-          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*" ] },
-          "rulesDestinationPorts": { "value": [ "*", 3389, "*" ] },
-          "rulesProtocol": { "value": [ "*", "TCP", "*" ] }
+          "rulesNames": { "value": [ "biz-allow", "mgmt-rdp-allow", "mgmt-ssh-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetBizSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ "*", 3389, 22, "*" ] },
+          "rulesProtocol": { "value": [ "*", "TCP", "TCP", "*" ] }
         }
       }
     },
