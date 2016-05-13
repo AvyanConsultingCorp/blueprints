@@ -7,9 +7,6 @@ Param(
   [string]$AdminPassword,
 
   [Parameter(Mandatory=$True)]
-  [string]$SafeModePassword,
-
-  [Parameter(Mandatory=$True)]
   [string]$Domain,
   
   [Parameter(Mandatory=$True)]
@@ -84,7 +81,7 @@ function Clear-Any-Restart([string] $key=$global:restartKey)
 
 function Restart-And-Resume([string] $script, [string] $step) 
 {
-	Restart-And-Run $global:restartKey "$global:powershell $script -SafeModePassword $SafeModePassword -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -AppName $AppName -ClusterName $ClusterName -StaticIp $StaticIp -Step $step"
+	Restart-And-Run $global:restartKey "$global:powershell $script -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -AppName $AppName -ClusterName $ClusterName -StaticIp $StaticIp -Step $step"
 }
 
 #endregion
@@ -111,7 +108,6 @@ function CustomPreRestartActions([string]$outputStr="Empty")
 	Write-Host $outputStr + ": Joining the computer to the domain..."
    
     Import-Module "sqlps" -DisableNameChecking
-    $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)	
     Enable-PSRemoting -Force

@@ -7,9 +7,6 @@ Param(
   [string]$AdminPassword,
 
   [Parameter(Mandatory=$True)]
-  [string]$SafeModePassword,
-
-  [Parameter(Mandatory=$True)]
   [string]$Domain,
   
   [Parameter(Mandatory=$True)]
@@ -31,11 +28,8 @@ $SqlUser.LoginType = "WindowsUser"
 $SqlUser.create($AdminPassword)
 $sqlUser.AddToRole("sysadmin")
 
-$secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
-
-Enable-PSRemoting -Force
 
 # Join domain
 Add-Computer -Credential $credential -DomainName $Domain -Force

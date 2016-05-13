@@ -153,9 +153,9 @@
       "psArgument": [
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'))]",
-        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('appName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
-        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('appName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
-        "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -ClusterName ', variables('clusterName'))]"
+        "[concat(' -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('appName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
+        "[concat(' -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -AppName ', parameters('appName'), ' -ClusterName ', variables('clusterName'), ' -StaticIp ', parameters('sqlStaticIp'))]",
+        "[concat(' -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -ClusterName ', variables('clusterName'))]"
       ]
     }
   },
@@ -179,7 +179,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "platformFaultDomainCount": 3,
-        "platformUpdateDomainCount": 3
+        "platformUpdateDomainCount": 5
       },
       "tags": {
         "displayName": "AvailabilitySet"
@@ -202,7 +202,13 @@
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('dnsServers')[0]]",
+            "[parameters('dnsServers')[1]]"
+          ]
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -225,7 +231,13 @@
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('dnsServers')[0]]",
+            "[parameters('dnsServers')[1]]"
+          ]
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -255,7 +267,13 @@
               ]
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('dnsServers')[0]]",
+            "[parameters('dnsServers')[1]]"
+          ]
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -285,7 +303,13 @@
               ]
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('dnsServers')[0]]",
+            "[parameters('dnsServers')[1]]"
+          ]
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -307,7 +331,13 @@
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": [
+            "[parameters('dnsServers')[0]]",
+            "[parameters('dnsServers')[1]]"
+          ]
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"

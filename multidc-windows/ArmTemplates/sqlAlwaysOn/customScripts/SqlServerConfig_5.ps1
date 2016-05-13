@@ -1,9 +1,6 @@
 ﻿[CmdletBinding()]
 Param(
   [Parameter(Mandatory=$True)]
-  [string]$SafeModePassword,
-
-  [Parameter(Mandatory=$True)]
   [string]$AdminPassword,
 
   [Parameter(Mandatory=$True)]
@@ -25,10 +22,6 @@ $global:startingStep = $Step
 $global:restartKey = "Restart-And-Resume"
 $global:RegRunKey ="HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 $global:powershell = (Join-Path $env:windir "system32\WindowsPowerShell\v1.0\powershell.exe")
-$domainUser = "$Domain\$AdminUser"
-$secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
-$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
 
 # -------------------------------------
 # Collection of Utility functions.
@@ -78,7 +71,7 @@ function Clear-Any-Restart([string] $key=$global:restartKey)
 
 function Restart-And-Resume([string] $script, [string] $step) 
 {
-	Restart-And-Run $global:restartKey "$global:powershell $script -SafeModePassword $SafeModePassword -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -ClusterName $ClusterName -Step $step"
+	Restart-And-Run $global:restartKey "$global:powershell $script -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -ClusterName $ClusterName -Step $step"
 }
 
 #endregion
@@ -105,6 +98,9 @@ function CustomPreRestartActions([string]$outputStr="Empty")
 	Write-Host $outputStr + ": Joining the computer to the domain..."
    
 	# Join domain
+    $domainUser = "$Domain\$AdminUser"
+    $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
 	Add-Computer -Credential $credential -DomainName $Domain -Force
 }
 

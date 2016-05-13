@@ -152,8 +152,11 @@
             "[parameters('vnetAddressPrefix2')]"
           ]
         },
-        "dnsSettings": {
-          "dnsServers": "[parameters('dnsServers')]"
+        "dhcpOptions": {
+          "dnsServers": [
+            "[parameters('dnsServers')[0]]",
+            "[parameters('dnsServers')[1]]"
+          ]
         },
         "subnets": [
           {
@@ -192,10 +195,7 @@
       "name": "[variables('gatewayPublicIPName')]",
       "location": "[variables('region')]",
       "properties": {
-        "publicIPAllocationMethod": "Dynamic",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('vnetDomainLabel')]"
-        }
+        "publicIPAllocationMethod": "Dynamic"
       },
       "tags": {
         "displayName": "PublicIPAddress"
