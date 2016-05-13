@@ -50,13 +50,18 @@ azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP
 #azure group deployment create -f ./../Templates/azuredeploy.json -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 # the following variables are used in the above resource group, you need to use them later to create web/biz/db tier. don't change their values.
-RETURNED_VNET_NAME=${BASE_NAME}-vnet
-RETURNED_MGMT_SUBNET_NAME_PREFIX=mgmt
-RETURNED_NVA_FE_SUBNET_NAME_PREFIX=nva-fe
-RETURNED_NVA_BE_SUBNET_NAME_PREFIX=nva-be
-RETURNED_WEB_SUBNET_NAME_PREFIX=web
-RETURNED_BIZ_SUBNET_NAME_PREFIX=biz
-RETURNED_DB_SUBNET_NAME_PREFIX=db
+DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
+DEPLOYED_MGMT_SUBNET_NAME_PREFIX=mgmt
+DEPLOYED_NVA_FE_SUBNET_NAME_PREFIX=nva-fe
+DEPLOYED_NVA_BE_SUBNET_NAME_PREFIX=nva-be
+DEPLOYED_WEB_SUBNET_NAME_PREFIX=web
+DEPLOYED_BIZ_SUBNET_NAME_PREFIX=biz
+DEPLOYED_DB_SUBNET_NAME_PREFIX=db
+
+DEPLOYED_WEB_SUBNET_NAME=${BASE_NAME}-web-subnet
+DEPLOYED_BIZ_SUBNET_NAME=${BASE_NAME}-biz-subnet
+DEPLOYED_DB_SUBNET_NAME=${BASE_NAME}-db-subnet
+
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
 NVA_FE_ILB_IP_ADDRESS=10.0.1.254
@@ -73,10 +78,9 @@ ADMIN_USER_NAME=adminUser
 ADMIN_PASSWORD=adminP@ssw0rd
 # OS_TYPE=Ubuntu
 OS_TYPE=Windows
-VM_SIZE=Standard_DS3
 
 # create web tier
-SUBNET_NAME_PREFIX=${RETURNED_WEB_SUBNET_NAME_PREFIX}
+SUBNET_NAME_PREFIX=${DEPLOYED_WEB_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${WEB_ILB_IP_ADDRESS}
 NUMBER_VMS=2
 
@@ -84,7 +88,7 @@ RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
@@ -104,7 +108,7 @@ do
 done    
 
 # create biz tier
-SUBNET_NAME_PREFIX=${RETURNED_BIZ_SUBNET_NAME_PREFIX}
+SUBNET_NAME_PREFIX=${DEPLOYED_BIZ_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${BIZ_ILB_IP_ADDRESS}
 NUMBER_VMS=2
 
@@ -112,12 +116,12 @@ RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 # create db tier
-SUBNET_NAME_PREFIX=${RETURNED_DB_SUBNET_NAME_PREFIX}
+SUBNET_NAME_PREFIX=${DEPLOYED_DB_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${DB_ILB_IP_ADDRESS}
 NUMBER_VMS=2
 
@@ -125,7 +129,7 @@ RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 ############################################################################
@@ -135,9 +139,9 @@ MGMT_RESOURCE_GROUP=${BASE_NAME}-mgmt-subnet-rg
 RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-nvas-mgmt.json
 
-MGMT_SUBNET_NAME_PREFIX=${RETURNED_MGMT_SUBNET_NAME_PREFIX}
-NVA_FE_SUBNET_NAME_PREFIX=${RETURNED_NVA_FE_SUBNET_NAME_PREFIX}
-NVA_BE_SUBNET_NAME_PREFIX=${RETURNED_NVA_BE_SUBNET_NAME_PREFIX}
+MGMT_SUBNET_NAME_PREFIX=${DEPLOYED_MGMT_SUBNET_NAME_PREFIX}
+NVA_FE_SUBNET_NAME_PREFIX=${DEPLOYED_NVA_FE_SUBNET_NAME_PREFIX}
+NVA_BE_SUBNET_NAME_PREFIX=${DEPLOYED_NVA_BE_SUBNET_NAME_PREFIX}
 
 FE_SUBNET_PREFIX=${VNET_NVA_FE_SUBNET_PREFIX}
 FE_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${NVA_FE_SUBNET_NAME_PREFIX}-subnet
@@ -145,24 +149,21 @@ BE_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP
 MGMT_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${MGMT_SUBNET_NAME_PREFIX}-subnet
 ILB_IP_ADDRESS=${NVA_FE_ILB_IP_ADDRESS}
 JUMPBOX_IP_ADDRESS=${MGMT_JUMPBOX_IP_ADDRESS}
-#JUMPBOX_OS_TYPE=Ubuntu
-JUMPBOX_OS_TYPE=Windows
 VM_SIZE=Standard_DS3
-
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"feSubnetPrefix\":{\"value\":\"${FE_SUBNET_PREFIX}\"},\"feSubnetId\":{\"value\":\"${FE_SUBNET_ID}\"},\"beSubnetId\":{\"value\":\"${BE_SUBNET_ID}\"},\"mgmtSubnetId\":{\"value\":\"${MGMT_SUBNET_ID}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"jumpboxIpAddress\":{\"value\":\"${JUMPBOX_IP_ADDRESS}\"},\"jumpboxOSType\":{\"value\":\"${JUMPBOX_OS_TYPE}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"feSubnetPrefix\":{\"value\":\"${FE_SUBNET_PREFIX}\"},\"feSubnetId\":{\"value\":\"${FE_SUBNET_ID}\"},\"beSubnetId\":{\"value\":\"${BE_SUBNET_ID}\"},\"mgmtSubnetId\":{\"value\":\"${MGMT_SUBNET_ID}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"jumpboxIpAddress\":{\"value\":\"${JUMPBOX_IP_ADDRESS}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 #the folloiwng parameters are from the mgmt tier, and is needed for vpn creation
-RETURNED_UDR_NAME=${BASE_NAME}gw-udr
+DEPLOYED_UDR_NAME=${BASE_NAME}gw-udr
 ############################################################################
 ## Create VPN Gateway and VPN connection to connect to on premises network
 ############################################################################
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vpn-gateway-connection.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
-VNET_NAME=${RETURNED_VNET_NAME}
-UDR_NAME=${RETURNED_UDR_NAME}
+VNET_NAME=${DEPLOYED_VNET_NAME}
+UDR_NAME=${DEPLOYED_UDR_NAME}
 VPN_TYPE=RouteBased
 UDR_RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
 ON_PREMISES_PIP=${INPUT_ON_PREMISES_PUBLIC_IP}
@@ -170,4 +171,13 @@ ON_PREMISES_ADDRESS_SPACE=${INPUT_ON_PREMISES_ADDRESS_SPACE}
 SHARED_KEY=${INPUT_VPN_IPSEC_SHARED_KEY}
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"gatewaySubnetAddressPrefix\":{\"value\":\"${GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vpnType\":{\"value\":\"${VPN_TYPE}\"},\"udrName\":{\"value\":\"${UDR_NAME}\"},\"udrResourceGroup\":{\"value\":\"${UDR_RESOURCE_GROUP}\"},\"onPremisesPIP\":{\"value\":\"${ON_PREMISES_PIP}\"},\"onPremisesAddressSpace\":{\"value\":\"${ON_PREMISES_ADDRESS_SPACE}\"},\"sharedKey\":{\"value\":\"${SHARED_KEY}\"}}"
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-
+############################################################################
+## Enable forced tunneling in web/biz/db tier
+############################################################################
+FORCED_TUNNELING_ROUTE_TABLE_NAME=${BASE_NAME}-forced-tunneling-udr
+FORCED_TUNNELING_ROUTE_TABLE_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/routeTables/${FORCED_TUNNELING_ROUTE_TABLE_NAME}
+azure network route-table create -n ${FORCED_TUNNELING_ROUTE_TABLE_NAME}  -g ${NTWK_RESOURCE_GROUP}  -l ${LOCATION}
+azure network route-table route create -n "DefaultRoute"  -g ${NTWK_RESOURCE_GROUP} -a "0.0.0.0/0" -y VirtualNetworkGateway -r ${FORCED_TUNNELING_ROUTE_TABLE_NAME}
+azure network vnet subnet set -n ${DEPLOYED_WEB_SUBNET_NAME} -a ${VNET_WEB_SUBNET_PREFIX} -e ${DEPLOYED_VNET_NAME} -i ${FORCED_TUNNELING_ROUTE_TABLE_ID}
+azure network vnet subnet set -n ${DEPLOYED_BIZ_SUBNET_NAME} -a ${VNET_BIZ_SUBNET_PREFIX} -e ${DEPLOYED_VNET_NAME} -i ${FORCED_TUNNELING_ROUTE_TABLE_ID}
+azure network vnet subnet set -n ${DEPLOYED_DB_SUBNET_NAME} -a ${VNET_DB_SUBNET_PREFIX} -e ${DEPLOYED_VNET_NAME} -i ${FORCED_TUNNELING_ROUTE_TABLE_ID}
