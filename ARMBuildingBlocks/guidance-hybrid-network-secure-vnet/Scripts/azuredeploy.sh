@@ -68,6 +68,7 @@ TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildi
 # use the following same parameters for web, biz, and db tiere. you can change them for each tier.
 ADMIN_USER_NAME=adminUser
 ADMIN_PASSWORD=adminP@ssw0rd
+# OS_TYPE=Ubuntu
 OS_TYPE=Windows
 
 # create web tier
@@ -92,7 +93,7 @@ do
 		TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-vm-iis.json
 		azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	fi
-	if [ "${OS_TYPE}" == "UBUNTU" ]; then
+	if [ "${OS_TYPE}" == "Ubuntu" ]; then
 		TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-vm-apache.json
 		azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	fi
