@@ -99,11 +99,13 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/virtualNetworkGateways",
+      "sku": "Standard",
       "name": "[variables('gatewayName')]",
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('gwPIPName'))]",
-        "Microsoft.Resources/deployments/subnet-template"
+        "Microsoft.Resources/deployments/subnet-template",
+        "[variables('onPremisesLGWName')]"
       ],
       "tags": { "displayName": "VPN Gateway" },
       "properties": {
@@ -119,7 +121,9 @@
         ],
         "gatewayType": "Vpn",
         "vpnType": "[parameters('vpnType')]",
-        "enableBgp": "false"
+        "GatewayDefaultSite": {
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways',variables('onPremisesLGWName'))]"
+        }
       }
     },
     {
