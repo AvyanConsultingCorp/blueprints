@@ -31,7 +31,9 @@ INPUT_ON_PREMISES_ADDRESS_SPACE=$5
 LOCATION=centralus
 azure config mode arm
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
-# create network 
+############################################################################
+## Create vNet and Subnets for mgmt, nva-fe, nva-be, web, biz, db
+############################################################################
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
@@ -62,8 +64,9 @@ WEB_ILB_IP_ADDRESS=10.0.3.254
 BIZ_ILB_IP_ADDRESS=10.0.4.254
 DB_ILB_IP_ADDRESS=10.0.5.254
 VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
-
-# create ilb and vm in web/biz/db tier
+############################################################################
+## Create ILB and VMs in web, biz, db
+############################################################################
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
 # use the following same parameters for web, biz, and db tiere. you can change them for each tier.
 ADMIN_USER_NAME=adminUser
@@ -99,7 +102,6 @@ do
 	fi
 done    
 
-
 # create biz tier
 SUBNET_NAME_PREFIX=${RETURNED_BIZ_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${BIZ_ILB_IP_ADDRESS}
@@ -125,8 +127,9 @@ SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/p
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"subnetId\":{\"value\":\"${SUBNET_ID}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"}}"
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-
-# create nva and mgmt tier
+############################################################################
+## Create ILB and VMs in nva subnet and jumbox in management subnet
+############################################################################
 MGMT_RESOURCE_GROUP=${BASE_NAME}-mgmt-subnet-rg
 RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-nvas-mgmt.json
@@ -146,10 +149,11 @@ PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"feSubnetPrefix\":{\"val
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-
 #the folloiwng parameters are from the mgmt tier, and is needed for vpn creation
 RETURNED_UDR_NAME=${BASE_NAME}gw-udr
-# create vpn 
+############################################################################
+## Create VPN Gateway and VPN connection to connect to on premises network
+############################################################################
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vpn-gateway-connection.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
