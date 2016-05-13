@@ -83,6 +83,22 @@ PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adminUsername\":{\"valu
 azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
+# install iis/apache to web vms
+for i in `seq 1 ${NUMBER_VMS}`;
+do
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
+	if [ "${OS_TYPE}" == "Windows" ]; then
+		TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-vm-iis.json
+		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+	fi
+	if [ "${OS_TYPE}" == "UBUNTU" ]; then
+		TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-vm-apache.json
+		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+	fi
+done    
+
+
 # create biz tier
 SUBNET_NAME_PREFIX=${RETURNED_BIZ_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${BIZ_ILB_IP_ADDRESS}
