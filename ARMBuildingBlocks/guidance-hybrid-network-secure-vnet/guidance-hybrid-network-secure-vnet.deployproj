@@ -33,6 +33,7 @@
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <Content Include="Templates\azuredeploy.json" />
+    <None Include="Scripts\azuredeploy.sh" />
     <None Include="Scripts\DeploySecureVNet.ps1" />
   </ItemGroup>
   <ItemGroup>
