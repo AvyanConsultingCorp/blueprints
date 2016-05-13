@@ -202,13 +202,7 @@
               }
             }
           }
-        ],
-        "dnsSettings": {
-          "dnsServers": [
-            "[parameters('dnsServers')[0]]",
-            "[parameters('dnsServers')[1]]"
-          ]
-        }
+        ]
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -231,13 +225,7 @@
               }
             }
           }
-        ],
-        "dnsSettings": {
-          "dnsServers": [
-            "[parameters('dnsServers')[0]]",
-            "[parameters('dnsServers')[1]]"
-          ]
-        }
+        ]
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -267,13 +255,7 @@
               ]
             }
           }
-        ],
-        "dnsSettings": {
-          "dnsServers": [
-            "[parameters('dnsServers')[0]]",
-            "[parameters('dnsServers')[1]]"
-          ]
-        }
+        ]
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -303,13 +285,7 @@
               ]
             }
           }
-        ],
-        "dnsSettings": {
-          "dnsServers": [
-            "[parameters('dnsServers')[0]]",
-            "[parameters('dnsServers')[1]]"
-          ]
-        }
+        ]
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -331,13 +307,7 @@
               }
             }
           }
-        ],
-        "dnsSettings": {
-          "dnsServers": [
-            "[parameters('dnsServers')[0]]",
-            "[parameters('dnsServers')[1]]"
-          ]
-        }
+        ]
       },
       "tags": {
         "displayName": "NetworkInterfaces"
