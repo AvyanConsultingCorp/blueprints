@@ -9,6 +9,11 @@
     "mgmtSubnetId": { "type": "string" },
     "ilbIpAddress": { "type": "string" },
     "jumpboxIpAddress": { "type": "string" },
+    "jumpboxOSType": {
+      "type": "string",
+      "allowedValues": [ "Windows", "Ubuntu" ],
+      "defaultValue": "Ubuntu"
+    },
     "adminUsername": { "type": "string" },
     "adminPassword": { "type": "securestring" },
     "vmSize": {
@@ -224,7 +229,7 @@
           "vmIPaddress": { "value": "[parameters('jumpboxIpAddress')]" },
           "snid": { "value": "[parameters('mgmtSubnetId')]" },
           "stgAccountName": { "value": "[concat(parameters('baseName'),'3',variables('uniqueString'))]" },
-          "osType": { "value": "[variables('osType')]" },
+          "osType": { "value": "[parameters('jumpboxOSType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" }
         }
