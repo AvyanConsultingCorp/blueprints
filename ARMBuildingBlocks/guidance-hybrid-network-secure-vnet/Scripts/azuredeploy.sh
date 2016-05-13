@@ -28,7 +28,7 @@ INPUT_VPN_IPSEC_SHARED_KEY=$3
 INPUT_ON_PREMISES_PUBLIC_IP=$4
 INPUT_ON_PREMISES_ADDRESS_SPACE=$5
 
-LOCATION=centralus
+LOCATION=eastus
 azure config mode arm
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 ############################################################################
