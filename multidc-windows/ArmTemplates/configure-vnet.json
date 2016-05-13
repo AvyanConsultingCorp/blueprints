@@ -152,7 +152,7 @@
             "[parameters('vnetAddressPrefix2')]"
           ]
         },
-        "dhcpOptions": {
+        "dnsSettings": {
           "dnsServers": [
             "[parameters('dnsServers')[0]]",
             "[parameters('dnsServers')[1]]"
