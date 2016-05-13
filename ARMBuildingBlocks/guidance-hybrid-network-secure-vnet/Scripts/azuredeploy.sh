@@ -90,11 +90,11 @@ do
 	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
 	if [ "${OS_TYPE}" == "Windows" ]; then
 		TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-vm-iis.json
-		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+		azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	fi
 	if [ "${OS_TYPE}" == "UBUNTU" ]; then
 		TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-vm-apache.json
-		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+		azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	fi
 done    
 
