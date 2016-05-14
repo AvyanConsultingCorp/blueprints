@@ -29,8 +29,14 @@ INPUT_ON_PREMISES_PUBLIC_IP=$4
 INPUT_ON_PREMISES_ADDRESS_SPACE=$5
 
 LOCATION=eastus
-azure config mode arm
+ADMIN_USER_NAME=adminUser
+ADMIN_PASSWORD=adminP@ssw0rd
+# OS_TYPE=Ubuntu
+OS_TYPE=Windows
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
+
+echo azure config mode arm
+     azure config mode arm
 ############################################################################
 ## Create vNet and Subnets for mgmt, nva-fe, nva-be, web, biz, db
 ############################################################################
@@ -77,14 +83,8 @@ VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
 ############################################################################
 ## Create ILB and VMs in web, biz, db
 ############################################################################
-TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
-# use the following same parameters for web, biz, and db tiere. you can change them for each tier.
-ADMIN_USER_NAME=adminUser
-ADMIN_PASSWORD=adminP@ssw0rd
-# OS_TYPE=Ubuntu
-OS_TYPE=Windows
-
 # create web tier
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
 SUBNET_NAME_PREFIX=${DEPLOYED_WEB_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${WEB_ILB_IP_ADDRESS}
 NUMBER_VMS=2
@@ -118,6 +118,7 @@ echo	azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 done    
 
 # create biz tier
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
 SUBNET_NAME_PREFIX=${DEPLOYED_BIZ_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${BIZ_ILB_IP_ADDRESS}
 NUMBER_VMS=2
@@ -134,6 +135,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 # create db tier
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
 SUBNET_NAME_PREFIX=${DEPLOYED_DB_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${DB_ILB_IP_ADDRESS}
 NUMBER_VMS=2
