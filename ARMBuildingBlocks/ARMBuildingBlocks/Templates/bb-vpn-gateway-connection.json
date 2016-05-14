@@ -99,7 +99,6 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/virtualNetworkGateways",
-      "sku": "Standard",
       "name": "[variables('gatewayName')]",
       "location": "[variables('location')]",
       "dependsOn": [
@@ -120,6 +119,7 @@
           }
         ],
         "gatewayType": "Vpn",
+        "sku": "Standard",
         "vpnType": "[parameters('vpnType')]",
         "GatewayDefaultSite": {
           "id": "[resourceId('Microsoft.Network/localNetworkGateways',variables('onPremisesLGWName'))]"
