@@ -181,7 +181,7 @@
               "addressPrefix": "[parameters('vnetWebSubnetPrefix')]",
               "networkSecurityGroup": { "id": "[reference('web-nsg').outputs.nsgid.value]" },
               "routeTable": {
-                "id": "[resourceId(resourceGroup(), 'Microsoft.Network/routeTables', variables('udrName'))]"
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
               }
             }
           },
@@ -190,7 +190,7 @@
             "properties": {
               "addressPrefix": "[parameters('vnetBizSubnetPrefix')]",
               "routeTable": {
-                "id": "[resourceId(resourceGroup(), 'Microsoft.Network/routeTables', variables('udrName'))]"
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
               },
               "networkSecurityGroup": { "id": "[reference('biz-nsg').outputs.nsgid.value]" }
             }
@@ -200,7 +200,7 @@
             "properties": {
               "addressPrefix": "[parameters('vnetDbSubnetPrefix')]",
               "routeTable": {
-                "id": "[resourceId(resourceGroup(), 'Microsoft.Network/routeTables', variables('udrName'))]"
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
               },
               "networkSecurityGroup": { "id": "[reference('db-nsg').outputs.nsgid.value]" }
             }
