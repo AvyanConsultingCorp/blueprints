@@ -152,11 +152,8 @@
             "[parameters('vnetAddressPrefix2')]"
           ]
         },
-        "dnsSettings": {
-          "dnsServers": [
-            "[parameters('dnsServers')[0]]",
-            "[parameters('dnsServers')[1]]"
-          ]
+        "dhcpOptions": {
+          "dnsServers": "[parameters('dnsServers')]"
         },
         "subnets": [
           {

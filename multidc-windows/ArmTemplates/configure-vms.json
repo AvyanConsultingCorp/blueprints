@@ -202,7 +202,11 @@
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": "[parameters('dnsServers')]",
+          "internalDnsNameLabel": "[variables('sqlDomainName')]",
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -225,7 +229,11 @@
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": "[parameters('dnsServers')]",
+          "internalDnsNameLabel": "[variables('sqlDomainName')]",
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -255,7 +263,11 @@
               ]
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": "[parameters('dnsServers')]",
+          "internalDnsNameLabel": "[variables('sqlDomainName')]",
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -285,7 +297,11 @@
               ]
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": "[parameters('dnsServers')]",
+          "internalDnsNameLabel": "[variables('sqlDomainName')]",
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
@@ -307,7 +323,11 @@
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": "[parameters('dnsServers')]",
+          "internalDnsNameLabel": "[variables('sqlDomainName')]",
+        }
       },
       "tags": {
         "displayName": "NetworkInterfaces"
