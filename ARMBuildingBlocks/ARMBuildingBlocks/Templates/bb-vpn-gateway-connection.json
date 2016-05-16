@@ -120,7 +120,16 @@
         ],
         "gatewayType": "Vpn",
         "vpnType": "[parameters('vpnType')]",
-        "enableBgp": "false"
+        "enableBgp": "false",
+        "GatewayDefaultSite": {
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways',variables('onPremisesLGWName'))]"
+        },
+        "sku": {
+          "name": "Standard",
+          "tier": "Standard",
+          "capacity": 2
+        }
+
       }
     },
     {
