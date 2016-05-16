@@ -3,10 +3,11 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
-    "feSubnetPrefix": { "type": "string" },
     "feSubnetId": { "type": "string" },
     "beSubnetId": { "type": "string" },
     "mgmtSubnetId": { "type": "string" },
+    "mgmtSubnetPrefix": { "type": "string" },
+    "vnetPrefix": {"type": "string"},
     "ilbIpAddress": { "type": "string" },
     "jumpboxIpAddress": { "type": "string" },
     "jumpboxOSType": {
@@ -148,9 +149,16 @@
           {
             "name": "toFrontEnd",
             "properties": {
-              "addressPrefix": "[parameters('feSubnetPrefix')]",
+              "addressPrefix": "[parameters('vnetPrefix')]",
               "nextHopType": "VirtualAppliance",
               "nextHopIpAddress": "[parameters('ilbIpAddress')]"
+            }
+          },
+          {
+            "name": "toMgmt",
+            "properties": {
+              "addressPrefix": "[parameters('mgmtSubnetPrefix')]",
+              "nextHopType": "VnetLocal"
             }
           }
         ]
