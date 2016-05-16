@@ -10,7 +10,8 @@
     "vnetNvaBeSubnetPrefix": { "type": "string" },
     "vnetWebSubnetPrefix": { "type": "string" },
     "vnetBizSubnetPrefix": { "type": "string" },
-    "vnetDbSubnetPrefix": { "type": "string" }
+    "vnetDbSubnetPrefix": { "type": "string" },
+    "vnetGwSubnetPrefix": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -203,7 +204,16 @@
               },
               "networkSecurityGroup": { "id": "[reference('db-nsg').outputs.nsgid.value]" }
             }
+          },
+
+          {
+            "name": "GatewaySubnet",
+            "properties": {
+              "addressPrefix": "[parameters('vnetGwSubnetPrefix')]"
+            }
           }
+
+
         ]
       }
     }
