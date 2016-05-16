@@ -119,11 +119,8 @@
           }
         ],
         "gatewayType": "Vpn",
-        "sku": "Standard",
         "vpnType": "[parameters('vpnType')]",
-        "GatewayDefaultSite": {
-          "id": "[resourceId('Microsoft.Network/localNetworkGateways',variables('onPremisesLGWName'))]"
-        }
+        "enableBgp": "false"
       }
     },
     {
