@@ -143,7 +143,7 @@
         "Microsoft.Resources/deployments/web-nsg",
         "Microsoft.Resources/deployments/biz-nsg",
         "Microsoft.Resources/deployments/db-nsg",
-        "[resourceId(resourceGroup(), 'Microsoft.Network/routeTables', variables('udrName'))]"
+        "[concat('Microsoft.Network/routeTables/',variables('udrName'))]"
       ],
       "tags": {
         "displayName": "vnet"
