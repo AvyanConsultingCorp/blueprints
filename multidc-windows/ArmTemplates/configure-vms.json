@@ -411,6 +411,10 @@
       "apiVersion": "2015-01-01",
       "properties": {
         "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-dc-vm.json')]",
+          "contentVersion": "1.0.0.0"
+        },
         "parameters": {
           "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]" },
           "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
@@ -434,6 +438,10 @@
       ],
       "properties": {
         "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-dc-vm.json')]",
+          "contentVersion": "1.0.0.0"
+        },
         "parameters": {
           "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]" },
           "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
