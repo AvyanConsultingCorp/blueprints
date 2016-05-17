@@ -232,8 +232,8 @@
         "templateLink": { "uri": "[variables('jumpBoxTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "vmNamePrefix": { "value": "jump-box" },
-          "vmComputerName": { "value": "jumpbox" },
+          "vmNamePrefix": { "value": "jb" },
+          "vmComputerName": { "value": "jb" },
           "vmIPaddress": { "value": "[parameters('jumpboxIpAddress')]" },
           "snid": { "value": "[parameters('mgmtSubnetId')]" },
           "stgAccountName": { "value": "[concat(parameters('baseName'),'3',variables('uniqueString'))]" },
