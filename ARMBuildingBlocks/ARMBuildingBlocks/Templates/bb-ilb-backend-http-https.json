@@ -4,7 +4,7 @@
   "parameters": {
     "baseName": { "type": "string" },
     "vmNamePrefix": { "type": "string" },
-    "vmComputerName": {
+    "vmComputerNamePrefix": {
       "type": "string",
       "maxLength": 13
     },
@@ -37,8 +37,22 @@
       ],
       "defaultValue": "Standard_DS3"
     },
+    "vnetResourceGroup": {
+      "type": "string"
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "VNet where the VMs will be deployed"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Subnet where the VMs will be deployed"
+      }
+    },
     "subnetNamePrefix": { "type": "string" },
-    "subnetId": { "type": "string" },
     "ilbIpAddress": { "type": "string" },
     "osType": {
       "type": "string",
@@ -62,6 +76,7 @@
     "numberVMs": {
       "type": "int",
       "defaultValue": 2,
+      "minValue": 2,
       "metadata": { "description": "Number of VMs in subnet." }
     }
 
@@ -73,11 +88,11 @@
     "ilbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
     "ilbBEId": "[concat(variables('ilbId'),'/backendAddressPools/',variables('lbBEPoolName'))]",
     "lbFEIpConfigId": "[concat(variables('ilbId'),'/frontendIPConfigurations/','ipconfig1')]",
-    "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('vmNamePRefix'),'-as')]",
+    "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
-    "vmAvailabilitySetCreate": "[concat(variables('vmAvailabilitySetName'),'-create')]",
-    "createavailset": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-avail-set.json",
-    "createvms": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-lbbe.json"
+    "vnetID": "[resourceId(parameters('vnetResourceGroup'), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+    "subnetId": "[concat(variables('vnetID'),'/subnets/', parameters('subnetName'))]",
+    "createVMs": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-lbbe.json"
   },
   "resources": [
     {
@@ -93,7 +108,7 @@
             "properties": {
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[parameters('ilbIpAddress')]",
-              "subnet": { "id": "[parameters('subnetId')]" }
+              "subnet": { "id": "[variables('subnetId')]" }
             }
           }
         ],
@@ -140,7 +155,7 @@
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
-      "name": "[concat(parameters('baseName'),copyindex(1),variables('uniqueString'))]",
+      "name": "[concat(parameters('baseName'), copyindex(1), variables('uniqueString'))]",
       "copy": {
         "name": "stgCount",
         "count": "[parameters('numberVMs')]"
@@ -148,23 +163,19 @@
       "properties": { "accountType": "Premium_LRS" }
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "[variables('vmAvailabilitySetCreate')]",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('vmAvailabilitySetName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
       "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('createavailset')]"
-        },
-        "parameters": {
-          "vmAvailabilitySetName": { "value": "[variables('vmAvailabilitySetName')]" }
-        }
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
       }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('baseName'),copyindex(1))]",
+      "name": "[concat(parameters('baseName'), copyindex(1))]",
       "copy": {
         "name": "vmCount",
         "count": "[parameters('numberVMs')]"
@@ -172,25 +183,25 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('createvms')]"
+          "uri": "[variables('createVMs')]"
         },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
-          "vmComputerName": { "value": "[concat(parameters('vmComputerName'),copyindex(1))]" },
-          "vmSize": {"value": "[parameters('vmSize')]"},
-          "snid": { "value": "[parameters('subnetId')]" },
+          "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'), copyindex(1))]" },
+          "vmComputerName": { "value": "[concat(parameters('vmComputerNamePrefix'), copyindex(1))]" },
+          "vmSize": { "value": "[parameters('vmSize')]" },
+          "snid": { "value": "[variables('subnetId')]" },
           "lbBackendPoolId": { "value": "[variables('ilbBEId')]" },
           "osType": { "value": "[parameters('osType')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "stgAccountName": { "value": "[concat(parameters('baseName'),copyindex(1),variables('uniqueString'))]" },
+          "stgAccountName": { "value": "[concat(parameters('baseName'), copyindex(1), variables('uniqueString'))]" },
           "vmAvSetName": { "value": "[variables('vmAvailabilitySetName')]" }
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
-        "[resourceId('Microsoft.Resources/deployments',variables('vmAvailabilitySetCreate'))]",
+        "[resourceId('Microsoft.Compute/availabilitySets',variables('vmAvailabilitySetName'))]",
         "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),parameters('numberVMs'),variables('uniqueString'))]"
       ]
     }
