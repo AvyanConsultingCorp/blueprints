@@ -65,7 +65,7 @@
     "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-custom-linux-extension.json",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/nva.sh",
     "scriptName": "nva.sh",
-    "udrName": "[concat(parameters('baseName'), 'gw-udr')]"
+    "udrName": "[concat(parameters('baseName'), '-gw-udr')]"
   },
   "resources": [
     {

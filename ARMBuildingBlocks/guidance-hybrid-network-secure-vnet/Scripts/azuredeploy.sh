@@ -94,7 +94,7 @@ SUBNET_NAME_PREFIX=${DEPLOYED_WEB_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${WEB_ILB_IP_ADDRESS}
 NUMBER_VMS=2
 
-RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
+RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-rg
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
@@ -135,7 +135,7 @@ SUBNET_NAME_PREFIX=${DEPLOYED_BIZ_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${BIZ_ILB_IP_ADDRESS}
 NUMBER_VMS=2
 
-RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
+RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-rg
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
@@ -155,7 +155,7 @@ SUBNET_NAME_PREFIX=${DEPLOYED_DB_SUBNET_NAME_PREFIX}
 ILB_IP_ADDRESS=${DB_ILB_IP_ADDRESS}
 NUMBER_VMS=2
 
-RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet-rg
+RESOURCE_GROUP=${BASE_NAME}-${SUBNET_NAME_PREFIX}-rg
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 VM_COMPUTER_NAME=${SUBNET_NAME_PREFIX}
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-subnet
@@ -171,7 +171,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 ############################################################################
 ## Create ILB and VMs in nva subnet and jumbox in management subnet
 ############################################################################
-MGMT_RESOURCE_GROUP=${BASE_NAME}-mgmt-subnet-rg
+MGMT_RESOURCE_GROUP=${BASE_NAME}-mgmt-rg
 RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-nvas-mgmt.json
 
@@ -200,7 +200,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 #the folloiwng parameters are from the mgmt tier, and is needed for vpn creation
-DEPLOYED_UDR_NAME=${BASE_NAME}gw-udr
+DEPLOYED_UDR_NAME=${BASE_NAME}-gw-udr
 ############################################################################
 ## Create VPN Gateway and VPN connection to connect to on premises network
 ############################################################################
