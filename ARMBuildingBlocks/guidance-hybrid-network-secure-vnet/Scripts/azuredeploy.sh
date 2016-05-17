@@ -28,7 +28,7 @@ INPUT_VPN_IPSEC_SHARED_KEY=$3
 INPUT_ON_PREMISES_PUBLIC_IP=$4
 INPUT_ON_PREMISES_ADDRESS_SPACE=$5
 
-LOCATION=eastus
+LOCATION=westus
 ADMIN_USER_NAME=adminUser
 ADMIN_PASSWORD=adminP@ssw0rd
 #OS_TYPE=Ubuntu
@@ -247,13 +247,18 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ntwk-forced-tunneling.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
+
 VNET_PREFIX=${VNET_PREFIX}
+VNET_MGMT_SUBNET_PREFIX=${VNET_MGMT_SUBNET_PREFIX}
+VNET_NVA_FE_SUBNET_PREFIX=${VNET_NVA_FE_SUBNET_PREFIX}
+VNET_NVA_BE_SUBNET_PREFIX=${VNET_NVA_BE_SUBNET_PREFIX}
 VNET_WEB_SUBNET_PREFIX=${VNET_WEB_SUBNET_PREFIX}
 VNET_BIZ_SUBNET_PREFIX=${VNET_BIZ_SUBNET_PREFIX}
 VNET_DB_SUBNET_PREFIX=${VNET_DB_SUBNET_PREFIX}
 VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
 ON_PREMISES_LGW_NAME=${ON_PREMISES_LGW_NAME}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"onPremisesLGWName\":{\"value\":\"${ON_PREMISES_LGW_NAME}\"}}"
+
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"onPremisesLGWName\":{\"value\":\"${ON_PREMISES_LGW_NAME}\"}}"
 
 echo
 echo
