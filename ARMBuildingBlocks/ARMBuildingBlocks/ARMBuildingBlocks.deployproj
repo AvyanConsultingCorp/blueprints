@@ -69,6 +69,8 @@
     <None Include="Templates\bb-vnet-1subnet.json" />
     <None Include="Templates\bb-vpn-gateway-connection.json" />
     <None Include="Templates\bb-vpn-gateway-connection.parameters.json" />
+    <None Include="Templates\bb-web-tier-ubuntu.json" />
+    <None Include="Templates\bb-web-tier-windows.json" />
     <None Include="Templates\ibb-vm-iis.json" />
     <None Include="Templates\ibb-vm-apache.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
