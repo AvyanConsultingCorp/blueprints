@@ -434,7 +434,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]"
       ],
       "properties": {
         "mode": "Incremental",
