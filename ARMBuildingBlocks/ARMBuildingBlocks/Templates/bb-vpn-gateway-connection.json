@@ -59,7 +59,7 @@
     "gatewayName": "[concat(parameters('baseName'),'-vpngw')]",
     "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/GatewaySubnet')]",
     "vnetLocalGWName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-lgw')]",
-    "vnetOnPremConnName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-vpnconn')]",
+    "vnetOnPremConnName": "[concat(parameters('vnetName'),'-vpnconn')]",
     "subnetTemplates": [
       "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-gatewaysubnet.json",
       "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-gatewaysubnet-udr.json"
