@@ -212,7 +212,7 @@
         }
       },
       "tags": {
-        "displayName": "NetworkInterfaces"
+        "displayName": "NetworkInterfaces PDC"
       }
     },
     {
@@ -241,7 +241,7 @@
         }
       },
       "tags": {
-        "displayName": "NetworkInterfaces"
+        "displayName": "NetworkInterfaces BDC"
       }
     },
     {
@@ -276,7 +276,7 @@
         }
       },
       "tags": {
-        "displayName": "NetworkInterfaces"
+        "displayName": "NetworkInterfaces Sql-1"
       }
     },
     {
@@ -312,7 +312,7 @@
         }
       },
       "tags": {
-        "displayName": "NetworkInterfaces"
+        "displayName": "NetworkInterfaces Sql-2"
       }
     },
     {
@@ -343,7 +343,7 @@
         }
       },
       "tags": {
-        "displayName": "NetworkInterfaces"
+        "displayName": "NetworkInterfaces FSW"
       }
     },
     {
