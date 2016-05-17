@@ -228,63 +228,6 @@
       "tags": {
         "displayName": "VirtualNetworkGateway"
       }
-    },
-    {
-      "name": "DeployVMs",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [ ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-vms.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "appName": {
-            "value": "[parameters('appName')]"
-          },
-          "numberOfInstances": {
-            "value": 3
-          },
-          "subnetDcRef": {
-            "value": "[variables('backendSubnetDcRef')]"
-          },
-          "subnetSqlRef": {
-            "value": "[variables('backendSubnetSqlRef')]"
-          },
-          "lbFrontendPrivateIp": {
-            "value": "[parameters('lbFrontendPrivateIp')]"
-          },
-          "projectName": {
-            "value": "sqlAlwaysOn"
-          },
-          "networkInterfacePrefix": {
-            "value": "[parameters('networkInterfacePrefix')]"
-          },
-          "loadBalancerName": {
-            "value": "[parameters('loadBalancerName')]"
-          },
-          "adminUsername": {
-            "value": "administrator1"
-          },
-          "adminPassword": {
-            "value": "AweS0me@PW"
-          },
-          "vmNamePrefix": {
-            "value": "[parameters('vmNamePrefix')]"
-          },
-          "storageAccountName": {
-            "value": "[parameters('storageAccountName')]"
-          },
-          "dnsServers": {
-            "value": "[parameters('dnsServers')]"
-          },
-          "sqlStaticIp": {
-            "value": "[parameters('sqlStaticIp')]"
-          }
-        }
-      }
     }
   ],
   "outputs": {
