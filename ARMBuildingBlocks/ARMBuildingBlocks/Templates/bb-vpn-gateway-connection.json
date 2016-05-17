@@ -46,7 +46,11 @@
     "sharedKey": {
       "type": "string",
       "metadata": { "description": "Shared key for VPN devices authentication." }
-    }
+    },
+    "onPremisesLGWName": {
+      "type": "string",
+      "metadata": { "description": "on premises local gateway name." }
+    },
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -55,7 +59,6 @@
     "gatewayName": "[concat(parameters('baseName'),'-vpngw')]",
     "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/GatewaySubnet')]",
     "vnetLocalGWName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-lgw')]",
-    "onPremisesLGWName": "on-premises-lgw",
     "vnetOnPremConnName": "[concat(parameters('baseName'),'-',parameters('vnetName'),'-vpnconn')]",
     "subnetTemplates": [
       "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-gatewaysubnet.json",
@@ -104,7 +107,7 @@
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('gwPIPName'))]",
         "Microsoft.Resources/deployments/subnet-template",
-        "[variables('onPremisesLGWName')]"
+        "[parameters('onPremisesLGWName')]"
       ],
       "tags": { "displayName": "VPN Gateway" },
       "properties": {
@@ -121,9 +124,6 @@
         "gatewayType": "Vpn",
         "vpnType": "[parameters('vpnType')]",
         "enableBgp": "false",
-        "GatewayDefaultSite": {
-          "id": "[resourceId('Microsoft.Network/localNetworkGateways',variables('onPremisesLGWName'))]"
-        },
         "sku": {
           "name": "Standard",
           "tier": "Standard",
@@ -135,7 +135,7 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/localNetworkGateways",
-      "name": "[variables('onPremisesLGWName')]",
+      "name": "[parameters('onPremisesLGWName')]",
       "location": "[variables('location')]",
       "tags": { "displayName": "Local gateway for on-premises" },
       "properties": {
@@ -153,14 +153,14 @@
       "tags": { "displayName": "Connection to on-premises" },
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworkGateways/', variables('gatewayName'))]",
-        "[concat('Microsoft.Network/localNetworkGateways/', variables('onPremisesLGWName'))]"
+        "[concat('Microsoft.Network/localNetworkGateways/', parameters('onPremisesLGWName'))]"
       ],
       "properties": {
         "virtualNetworkGateway1": {
           "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', variables('gatewayName'))]"
         },
         "localNetworkGateway2": {
-          "id": "[resourceId('Microsoft.Network/localNetworkGateways', variables('onPremisesLGWName'))]"
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('onPremisesLGWName'))]"
         },
         "connectionType": "IPsec",
         "routingWeight": 10,

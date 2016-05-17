@@ -22,7 +22,6 @@
     "vnetWebSubnetName": "[concat(parameters('baseName'),'-web-subnet')]",
     "vnetBizSubnetName": "[concat(parameters('baseName'),'-biz-subnet')]",
     "vnetDbSubnetName": "[concat(parameters('baseName'),'-db-subnet')]",
-    "udrName": "[concat(parameters('baseName'), '-forced-tunneling-udr')]",
     "nsgTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nsg.json"
   },
   "resources": [
@@ -116,24 +115,6 @@
     },
 
     {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2016-03-30",
-      "location": "[variables('location')]",
-      "name": "[variables('udrName')]",
-      "properties": {
-        "routes": [
-          {
-            "name": "DefaultRoute",
-            "properties": {
-              "addressPrefix": "0.0.0.0/0",
-              "nextHopType": "VirtualNetworkGateway"
-            }
-          }
-        ]
-      }
-    },
-
-    {
       "name": "[variables('vnetName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[resourceGroup().location]",
@@ -142,8 +123,7 @@
         "Microsoft.Resources/deployments/mgmt-nsg",
         "Microsoft.Resources/deployments/web-nsg",
         "Microsoft.Resources/deployments/biz-nsg",
-        "Microsoft.Resources/deployments/db-nsg",
-        "[concat('Microsoft.Network/routeTables/',variables('udrName'))]"
+        "Microsoft.Resources/deployments/db-nsg"
       ],
       "tags": {
         "displayName": "vnet"
@@ -180,18 +160,12 @@
             "properties": {
               "addressPrefix": "[parameters('vnetWebSubnetPrefix')]",
               "networkSecurityGroup": { "id": "[reference('web-nsg').outputs.nsgid.value]" },
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
-              }
             }
           },
           {
             "name": "[variables('vnetBizSubnetName')]",
             "properties": {
               "addressPrefix": "[parameters('vnetBizSubnetPrefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
-              },
               "networkSecurityGroup": { "id": "[reference('biz-nsg').outputs.nsgid.value]" }
             }
           },
@@ -199,9 +173,6 @@
             "name": "[variables('vnetDbSubnetName')]",
             "properties": {
               "addressPrefix": "[parameters('vnetDbSubnetPrefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
-              },
               "networkSecurityGroup": { "id": "[reference('db-nsg').outputs.nsgid.value]" }
             }
           },
