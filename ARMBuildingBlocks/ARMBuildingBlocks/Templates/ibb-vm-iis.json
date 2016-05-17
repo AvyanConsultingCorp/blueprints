@@ -11,7 +11,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "vm-iis-installation",
+      "name": "[concat(parameters('vmName'),'-vm-iis-installation')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('extensionTemplate')]" },
