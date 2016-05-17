@@ -110,7 +110,7 @@
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
     "sqlAlwaysOnConfigScriptFileName": "SqlServerConfig_",
     "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]",
-    "sqlDomainName": "poltergeist.local",
+    "sqlDomainName": "qazwsx.local",
     "sqlDomainLogin": "sqladmin",
     "clusterName": "app1cluster",
     "lbBackendPool": "[concat(parameters('loadBalancerName'),'-pool')]",
@@ -217,6 +217,9 @@
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(parameters('networkInterfacePrefix'), '1')]",
       "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat(parameters('networkInterfacePrefix'), '0')]"
+      ],
       "properties": {
         "ipConfigurations": [
           {
@@ -245,6 +248,8 @@
       "name": "[concat(parameters('networkInterfacePrefix'), '2')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
+        "[concat(parameters('networkInterfacePrefix'), '0')]",
+        "[concat(parameters('networkInterfacePrefix'), '1')]",
         "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
       ],
       "properties": {
@@ -279,6 +284,9 @@
       "name": "[concat(parameters('networkInterfacePrefix'), '3')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
+        "[concat(parameters('networkInterfacePrefix'), '0')]",
+        "[concat(parameters('networkInterfacePrefix'), '1')]",
+        "[concat(parameters('networkInterfacePrefix'), '2')]",
         "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
       ],
       "properties": {
@@ -312,6 +320,12 @@
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[concat(parameters('networkInterfacePrefix'), '4')]",
       "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat(parameters('networkInterfacePrefix'), '0')]",
+        "[concat(parameters('networkInterfacePrefix'), '1')]",
+        "[concat(parameters('networkInterfacePrefix'), '2')]",
+        "[concat(parameters('networkInterfacePrefix'), '3')]"
+      ],
       "properties": {
         "ipConfigurations": [
           {
