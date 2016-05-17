@@ -104,7 +104,8 @@
     }
   },
   "variables": {
-    "availabilitySetName": "AvSet",
+    "dcAvailabilitySetName": "dcAvSet",
+    "sqlAvailabilitySetName": "sqlAvSet",
     "storageAccountType": "Standard_LRS",
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',parameters('loadBalancerName'))]",
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
@@ -124,16 +125,6 @@
         "fsw"
       ],
       "vmImage": [
-        [
-          "MicrosoftWindowsServer",
-          "WindowsServer",
-          "2012-R2-Datacenter"
-        ],
-        [
-          "MicrosoftWindowsServer",
-          "WindowsServer",
-          "2012-R2-Datacenter"
-        ],
         [
           "MicrosoftSQLServer",
           "SQL2014SP1-WS2012R2",
@@ -175,14 +166,27 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('availabilitySetName')]",
+      "name": "[variables('dcAvailabilitySetName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "platformFaultDomainCount": 3,
         "platformUpdateDomainCount": 5
       },
       "tags": {
-        "displayName": "AvailabilitySet"
+        "displayName": "AvailabilitySet DC"
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "[variables('sqlAvailabilitySetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      },
+      "tags": {
+        "displayName": "AvailabilitySet SQL"
       }
     },
     {
@@ -204,8 +208,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": "[parameters('dnsServers')]",
-          "internalDnsNameLabel": "[split(variables('sqlDomainName'),'.')[0]]"
+          "dnsServers": "[parameters('dnsServers')]"
         }
       },
       "tags": {
@@ -234,8 +237,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": "[parameters('dnsServers')]",
-          "internalDnsNameLabel": "[split(variables('sqlDomainName'),'.')[0]]"
+          "dnsServers": "[parameters('dnsServers')]"
         }
       },
       "tags": {
@@ -270,8 +272,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": "[parameters('dnsServers')]",
-          "internalDnsNameLabel": "[split(variables('sqlDomainName'),'.')[0]]"
+          "dnsServers": "[parameters('dnsServers')]"
         }
       },
       "tags": {
@@ -307,8 +308,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": "[parameters('dnsServers')]",
-          "internalDnsNameLabel": "[split(variables('sqlDomainName'),'.')[0]]"
+          "dnsServers": "[parameters('dnsServers')]"
         }
       },
       "tags": {
@@ -339,8 +339,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": "[parameters('dnsServers')]",
-          "internalDnsNameLabel": "[split(variables('sqlDomainName'),'.')[0]]"
+          "dnsServers": "[parameters('dnsServers')]"
         }
       },
       "tags": {
@@ -407,9 +406,52 @@
       }
     },
     {
+      "name": "deploy-pdc-vm",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "parameters": {
+          "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]" },
+          "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
+          "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '0')]" },
+          "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
+          "vmSize": { "value": "[parameters('vmSize')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "vmStorageAccountContainerName": { "value": "[parameters('vmStorageAccountContainerName')]" },
+          "scriptUri": { "value": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'1.ps1')]" },
+          "scriptCommand": { "value": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), '1.ps1 ', variables('vmSettings').psArgument[0])]" }
+        }
+      }
+    },
+    {
+      "name": "deploy-bdc-vm",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "parameters": {
+          "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]" },
+          "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
+          "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '1')]" },
+          "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
+          "vmSize": { "value": "[parameters('vmSize')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "vmStorageAccountContainerName": { "value": "[parameters('vmStorageAccountContainerName')]" },
+          "scriptUri": { "value": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'2.ps1')]" },
+          "scriptCommand": { "value": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), '2.ps1 ', variables('vmSettings').psArgument[1])]" }
+        }
+      }
+    },
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
+      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex(2)])]",
       "copy": {
         "name": "virtualMachineLoop",
         "count": "[parameters('numberOfInstances')]"
@@ -417,32 +459,34 @@
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[variables('storageAccountUniqueName')]",
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex())]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('availabilitySetName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex(2))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('sqlAvailabilitySetName'))]",
+        "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]",
+        "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]"
       ],
       "properties": {
         "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('availabilitySetName'))]"
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('sqlAvailabilitySetName'))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex()])]",
+          "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex(2)])]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('vmSettings').vmImage[copyIndex()][0]]",
-            "offer": "[variables('vmSettings').vmImage[copyIndex()][1]]",
-            "sku": "[variables('vmSettings').vmImage[copyIndex()][2]]",
+            "publisher": "[variables('vmSettings').vmImage[copyIndex(2)][0]]",
+            "offer": "[variables('vmSettings').vmImage[copyIndex(2)][1]]",
+            "sku": "[variables('vmSettings').vmImage[copyIndex(2)][2]]",
             "version": "latest"
           },
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmSettings').vmName[copyindex()], '-osdisk.vhd')]"
+              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmSettings').vmName[copyindex(2)], '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -450,9 +494,9 @@
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmSettings').vmName[copyindex()],'data-1.vhd')]"
+                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmSettings').vmName[copyindex(2)],'data-1.vhd')]"
               },
-              "name": "[concat(variables('vmSettings').vmName[copyindex()],'-data-disk1')]",
+              "name": "[concat(variables('vmSettings').vmName[copyindex(2)],'-data-disk1')]",
               "createOption": "Empty",
               "caching": "None",
               "diskSizeGB": "128",
@@ -463,7 +507,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfacePrefix'),copyindex()))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfacePrefix'),copyindex(2)))]"
             }
           ]
         },
@@ -484,7 +528,7 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmSettings').vmName[copyindex()]))]"
+            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmSettings').vmName[copyindex(2)]))]"
           ],
           "tags": {
             "displayName": "SqlAlwaysOnConfig"
@@ -492,19 +536,19 @@
           "properties": {
             "publisher": "Microsoft.Compute",
             "type": "CustomScriptExtension",
-            "typeHandlerVersion": "1.4",
+            "typeHandlerVersion": "1.8",
             "autoUpgradeMinorVersion": true,
             "settings": {
               "fileUris": [
-                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(1),'.ps1')]"
+                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(3),'.ps1')]"
               ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(1),'.ps1 ', variables('vmSettings').psArgument[copyindex()])]"
+              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(3),'.ps1 ', variables('vmSettings').psArgument[copyindex(2)])]"
             }
           }
         }
       ]
     }
   ]
-  }
+    }
 
 

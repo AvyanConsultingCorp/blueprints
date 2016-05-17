@@ -1,0 +1,173 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the DC VM"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account"
+      }
+    },
+    "nicName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the network interface"
+      }
+    },
+    "avSetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the availability set"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "metadata": {
+        "description": "Size of the VM"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Admin user on the VM"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the admin user"
+      }
+    },
+    "vmStorageAccountContainerName": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage account container for data disks"
+      }
+    },
+    "scriptUri": {
+      "type": "string",
+      "metadata": {
+        "description": "Uri of the powershell script to execute on the VM as an extension"
+      }
+    },
+    "scriptCommand": {
+      "type": "string",
+      "metadata": {
+        "description": "Powershell command line to execute as script extension"
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[parameters('storageAccountName')]",
+        "[parameters('nicName')]",
+        "[parameters('avSetName')]"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('avSetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://', parameters('storageAccountName'),'.blob.core.windows.net/vhds/', parameters('vmName'), '-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat('http://', parameters('storageAccountName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmSettings').vmName[0],'data-1.vhd')]"
+              },
+              "name": "[concat(parameters('vmName'),'-data-disk1')]",
+              "createOption": "Empty",
+              "caching": "None",
+              "diskSizeGB": "128",
+              "lun": 0
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://', parameters('storageAccountName'), '.blob.core.windows.net')]"
+          }
+        }
+      },
+      "tags": {
+        "displayName": "VirtualMachines PDC"
+      },
+      "resources": [
+        {
+          "name": "SqlAlwaysOnConfig",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "SqlAlwaysOnConfig"
+          },
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.8",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[parameters('scriptUri')]"
+              ],
+              "commandToExecute": "[parameters('scriptCommand')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "scriptDescription": {
+      "type": "object",
+      "value": {
+        "path": "[parameters('scriptUri')]",
+        "command": "[parameters('scriptCommand')]"
+      }
+    }
+  }
+}
