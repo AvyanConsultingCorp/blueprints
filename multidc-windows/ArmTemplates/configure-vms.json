@@ -468,7 +468,9 @@
       "dependsOn": [
         "[variables('storageAccountUniqueName')]",
         "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex(2))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('sqlAvailabilitySetName'))]"
+        "[concat('Microsoft.Compute/availabilitySets/', variables('sqlAvailabilitySetName'))]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]"
       ],
       "properties": {
         "availabilitySet": {
