@@ -427,34 +427,36 @@
           "scriptUri": { "value": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'1.ps1')]" },
           "scriptCommand": { "value": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), '1.ps1 ', variables('vmSettings').psArgument[0])]" }
         }
-      }
-    },
-    {
-      "name": "deploy-bdc-vm",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-dc-vm.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]" },
-          "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
-          "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '1')]" },
-          "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
-          "vmSize": { "value": "[parameters('vmSize')]" },
-          "adminUsername": { "value": "[parameters('adminUsername')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "vmStorageAccountContainerName": { "value": "[parameters('vmStorageAccountContainerName')]" },
-          "scriptUri": { "value": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'2.ps1')]" },
-          "scriptCommand": { "value": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), '2.ps1 ', variables('vmSettings').psArgument[1])]" }
+      },
+      "resources": [
+        {
+          "name": "deploy-bdc-vm",
+          "type": "Microsoft.Resources/deployments",
+          "apiVersion": "2015-01-01",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]"
+          ],
+          "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+              "uri": "[uri(deployment().properties.templateLink.uri, 'configure-dc-vm.json')]",
+              "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+              "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]" },
+              "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
+              "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '1')]" },
+              "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
+              "vmSize": { "value": "[parameters('vmSize')]" },
+              "adminUsername": { "value": "[parameters('adminUsername')]" },
+              "adminPassword": { "value": "[parameters('adminPassword')]" },
+              "vmStorageAccountContainerName": { "value": "[parameters('vmStorageAccountContainerName')]" },
+              "scriptUri": { "value": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'2.ps1')]" },
+              "scriptCommand": { "value": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), '2.ps1 ', variables('vmSettings').psArgument[1])]" }
+            }
+          }
         }
-      }
+      ]
     },
     {
       "apiVersion": "2015-06-15",
