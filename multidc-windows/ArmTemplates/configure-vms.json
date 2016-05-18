@@ -433,9 +433,6 @@
       "name": "deploy-bdc-vm",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]"
-      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
