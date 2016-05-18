@@ -433,6 +433,9 @@
       "name": "deploy-bdc-vm",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "deploy-pdc-vm"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -466,8 +469,8 @@
         "[variables('storageAccountUniqueName')]",
         "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex(2))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('sqlAvailabilitySetName'))]",
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[0])]",
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[1])]"
+        "deploy-pdc-vm",
+        "deploy-bdc-vm"
       ],
       "properties": {
         "availabilitySet": {
