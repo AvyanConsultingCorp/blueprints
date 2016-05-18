@@ -233,7 +233,10 @@
       "name": "DeployVMs",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "dependsOn": [ ],
+      "dependsOn": [
+        "[variables('backendSubnetDcRef')]",
+        "[variables('backendSubnetSqlRef')]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -266,7 +269,7 @@
             "value": "[parameters('loadBalancerName')]"
           },
           "adminUsername": {
-            "value": "administrator1"
+            "value": "testuser"
           },
           "adminPassword": {
             "value": "AweS0me@PW"
