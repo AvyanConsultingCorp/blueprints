@@ -2,38 +2,23 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": { "type": "string" },
-    "vnetMgmtSubnetPrefix": { "type": "string" },
-    "vnetNvaFeSubnetPrefix": { "type": "string" },
-    "vnetNvaBeSubnetPrefix": { "type": "string" },
-    "vnetPrefix": { "type": "string" },
-    "vnetWebSubnetPrefix": { "type": "string" },
-    "vnetBizSubnetPrefix": { "type": "string" },
-    "vnetDbSubnetPrefix": { "type": "string" },
-    "vnetGwSubnetPrefix": { "type": "string" },
-    "onPremisesLGWName": { "type": "string" }
+    "webUdrName": { "type": "string" },
+    "bizUdrName": { "type": "string" },
+    "dbUdrName": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "vnetName": "[concat(parameters('baseName'),'-vnet')]",
-    "vnetNvaFeSubnetName": "[concat(parameters('baseName'),'-nva-fe-subnet')]",
-    "vnetNvaBeSubnetName": "[concat(parameters('baseName'),'-nva-be-subnet')]",
-    "vnetMgmtSubnetName": "[concat(parameters('baseName'),'-mgmt-subnet')]",
-    "vnetWebSubnetName": "[concat(parameters('baseName'),'-web-subnet')]",
-    "vnetBizSubnetName": "[concat(parameters('baseName'),'-biz-subnet')]",
-    "vnetDbSubnetName": "[concat(parameters('baseName'),'-db-subnet')]",
-    "udrName": "[concat(parameters('baseName'), '-forced-tunneling-udr')]"
   },
   "resources": [
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
-      "name": "[variables('udrName')]",
+      "name": "[parameters('webUdrName')]",
       "properties": {
         "routes": [
           {
-            "name": "DefaultRoute",
+            "name": "ForcedTunnelingRoute",
             "properties": {
               "addressPrefix": "0.0.0.0/0",
               "nextHopType": "VirtualNetworkGateway"
@@ -44,77 +29,35 @@
     },
 
     {
-      "name": "[variables('vnetName')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Network/routeTables/',variables('udrName'))]"
-      ],
-      "tags": {
-        "displayName": "vnet"
-      },
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[parameters('bizUdrName')]",
       "properties": {
-        "mode": "Incremental",
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnetPrefix')]"
-          ]
-        },
-        "subnets": [
+        "routes": [
           {
-            "name": "[variables('vnetMgmtSubnetName')]",
+            "name": "ForcedTunnelingRoute",
             "properties": {
-              "addressPrefix": "[parameters('vnetMgmtSubnetPrefix')]",
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualNetworkGateway"
             }
-          },
-          {
-            "name": "[variables('vnetNvaFeSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetNvaFeSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetNvaBeSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetNvaBeSubnetPrefix')]"
-            }
-          },
-          {
-            "name": "[variables('vnetWebSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetWebSubnetPrefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
-              }
-            }
-          },
-          {
-            "name": "[variables('vnetBizSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetBizSubnetPrefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
-              }
-            }
-          },
-          {
-            "name": "[variables('vnetDbSubnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetDbSubnetPrefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', variables('udrName'))]"
-              }
-            }
-          },
+          }
+        ]
+      }
+    },
 
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[parameters('dbUdrName')]",
+      "properties": {
+        "routes": [
           {
-            "name": "GatewaySubnet",
+            "name": "ForcedTunnelingRoute",
             "properties": {
-              "addressPrefix": "[parameters('vnetGwSubnetPrefix')]",
-              "GatewayDefaultSite": {
-                "id": "[resourceId('Microsoft.Network/localNetworkGateways',parameters('onPremisesLGWName'))]"
-              }
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualNetworkGateway"
             }
           }
         ]

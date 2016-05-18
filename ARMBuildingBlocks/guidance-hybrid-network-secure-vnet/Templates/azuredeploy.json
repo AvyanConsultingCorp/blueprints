@@ -22,9 +22,14 @@
     "vnetWebSubnetName": "[concat(parameters('baseName'),'-web-subnet')]",
     "vnetBizSubnetName": "[concat(parameters('baseName'),'-biz-subnet')]",
     "vnetDbSubnetName": "[concat(parameters('baseName'),'-db-subnet')]",
+    "webUdrName": "[concat(parameters('baseName'),'-web-udr')]",
+    "bizUdrName": "[concat(parameters('baseName'),'-biz-udr')]",
+    "dbUdrName": "[concat(parameters('baseName'),'-db-udr')]",
+
     "nsgTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nsg.json"
   },
   "resources": [
+
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -91,7 +96,6 @@
       }
     },
 
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -115,6 +119,36 @@
     },
 
     {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('webUdrName')]",
+      "properties": {
+        "routes": []
+      }
+    },
+
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('bizUdrName')]",
+      "properties": {
+        "routes": []
+      }
+    },
+
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('dbUdrName')]",
+      "properties": {
+        "routes": []
+      }
+    },
+
+    {
       "name": "[variables('vnetName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[resourceGroup().location]",
@@ -123,7 +157,10 @@
         "Microsoft.Resources/deployments/mgmt-nsg",
         "Microsoft.Resources/deployments/web-nsg",
         "Microsoft.Resources/deployments/biz-nsg",
-        "Microsoft.Resources/deployments/db-nsg"
+        "Microsoft.Resources/deployments/db-nsg",
+        "[concat('Microsoft.Network/routeTables/',variables('webUdrName'))]",
+        "[concat('Microsoft.Network/routeTables/',variables('bizUdrName'))]",
+        "[concat('Microsoft.Network/routeTables/',variables('dbUdrName'))]"
       ],
       "tags": {
         "displayName": "vnet"
@@ -160,20 +197,23 @@
             "properties": {
               "addressPrefix": "[parameters('vnetWebSubnetPrefix')]",
               "networkSecurityGroup": { "id": "[reference('web-nsg').outputs.nsgid.value]" },
+              "routeTable": {"id": "[resourceId('Microsoft.Network/routeTables', variables('webUdrName'))]"}
             }
           },
           {
             "name": "[variables('vnetBizSubnetName')]",
             "properties": {
               "addressPrefix": "[parameters('vnetBizSubnetPrefix')]",
-              "networkSecurityGroup": { "id": "[reference('biz-nsg').outputs.nsgid.value]" }
+              "networkSecurityGroup": { "id": "[reference('biz-nsg').outputs.nsgid.value]" },
+              "routeTable": {"id": "[resourceId('Microsoft.Network/routeTables', variables('bizUdrName'))]"}
             }
           },
           {
             "name": "[variables('vnetDbSubnetName')]",
             "properties": {
               "addressPrefix": "[parameters('vnetDbSubnetPrefix')]",
-              "networkSecurityGroup": { "id": "[reference('db-nsg').outputs.nsgid.value]" }
+              "networkSecurityGroup": { "id": "[reference('db-nsg').outputs.nsgid.value]" },
+              "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables', variables('dbUdrName'))]" }
             }
           },
 
@@ -191,34 +231,5 @@
 
   ],
   "outputs": {
-    "vnetId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
-    },
-
-    "mgmtSubnetId": {
-      "type": "string",
-      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetMgmtSubnetName'))]"
-    },
-    "nvaFeSubnetId": {
-      "type": "string",
-      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetNvaFeSubnetName'))]"
-    },
-    "nvaBeSubnetId": {
-      "type": "string",
-      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetNvaBeSubnetName'))]"
-    },
-    "webSubnetId": {
-      "type": "string",
-      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetWebSubnetName'))]"
-    },
-    "bizSubnetId": {
-      "type": "string",
-      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetBizSubnetName'))]"
-    },
-    "dbSubnetId": {
-      "type": "string",
-      "value": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')),'/subnets/',variables('vnetDbSubnetName'))]"
-    }
   }
 }

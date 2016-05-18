@@ -79,6 +79,11 @@ DEPLOYED_WEB_SUBNET_NAME=${BASE_NAME}-web-subnet
 DEPLOYED_BIZ_SUBNET_NAME=${BASE_NAME}-biz-subnet
 DEPLOYED_DB_SUBNET_NAME=${BASE_NAME}-db-subnet
 
+DEPLOYED_WEB_UDR_NAME=${BASE_NAME}-web-udr
+DEPLOYED_BIZ_UDR_NAME=${BASE_NAME}-biz-udr
+DEPLOYED_DB_UDR_NAME=${BASE_NAME}-db-udr
+
+
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
 NVA_FE_ILB_IP_ADDRESS=10.0.1.254
@@ -206,7 +211,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 #the folloiwng parameters are from the mgmt tier, and is needed for vpn creation
-DEPLOYED_UDR_NAME=${BASE_NAME}-gw-udr
+DEPLOYED_GW_UDR_NAME=${BASE_NAME}-gw-udr
 ############################################################################
 ## Create VPN Gateway and VPN connection to connect to on premises network
 ############################################################################
@@ -214,14 +219,13 @@ TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildi
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
 VNET_NAME=${DEPLOYED_VNET_NAME}
-UDR_NAME=${DEPLOYED_UDR_NAME}
+UDR_NAME=${DEPLOYED_GW_UDR_NAME}
 VPN_TYPE=RouteBased
 UDR_RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
 ON_PREMISES_PIP=${INPUT_ON_PREMISES_PUBLIC_IP}
 ON_PREMISES_ADDRESS_SPACE=${INPUT_ON_PREMISES_ADDRESS_SPACE}
 SHARED_KEY=${INPUT_VPN_IPSEC_SHARED_KEY}
-ON_PREMISES_LGW_NAME=on-premises-lgw
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"gatewaySubnetAddressPrefix\":{\"value\":\"${GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vpnType\":{\"value\":\"${VPN_TYPE}\"},\"udrName\":{\"value\":\"${UDR_NAME}\"},\"udrResourceGroup\":{\"value\":\"${UDR_RESOURCE_GROUP}\"},\"onPremisesPIP\":{\"value\":\"${ON_PREMISES_PIP}\"},\"onPremisesAddressSpace\":{\"value\":\"${ON_PREMISES_ADDRESS_SPACE}\"},\"onPremisesLGWName\":{\"value\":\"${ON_PREMISES_LGW_NAME}\"},\"sharedKey\":{\"value\":\"${SHARED_KEY}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"gatewaySubnetAddressPrefix\":{\"value\":\"${GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vpnType\":{\"value\":\"${VPN_TYPE}\"},\"udrName\":{\"value\":\"${UDR_NAME}\"},\"udrResourceGroup\":{\"value\":\"${UDR_RESOURCE_GROUP}\"},\"onPremisesPIP\":{\"value\":\"${ON_PREMISES_PIP}\"},\"onPremisesAddressSpace\":{\"value\":\"${ON_PREMISES_ADDRESS_SPACE}\"},\"sharedKey\":{\"value\":\"${SHARED_KEY}\"}}"
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
@@ -252,20 +256,10 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 ############################################################################
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ntwk-forced-tunneling.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
-ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
-
-VNET_PREFIX=${VNET_PREFIX}
-VNET_MGMT_SUBNET_PREFIX=${VNET_MGMT_SUBNET_PREFIX}
-VNET_NVA_FE_SUBNET_PREFIX=${VNET_NVA_FE_SUBNET_PREFIX}
-VNET_NVA_BE_SUBNET_PREFIX=${VNET_NVA_BE_SUBNET_PREFIX}
-VNET_WEB_SUBNET_PREFIX=${VNET_WEB_SUBNET_PREFIX}
-VNET_BIZ_SUBNET_PREFIX=${VNET_BIZ_SUBNET_PREFIX}
-VNET_DB_SUBNET_PREFIX=${VNET_DB_SUBNET_PREFIX}
-VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
-ON_PREMISES_LGW_NAME=${ON_PREMISES_LGW_NAME}
-
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"onPremisesLGWName\":{\"value\":\"${ON_PREMISES_LGW_NAME}\"}}"
-
+WEB_UDR_NAME=${DEPLOYED_WEB_UDR_NAME}
+BIZ_UDR_NAME=${DEPLOYED_BIZ_UDR_NAME}
+DB_UDR_NAME=${DEPLOYED_DB_UDR_NAME}
+PARAMETERS="{\"webUdrName\":{\"value\":\"${WEB_UDR_NAME}\"},\"bizUdrName\":{\"value\":\"${BIZ_UDR_NAME}\"},\"dbUdrName\":{\"value\":\"${DB_UDR_NAME}\"}}"
 echo
 echo
 echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
