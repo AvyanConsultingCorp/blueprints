@@ -71,11 +71,6 @@
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('vmName')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[parameters('storageAccountName')]",
-        "[parameters('nicName')]",
-        "[parameters('avSetName')]"
-      ],
       "properties": {
         "availabilitySet": {
           "id": "[resourceId('Microsoft.Compute/availabilitySets',parameters('avSetName'))]"

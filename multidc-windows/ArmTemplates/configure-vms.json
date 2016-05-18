@@ -409,6 +409,11 @@
       "name": "deploy-pdc-vm",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[variables('storageAccountUniqueName')]",
+        "[concat(parameters('networkInterfacePrefix'), '0')]",
+        "[variables('dcAvailabilitySetName')]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
