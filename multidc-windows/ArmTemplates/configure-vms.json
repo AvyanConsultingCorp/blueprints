@@ -118,11 +118,11 @@
     "lbFrontendIpName": "[concat(parameters('loadBalancerName'),'-fe')]",
     "vmSettings": {
       "vmName": [
-        "ad-1",
-        "ad-2",
-        "sql-1",
-        "sql-2",
-        "fsw"
+        "[concat(parameters('vmNamePrefix'),'-', 'pdc')]",
+        "[concat(parameters('vmNamePrefix'),'-', 'bdc')]",
+        "[concat(parameters('vmNamePrefix'),'-', 'sql-1')]",
+        "[concat(parameters('vmNamePrefix'),'-', 'sql-2')]",
+        "[concat(parameters('vmNamePrefix'),'-', 'fsw')]"
       ],
       "vmImage": [
         [
@@ -416,7 +416,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]" },
+          "vmName": { "value": "[variables('vmSettings').vmName[0]]" },
           "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
           "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '0')]" },
           "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
@@ -440,7 +440,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]" },
+          "vmName": { "value": "[variables('vmSettings').vmName[1]]" },
           "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
           "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '1')]" },
           "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
@@ -456,7 +456,7 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex(2)])]",
+      "name": "[variables('vmSettings').vmName[copyindex(2)]]",
       "copy": {
         "name": "virtualMachineLoop",
         "count": "[parameters('numberOfInstances')]"
@@ -466,8 +466,8 @@
         "[variables('storageAccountUniqueName')]",
         "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex(2))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('sqlAvailabilitySetName'))]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[0])]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[1])]"
       ],
       "properties": {
         "availabilitySet": {
@@ -477,7 +477,7 @@
           "vmSize": "[parameters('vmSize')]"
         },
         "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex(2)])]",
+          "computerName": "[variables('vmSettings').vmName[copyindex(2)]]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -533,7 +533,7 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmSettings').vmName[copyindex(2)]))]"
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[copyindex(2)])]"
           ],
           "tags": {
             "displayName": "SqlAlwaysOnConfig"
