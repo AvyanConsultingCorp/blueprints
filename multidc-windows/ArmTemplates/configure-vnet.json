@@ -233,6 +233,9 @@
       "name": "DeployVMs",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
