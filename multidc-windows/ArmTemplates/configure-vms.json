@@ -406,106 +406,57 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex(2)])]",
-      "copy": {
-        "name": "virtualMachineLoop",
-        "count": "[parameters('numberOfInstances')]"
-      },
-      "location": "[resourceGroup().location]",
+      "name": "deploy-pdc-vm",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-dc-vm.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]" },
+          "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
+          "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '0')]" },
+          "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
+          "vmSize": { "value": "[parameters('vmSize')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "vmStorageAccountContainerName": { "value": "[parameters('vmStorageAccountContainerName')]" },
+          "scriptUri": { "value": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'1.ps1')]" },
+          "scriptCommand": { "value": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), '1.ps1 ', variables('vmSettings').psArgument[0])]" }
+        }
+      }
+    },
+    {
+      "name": "deploy-bdc-vm",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[variables('storageAccountUniqueName')]",
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfacePrefix'), copyindex(2))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('sqlAvailabilitySetName'))]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]",
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[0])]"
       ],
       "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('sqlAvailabilitySetName'))]"
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'configure-dc-vm.json')]",
+          "contentVersion": "1.0.0.0"
         },
-        "hardwareProfile": {
-          "vmSize": "[parameters('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[copyindex(2)])]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('vmSettings').vmImage[copyIndex(2)][0]]",
-            "offer": "[variables('vmSettings').vmImage[copyIndex(2)][1]]",
-            "sku": "[variables('vmSettings').vmImage[copyIndex(2)][2]]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/vhds/', variables('vmSettings').vmName[copyindex(2)], '-osdisk.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "vhd": {
-                "uri": "[concat('http://', variables('storageAccountUniqueName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/', variables('vmSettings').vmName[copyindex(2)],'data-1.vhd')]"
-              },
-              "name": "[concat(variables('vmSettings').vmName[copyindex(2)],'-data-disk1')]",
-              "createOption": "Empty",
-              "caching": "None",
-              "diskSizeGB": "128",
-              "lun": 0
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(parameters('networkInterfacePrefix'),copyindex(2)))]"
-            }
-          ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[concat('http://',variables('storageAccountUniqueName'), '.blob.core.windows.net')]"
-          }
+        "parameters": {
+          "vmName": { "value": "[concat(parameters('vmNamePrefix'),'-', variables('vmSettings').vmName[1])]" },
+          "storageAccountName": { "value": "[variables('storageAccountUniqueName')]" },
+          "nicName": { "value": "[concat(parameters('networkInterfacePrefix'), '1')]" },
+          "avSetName": { "value": "[variables('dcAvailabilitySetName')]" },
+          "vmSize": { "value": "[parameters('vmSize')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "vmStorageAccountContainerName": { "value": "[parameters('vmStorageAccountContainerName')]" },
+          "scriptUri": { "value": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'2.ps1')]" },
+          "scriptCommand": { "value": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), '2.ps1 ', variables('vmSettings').psArgument[1])]" }
         }
-      },
-      "tags": {
-        "displayName": "VirtualMachines"
-      },
-      "resources": [
-        {
-          "name": "SqlAlwaysOnConfig",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmNamePrefix'), '-',variables('vmSettings').vmName[copyindex(2)]))]"
-          ],
-          "tags": {
-            "displayName": "SqlAlwaysOnConfig"
-          },
-          "properties": {
-            "publisher": "Microsoft.Compute",
-            "type": "CustomScriptExtension",
-            "typeHandlerVersion": "1.8",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "fileUris": [
-                "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(3),'.ps1')]"
-              ],
-              "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), copyIndex(3),'.ps1 ', variables('vmSettings').psArgument[copyindex(2)])]"
-            }
-          }
-        }
-      ]
+      }
     }
   ]
-    }
+}
 
 
