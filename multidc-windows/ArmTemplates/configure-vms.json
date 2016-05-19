@@ -447,7 +447,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[0])]"
+        "Microsoft.Resources/deployments/deploy-pdc-vm"
       ],
       "properties": {
         "mode": "Incremental",
@@ -538,7 +538,9 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "deploy-pdc-vm",
+        "Microsoft.Resources/deployments/deploy-pdc-vm",
+        "Microsoft.Resources/deployments/update-vnet-dns-1",
+        "Microsoft.Resources/deployments/update-bdc-nic",
         "Microsoft.Resources/deployments/update-bdc-nic"
       ],
       "properties": {
