@@ -447,7 +447,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[0],'/extensions/CreatePrimaryDc')]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[0])]"
       ],
       "properties": {
         "mode": "Incremental",
