@@ -415,7 +415,7 @@
     {
       "name": "deploy-pdc-vm",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "[variables('storageAccountUniqueName')]",
         "[concat(parameters('networkInterfacePrefix'), '0')]",
@@ -445,7 +445,7 @@
     {
       "name": "update-vnet-dns-1",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/deploy-pdc-vm"
       ],
@@ -491,7 +491,7 @@
     {
       "name": "update-bdc-nic",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/update-vnet-dns-1"
       ],
@@ -536,7 +536,7 @@
     {
       "name": "deploy-bdc-vm",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/deploy-pdc-vm",
         "Microsoft.Resources/deployments/update-vnet-dns-1",
@@ -567,7 +567,7 @@
     {
       "name": "update-vnet-dns-2",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
         "Microsoft.Resources/deployments/deploy-pdc-vm"
       ],

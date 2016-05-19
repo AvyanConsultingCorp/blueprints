@@ -143,9 +143,6 @@
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
           ],
-          "tags": {
-            "displayName": "[parameters('scriptName')]"
-          },
           "properties": {
             "publisher": "Microsoft.Compute",
             "type": "CustomScriptExtension",
@@ -157,6 +154,9 @@
               ],
               "commandToExecute": "[parameters('scriptCommand')]"
             }
+          },
+          "tags": {
+            "displayName": "Domain setup script"
           }
         }
       ]
