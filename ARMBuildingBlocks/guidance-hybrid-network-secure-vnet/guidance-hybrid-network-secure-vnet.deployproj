@@ -35,6 +35,8 @@
     <Content Include="Templates\azuredeploy.json" />
     <None Include="Scripts\azuredeploy.sh" />
     <None Include="Scripts\DeploySecureVNet.ps1" />
+    <None Include="Templates\update-gw-udr.json" />
+    <None Include="Templates\update-nsg.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />
