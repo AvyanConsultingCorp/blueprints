@@ -1,0 +1,123 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "onpremNetPrefix": { "type": "string" },
+    "vnetPrefix": { "type": "string" },
+    "vnetMgmtSubnetPrefix": { "type": "string" },
+    "vnetNvaFeSubnetPrefix": { "type": "string" },
+    "vnetNvaBeSubnetPrefix": { "type": "string" },
+    "vnetWebSubnetPrefix": { "type": "string" },
+    "vnetBizSubnetPrefix": { "type": "string" },
+    "vnetDbSubnetPrefix": { "type": "string" },
+    "vnetGwSubnetPrefix": { "type": "string" }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vnetName": "[concat(parameters('baseName'),'-vnet')]",
+    "vnetNvaFeSubnetName": "[concat(parameters('baseName'),'-nva-fe-subnet')]",
+    "vnetNvaBeSubnetName": "[concat(parameters('baseName'),'-nva-be-subnet')]",
+    "vnetMgmtSubnetName": "[concat(parameters('baseName'),'-mgmt-subnet')]",
+    "vnetWebSubnetName": "[concat(parameters('baseName'),'-web-subnet')]",
+    "vnetBizSubnetName": "[concat(parameters('baseName'),'-biz-subnet')]",
+    "vnetDbSubnetName": "[concat(parameters('baseName'),'-db-subnet')]",
+    "webUdrName": "[concat(parameters('baseName'),'-web-udr')]",
+    "bizUdrName": "[concat(parameters('baseName'),'-biz-udr')]",
+    "dbUdrName": "[concat(parameters('baseName'),'-db-udr')]",
+
+    "nsgTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nsg.json"
+  },
+  "resources": [
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "mgmt-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "mgmt" },
+          "rulesNames": { "value": [ "on-prem-rdp-allow", "on-prem-ssh-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('onpremNetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ 3389, 22, "*" ] },
+          "rulesProtocol": { "value": [ "TCP", "TCP", "*" ] }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "web-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "web" },
+          "rulesNames": { "value": [ "on-prem-allow", "vnet-allow", "mgmt-rdp-allow", "mgmt-ssh-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('vnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ 80, 80, 3389, 22, "*" ] },
+          "rulesProtocol": { "value": [ "TCP", "TCP", "TCP", "TCP", "*" ] }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "biz-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "biz" },
+          "rulesNames": { "value": [ "web-allow", "mgmt-rdp-allow", "mgmt-ssh-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetWebSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ "*", 3389, 22, "*" ] },
+          "rulesProtocol": { "value": [ "*", "TCP", "TCP", "*" ] }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "db-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "db" },
+          "rulesNames": { "value": [ "biz-allow", "mgmt-rdp-allow", "mgmt-ssh-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('vnetBizSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ "*", 3389, 22, "*" ] },
+          "rulesProtocol": { "value": [ "*", "TCP", "TCP", "*" ] }
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

@@ -1,0 +1,99 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "feSubnetId": { "type": "string" },
+    "beSubnetId": { "type": "string" },
+    "mgmtSubnetId": { "type": "string" },
+    "mgmtSubnetPrefix": { "type": "string" },
+    "vnetPrefix": { "type": "string" },
+    "ilbIpAddress": { "type": "string" },
+    "jumpboxIpAddress": { "type": "string" },
+    "jumpboxOSType": {
+      "type": "string",
+      "allowedValues": [ "Windows", "Ubuntu" ],
+      "defaultValue": "Ubuntu"
+    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+    "vmSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_GS1",
+        "Standard_GS2",
+        "Standard_GS3",
+        "Standard_GS4",
+        "Standard_GS5",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2"
+      ]
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vmNamePrefix": "nva",
+    "vmComputerNamePrefix": "nva",
+    "numVMs": 2,
+    "osType": "Ubuntu",
+    "lbName": "[concat(parameters('baseName'),'-nva-ilb')]",
+    "ilbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+    "ilbFEName": "feIpConfig1",
+    "ilbFEId": "[concat(variables('ilbId'),'/frontendIPConfigurations/',variables('ilbFEName'))]",
+    "ilbBEName": "beAddPool",
+    "ilbBEId": "[concat(variables('ilbId'),'/backendAddressPools/',variables('ilbBEName'))]",
+    "uniqueString": "[uniqueString(resourceGroup().Id)]",
+    "vmAvSetName": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),'-as')]",
+    "vmsTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vms-3nics-lbbe.json",
+    "jumpBoxTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json",
+    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-custom-linux-extension.json",
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/nva.sh",
+    "scriptName": "nva.sh",
+    "udrName": "[concat(parameters('baseName'), '-gw-udr')]"
+  },
+  "resources": [
+     {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('udrName')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "toFrontEnd",
+            "properties": {
+              "addressPrefix": "[parameters('vnetPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('ilbIpAddress')]"
+            }
+          },
+          {
+            "name": "toMgmt",
+            "properties": {
+              "addressPrefix": "[parameters('mgmtSubnetPrefix')]",
+              "nextHopType": "VnetLocal"
+            }
+          }
+        ]
+      }
+    }
+   ],
+  "outputs": {
+  }
+}

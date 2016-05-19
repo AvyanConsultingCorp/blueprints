@@ -12,10 +12,10 @@ errhandle()
 
 ############################################################################
 
-if [ $# -ne 5 ] 
+if [ $# -ne 6 ] 
 then
-    echo "Usage: ${0} appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix"
-    echo "For example: ${0} mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24"
+    echo "Usage: ${0} appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix location"
+    echo "For example: ${0} mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24 eastus"
     exit
 fi
 
@@ -27,8 +27,8 @@ SUBSCRIPTION=$2
 INPUT_VPN_IPSEC_SHARED_KEY=$3
 INPUT_ON_PREMISES_PUBLIC_IP=$4
 INPUT_ON_PREMISES_ADDRESS_SPACE=$5
+LOCATION=$6
 
-LOCATION=eastus
 ADMIN_USER_NAME=adminUser
 ADMIN_PASSWORD=adminP@ssw0rd
 #OS_TYPE=Ubuntu
