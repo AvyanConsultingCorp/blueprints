@@ -16,6 +16,7 @@ if [ $# -ne 6 ]
 then
     echo "Usage: ${0} appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix location"
     echo "For example: ${0} mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24 eastus"
+    echo "to update udr/nsg: ${0} mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24 eastus TRUE"
     exit
 fi
 
@@ -28,6 +29,7 @@ INPUT_VPN_IPSEC_SHARED_KEY=$3
 INPUT_ON_PREMISES_PUBLIC_IP=$4
 INPUT_ON_PREMISES_ADDRESS_SPACE=$5
 LOCATION=$6
+UPDATE_UDR_NSG=$7
 
 ADMIN_USER_NAME=adminUser
 ADMIN_PASSWORD=adminP@ssw0rd
@@ -42,7 +44,14 @@ echo azure config mode arm
 ############################################################################
 ## Create vNet and Subnets for mgmt, nva-fe, nva-be, web, biz, db
 ############################################################################
+
+
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/azuredeploy.json
+
+if [ "${UPDATE_UDR_NSG}" == "TRUE" ]; then
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/updage-nsg.json
+fi
+
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
 VNET_PREFIX=10.0.0.0/16
@@ -106,6 +115,8 @@ VNET_RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 VNET_NAME=${DEPLOYED_VNET_NAME}
 SUBNET_NAME=${DEPLOYED_WEB_SUBNET_NAME}
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"}}"
+
+if [ "${UPDATE_UDR_NSG}" == "FALSE" ]; then
 echo
 echo
 echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
@@ -134,7 +145,10 @@ do
 		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	fi
-done    
+done  
+fi
+
+
 
 # create biz tier
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
@@ -149,6 +163,7 @@ VNET_RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 VNET_NAME=${DEPLOYED_VNET_NAME}
 SUBNET_NAME=${DEPLOYED_BIZ_SUBNET_NAME}
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"}}"
+if [ "${UPDATE_UDR_NSG}" == "FALSE" ]; then
 echo
 echo
 echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
@@ -157,6 +172,8 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+fi
+
 
 # create db tier
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
@@ -171,6 +188,8 @@ VNET_RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 VNET_NAME=${DEPLOYED_VNET_NAME}
 SUBNET_NAME=${DEPLOYED_DB_SUBNET_NAME}
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"}}"
+
+if [ "${UPDATE_UDR_NSG}" == "FALSE" ]; then
 echo
 echo
 echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
@@ -179,12 +198,19 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+fi
+
 ############################################################################
 ## Create ILB and VMs in nva subnet and jumbox in management subnet
 ############################################################################
 MGMT_RESOURCE_GROUP=${BASE_NAME}-mgmt-rg
 RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/ibb-nvas-mgmt.json
+
+if [ "${UPDATE_UDR_NSG}" == "TRUE" ]; then
+# update gw-udr
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/updage-gw-udr.json
+fi
 
 MGMT_SUBNET_NAME_PREFIX=${DEPLOYED_MGMT_SUBNET_NAME_PREFIX}
 NVA_FE_SUBNET_NAME_PREFIX=${DEPLOYED_NVA_FE_SUBNET_NAME_PREFIX}
@@ -210,12 +236,14 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
+
 #the folloiwng parameters are from the mgmt tier, and is needed for vpn creation
 DEPLOYED_GW_UDR_NAME=${BASE_NAME}-gw-udr
 ############################################################################
 ## Create VPN Gateway and VPN connection to connect to on premises network
 ############################################################################
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vpn-gateway-connection.json
+
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
 VNET_NAME=${DEPLOYED_VNET_NAME}
@@ -226,10 +254,14 @@ ON_PREMISES_PIP=${INPUT_ON_PREMISES_PUBLIC_IP}
 ON_PREMISES_ADDRESS_SPACE=${INPUT_ON_PREMISES_ADDRESS_SPACE}
 SHARED_KEY=${INPUT_VPN_IPSEC_SHARED_KEY}
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"gatewaySubnetAddressPrefix\":{\"value\":\"${GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vpnType\":{\"value\":\"${VPN_TYPE}\"},\"udrName\":{\"value\":\"${UDR_NAME}\"},\"udrResourceGroup\":{\"value\":\"${UDR_RESOURCE_GROUP}\"},\"onPremisesPIP\":{\"value\":\"${ON_PREMISES_PIP}\"},\"onPremisesAddressSpace\":{\"value\":\"${ON_PREMISES_ADDRESS_SPACE}\"},\"sharedKey\":{\"value\":\"${SHARED_KEY}\"}}"
+
+if [ "${UPDATE_UDR_NSG}" == "FALSE" ]; then
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+fi
+
 ############################################################################
 ## Enable forced tunneling in web/biz/db tier
 ############################################################################
@@ -255,6 +287,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 ## Enable forced tunneling
 ############################################################################
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ntwk-forced-tunneling.json
+
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 WEB_UDR_NAME=${DEPLOYED_WEB_UDR_NAME}
 BIZ_UDR_NAME=${DEPLOYED_BIZ_UDR_NAME}
