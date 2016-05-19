@@ -152,9 +152,6 @@
             "[parameters('vnetAddressPrefix2')]"
           ]
         },
-        "dnsSettings": {
-          "dnsServers": "[parameters('dnsServers')]"
-        },
         "subnets": [
           {
             "name": "[parameters('vnetFrontendSubnetName')]",
@@ -284,6 +281,39 @@
           },
           "sqlStaticIp": {
             "value": "[parameters('sqlStaticIp')]"
+          },
+          "vnetName": {
+            "value": "[parameters('vnetName')]"
+          },
+          "vnetAddressSpace": {
+            "value": [
+              "[parameters('vnetAddressPrefix1')]",
+              "[parameters('vnetAddressPrefix2')]"
+            ]
+          },
+          "backendSubnetDc": {
+            "value": [
+              "[parameters('vnetBackendSubnetNameDc')]",
+              "[parameters('vnetBackendSubnetPrefixDc')]"
+            ]
+          },
+          "backendSubnetSql": {
+            "value": [
+              "[parameters('vnetBackendSubnetNameSql')]",
+              "[parameters('vnetBackendSubnetPrefixSql')]"
+            ]
+          },
+          "frontendSubnet": {
+            "value": [
+              "[parameters('vnetFrontendSubnetName')]",
+              "[parameters('vnetFrontendSubnetPrefix')]"
+            ]
+          },
+          "gatewaySubnet": {
+            "value": [
+              "GatewaySubnet",
+              "[parameters('vnetGatewaySubnetPrefix')]"
+            ]
           }
         }
       }

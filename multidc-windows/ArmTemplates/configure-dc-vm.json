@@ -50,6 +50,12 @@
         "description": "Storage account container for data disks"
       }
     },
+    "scriptName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the script for back dependency reference"
+      }
+    },
     "scriptUri": {
       "type": "string",
       "metadata": {
@@ -130,7 +136,7 @@
       },
       "resources": [
         {
-          "name": "SqlAlwaysOnConfig",
+          "name": "[parameters('scriptName')]",
           "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
@@ -138,7 +144,7 @@
             "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
           ],
           "tags": {
-            "displayName": "SqlAlwaysOnConfig"
+            "displayName": "[parameters('scriptName')]"
           },
           "properties": {
             "publisher": "Microsoft.Compute",
