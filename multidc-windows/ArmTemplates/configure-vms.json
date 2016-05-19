@@ -569,7 +569,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmSettings').vmName[0],'/extensions/CreateBackupDc')]"
+        "Microsoft.Resources/deployments/deploy-pdc-vm"
       ],
       "properties": {
         "mode": "Incremental",
