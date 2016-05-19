@@ -12,7 +12,7 @@ errhandle()
 
 ############################################################################
 
-if [ $# -ne 6 ] 
+if [ $# -lt 6 ] 
 then
     echo "Usage: ${0} appname subscription-id ipsec-shared-key on-prem-gateway-pip on-prem-address-prefix location"
     echo "For example: ${0} mytest123 13ed86531-1602-4c51-a4d4-afcfc38ddad3 myipsecsharedkey123 11.22.33.44 192.168.0.0/24 eastus"
