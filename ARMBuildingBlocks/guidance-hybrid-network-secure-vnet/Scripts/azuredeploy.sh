@@ -49,7 +49,7 @@ echo azure config mode arm
 TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/azuredeploy.json
 
 if [ "${UPDATE_UDR_NSG}" == "TRUE" ]; then
-TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/updage-nsg.json
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/update-nsg.json
 fi
 
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
@@ -209,7 +209,7 @@ TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildi
 
 if [ "${UPDATE_UDR_NSG}" == "TRUE" ]; then
 # update gw-udr
-TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/updage-gw-udr.json
+TEMPLATE_URI=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/guidance-hybrid-network-secure-vnet/Templates/update-gw-udr.json
 fi
 
 MGMT_SUBNET_NAME_PREFIX=${DEPLOYED_MGMT_SUBNET_NAME_PREFIX}
