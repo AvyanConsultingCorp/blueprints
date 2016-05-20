@@ -30,6 +30,7 @@
   },
   "resources": [
 
+
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -40,14 +41,14 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "nsgNamePrefix": { "value": "mgmt" },
-          "rulesNames": { "value": [ "on-prem-rdp-allow", "on-prem-ssh-allow", "self-allow", "vnet-deny" ] },
-          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
-          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
-          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('onpremNetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
-          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
-          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
-          "rulesDestinationPorts": { "value": [ 3389, 22, "*", "*" ] },
-          "rulesProtocol": { "value": [ "*", "TCP", "*", "*" ] }
+          "rulesNames": { "value": [ "on-prem-rdp-allow", "on-prem-ssh-allow", "gateway-allow", "self-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('onpremNetPrefix')]", "[parameters('vnetGwSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ 3389, 22, "*", "*", "*" ] },
+          "rulesProtocol": { "value": [ "*", "*", "*", "*", "*" ] }
         }
       }
     },
