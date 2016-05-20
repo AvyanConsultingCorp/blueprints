@@ -59,12 +59,10 @@
       "apiVersion": "2016-03-30",
       "properties": {
         "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnetAddressSpace')]"
-          ]
+          "addressPrefixes": [ "[parameters('vnetAddressSpace')]" ]
         },
         "dhcpOptions": {
-          "dnsServers": "[parameters('dnsServers')]"
+          "dnsServers": [ "[parameters('dnsServers')]" ]
         },
         "subnets": [
           {
