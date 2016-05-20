@@ -70,6 +70,24 @@
             "properties": {
               "addressPrefix": "[parameters('vnetFrontendSubnet').prefix]"
             }
+          },
+          {
+            "name": "[parameters('vnetBackendSubnetDc').name]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetBackendSubnetDc').prefix]"
+            }
+          },
+          {
+            "name": "[parameters('vnetBackendSubnetSql').name]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetBackendSubnetSql').prefix]"
+            }
+          },
+          {
+            "name": "[parameters('vnetGatewaySubnet').name]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetGatewaySubnet').prefix]"
+            }
           }
         ]
       },
