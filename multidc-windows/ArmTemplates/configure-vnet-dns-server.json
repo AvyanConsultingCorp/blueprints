@@ -58,38 +58,9 @@
       "location": "[parameters('location')]",
       "apiVersion": "2016-03-30",
       "properties": {
-        "addressSpace": {
-          "addressPrefixes": "[parameters('vnetAddressPrefixes')]"
-        },
         "dhcpOptions": {
           "dnsServers": "[parameters('dnsServers')]"
-        },
-        "subnets": [
-          {
-            "name": "[parameters('vnetFrontendSubnet').name]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetFrontendSubnet').prefix]"
-            }
-          },
-          {
-            "name": "[parameters('vnetBackendSubnetDc').name]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetBackendSubnetDc').prefix]"
-            }
-          },
-          {
-            "name": "[parameters('vnetBackendSubnetSql').name]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetBackendSubnetSql').prefix]"
-            }
-          },
-          {
-            "name": "[parameters('vnetGatewaySubnet').name]",
-            "properties": {
-              "addressPrefix": "[parameters('vnetGatewaySubnet').prefix]"
-            }
-          }
-        ]
+        }
       },
       "tags": {
         "displayName": "Virtual network with Dns"
