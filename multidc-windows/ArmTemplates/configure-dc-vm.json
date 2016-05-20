@@ -132,7 +132,7 @@
         }
       },
       "tags": {
-        "displayName": "Domain Controller"
+        "displayName": "domain-controller"
       },
       "resources": [
         {
@@ -156,7 +156,7 @@
             }
           },
           "tags": {
-            "displayName": "Domain setup script"
+            "displayName": "setup-script"
           }
         }
       ]

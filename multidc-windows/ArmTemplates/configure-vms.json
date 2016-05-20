@@ -483,9 +483,6 @@
             ]
           }
         }
-      },
-      "tags": {
-        "displayName": "update-vnet-dns-1"
       }
     },
     {
@@ -528,9 +525,6 @@
             ]
           }
         }
-      },
-      "tags": {
-        "displayName": "update-bdc-nic"
       }
     },
     {
@@ -605,9 +599,6 @@
             ]
           }
         }
-      },
-      "tags": {
-        "displayName": "update-vnet-dns-2"
       }
     },
     {
