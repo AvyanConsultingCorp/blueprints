@@ -8,13 +8,13 @@
         "Description": "The region to deploy the resources into"
       }
     },
-    "virtualNetworkName": {
+    "vnetName": {
       "type": "string",
       "metadata": {
         "Description": "The name of the Virtual Network to Create"
       }
     },
-    "virtualNetworkAddressRange": {
+    "vnetAddressSpace": {
       "type": "array",
       "metadata": {
         "Description": "The address range of the new VNET in CIDR format"
@@ -53,14 +53,14 @@
   },
   "resources": [
     {
-      "name": "[parameters('virtualNetworkName')]",
+      "name": "[parameters('vnetName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[parameters('location')]",
       "apiVersion": "2016-03-30",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[parameters('virtualNetworkAddressRange')]"
+            "[parameters('vnetAddressSpace')]"
           ]
         },
         "dhcpOptions": {

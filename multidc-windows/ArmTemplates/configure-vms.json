@@ -459,23 +459,23 @@
           "location": {
             "value": "[resourceGroup().location]"
           },
-          "virtualNetworkName": {
+          "vnetName": {
             "value": "[parameters('vnetName')]"
           },
-          "virtualNetworkAddressRange": {
-            "value": "[parameters('vnetAddressSpace')]"
+          "vnetAddressSpace": {
+            "value": [ "[parameters('vnetAddressSpace')]" ]
           },
           "vnetFrontendSubnet": {
-            "value": "[parameters('frontendSubnet')]"
+            "value": [ "[parameters('frontendSubnet')]" ]
           },
           "vnetBackendSubnetDc": {
-            "value": "[parameters('backendSubnetDc')]"
+            "value": [ "[parameters('backendSubnetDc')]" ]
           },
           "vnetBackendSubnetSql": {
-            "value": "[parameters('backendSubnetSql')]"
+            "value": [ "[parameters('backendSubnetSql')]" ]
           },
           "vnetGatewaySubnet": {
-            "value": "[parameters('gatewaySubnet')]"
+            "value": [ "[parameters('gatewaySubnet')]" ]
           },
           "dnsServers": {
             "value": [
@@ -575,23 +575,33 @@
           "location": {
             "value": "[resourceGroup().location]"
           },
-          "virtualNetworkName": {
+          "vnetName": {
             "value": "[parameters('vnetName')]"
           },
-          "virtualNetworkAddressRange": {
-            "value": "[parameters('vnetAddressSpace')]"
+          "vnetAddressSpace": {
+            "value": [
+              "[parameters('vnetAddressSpace')]"
+            ]
           },
           "vnetFrontendSubnet": {
-            "value": "[parameters('frontendSubnet')]"
+            "value": [
+              "[parameters('frontendSubnet')]"
+            ]
           },
           "vnetBackendSubnetDc": {
-            "value": "[parameters('backendSubnetDc')]"
+            "value": [
+              "[parameters('backendSubnetDc')]"
+            ]
           },
           "vnetBackendSubnetSql": {
-            "value": "[parameters('backendSubnetSql')]"
+            "value": [
+              "[parameters('backendSubnetSql')]"
+            ]
           },
           "vnetGatewaySubnet": {
-            "value": "[parameters('gatewaySubnet')]"
+            "value": [
+              "[parameters('gatewaySubnet')]"
+            ]
           },
           "dnsServers": {
             "value": [
