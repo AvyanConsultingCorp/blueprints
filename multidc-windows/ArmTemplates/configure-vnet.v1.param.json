@@ -5,32 +5,35 @@
     "vnetName": {
       "value": "app1-vnet"
     },
-    "vnetAddressPrefix1": {
-      "value": "10.11.0.0/16"
+    "vnetAddressPrefixes": {
+      "value": [
+        "10.11.0.0/16",
+        "10.12.0.0/16"
+      ]
     },
-    "vnetAddressPrefix2": {
-      "value": "10.12.0.0/16"
+    "vnetFrontendSubnet": {
+      "value": {
+        "name": "v1-fe-subnet",
+        "prefix": "10.11.0.0/24"
+      }
     },
-    "vnetFrontendSubnetName": {
-      "value": "v1-fe-subnet"
+    "vnetBackendSubnetDc": {
+      "value": {
+        "name": "v1-be-dc-subnet",
+        "prefix": "10.12.0.0/24"
+      }
     },
-    "vnetFrontendSubnetPrefix": {
-      "value": "10.11.0.0/24"
+    "vnetBackendSubnetSql": {
+      "value": {
+        "name": "v1-be-sql-subnet",
+        "prefix": "10.12.1.0/24"
+      }
     },
-    "vnetBackendSubnetNameDc": {
-      "value": "v1-be-dc-subnet"
-    },
-    "vnetBackendSubnetPrefixDc": {
-      "value": "10.12.0.0/24"
-    },
-    "vnetBackendSubnetNameSql": {
-      "value": "v1-be-sql-subnet"
-    },
-    "vnetBackendSubnetPrefixSql": {
-      "value": "10.12.1.0/24"
-    },
-    "vnetGatewaySubnetPrefix": {
-      "value": "10.12.255.0/27"
+    "vnetGatewaySubnet": {
+      "value": {
+        "name": "GatewaySubnet",
+        "prefix": "10.12.255.0/27"
+      }
     },
     "dnsServers": {
       "value": [

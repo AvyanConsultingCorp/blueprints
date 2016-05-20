@@ -8,58 +8,34 @@
         "description": "Name of the VNET."
       }
     },
-    "vnetAddressPrefix1": {
-      "type": "string",
+    "vnetAddressPrefixes": {
+      "type": "array",
       "metadata": {
-        "description": "Address space one for the VNET"
+        "description": "Address spaces for the VNET"
       }
     },
-    "vnetAddressPrefix2": {
-      "type": "string",
+    "vnetFrontendSubnet": {
+      "type": "object",
       "metadata": {
-        "description": "Address space two for the VNET"
+        "description": "Name and prefix of the frontend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
       }
     },
-    "vnetFrontendSubnetName": {
-      "type": "string",
+    "vnetBackendSubnetDc": {
+      "type": "object",
       "metadata": {
-        "description": "Name of the frontend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
+        "description": "Name and prefix of the domain controller backend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
       }
     },
-    "vnetFrontendSubnetPrefix": {
-      "type": "string",
+    "vnetBackendSubnetSql": {
+      "type": "object",
       "metadata": {
-        "description": "The IP address prefix for the frontend subnet in the VNET."
+        "description": "Name and prefix of the SQL backend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
       }
     },
-    "vnetBackendSubnetNameDc": {
-      "type": "string",
+    "vnetGatewaySubnet": {
+      "type": "object",
       "metadata": {
-        "description": "Name of the domain controller backend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
-      }
-    },
-    "vnetBackendSubnetPrefixDc": {
-      "type": "string",
-      "metadata": {
-        "description": "The IP address prefix for the domain controller backend subnet in the VNET."
-      }
-    },
-    "vnetBackendSubnetNameSql": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the SQL backend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
-      }
-    },
-    "vnetBackendSubnetPrefixSql": {
-      "type": "string",
-      "metadata": {
-        "description": "The IP address prefix for the SQL backend subnet in the VNET."
-      }
-    },
-    "vnetGatewaySubnetPrefix": {
-      "type": "string",
-      "metadata": {
-        "description": "The prefix for the GatewaySubnet where the VirtualNetworkGateway will be deployed. This must be at least /29."
+        "description": "Name and prefix for the GatewaySubnet where the VirtualNetworkGateway will be deployed. This must be at least /29."
       }
     },
     "dnsServers": {
@@ -135,8 +111,8 @@
     "region": "[resourceGroup().location]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
     "gatewaySubnetRef": "[concat(variables('vnetId'),'/subnets/','GatewaySubnet')]",
-    "backendSubnetDcRef": "[concat(variables('vnetId'),'/subnets/',parameters('vnetBackendSubnetNameDc'))]",
-    "backendSubnetSqlRef": "[concat(variables('vnetId'),'/subnets/',parameters('vnetBackendSubnetNameSql'))]",
+    "backendSubnetDcRef": "[concat(variables('vnetId'),'/subnets/',parameters('vnetBackendSubnetDc').name)]",
+    "backendSubnetSqlRef": "[concat(variables('vnetId'),'/subnets/',parameters('vnetBackendSubnetSql').name)]",
     "createVMsTemplateUri": "[uri(deployment().properties.templateLink.uri, 'configure-vms.json')]"
   },
   "resources": [
@@ -147,34 +123,31 @@
       "location": "[variables('region')]",
       "properties": {
         "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('vnetAddressPrefix1')]",
-            "[parameters('vnetAddressPrefix2')]"
-          ]
+          "addressPrefixes":"[parameters('vnetAddressPrefixes')]"
         },
         "subnets": [
           {
-            "name": "[parameters('vnetFrontendSubnetName')]",
+            "name": "[parameters('vnetFrontendSubnet').name]",
             "properties": {
-              "addressPrefix": "[parameters('vnetFrontendSubnetPrefix')]"
+              "addressPrefix": "[parameters('vnetFrontendSubnet').prefix]"
             }
           },
           {
-            "name": "[parameters('vnetBackendSubnetNameDc')]",
+            "name": "[parameters('vnetBackendSubnetDc').name]",
             "properties": {
-              "addressPrefix": "[parameters('vnetBackendSubnetPrefixDc')]"
+              "addressPrefix": "[parameters('vnetBackendSubnetDc').prefix]"
             }
           },
           {
-            "name": "[parameters('vnetBackendSubnetNameSql')]",
+            "name": "[parameters('vnetBackendSubnetSql').name]",
             "properties": {
-              "addressPrefix": "[parameters('vnetBackendSubnetPrefixSql')]"
+              "addressPrefix": "[parameters('vnetBackendSubnetSql').prefix]"
             }
           },
           {
-            "name": "GatewaySubnet",
+            "name": "[parameters('vnetGatewaySubnet').name]",
             "properties": {
-              "addressPrefix": "[parameters('vnetGatewaySubnetPrefix')]"
+              "addressPrefix": "[parameters('vnetGatewaySubnet').prefix]"
             }
           }
         ]
@@ -285,35 +258,20 @@
           "vnetName": {
             "value": "[parameters('vnetName')]"
           },
-          "vnetAddressSpace": {
-            "value": [
-              "[parameters('vnetAddressPrefix1')]",
-              "[parameters('vnetAddressPrefix2')]"
-            ]
+          "vnetAddressPrefixes": {
+            "value": "[parameters('vnetAddressPrefixes')]"
           },
-          "backendSubnetDc": {
-            "value": [
-              "[parameters('vnetBackendSubnetNameDc')]",
-              "[parameters('vnetBackendSubnetPrefixDc')]"
-            ]
+          "vnetBackendSubnetDc": {
+            "value": "[parameters('vnetBackendSubnetDc')]"
           },
-          "backendSubnetSql": {
-            "value": [
-              "[parameters('vnetBackendSubnetNameSql')]",
-              "[parameters('vnetBackendSubnetPrefixSql')]"
-            ]
+          "vnetBackendSubnetSql": {
+            "value": "[parameters('vnetBackendSubnetSql')]"
           },
-          "frontendSubnet": {
-            "value": [
-              "[parameters('vnetFrontendSubnetName')]",
-              "[parameters('vnetFrontendSubnetPrefix')]"
-            ]
+          "vnetFrontendSubnet": {
+            "value": "[parameters('vnetFrontendSubnet')]"
           },
-          "gatewaySubnet": {
-            "value": [
-              "GatewaySubnet",
-              "[parameters('vnetGatewaySubnetPrefix')]"
-            ]
+          "vnetGatewaySubnet": {
+            "value": "[parameters('vnetGatewaySubnet')]"
           }
         }
       }

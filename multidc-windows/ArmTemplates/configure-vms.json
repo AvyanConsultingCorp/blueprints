@@ -108,34 +108,34 @@
         "description": "Virtual network name."
       }
     },
-    "vnetAddressSpace": {
+    "vnetAddressPrefixes": {
       "type": "array",
       "metadata": {
         "description": "Virtual network address prefixes."
       }
     },
-    "backendSubnetDc": {
-      "type": "array",
+    "vnetFrontendSubnet": {
+      "type": "object",
       "metadata": {
-        "description": "Domain controller backend subnet name and prefix."
+        "description": "Name and prefix of the frontend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
       }
     },
-    "backendSubnetSql": {
-      "type": "array",
+    "vnetBackendSubnetDc": {
+      "type": "object",
       "metadata": {
-        "description": "Sql backend subnet name and prefix."
+        "description": "Name and prefix of the domain controller backend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
       }
     },
-    "frontendSubnet": {
-      "type": "array",
+    "vnetBackendSubnetSql": {
+      "type": "object",
       "metadata": {
-        "description": "Frontend subnet name and prefix."
+        "description": "Name and prefix of the SQL backend subnet in the VNET. Please note, an additional subnet called GatewaySubnet will be created where the VirtualNetworkGateway will be deployed. The name of that subnet must not be changed from GatewaySubnet."
       }
     },
-    "gatewaySubnet": {
-      "type": "array",
+    "vnetGatewaySubnet": {
+      "type": "object",
       "metadata": {
-        "description": "Gateway subnet name and prefix."
+        "description": "Name and prefix for the GatewaySubnet where the VirtualNetworkGateway will be deployed. This must be at least /29."
       }
     }
   },
@@ -162,19 +162,25 @@
       ],
       "vmImage": [
         [
-          "MicrosoftSQLServer",
-          "SQL2014SP1-WS2012R2",
-          "Enterprise"
+          {
+            "publisher": "MicrosoftSQLServer",
+            "offer": "SQL2014SP1-WS2012R2",
+            "sku": "Enterprise"
+          }
         ],
         [
-          "MicrosoftSQLServer",
-          "SQL2014SP1-WS2012R2",
-          "Enterprise"
+          {
+            "publisher": "MicrosoftSQLServer",
+            "offer": "SQL2014SP1-WS2012R2",
+            "sku": "Enterprise"
+          }
         ],
         [
-          "MicrosoftWindowsServer",
-          "WindowsServer",
-          "2012-R2-Datacenter"
+          {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter"
+          }
         ]
       ],
       "psArgument": [
@@ -462,20 +468,20 @@
           "vnetName": {
             "value": "[parameters('vnetName')]"
           },
-          "vnetAddressSpace": {
-            "value": [ "[parameters('vnetAddressSpace')]" ]
+          "vnetAddressPrefixes": {
+            "value": "[parameters('vnetAddressPrefixes')]"
           },
           "vnetFrontendSubnet": {
-            "value": [ "[parameters('frontendSubnet')]" ]
+            "value": "[parameters('vnetFrontendSubnet')]"
           },
           "vnetBackendSubnetDc": {
-            "value": [ "[parameters('backendSubnetDc')]" ]
+            "value": "[parameters('vnetBackendSubnetDc')]"
           },
           "vnetBackendSubnetSql": {
-            "value": [ "[parameters('backendSubnetSql')]" ]
+            "value": "[parameters('vnetBackendSubnetSql')]"
           },
           "vnetGatewaySubnet": {
-            "value": [ "[parameters('gatewaySubnet')]" ]
+            "value": "[parameters('vnetGatewaySubnet')]"
           },
           "dnsServers": {
             "value": [
@@ -578,35 +584,23 @@
           "vnetName": {
             "value": "[parameters('vnetName')]"
           },
-          "vnetAddressSpace": {
-            "value": [
-              "[parameters('vnetAddressSpace')]"
-            ]
+          "vnetAddressPrefixes": {
+            "value": "[parameters('vnetAddressPrefixes')]"
           },
           "vnetFrontendSubnet": {
-            "value": [
-              "[parameters('frontendSubnet')]"
-            ]
+            "value": "[parameters('vnetFrontendSubnet')]"
           },
           "vnetBackendSubnetDc": {
-            "value": [
-              "[parameters('backendSubnetDc')]"
-            ]
+            "value": "[parameters('vnetBackendSubnetDc')]"
           },
           "vnetBackendSubnetSql": {
-            "value": [
-              "[parameters('backendSubnetSql')]"
-            ]
+            "value": "[parameters('vnetBackendSubnetSql')]"
           },
           "vnetGatewaySubnet": {
-            "value": [
-              "[parameters('gatewaySubnet')]"
-            ]
+            "value": "[parameters('vnetGatewaySubnet')]"
           },
           "dnsServers": {
-            "value": [
-              "[parameters('dnsServers')]"
-            ]
+            "value": "[parameters('dnsServers')]"
           }
         }
       }
@@ -644,9 +638,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[variables('vmSettings').vmImage[copyIndex(2)][0]]",
-            "offer": "[variables('vmSettings').vmImage[copyIndex(2)][1]]",
-            "sku": "[variables('vmSettings').vmImage[copyIndex(2)][2]]",
+            "publisher": "[variables('vmSettings').vmImage[copyIndex(2)].publisher]",
+            "offer": "[variables('vmSettings').vmImage[copyIndex(2)].offer]",
+            "sku": "[variables('vmSettings').vmImage[copyIndex(2)].sku]",
             "version": "latest"
           },
           "osDisk": {
