@@ -40,14 +40,14 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "nsgNamePrefix": { "value": "mgmt" },
-          "rulesNames": { "value": [ "on-prem-rdp-allow", "on-prem-ssh-allow", "vnet-deny" ] },
-          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound" ] },
-          "rulesAccess": { "value": [ "Allow", "Allow", "Deny" ] },
-          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('onpremNetPrefix')]", "*" ] },
-          "rulesSourcePorts": { "value": [ "*", "*", "*" ] },
-          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*" ] },
-          "rulesDestinationPorts": { "value": [ 3389, 22, "*" ] },
-          "rulesProtocol": { "value": [ "TCP", "TCP", "*" ] }
+          "rulesNames": { "value": [ "on-prem-rdp-allow", "on-prem-ssh-allow", "self-allow", "vnet-deny" ] },
+          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Deny" ] },
+          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('onpremNetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
+          "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
+          "rulesDestinationPorts": { "value": [ 3389, 22, "*", "*" ] },
+          "rulesProtocol": { "value": [ "*", "TCP", "*", "*" ] }
         }
       }
     },
@@ -69,7 +69,7 @@
           "rulesSourcePorts": { "value": [ "*", "*", "*", "*", "*" ] },
           "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*", "*" ] },
           "rulesDestinationPorts": { "value": [ 80, 80, 3389, 22, "*" ] },
-          "rulesProtocol": { "value": [ "TCP", "TCP", "TCP", "TCP", "*" ] }
+          "rulesProtocol": { "value": [ "TCP", "TCP", "*", "TCP", "*" ] }
         }
       }
     },
@@ -91,7 +91,7 @@
           "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
           "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
           "rulesDestinationPorts": { "value": [ "*", 3389, 22, "*" ] },
-          "rulesProtocol": { "value": [ "*", "TCP", "TCP", "*" ] }
+          "rulesProtocol": { "value": [ "*", "*", "TCP", "*" ] }
         }
       }
     },
@@ -113,7 +113,7 @@
           "rulesSourcePorts": { "value": [ "*", "*", "*", "*" ] },
           "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*" ] },
           "rulesDestinationPorts": { "value": [ "*", 3389, 22, "*" ] },
-          "rulesProtocol": { "value": [ "*", "TCP", "TCP", "*" ] }
+          "rulesProtocol": { "value": [ "*", "*", "TCP", "*" ] }
         }
       }
     }
