@@ -217,7 +217,7 @@
             "value": "[parameters('appName')]"
           },
           "numberOfInstances": {
-            "value": 3
+            "value": 5
           },
           "subnetDcRef": {
             "value": "[variables('backendSubnetDcRef')]"
