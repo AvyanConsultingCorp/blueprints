@@ -148,7 +148,7 @@
     "sqlAlwaysOnConfigScriptFileName": "SqlServerConfig_",
     "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]",
     "sqlDomainName": "poltergeist.local",
-    "sqlDomainLogin": "sqladmin",
+    "sqlDomainLogin": "[parameters('adminUsername')]",
     "clusterName": "app1cluster",
     "lbBackendPool": "[concat(parameters('loadBalancerName'),'-pool')]",
     "lbFrontendIpName": "[concat(parameters('loadBalancerName'),'-fe')]",
