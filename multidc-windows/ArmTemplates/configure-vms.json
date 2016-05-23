@@ -161,41 +161,31 @@
         "[concat(parameters('vmNamePrefix'),'-', 'fsw')]"
       ],
       "vmImage": [
-        [
           {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
             "sku": "2012-R2-Datacenter"
-          }
-        ],
-        [
+          },
           {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
             "sku": "2012-R2-Datacenter"
-          }
-        ],
-        [
+          },
           {
             "publisher": "MicrosoftSQLServer",
             "offer": "SQL2014SP1-WS2012R2",
             "sku": "Enterprise"
-          }
-        ],
-        [
+          },
           {
             "publisher": "MicrosoftSQLServer",
             "offer": "SQL2014SP1-WS2012R2",
             "sku": "Enterprise"
-          }
-        ],
-        [
+          },
           {
             "publisher": "MicrosoftWindowsServer",
             "offer": "WindowsServer",
             "sku": "2012-R2-Datacenter"
           }
-        ]
       ],
       "psArgument": [
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
