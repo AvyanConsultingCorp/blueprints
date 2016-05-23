@@ -583,7 +583,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-02-01",
       "dependsOn": [
-        "Microsoft.Resources/deployments/deploy-pdc-vm"
+        "Microsoft.Resources/deployments/deploy-bdc-vm"
       ],
       "properties": {
         "mode": "Incremental",
