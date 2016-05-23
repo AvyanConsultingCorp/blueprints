@@ -155,7 +155,7 @@
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
-      "name": "[concat(parameters('baseName'), copyindex(1), variables('uniqueString'))]",
+      "name": "[concat(replace(parameters('baseName'),'-',''), copyindex(1), variables('uniqueString'))]",
       "copy": {
         "name": "stgCount",
         "count": "[parameters('numberVMs')]"
