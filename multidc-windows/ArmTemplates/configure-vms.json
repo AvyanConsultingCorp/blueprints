@@ -161,8 +161,20 @@
         "[concat(parameters('vmNamePrefix'),'-', 'fsw')]"
       ],
       "vmImage": [
-        [ ],
-        [ ],
+        [
+          {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter"
+          }
+        ],
+        [
+          {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter"
+          }
+        ],
         [
           {
             "publisher": "MicrosoftSQLServer",
