@@ -109,11 +109,11 @@ function CustomPreRestartActions([string]$outputStr="Empty")
    
     Import-Module "sqlps" -DisableNameChecking
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-    $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)	
-    Enable-PSRemoting -Force
+    $domainUser = "$Domain\$AdminUser"
+    $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)	
 
     # Add domain user
-    Add-DomainUser
+    Add-DomainUser $domainUser $AdminPassword
 
     # Join domain
 	Add-Computer -Credential $credential -DomainName $Domain -Force
@@ -133,14 +133,13 @@ function CustomRestartActions([string]$outputStr="Empty")
 
 #endregion
 
-function Add-DomainUser
+function Add-DomainUser([string]$user, [string]$adminPwd)
 {
-    $domainUser = "$Domain\$AdminUser"
-    Write-Host 'Calling Add-DomainUser with: ' $domainUser
+    Write-Host 'Calling Add-DomainUser with: ' $user
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server "(local)"
-    $SqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $domainUser)
-    $SqlUser.LoginType = "WindowsUser"
-    $SqlUser.create($AdminPassword)
+    $sqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $user)
+    $sqlUser.LoginType = "WindowsUser"
+    $sqlUser.create($adminPwd)
     $sqlUser.AddToRole("sysadmin")
 }
 
@@ -175,8 +174,8 @@ function Configure-AlwaysOn
     }
 
     # Back up database to a file share that both SQL server instances can access, and restore to sql2
-    Backup-SqlDatabase -Database "TestDB" -BackupFile "\\$AppName-fsw\$ClusterName\db.bak" -ServerInstance $Sql1ServerName
-    Backup-SqlDatabase -Database "TestDB" -BackupFile "\\$AppName-fsw\$ClusterName\db.log" -ServerInstance $Sql1ServerName -BackupAction Log 
+    Backup-SqlDatabase -Database "TestDb" -BackupFile "\\$AppName-fsw\$ClusterName\db.bak" -ServerInstance $Sql1ServerName
+    Backup-SqlDatabase -Database "TestDb" -BackupFile "\\$AppName-fsw\$ClusterName\db.log" -ServerInstance $Sql1ServerName -BackupAction Log 
     Restore-SqlDatabase -Database "TestDb" -BackupFile "\\$AppName-fsw\$ClusterName\db.bak" -ServerInstance $Sql2ServerName -NoRecovery
     Restore-SqlDatabase -Database "TestDb" -BackupFile "\\$AppName-fsw\$ClusterName\db.log" -ServerInstance $Sql2ServerName -NoRecovery -RestoreAction Log
 

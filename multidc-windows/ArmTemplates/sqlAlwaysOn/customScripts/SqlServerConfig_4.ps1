@@ -23,9 +23,9 @@ Import-Module "sqlps" -DisableNameChecking
 
 $domainUser = "$Domain\$AdminUser"
 $srv = New-Object Microsoft.SqlServer.Management.Smo.Server "(local)"
-$SqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($srv, $domainUser)
-$SqlUser.LoginType = "WindowsUser"
-$SqlUser.create($AdminPassword)
+$sqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($srv, $domainUser)
+$sqlUser.LoginType = "WindowsUser"
+$sqlUser.create($AdminPassword)
 $sqlUser.AddToRole("sysadmin")
 
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
