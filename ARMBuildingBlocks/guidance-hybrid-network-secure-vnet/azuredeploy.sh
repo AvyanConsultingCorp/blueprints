@@ -40,67 +40,21 @@ function validateNotEmpty() {
 ############################################################################
 
 URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks
+
 # Default parameter values
+BASE_NAME=
+SUBSCRIPTION=
 LOCATION=centralus
+OS_TYPE=Windows
 ADMIN_USER_NAME=adminUser
 ADMIN_PASSWORD=adminP@ssw0rd
-OS_TYPE=Windows
-INPUT_VPN_IPSEC_SHARED_KEY=myipsecsharedkey123
-INPUT_ON_PREMISES_PUBLIC_IP=11.22.33.44
-INPUT_ON_PREMISES_ADDRESS_SPACE=192.168.0.0/24
-
-while [[ $# > 0 ]]
-do
-  key="$1"
-  case $key in
-    -b|--base-name)
-      BASE_NAME="$2"
-      shift
-      ;;
-    -s|--subscription)
-      SUBSCRIPTION="$2"
-      shift
-      ;;
-    -l|--location)
-      LOCATION="$2"
-      shift
-      ;;
-    -o|--os-type)
-      if validate "$2" "Windows" "Ubuntu"
-      then
-        echo "Invalid OS Type: ${2}"
-        exit
-      fi
-      OS_TYPE="$2"
-      shift
-      ;;
-    *)
-      echo Unknown option "$1"
-      exit
-    ;;
-  esac
-  shift
-done
-
-if validateNotEmpty ${SUBSCRIPTION};
-then
-  echo "A value for --subscription must be provided"
-  exit
-fi
-
-if validateNotEmpty ${BASE_NAME};
-then
-  echo "A value for --base-name must be provided"
-  exit
-fi
-
-if validateNotEmpty ${LOCATION};
-then
-  echo "A value for --location must be provided"
-  exit
-fi
 
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
+
+# VPN parameter defaults
+INPUT_ON_PREMISES_PUBLIC_IP=11.22.33.44
+INPUT_ON_PREMISES_ADDRESS_SPACE=192.168.0.0/24
+INPUT_VPN_IPSEC_SHARED_KEY=myipsecsharedkey123
 
 # VNet parameter defaults
 VNET_PREFIX=10.0.0.0/16
@@ -122,6 +76,18 @@ DB_ILB_IP_ADDRESS=10.0.5.254
 WEB_NUMBER_VMS=2
 BIZ_NUMBER_VMS=2
 DB_NUMBER_VMS=2
+
+if validateNotEmpty ${SUBSCRIPTION};
+then
+  echo "A value for SUBSCRIPTION must be provided"
+  exit
+fi
+
+if validateNotEmpty ${BASE_NAME};
+then
+  echo "A value for BASE_NAME must be provided"
+  exit
+fi
 
 echo
 echo
