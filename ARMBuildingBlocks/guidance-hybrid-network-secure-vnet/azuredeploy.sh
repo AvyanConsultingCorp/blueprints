@@ -157,9 +157,9 @@ DEPLOYED_WEB_SUBNET_NAME_PREFIX=web
 DEPLOYED_BIZ_SUBNET_NAME_PREFIX=biz
 DEPLOYED_DB_SUBNET_NAME_PREFIX=db
 
-DEPLOYED_WEB_SUBNET_NAME=${BASE_NAME}-web-subnet
-DEPLOYED_BIZ_SUBNET_NAME=${BASE_NAME}-biz-subnet
-DEPLOYED_DB_SUBNET_NAME=${BASE_NAME}-db-subnet
+DEPLOYED_WEB_SUBNET_NAME=${BASE_NAME}-web-sn
+DEPLOYED_BIZ_SUBNET_NAME=${BASE_NAME}-biz-sn
+DEPLOYED_DB_SUBNET_NAME=${BASE_NAME}-db-sn
 
 DEPLOYED_WEB_UDR_NAME=${BASE_NAME}-web-udr
 DEPLOYED_BIZ_UDR_NAME=${BASE_NAME}-biz-udr
@@ -273,9 +273,9 @@ NVA_BE_SUBNET_NAME_PREFIX=${DEPLOYED_NVA_BE_SUBNET_NAME_PREFIX}
 MGMT_SUBNET_PREFIX=${VNET_MGMT_SUBNET_PREFIX}
 VNET_PREFIX=${VNET_PREFIX}
 
-FE_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${NVA_FE_SUBNET_NAME_PREFIX}-subnet
-BE_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${NVA_BE_SUBNET_NAME_PREFIX}-subnet
-MGMT_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${MGMT_SUBNET_NAME_PREFIX}-subnet
+FE_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${NVA_FE_SUBNET_NAME_PREFIX}-sn
+BE_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${NVA_BE_SUBNET_NAME_PREFIX}-sn
+MGMT_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${MGMT_SUBNET_NAME_PREFIX}-sn
 ILB_IP_ADDRESS=${NVA_FE_ILB_IP_ADDRESS}
 JUMPBOX_IP_ADDRESS=${MGMT_JUMPBOX_IP_ADDRESS}
 VM_SIZE=Standard_DS3
