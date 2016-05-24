@@ -108,14 +108,14 @@ function CustomPreRestartActions([string]$outputStr="Empty")
 	Write-Host $outputStr + ": Joining the computer to the domain..."
    
     Import-Module "sqlps" -DisableNameChecking
-    $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-    $domainUser = "$Domain\$AdminUser"
-    $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)	
 
     # Add domain user
+    $domainUser = "$Domain\$AdminUser"
     Add-DomainUser $domainUser $AdminPassword
 
     # Join domain
+    $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)	
 	Add-Computer -Credential $credential -DomainName $Domain -Force
 }
 
@@ -135,7 +135,7 @@ function CustomRestartActions([string]$outputStr="Empty")
 
 function Add-DomainUser([string]$user, [string]$adminPwd)
 {
-    Write-Host 'Calling Add-DomainUser with: ' $user
+    Write-Host 'Invoked Add-DomainUser with: ' $user
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server "(local)"
     $sqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $user)
     $sqlUser.LoginType = "WindowsUser"
@@ -145,6 +145,7 @@ function Add-DomainUser([string]$user, [string]$adminPwd)
 
 function Install-FailoverCluster
 {
+    Write-Host 'Install-FailoverCluster'
     Install-WindowsFeature -Name FailOver-Clustering -IncludeManagementTools
     Install-WindowsFeature -ComputerName $Sql2ServerName -Name FailOver-Clustering -IncludeManagementTools
     $cluster = New-Cluster -Name $ClusterName -StaticAddress $StaticIp -Node $Sql1ServerName,$Sql2ServerName -NoStorage
@@ -218,4 +219,4 @@ function Create-AvailabilityGroup
 }
 
 
-Restart-Call "Configuring SQL Server AlwaysOn feature using a scheduled restart job!"
+Restart-Call "Configuring SQL Server AlwaysOn feature using a scheduled restart job"
