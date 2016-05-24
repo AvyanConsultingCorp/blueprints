@@ -29,17 +29,17 @@ function Add-DomainUser([string]$user, [string]$adminPwd)
     $conn.ServerInstance = "(local)"
     $conn.Connect()
     $smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
-    $SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo,"${env:ComputerName}\$user"
+    $SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo, $user
     $SqlUser.LoginType = 'WindowsUser'
     $SqlUser.Create($adminPwd)
     $SqlUser.AddToRole("sysadmin")
 }
 
 # Add domain user to SQL server
-Add-DomainUser $AdminUser $AdminPassword
+$domainUser = "$Domain\$AdminUser"
+Add-DomainUser $domainUser $AdminPassword
 
 # Join domain
-$domainUser = "$Domain\$AdminUser"
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
 Add-Computer -Credential $credential -DomainName $Domain -Force

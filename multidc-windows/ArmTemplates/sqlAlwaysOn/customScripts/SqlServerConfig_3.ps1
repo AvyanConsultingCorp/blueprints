@@ -111,7 +111,7 @@ function CustomPreRestartActions([string]$outputStr="Empty")
 
     # Add domain user
     $domainUser = "$Domain\$AdminUser"
-    Add-DomainUser $AdminUser $AdminPassword
+    Add-DomainUser $domainUser $AdminPassword
 
     # Join domain
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
@@ -144,12 +144,13 @@ function Add-DomainUser([string]$user, [string]$adminPwd)
 
     $conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection -ArgumentList $env:ComputerName
     $conn.ServerInstance = "(local)"
-    $conn.Connect()
+    $conn.Connect
     $smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
-    $SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo,"${env:ComputerName}\$user"
+    $SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo, $user
     $SqlUser.LoginType = 'WindowsUser'
     #$sqlUser.PasswordPolicyEnforced = $false
     $SqlUser.Create($adminPwd)
+    $SqlUser.AddToRole("sysadmin")
 }
 
 function Install-FailoverCluster
