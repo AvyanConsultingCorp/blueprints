@@ -71,7 +71,7 @@ function Clear-Any-Restart([string] $key=$global:restartKey)
 
 function Restart-And-Resume([string] $script, [string] $step) 
 {
-	Restart-And-Run $global:restartKey "$global:powershell $script -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -ClusterName $ClusterName -Step $step"
+	Restart-And-Run $global:restartKey "$global:powershell -ExecutionPolicy Unrestricted $script -Domain $Domain -AdminUser $AdminUser -AdminPassword $AdminPassword -ClusterName $ClusterName -Step $step"
 }
 
 #endregion
@@ -95,13 +95,13 @@ function Restart-Call($cutomOutput)
 
 function CustomPreRestartActions([string]$outputStr="Empty")
 {
-	Write-Host $outputStr + ": Joining the computer to the domain..."
+    Write-Host $outputStr + ": Joining the computer to the domain..."
    
 	# Join domain
     $domainUser = "$Domain\$AdminUser"
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
-	Add-Computer -Credential $credential -DomainName $Domain -Force
+	Add-Computer -Credential $credential -DomainName $Domain -Force -Restart
 }
 
 function CustomRestartActions([string]$outputStr="Empty")

@@ -21,16 +21,26 @@ Param(
 
 Import-Module "sqlps" -DisableNameChecking
 
-$domainUser = "$Domain\$AdminUser"
-$srv = New-Object Microsoft.SqlServer.Management.Smo.Server "(local)"
-$sqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($srv, $domainUser)
-$sqlUser.LoginType = "WindowsUser"
-$sqlUser.create($AdminPassword)
-$sqlUser.AddToRole("sysadmin")
+function Add-DomainUser([string]$user, [string]$adminPwd)
+{
+    Write-Host 'Invoked Add-DomainUser with: ' $user
 
-$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
+    $conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection -ArgumentList $env:ComputerName
+    $conn.ServerInstance = "(local)"
+    $conn.Connect()
+    $smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
+    $SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo,"${env:ComputerName}\$user"
+    $SqlUser.LoginType = 'WindowsUser'
+    $SqlUser.Create($adminPwd)
+    $SqlUser.AddToRole("sysadmin")
+}
+
+# Add domain user to SQL server
+Add-DomainUser $AdminUser $AdminPassword
 
 # Join domain
+$domainUser = "$Domain\$AdminUser"
+$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
 Add-Computer -Credential $credential -DomainName $Domain -Force
 Restart-Computer -Force

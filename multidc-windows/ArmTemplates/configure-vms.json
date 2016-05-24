@@ -161,31 +161,31 @@
         "[concat(parameters('vmNamePrefix'),'-', 'fsw')]"
       ],
       "vmImage": [
-          {
-            "publisher": "MicrosoftWindowsServer",
-            "offer": "WindowsServer",
-            "sku": "2012-R2-Datacenter"
-          },
-          {
-            "publisher": "MicrosoftWindowsServer",
-            "offer": "WindowsServer",
-            "sku": "2012-R2-Datacenter"
-          },
-          {
-            "publisher": "MicrosoftSQLServer",
-            "offer": "SQL2014SP1-WS2012R2",
-            "sku": "Enterprise"
-          },
-          {
-            "publisher": "MicrosoftSQLServer",
-            "offer": "SQL2014SP1-WS2012R2",
-            "sku": "Enterprise"
-          },
-          {
-            "publisher": "MicrosoftWindowsServer",
-            "offer": "WindowsServer",
-            "sku": "2012-R2-Datacenter"
-          }
+        {
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2012-R2-Datacenter"
+        },
+        {
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2012-R2-Datacenter"
+        },
+        {
+          "publisher": "MicrosoftSQLServer",
+          "offer": "SQL2014SP1-WS2012R2",
+          "sku": "Enterprise"
+        },
+        {
+          "publisher": "MicrosoftSQLServer",
+          "offer": "SQL2014SP1-WS2012R2",
+          "sku": "Enterprise"
+        },
+        {
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2012-R2-Datacenter"
+        }
       ],
       "psArgument": [
         "[concat(' -SafeModePassword QAZwsx123 -Domain ', variables('sqlDomainName'))]",
@@ -266,7 +266,7 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipConfig2",
+            "name": "ipConfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[parameters('dnsServers')[1]]",
@@ -292,7 +292,7 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipConfig3",
+            "name": "ipConfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
@@ -322,7 +322,7 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipConfig4",
+            "name": "ipConfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
@@ -349,7 +349,7 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipConfig5",
+            "name": "ipConfig1",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
@@ -518,7 +518,7 @@
           "ipConfigurations": {
             "value": [
               {
-                "name": "ipconfig2",
+                "name": "ipconfig1",
                 "properties": {
                   "privateIPAllocationMethod": "Static",
                   "privateIPAddress": "[parameters('dnsServers')[1]]",
