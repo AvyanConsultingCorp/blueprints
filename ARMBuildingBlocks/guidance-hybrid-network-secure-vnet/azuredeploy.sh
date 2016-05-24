@@ -132,7 +132,7 @@ echo azure config mode arm
 ############################################################################
 
 
-TEMPLATE_URI=${URI_BASE}/guidance-hybrid-network-secure-vnet/Templates/azuredeploy.json
+TEMPLATE_URI=${URI_BASE}/guidance-hybrid-network-secure-vnet/Templates/ra-vnet-subnets-udr-nsg/azuredeploy.json
 
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
