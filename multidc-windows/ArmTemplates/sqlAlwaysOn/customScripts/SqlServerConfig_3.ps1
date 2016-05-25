@@ -29,6 +29,7 @@ $global:restartKey = "Restart-And-Resume"
 $global:RegRunKey ="HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 $global:powershell = (Join-Path $env:windir "system32\WindowsPowerShell\v1.0\powershell.exe")
 
+Import-Module "sqlps" -DisableNameChecking
 
 $Sql1ServerName = "$AppName-sql-1"
 $Sql2ServerName = "$AppName-sql-2"
@@ -106,29 +107,27 @@ function Restart-Call($cutomOutput)
 function CustomPreRestartActions([string]$outputStr="Empty")
 {
 	Write-Host $outputStr + ": Joining the computer to the domain..."
-   
-    Import-Module "sqlps" -DisableNameChecking
-
-    # Add domain user
-    $domainUser = "$Domain\$AdminUser"
-    Add-DomainUser $domainUser $AdminPassword
-
+      
     # Join domain
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-    $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)	
+    $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)	
 	Add-Computer -Credential $credential -DomainName $Domain -Force
 }
 
 function CustomRestartActions([string]$outputStr="Empty")
 {
-   	Write-Host $outputStr + ": Creating failover cluster and configuring AlwaysOn..."
+   Write-Host $outputStr + ": Adding domain user to SQL server..."
+   
+   # Add domain user
+   Add-DomainUser $AdminUser $AdminPassword
+	
+   Write-Host $outputStr + ": Creating failover cluster and configuring AlwaysOn..."
 
    # Install cluster
    Install-FailoverCluster
 
    # Configure SQL AlwaysOn
    Configure-AlwaysOn
-	
 }
 
 #endregion
@@ -141,16 +140,6 @@ function Add-DomainUser([string]$user, [string]$adminPwd)
     $sqlUser.LoginType = "WindowsUser"
     $sqlUser.create($adminPwd)
     $sqlUser.AddToRole("sysadmin")
-
-    #$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection -ArgumentList $env:ComputerName
-    #$conn.ServerInstance = "(local)"
-    #$conn.Connect
-    #$smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
-    #$SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo, $user
-    #$SqlUser.LoginType = 'WindowsUser'
-    #$sqlUser.PasswordPolicyEnforced = $false
-    #$SqlUser.Create($adminPwd)
-    #$SqlUser.AddToRole("sysadmin")
 }
 
 function Install-FailoverCluster
@@ -206,9 +195,8 @@ function Set-FirewallRule([string]$sqlServer)
 function Change-SqlLogon([string]$sqlServer)
 {
     $mc = new-object Microsoft.SQLServer.Management.SMO.WMI.ManagedComputer $sqlServer
-    $service = $mc.Services["MSSQLSERVER"]
-    $domainUser = "$Domain\$AdminUser"
-    $service.SetServiceAccount($domainUser, $AdminPassword)
+    $service = $mc.Services['MSSQLSERVER']
+    $service.SetServiceAccount($AdminUser, $AdminPassword)
     #$service.Stop()
     #$service.Refresh()
     #$service.Start()

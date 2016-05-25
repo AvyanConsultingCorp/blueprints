@@ -98,9 +98,8 @@ function CustomPreRestartActions([string]$outputStr="Empty")
     Write-Host $outputStr + ": Joining the computer to the domain..."
    
 	# Join domain
-    $domainUser = "$Domain\$AdminUser"
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-    $credential = New-Object System.Management.Automation.PSCredential ($domainUser, $secAdminPassword)
+    $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
 	Add-Computer -Credential $credential -DomainName $Domain -Force -Restart
 }
 
