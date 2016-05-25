@@ -24,15 +24,20 @@ Import-Module "sqlps" -DisableNameChecking
 function Add-DomainUser([string]$user, [string]$adminPwd)
 {
     Write-Host 'Invoked Add-DomainUser with: ' $user
+    $server = New-Object Microsoft.SqlServer.Management.Smo.Server '(local)'
+    $sqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $user)
+    $sqlUser.LoginType = "WindowsUser"
+    $sqlUser.create($adminPwd)
+    $sqlUser.AddToRole("sysadmin")
 
-    $conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection -ArgumentList $env:ComputerName
-    $conn.ServerInstance = "(local)"
-    $conn.Connect()
-    $smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
-    $SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo, $user
-    $SqlUser.LoginType = 'WindowsUser'
-    $SqlUser.Create($adminPwd)
-    $SqlUser.AddToRole("sysadmin")
+    #$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection -ArgumentList $env:ComputerName
+    #$conn.ServerInstance = "(local)"
+    #$conn.Connect()
+    #$smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
+    #$SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo, $user
+    #$SqlUser.LoginType = 'WindowsUser'
+    #$SqlUser.Create($adminPwd)
+    #$SqlUser.AddToRole("sysadmin")
 }
 
 # Add domain user to SQL server

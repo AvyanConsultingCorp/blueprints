@@ -136,21 +136,21 @@ function CustomRestartActions([string]$outputStr="Empty")
 function Add-DomainUser([string]$user, [string]$adminPwd)
 {
     Write-Host 'Invoked Add-DomainUser with: ' $user
-    #$server = New-Object Microsoft.SqlServer.Management.Smo.Server "(local)"
-    #$sqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $user)
-    #$sqlUser.LoginType = "WindowsUser"
-    #$sqlUser.create($adminPwd)
-    #$sqlUser.AddToRole("sysadmin")
+    $server = New-Object Microsoft.SqlServer.Management.Smo.Server '(local)'
+    $sqlUser = New-Object Microsoft.SqlServer.Management.Smo.Login($server, $user)
+    $sqlUser.LoginType = "WindowsUser"
+    $sqlUser.create($adminPwd)
+    $sqlUser.AddToRole("sysadmin")
 
-    $conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection -ArgumentList $env:ComputerName
-    $conn.ServerInstance = "(local)"
-    $conn.Connect
-    $smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
-    $SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo, $user
-    $SqlUser.LoginType = 'WindowsUser'
+    #$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection -ArgumentList $env:ComputerName
+    #$conn.ServerInstance = "(local)"
+    #$conn.Connect
+    #$smo = New-Object Microsoft.SqlServer.Management.Smo.Server -ArgumentList $conn
+    #$SqlUser = New-Object -TypeName Microsoft.SqlServer.Management.Smo.Login -ArgumentList $smo, $user
+    #$SqlUser.LoginType = 'WindowsUser'
     #$sqlUser.PasswordPolicyEnforced = $false
-    $SqlUser.Create($adminPwd)
-    $SqlUser.AddToRole("sysadmin")
+    #$SqlUser.Create($adminPwd)
+    #$SqlUser.AddToRole("sysadmin")
 }
 
 function Install-FailoverCluster

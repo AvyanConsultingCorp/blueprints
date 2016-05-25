@@ -147,7 +147,7 @@
     "sqlAlwaysOnConfigScriptFolder": "[concat(parameters('projectName'), '/', 'customScripts')]",
     "sqlAlwaysOnConfigScriptFileName": "SqlServerConfig_",
     "storageAccountUniqueName": "[concat(parameters('storageAccountName'), uniqueString(resourceGroup().id))]",
-    "sqlDomainName": "poltergeist.local",
+    "sqlDomainName": "poltergeist",
     "sqlDomainLogin": "[parameters('adminUsername')]",
     "clusterName": "app1cluster",
     "lbBackendPool": "[concat(parameters('loadBalancerName'),'-pool')]",
