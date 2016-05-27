@@ -1,0 +1,41 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "value": "myhr1"
+    },
+    "vmNamePrefix": {
+      "value": "manivm1"
+    },
+    "vmComputerName": {
+      "value": "manivmcomputer"
+    },
+    "subnetNamePrefix": {
+      "value": "manisnet"
+    },
+    "subnetId": {
+      "value": "/subscriptions/ce0f816f-6ffb-4e1c-bc6c-d8a5bc69765c/resourceGroups/manitestvnetrg/providers/Microsoft.Network/virtualNetworks/manitest123-vnet/subnets/manitest123-frontend-subnet"
+    },
+    "ilbIpAddress": {
+      "value": "10.20.1.15"
+    },
+    "osType": {
+      "value": "Windows"
+    },
+    "adminUsername": {
+      "value": "pnpadmin"
+    },
+    "adminPassword": {
+      "value": ""
+    },
+    "numberVMs": {
+      "value": 2
+    },
+    "stgAccountName": {
+      "value": "manistor"
+    }
+
+
+  }
+}
