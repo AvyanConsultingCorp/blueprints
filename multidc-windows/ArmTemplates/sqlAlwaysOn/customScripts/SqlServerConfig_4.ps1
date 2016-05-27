@@ -31,11 +31,12 @@ function Add-DomainUser([string]$user, [string]$adminPwd)
     $sqlUser.AddToRole("sysadmin")
 }
 
-# Add domain user to SQL server
-Add-DomainUser $AdminUser $AdminPassword
-
 # Join domain
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
 Add-Computer -Credential $credential -DomainName $Domain -Force
+
+# Add domain user to SQL server
+Add-DomainUser $AdminUser $AdminPassword
+
 Restart-Computer -Force
