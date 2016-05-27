@@ -112,22 +112,23 @@ function CustomPreRestartActions([string]$outputStr="Empty")
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)	
 	Add-Computer -Credential $credential -DomainName $Domain -Force
+    Write-Host $outputStr + ": Adding domain user to SQL server..."
+   
+    # Add domain user
+    Add-DomainUser $AdminUser $AdminPassword
+   
+    Write-Host $outputStr + ": Creating failover cluster and configuring AlwaysOn..."
+
+    # Install cluster
+    Install-FailoverCluster
+
+    # Configure SQL AlwaysOn
+    Configure-AlwaysOn
 }
 
 function CustomRestartActions([string]$outputStr="Empty")
 {
-   Write-Host $outputStr + ": Adding domain user to SQL server..."
-   
-   # Add domain user
-   Add-DomainUser $AdminUser $AdminPassword
-	
-   Write-Host $outputStr + ": Creating failover cluster and configuring AlwaysOn..."
 
-   # Install cluster
-   Install-FailoverCluster
-
-   # Configure SQL AlwaysOn
-   Configure-AlwaysOn
 }
 
 #endregion

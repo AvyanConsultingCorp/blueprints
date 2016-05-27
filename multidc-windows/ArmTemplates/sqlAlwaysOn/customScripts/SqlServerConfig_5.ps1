@@ -101,14 +101,15 @@ function CustomPreRestartActions([string]$outputStr="Empty")
     $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential ($AdminUser, $secAdminPassword)
 	Add-Computer -Credential $credential -DomainName $Domain -Force -Restart
+   	
+    Write-Host $outputStr + ": Initalizing and formatting disks..."
+    
+    Format-Drive F
+    Create-FileShare 'F:'
 }
 
 function CustomRestartActions([string]$outputStr="Empty")
 {
-   	Write-Host $outputStr + ": Initalizing and formatting disks..."
-    
-    Format-Drive F
-    Create-FileShare 'F:'
 }
 
 function Format-Drive([string]$driveLetter='F')
