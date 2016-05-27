@@ -388,6 +388,7 @@
         ],
         "loadBalancingRules": [
           {
+            "name": "sqlAlwaysOnListener",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/frontendIpConfigurations/', variables('lbFrontendIpName'))]"
@@ -399,22 +400,21 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"
               },
               "protocol": "Tcp",
-              "frontendPort": 80,
-              "backendPort": 80,
-              "idleTimeoutInMinutes": 15
-            },
-            "Name": "lbrule"
+              "frontendPort": 1433,
+              "backendPort": 1433,
+              "enableFloatingIP": true
+            }
           }
         ],
         "probes": [
           {
+            "name": "sqlAlwaysOnProbe",
             "properties": {
               "protocol": "Tcp",
-              "port": 80,
+              "port": 59999,
               "intervalInSeconds": 15,
               "numberOfProbes": 2
-            },
-            "name": "lbprobe"
+            }
           }
         ]
       },
