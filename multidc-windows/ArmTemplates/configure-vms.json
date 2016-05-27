@@ -397,7 +397,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/backendAddressPools/', variables('lbBackendPool'))]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/lbprobe')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName')), '/probes/sqlAlwaysOnProbe')]"
               },
               "protocol": "Tcp",
               "frontendPort": 1433,
