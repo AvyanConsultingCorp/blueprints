@@ -93,5 +93,11 @@ To deploy each resource group, use the templates below. We recommend you read th
 </tr>
 </table>
 
+### Template composition
+
+The figure below shows the template composition for the entire solution.
+
+<img src="http://mspnp.github.io/Blueprint%20Forced%20Tunnelling.svg">
+
 [0]: https://acom.azurecomcdn.net/80C57D/cdn/mediahandler/docarticles/dpsmedia-prod/azure.microsoft.com/en-us/documentation/articles/guidance-iaas-ra-secure-vnet-hybrid/20160526050049/figure1.png "Secure hybrid network architecture"
 [1]: https://acom.azurecomcdn.net/80C57D/cdn/mediahandler/docarticles/dpsmedia-prod/azure.microsoft.com/en-us/documentation/articles/guidance-iaas-ra-secure-vnet-hybrid/20160527062741/resource-groups.gif "Resource group progression"
