@@ -675,7 +675,7 @@
         "Microsoft.Resources/deployments/update-bdc-nic",
         "Microsoft.Resources/deployments/deploy-bdc-vm",
         "Microsoft.Resources/deployments/update-vnet-dns-2",
-        "Microsoft.Resources/deployments/update-sql-nic"
+        "[concat('Microsoft.Resources/deployments/update-sql-nic-',copyIndex())]"
       ],
       "properties": {
         "availabilitySet": {
