@@ -610,7 +610,7 @@
       }
     },
     {
-      "name": "update-sql-nic",
+      "name": "[concat('update-sql-nic-',copyIndex())]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2016-02-01",
       "dependsOn": [
