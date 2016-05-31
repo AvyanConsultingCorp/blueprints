@@ -1,0 +1,167 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmComputerName": {
+      "type": "string",
+      "maxLength": 15
+    },
+    "vmSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_GS1",
+        "Standard_GS2",
+        "Standard_GS3",
+        "Standard_GS4",
+        "Standard_GS5",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2"
+      ],
+      "defaultValue": "Standard_DS3"
+    },
+    "diagStorageConfig": {
+      "type": "object",
+      "metadata": {
+        "description": "Diagnostic storage account configuration."
+      }
+    },
+    "vhdStorageConfig": {
+      "type": "object",
+      "metadata": {
+        "description": "VHD storage account configuration."
+      }
+    },
+    "snid": { "type": "string" },
+    "osType": {
+      "type": "string",
+      "allowedValues": [
+        "Windows",
+        "Ubuntu"
+      ]
+    },
+    "osProfile": {
+      "type": "object",
+      "metadata": {
+        "description": "Operating system profile."
+      }
+    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vmStorageAccountContainerName": "vhds",
+    "vmNicName": "[concat(parameters('vmComputerName'),'-nic')]",
+    "vmOSDiskName": "[concat(parameters('vmComputerName'),'-os.vhd')]",
+    "vmDataDiskName": "[concat(parameters('vmComputerName'),'-data.vhd')]",
+    "vmAvSetName": "[concat(parameters('vmComputerName'),'-as')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "2015-06-15",
+      "name": "[variables('vmAvSetName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM Availability Set" },
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 3
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('vmNicName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM NIC" },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": { "id": "[parameters('snid')]" }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmComputerName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNicName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('vmAvSetName'))]"
+      ],
+      "properties": {
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvSetName'))]" },
+        "hardwareProfile": { "vmSize": "[parameters('vmSize')]" },
+        "osProfile": {
+          "computerName": "[parameters('vmComputerName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('osProfile').publisher]",
+            "offer": "[parameters('osProfile').offer]",
+            "sku": "[parameters('osProfile').sku]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[variables('vmOsDiskName')]",
+            "vhd": { "uri": "[concat('http://', parameters('vhdStorageConfig').name, '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('vmDataDiskName')]",
+              "vhd": { "uri": "[concat('http://', parameters('vhdStorageConfig').name, '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
+              "diskSizeGB": "127",
+              "createOption": "Empty",
+              "lun": 0
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('http://', parameters('diagStorageConfig').name, '.blob.core.windows.net')]"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]" }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[parameters('vmComputerName')]"
+    }
+  }
+}
+
