@@ -32,20 +32,6 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
-    <None Include="Not used\bb-data-disk-add.json" />
-    <None Include="Not used\bb-nsg-remote-access.json" />
-    <None Include="Not used\bb-subnets.json" />
-    <None Include="Not used\bb-vm-1nic-pip-static-private-ip.json" />
-    <None Include="Not used\bb-vm-1nic-pip-static-private-ip.parameters.json" />
-    <None Include="Not used\bb-vm-1nic-pip.json" />
-    <None Include="Not used\bb-vms-1nic.json" />
-    <None Include="Not used\bb-vnet-1subnet-nsg-udr.json" />
-    <None Include="Not used\bb-vnet-1subnet-nsg.json" />
-    <None Include="Not used\bb-vnet-1subnet-udr.json" />
-    <None Include="Not used\bb-vnet-3subnets.json" />
-    <None Include="Not used\bb-vpn-connection.json" />
-    <None Include="Not used\bb-vpn-gateway.json" />
-    <None Include="Not used\bb-vpn-gateway.parameters.json" />
     <None Include="Scripts\apache.sh" />
     <None Include="Scripts\iisaspnet.ps1" />
     <None Include="Scripts\iisaspnet.ps1.zip" />
@@ -53,8 +39,8 @@
     <None Include="Templates\bb-custom-linux-extension.json" />
     <None Include="Templates\bb-dsc-extension.json" />
     <None Include="Templates\bb-dsc-extension2.json" />
-    <None Include="Templates\bb-ilb-backend-http-https.json" />
-    <None Include="Templates\bb-ilb-backend-http-https.parameters.json" />
+    <None Include="Templates\bb-ilb-backend-http-https\azuredeploy.json" />
+    <None Include="Templates\bb-ilb-backend-http-https\azuredeploy.parameters.json" />
     <None Include="Templates\bb-nsg.json" />
     <None Include="Templates\bb-gatewaysubnet-udr.json" />
     <None Include="Templates\bb-gatewaysubnet.json" />
