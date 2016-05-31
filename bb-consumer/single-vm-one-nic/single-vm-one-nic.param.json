@@ -37,11 +37,11 @@
         },
         "storageAccounts": [
           {
-            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType,'diagst')]",
+            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType, uniqueString(resourceGroup().id), 'diag')]",
             "type": "Standard_LRS"
           },
           {
-            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType,'st0')]",
+            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType, uniqueString(resourceGroup().id),'st')]",
             "type": "Premium_LRS"
           }
         ]
