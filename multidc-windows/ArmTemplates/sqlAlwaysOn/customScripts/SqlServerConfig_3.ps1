@@ -120,7 +120,7 @@ function CustomPreRestartActions([string]$outputStr="Empty")
     Write-Host $outputStr + ": Creating failover cluster and configuring AlwaysOn..."
 
     # Install cluster
-    Install-FailoverCluster
+    Install-FailoverCluster $credential
 
     # Configure SQL AlwaysOn
     Configure-AlwaysOn
@@ -143,11 +143,11 @@ function Add-DomainUser([string]$user, [string]$adminPwd)
     $sqlUser.AddToRole("sysadmin")
 }
 
-function Install-FailoverCluster
+function Install-FailoverCluster([System.Management.Automation.PSCredential]$credential)
 {
     Write-Host 'Install-FailoverCluster'
     Install-WindowsFeature -Name FailOver-Clustering -IncludeManagementTools
-    Install-WindowsFeature -ComputerName $Sql2ServerName -Name FailOver-Clustering -IncludeManagementTools
+    Install-WindowsFeature -ComputerName $Sql2ServerName -Name FailOver-Clustering -IncludeManagementTools -Credential $credential
     $cluster = New-Cluster -Name $ClusterName -StaticAddress $StaticIp -Node $Sql1ServerName,$Sql2ServerName -NoStorage
     Set-ClusterQuorum -InputObject $cluster -FileShareWitness "\\$AppName-fsw\$ClusterName"
 }
