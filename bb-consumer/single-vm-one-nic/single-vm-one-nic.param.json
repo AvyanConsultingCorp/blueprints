@@ -37,7 +37,7 @@
         },
         "storageAccounts": [
           {
-            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType,'diagSt')]",
+            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType,'diagst')]",
             "type": "Standard_LRS"
           },
           {
