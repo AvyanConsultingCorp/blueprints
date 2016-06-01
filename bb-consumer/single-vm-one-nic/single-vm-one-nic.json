@@ -60,7 +60,7 @@
       "dependsOn": [ "Microsoft.Resources/deployments/vnet" ],
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('vnetTemplate')]" },
+        "templateLink": { "uri": "[variables('vmTemplate')]" },
         "parameters": {
           "vmComputerName": { "value": "[concat(parameters('virtualMachineSettings').appName,'-',parameters('virtualMachineSettings').appType,'-vm')]" },
           "vmSize": {"value": "[parameters('virtualMachineSettings').size]"},
