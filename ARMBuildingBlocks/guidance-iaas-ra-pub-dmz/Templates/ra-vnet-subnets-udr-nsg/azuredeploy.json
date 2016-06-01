@@ -11,7 +11,9 @@
     "vnetWebSubnetPrefix": { "type": "string" },
     "vnetBizSubnetPrefix": { "type": "string" },
     "vnetDbSubnetPrefix": { "type": "string" },
-    "vnetGwSubnetPrefix": { "type": "string" }
+    "vnetGwSubnetPrefix": { "type": "string" },
+    "vnetDmzFeSubnetPrefix": { "type": "string" },
+    "vnetDmzBeSubnetPrefix": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
