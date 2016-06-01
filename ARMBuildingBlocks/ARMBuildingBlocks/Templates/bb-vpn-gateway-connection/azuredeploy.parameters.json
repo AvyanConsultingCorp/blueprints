@@ -1,0 +1,22 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "value": "my-base-name"
+    },
+    "infrastructureSettings": {
+      "value": {
+        "vnetName": "my-vnet-name"
+      }
+    },
+    "gatewaySettings": {
+      "value": {
+        "subnetAddressPrefix": "10.1.255.224/27",
+        "onPremisesAddressSpace": "192.168.0.0/24",
+        "onPremisesPublicIpAddress": "11.22.33.44",
+        "onPremisesSharedKey": "myipsecsharedkey123"
+      }
+    }
+  }
+}
