@@ -44,7 +44,7 @@ URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBl
 # Default parameter values
 BASE_NAME=
 SUBSCRIPTION=
-LOCATION=centralus
+LOCATION=westus
 OS_TYPE=Windows
 ADMIN_USER_NAME=adminUser
 ADMIN_PASSWORD=adminP@ssw0rd
@@ -52,7 +52,7 @@ ADMIN_PASSWORD=adminP@ssw0rd
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 
 # VPN parameter defaults
-INPUT_ON_PREMISES_PUBLIC_IP=11.22.33.44
+INPUT_ON_PREMISES_PUBLIC_IP=
 INPUT_ON_PREMISES_ADDRESS_SPACE=192.168.0.0/16
 INPUT_VPN_IPSEC_SHARED_KEY=myipsecsharedkey123
 
@@ -66,7 +66,7 @@ VNET_BIZ_SUBNET_PREFIX=10.0.4.0/24
 VNET_DB_SUBNET_PREFIX=10.0.5.0/24
 VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
 VNET_DMZ_FE_SUBNET_PREFIX=10.0.6.0/24
-VNET_DMZ_BE_SUBNET_PREFIX=10.0.6.0/24
+VNET_DMZ_BE_SUBNET_PREFIX=10.0.7.0/24
 
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
@@ -100,7 +100,7 @@ echo azure config mode arm
 ############################################################################
 
 
-TEMPLATE_URI=${URI_BASE}/guidance-hybrid-network-secure-vnet/Templates/ra-vnet-subnets-udr-nsg/azuredeploy.json
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-pub-dmz/Templates/ra-vnet-subnets-udr-nsg/azuredeploy.json
 
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
