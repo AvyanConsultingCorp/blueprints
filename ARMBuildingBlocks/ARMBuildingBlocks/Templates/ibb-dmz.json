@@ -1,0 +1,232 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "feSubnetId": { "type": "string" },
+    "beSubnetId": { "type": "string" },
+    "mgmtSubnetId": { "type": "string" },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+    "vmSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_GS1",
+        "Standard_GS2",
+        "Standard_GS3",
+        "Standard_GS4",
+        "Standard_GS5",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2"
+      ]
+    },
+    "publicIPAddressName": {
+      "type": "string",
+      "defaultValue": "myPublicIP",
+      "metadata": {
+        "description": "Public IP Name"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vmNamePrefix": "dmz",
+    "vmComputerNamePrefix": "dmz",
+    "numVMs": 2,
+    "osType": "Ubuntu",
+    "lbName": "[concat(parameters('baseName'),'-dmz-lb')]",
+    "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+    "lbFEName": "feIpConfig1",
+    "lbFEId": "[concat(variables('lbId'),'/frontendIPConfigurations/',variables('lbFEName'))]",
+    "lbBEName": "beAddPool",
+    "lbBEId": "[concat(variables('lbId'),'/backendAddressPools/',variables('lbBEName'))]",
+    "uniqueString": "[uniqueString(resourceGroup().Id)]",
+    "vmAvSetName": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),'-as')]",
+    "vmsTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vms-3nics-lbbe.json",
+    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-custom-linux-extension.json",
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/dmz-nva.sh",
+    "scriptName": "dmz-nva.sh",
+    "publicIPAddressType": "Static",
+    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2016-03-30",
+      "name": "[parameters('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+      }
+    },
+
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('lbName')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]"
+      ],
+      "tags": {
+        "displayName": "Load balancer"
+      },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "feIpConfig1",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('publicIPAddressID')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [ { "name": "[variables('lbBEName')]" } ],
+        "loadBalancingRules": [
+          {
+            "name": "http",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbFEId')]" },
+              "backendAddressPool": { "id": "[variables('lbBEId')]" },
+              "frontendPort": 80,
+              "backendPort": 80,
+              "protocol": "Tcp"
+            }
+          },
+          {
+            "name": "https",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[variables('lbFEId')]" },
+              "backendAddressPool": { "id": "[variables('lbBEId')]" },
+              "frontendPort": 443,
+              "backendPort": 443,
+              "protocol": "Tcp"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "tcpProbe",
+            "properties": {
+              "port": 80,
+              "protocol": "Tcp",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2,
+              "requestPath": "/"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[variables('vmAvSetName')]",
+      "tags": {
+        "displayName": "Availability set"
+      },
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
+    },
+
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[toLower(concat(replace(parameters('baseName'),'-',''), copyindex(1), variables('uniqueString')))]",
+      "tags": {
+        "displayName": "Storage accounts"
+      },
+      "copy": {
+        "name": "stgCount",
+        "count": "[add(variables('numVms'),1)]"
+      },
+      "properties": { "accountType": "Premium_LRS" }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "nvas",
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/',variables('vmAvSetName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'1',variables('uniqueString'))]",
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),'2',variables('uniqueString'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('vmsTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vmNamePrefix": { "value": "[variables('vmNamePrefix')]" },
+          "vmComputerNamePrefix": { "value": "[variables('vmComputerNamePrefix')]" },
+          "vmSize": { "value": "[parameters('vmSize')]" },
+          "snid1": { "value": "[parameters('feSubnetId')]" },
+          "snid2": { "value": "[parameters('beSubnetId')]" },
+          "snid3": { "value": "[parameters('mgmtSubnetId')]" },
+          "nic1IpForwarding": { "value": true },
+          "nic2IpForwarding": { "value": true },
+          "lbBackendPoolId": { "value": "[variables('lbBEId')]" },
+          "stgAccountNames": {
+            "value": [
+              "[concat(parameters('baseName'),'1',variables('uniqueString'))]",
+              "[concat(parameters('baseName'),'2',variables('uniqueString'))]"
+            ]
+          },
+          "osType": { "value": "[variables('osType')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "numberVMs": { "value": "[variables('numVMs')]" }
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat('routing',copyindex(1))]",
+      "dependsOn": [ "Microsoft.Resources/deployments/nvas" ],
+      "copy": {
+        "name": "extensionCount",
+        "count": "[variables('numVMs')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('extensionTemplate')]" },
+        "parameters": {
+          "vmName": { "value": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),copyindex(1),'-vm')]" },
+          "fileUri": { "value": "[variables('scriptUri')]" },
+          "scriptName": { "value": "[variables('scriptName')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "resourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().Name]"
+    }
+  }
+}
