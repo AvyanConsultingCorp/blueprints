@@ -1,0 +1,44 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachineSettings": {
+      "value": {
+        "size": "Standard_DS1",
+        "osType": "Windows",
+        "adminUserName": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "appName": "app1",
+        "appType": "dev",
+        "osProfile": {
+          "windows": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter"
+          },
+          "linux": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "14.04.2-LTS"
+          }
+        }
+      }
+    },
+    "infrastructureSettings": {
+      "value": {
+        "vnetAddressSpaces": [ "10.1.0.0/16" ],
+        "subnetAddressPrefix": "10.1.0.1/24",
+        "storageAccounts": [
+          {
+            "nameSuffix": "diag",
+            "type": "Standard_LRS"
+          },
+          {
+            "nameSuffix": "st",
+            "type": "Premium_LRS"
+          }
+        ]
+      }
+    }
+  }
+  }

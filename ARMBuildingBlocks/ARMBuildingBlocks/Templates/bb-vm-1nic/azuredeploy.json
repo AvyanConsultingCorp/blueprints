@@ -1,0 +1,83 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachineSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for the virtual machine."
+      }
+    },
+    "infrastructureSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for the infrastructure."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vmTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-single-vm-1-nic.json')]",
+    "vnetTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-vnet-1-subnet.json')]",
+    "vnetConfig": {
+      "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-vnet')]",
+      "addressPrefixes": "[parameters('infrastructureSettings').vnetAddressSpaces]"
+    },
+    "subnetConfig": {
+      "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-sn')]",
+      "addressPrefix": "[parameters('infrastructureSettings').subnetAddressPrefix]"
+    },
+    "storageNamePrefix": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "copy": {
+        "count": 2,
+        "name": "storageAccountLoop"
+      },
+      "apiVersion": "2015-06-15",
+      "name": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[copyIndex()].nameSuffix)]",
+      "location": "[variables('location')]",
+      "properties": { "accountType": "[parameters('infrastructureSettings').storageAccounts[copyIndex()].type]" }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "vnet",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('vnetTemplate')]" },
+        "parameters": {
+          "vnetConfig": { "value": "[variables('vnetConfig')]" },
+          "subnetConfig": { "value": "[variables('subnetConfig')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "vm",
+      "dependsOn": [ "Microsoft.Resources/deployments/vnet" ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('vmTemplate')]" },
+        "parameters": {
+          "vmComputerName": { "value": "[concat(parameters('virtualMachineSettings').appName,'-',parameters('virtualMachineSettings').appType,'-vm')]" },
+          "vmSize": { "value": "[parameters('virtualMachineSettings').size]" },
+          "diagStorageName": { "value": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[0].nameSuffix)]" },
+          "vhdStorageName": { "value": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[1].nameSuffix)]" },
+          "osType": { "value": "[parameters('virtualMachineSettings').osType]" },
+          "snid": { "value": "[reference('vnet').outputs.subnetId.value]" },
+          "adminUsername": { "value": "[parameters('virtualMachineSettings').adminUsername]" },
+          "adminPassword": { "value": "[parameters('virtualMachineSettings').adminPassword]" },
+          "osProfile": { "value": "[parameters('virtualMachineSettings').osProfile.windows]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
+
+
