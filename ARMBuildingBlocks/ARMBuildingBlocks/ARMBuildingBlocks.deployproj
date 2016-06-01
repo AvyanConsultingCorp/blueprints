@@ -49,6 +49,7 @@
     <None Include="Scripts\apache.sh" />
     <None Include="Scripts\iisaspnet.ps1" />
     <None Include="Scripts\iisaspnet.ps1.zip" />
+    <None Include="Scripts\dmz-nva.sh" />
     <None Include="Scripts\nva.sh" />
     <None Include="Templates\bb-custom-linux-extension.json" />
     <None Include="Templates\bb-dsc-extension.json" />
@@ -68,6 +69,7 @@
     <None Include="Templates\bb-vnet-1subnet.json" />
     <None Include="Templates\bb-vpn-gateway-connection.json" />
     <None Include="Templates\bb-vpn-gateway-connection.parameters.json" />
+    <None Include="Templates\ibb-dmz.json" />
     <None Include="Templates\ibb-vm-iis.json" />
     <None Include="Templates\ibb-vm-apache.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
