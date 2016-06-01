@@ -18,7 +18,7 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "vmTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-single-vm-1-nic.json')]",
-    "vnetTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-vnet-1-subnet.json')]"
+    "vnetTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-vnet-1-subnet.json')]",
     "vnetConfig": {
       "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-vnet')]",
       "addressPrefixes": "[parameters('infrastructureSettings').vnetAddressSpaces]"
