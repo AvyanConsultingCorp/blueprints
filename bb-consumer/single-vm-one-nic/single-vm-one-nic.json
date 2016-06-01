@@ -70,7 +70,7 @@
           "snid": { "value": "[reference('vnet').outputs.subnetId.value]" },
           "adminUsername": { "value": "[parameters('virtualMachineSettings').adminUsername]" },
           "adminPassword": { "value": "[parameters('virtualMachineSettings').adminPassword]" },
-          "osProfile": {"value": "[parameters('virtualMachineSettings').osProfile"}
+          "osProfile": {"value": "[parameters('virtualMachineSettings').osProfile.windows]"}
         }
       }
     }

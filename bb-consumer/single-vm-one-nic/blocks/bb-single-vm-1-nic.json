@@ -122,9 +122,9 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[parameters('osProfile').windows.publisher]",
-            "offer": "[parameters('osProfile').windows.offer]",
-            "sku": "[parameters('osProfile').windows.sku]",
+            "publisher": "[parameters('osProfile').publisher]",
+            "offer": "[parameters('osProfile').offer]",
+            "sku": "[parameters('osProfile').sku]",
             "version": "latest"
           },
           "osDisk": {
