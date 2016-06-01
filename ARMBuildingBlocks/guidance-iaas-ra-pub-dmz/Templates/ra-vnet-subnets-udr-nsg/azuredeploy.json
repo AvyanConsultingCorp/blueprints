@@ -27,6 +27,8 @@
     "webUdrName": "[concat(parameters('baseName'),'-web-udr')]",
     "bizUdrName": "[concat(parameters('baseName'),'-biz-udr')]",
     "dbUdrName": "[concat(parameters('baseName'),'-db-udr')]",
+    "vnetDmzFeSubnetName": "[concat(parameters('baseName'),'-dmz-fe-sn')]",
+    "vnetDmzBeSubnetName": "[concat(parameters('baseName'),'-dmz-be-sn')]",
 
     "nsgTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nsg.json"
   },
@@ -126,7 +128,7 @@
       "location": "[variables('location')]",
       "name": "[variables('webUdrName')]",
       "properties": {
-        "routes": []
+        "routes": [ ]
       }
     },
 
@@ -136,7 +138,7 @@
       "location": "[variables('location')]",
       "name": "[variables('bizUdrName')]",
       "properties": {
-        "routes": []
+        "routes": [ ]
       }
     },
 
@@ -146,7 +148,7 @@
       "location": "[variables('location')]",
       "name": "[variables('dbUdrName')]",
       "properties": {
-        "routes": []
+        "routes": [ ]
       }
     },
 
@@ -199,7 +201,7 @@
             "properties": {
               "addressPrefix": "[parameters('vnetWebSubnetPrefix')]",
               "networkSecurityGroup": { "id": "[reference('web-nsg').outputs.nsgid.value]" },
-              "routeTable": {"id": "[resourceId('Microsoft.Network/routeTables', variables('webUdrName'))]"}
+              "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables', variables('webUdrName'))]" }
             }
           },
           {
@@ -207,7 +209,7 @@
             "properties": {
               "addressPrefix": "[parameters('vnetBizSubnetPrefix')]",
               "networkSecurityGroup": { "id": "[reference('biz-nsg').outputs.nsgid.value]" },
-              "routeTable": {"id": "[resourceId('Microsoft.Network/routeTables', variables('bizUdrName'))]"}
+              "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables', variables('bizUdrName'))]" }
             }
           },
           {
@@ -218,15 +220,24 @@
               "routeTable": { "id": "[resourceId('Microsoft.Network/routeTables', variables('dbUdrName'))]" }
             }
           },
-
           {
             "name": "GatewaySubnet",
             "properties": {
               "addressPrefix": "[parameters('vnetGwSubnetPrefix')]"
             }
+          },
+          {
+            "name": "[variables('vnetDmzFeSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetDmzFeSubnetPrefix')]"
+            }
+          },
+          {
+            "name": "[variables('vnetDmzBeSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetDmzBeSubnetPrefix')]"
+            }
           }
-
-
         ]
       }
     }
