@@ -26,21 +26,15 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetConfig": {
-          "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-vnet')]",
-          "addressPrefixes": [ "10.1.0.0/16" ]
-        },
-        "subnetConfig": {
-          "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-web-sn')]",
-          "addressPrefix": "10.1.0.1/24"
-        },
+        "vnetAddressSpaces": [ "10.1.0.0/16" ],
+        "subnetAddressPrefix": "10.1.0.1/24",
         "storageAccounts": [
           {
-            "name": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id), 'diag')]",
+            "nameSuffix": "diag",
             "type": "Standard_LRS"
           },
           {
-            "name": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id),'st')]",
+            "nameSuffix": "st",
             "type": "Premium_LRS"
           }
         ]

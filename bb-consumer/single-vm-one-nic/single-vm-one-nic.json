@@ -17,8 +17,16 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "vmTemplate": "[uri(deployment().properties.templateLink.uri, 'Blocks/bb-single-vm-1-nic.json')]",
-    "vnetTemplate": "[uri(deployment().properties.templateLink.uri, 'Blocks/bb-vnet-1-subnet.json')]"
+    "vmTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-single-vm-1-nic.json')]",
+    "vnetTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-vnet-1-subnet.json')]"
+    "vnetConfig": {
+      "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-vnet')]",
+      "addressPrefixes": "[parameters('infrastructureSettings').vnetAddressSpaces]"
+    },
+    "subnetConfig": {
+      "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-sn')]",
+      "addressPrefix": "[parameters('infrastructureSettings').subnetAddressPrefix]"
+    }
   },
   "resources": [
     {
@@ -28,7 +36,7 @@
         "name": "storageAccountLoop"
       },
       "apiVersion": "2015-06-15",
-      "name": "[parameters('infrastructureSettings').storageAccounts[copyIndex()].name]",
+      "name": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id), parameters('infrastructureSettings').storageAccounts[copyIndex()].nameSuffix)]",
       "location": "[variables('location')]",
       "properties": { "accountType": "[parameters('infrastructureSettings').storageAccounts[copyIndex()].type]" }
     },
@@ -40,8 +48,8 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('vnetTemplate')]" },
         "parameters": {
-          "vnetConfig": { "value": "[parameters('infrastructureSettings').vnetConfig]" },
-          "subnetConfig": { "value": "[parameters('infrastructureSettings').subnetConfig]" }
+          "vnetConfig": { "value": "[variables('vnetConfig')]" },
+          "subnetConfig": { "value": "[variables('subnetConfig')]" }
         }
       }
     },
