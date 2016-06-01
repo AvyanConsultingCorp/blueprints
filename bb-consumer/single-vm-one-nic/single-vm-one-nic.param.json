@@ -8,7 +8,6 @@
         "osType": "Windows",
         "adminUserName": "testuser",
         "adminPassword": "AweS0me@PW",
-        "count": 2,
         "appName": "app1",
         "appType": "dev",
         "osProfile": {
@@ -28,20 +27,20 @@
     "infrastructureSettings": {
       "value": {
         "vnetConfig": {
-          "name": "[concat(variables('virtualMachineSettings').appName, '-', variables('virtualMachineSettings').appType, '-vnet')]",
+          "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-vnet')]",
           "addressPrefixes": [ "10.1.0.0/16" ]
         },
         "subnetConfig": {
-          "name": "[concat(variables('virtualMachineSettings').appName, '-', variables('virtualMachineSettings').appType, '-web-sn')]",
+          "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-web-sn')]",
           "addressPrefix": "10.1.0.1/24"
         },
         "storageAccounts": [
           {
-            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType, uniqueString(resourceGroup().id), 'diag')]",
+            "name": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id), 'diag')]",
             "type": "Standard_LRS"
           },
           {
-            "name": "[concat(variables('virtualMachineSettings').appName, variables('virtualMachineSettings').appType, uniqueString(resourceGroup().id),'st')]",
+            "name": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id),'st')]",
             "type": "Premium_LRS"
           }
         ]
