@@ -1,0 +1,46 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "value": {
+        "namePrefix": "rs",
+        "computerNamePrefix": "rs",
+        "size": "Standard_DS1",
+        "osType": "windows",
+        "adminUsername": "pnpadmin",
+        "adminPassword": "Passw0rd!",
+        "count": 2,
+        "osProfile": {
+          "windows": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter"
+          },
+          "linux": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "14.04.2-LTS"
+          }
+        }
+      },
+      "metadata": {
+        "description": "Name prefix is the prefix for VM name as appears in portal."
+      }
+    },
+    "infrastructureSettings": {
+      "value": {
+        "vnetResourceGroup": "rs-bp-rg",
+        "vnetName": "rs-bp-vnet",
+        "subnetName": "rs-web-sn",
+        "subnetNamePrefix": "web",
+        "ilbIpAddress": "10.0.0.254",
+        "availSetName": "rs-web-avSet"
+      },
+      "metadata": {
+        "description": "Multiple VMs require availability set name."
+      }
+    }
+
+  }
+}

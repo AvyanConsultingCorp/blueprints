@@ -1,0 +1,72 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ilbSettings": { "type": "object" },
+    "networkSettings": { "type": "object" }
+  },
+  "variables": {
+    "frontendIpConfigNameArray": "[split(parameters('ilbSettings').frontendIpConfigId,'-')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "2016-03-30",
+      "location": "[resourceGroup().location]",
+      "name": "[parameters('ilbSettings').name]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('frontendIpConfigNameArray')[sub(variables('frontendIpConfigNameArray').length,1)])",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ilbSettings').privateIpAddress]",
+              "subnet": { "id": "[parameters('networkSettings').subnetId]" }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[parameters('ilbSettings').backendPoolName]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "http-rule",
+            "properties": {
+              "backendAddressPool": { "id": "[parameters('ilbSettings').backendPoolId]" },
+              "frontendIPConfiguration": { "id": "[parameters('ilbSettings').frontendIpConfigId]" },
+              "frontendPort": 80,
+              "backendPort": 80,
+              "protocol": "Tcp"
+            }
+
+          },
+          {
+            "name": "https-rule",
+            "properties": {
+              "backendAddressPool": { "id": "[parameters('ilbSettings').backendPoolId]" },
+              "frontendIPConfiguration": { "id": "[parameters('ilbSettings').frontendIpConfigId]" },
+              "frontendPort": 443,
+              "backendPort": 443,
+              "protocol": "Tcp"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "ilb-probe",
+            "properties": {
+              "port": 80,
+              "protocol": "Http",
+              "requestPath": "/"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "ilbBackendPoolId": {"type": "string","value": "[parameters('ilbSettings').backendPoolId]"}
+  }
+}
