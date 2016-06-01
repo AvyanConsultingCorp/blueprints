@@ -26,7 +26,8 @@
     "subnetConfig": {
       "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-sn')]",
       "addressPrefix": "[parameters('infrastructureSettings').subnetAddressPrefix]"
-    }
+    },
+    "storageNamePrefix": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -36,7 +37,7 @@
         "name": "storageAccountLoop"
       },
       "apiVersion": "2015-06-15",
-      "name": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id), parameters('infrastructureSettings').storageAccounts[copyIndex()].nameSuffix)]",
+      "name": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[copyIndex()].nameSuffix)]",
       "location": "[variables('location')]",
       "properties": { "accountType": "[parameters('infrastructureSettings').storageAccounts[copyIndex()].type]" }
     },
@@ -64,8 +65,8 @@
         "parameters": {
           "vmComputerName": { "value": "[concat(parameters('virtualMachineSettings').appName,'-',parameters('virtualMachineSettings').appType,'-vm')]" },
           "vmSize": {"value": "[parameters('virtualMachineSettings').size]"},
-          "diagStorageConfig": { "value": "[parameters('infrastructureSettings').storageAccounts[0]]" },
-          "vhdStorageConfig": {"value": "[parameters('infrastructureSettings').storageAccounts[1]]"},
+          "diagStorageName": { "value": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[0].nameSuffix)]" },
+          "vhdStorageName": {"value": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[1].nameSuffix)]"},
           "osType": { "value": "[parameters('virtualMachineSettings').osType]" },
           "snid": { "value": "[reference('vnet').outputs.subnetId.value]" },
           "adminUsername": { "value": "[parameters('virtualMachineSettings').adminUsername]" },

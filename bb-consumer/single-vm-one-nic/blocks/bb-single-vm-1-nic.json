@@ -35,14 +35,14 @@
       ],
       "defaultValue": "Standard_DS3"
     },
-    "diagStorageConfig": {
-      "type": "object",
+    "diagStorageName": {
+      "type": "string",
       "metadata": {
         "description": "Diagnostic storage account configuration."
       }
     },
-    "vhdStorageConfig": {
-      "type": "object",
+    "vhdStorageName": {
+      "type": "string",
       "metadata": {
         "description": "VHD storage account configuration."
       }
@@ -129,14 +129,14 @@
           },
           "osDisk": {
             "name": "[variables('vmOsDiskName')]",
-            "vhd": { "uri": "[concat('http://', parameters('vhdStorageConfig').name, '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
+            "vhd": { "uri": "[concat('http://', parameters('vhdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
               "name": "[variables('vmDataDiskName')]",
-              "vhd": { "uri": "[concat('http://', parameters('vhdStorageConfig').name, '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
+              "vhd": { "uri": "[concat('http://', parameters('vhdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
               "diskSizeGB": "127",
               "createOption": "Empty",
               "lun": 0
@@ -146,7 +146,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[concat('http://', parameters('diagStorageConfig').name, '.blob.core.windows.net')]"
+            "storageUri": "[concat('http://', parameters('diagStorageName'), '.blob.core.windows.net')]"
           }
         },
         "networkProfile": {
