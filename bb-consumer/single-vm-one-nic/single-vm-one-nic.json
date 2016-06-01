@@ -67,7 +67,7 @@
           "diagStorageConfig": { "value": "[parameters('infrastructureSettings').storageAccounts[0]]" },
           "vhdStorageConfig": {"value": "[parameters('infrastructureSettings').storageAccounts[1]]"},
           "osType": { "value": "[parameters('virtualMachineSettings').osType]" },
-          "snid": { "value": "reference('vnet').outputs.subnetId.value" },
+          "snid": { "value": "[reference('vnet').outputs.subnetId.value]" },
           "adminUsername": { "value": "[parameters('virtualMachineSettings').adminUsername]" },
           "adminPassword": { "value": "[parameters('virtualMachineSettings').adminPassword]" },
           "osProfile": {"value": "[parameters('virtualMachineSettings').osProfile.windows"}
