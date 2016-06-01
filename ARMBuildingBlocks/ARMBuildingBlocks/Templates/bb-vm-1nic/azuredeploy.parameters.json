@@ -26,18 +26,10 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetAddressSpaces": [ "10.1.0.0/16" ],
-        "subnetAddressPrefix": "10.1.0.1/24",
-        "storageAccounts": [
-          {
-            "nameSuffix": "diag",
-            "type": "Standard_LRS"
-          },
-          {
-            "nameSuffix": "st",
-            "type": "Premium_LRS"
-          }
-        ]
+        "vnetResourceGroup": "rs-bp-rg",
+        "vnetName": "rs-bp-vnet",
+        "subnetName": "rs-web-sn"
+
       }
     }
   }

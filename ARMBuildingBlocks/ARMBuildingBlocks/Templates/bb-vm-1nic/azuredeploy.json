@@ -15,68 +15,105 @@
       }
     }
   },
+
   "variables": {
     "location": "[resourceGroup().location]",
-    "vmTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-single-vm-1-nic.json')]",
-    "vnetTemplate": "[uri(deployment().properties.templateLink.uri, 'blocks/bb-vnet-1-subnet.json')]",
-    "vnetConfig": {
-      "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-vnet')]",
-      "addressPrefixes": "[parameters('infrastructureSettings').vnetAddressSpaces]"
-    },
-    "subnetConfig": {
-      "name": "[concat(parameters('virtualMachineSettings').appName, '-', parameters('virtualMachineSettings').appType, '-sn')]",
-      "addressPrefix": "[parameters('infrastructureSettings').subnetAddressPrefix]"
-    },
-    "storageNamePrefix": "[concat(parameters('virtualMachineSettings').appName, parameters('virtualMachineSettings').appType, uniqueString(resourceGroup().id))]"
+    "vmStorageAccountContainerName": "vhds",
+    "vmNicName": "[concat(parameters('vmComputerName'),'-nic')]",
+    "vmOSDiskName": "[concat(parameters('vmComputerName'),'-os.vhd')]",
+    "vmDataDiskName": "[concat(parameters('vmComputerName'),'-data.vhd')]",
+    "vmAvSetName": "[concat(parameters('vmComputerName'),'-as')]"
   },
   "resources": [
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "copy": {
-        "count": 2,
-        "name": "storageAccountLoop"
-      },
+      "type": "Microsoft.Compute/availabilitySets",
       "apiVersion": "2015-06-15",
-      "name": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[copyIndex()].nameSuffix)]",
+      "name": "[variables('vmAvSetName')]",
       "location": "[variables('location')]",
-      "properties": { "accountType": "[parameters('infrastructureSettings').storageAccounts[copyIndex()].type]" }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "vnet",
+      "tags": { "displayName": "VM Availability Set" },
       "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('vnetTemplate')]" },
-        "parameters": {
-          "vnetConfig": { "value": "[variables('vnetConfig')]" },
-          "subnetConfig": { "value": "[variables('subnetConfig')]" }
-        }
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 3
       }
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "vm",
-      "dependsOn": [ "Microsoft.Resources/deployments/vnet" ],
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('vmNicName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM NIC" },
       "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('vmTemplate')]" },
-        "parameters": {
-          "vmComputerName": { "value": "[concat(parameters('virtualMachineSettings').appName,'-',parameters('virtualMachineSettings').appType,'-vm')]" },
-          "vmSize": { "value": "[parameters('virtualMachineSettings').size]" },
-          "diagStorageName": { "value": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[0].nameSuffix)]" },
-          "vhdStorageName": { "value": "[concat(variables('storageNamePrefix'), parameters('infrastructureSettings').storageAccounts[1].nameSuffix)]" },
-          "osType": { "value": "[parameters('virtualMachineSettings').osType]" },
-          "snid": { "value": "[reference('vnet').outputs.subnetId.value]" },
-          "adminUsername": { "value": "[parameters('virtualMachineSettings').adminUsername]" },
-          "adminPassword": { "value": "[parameters('virtualMachineSettings').adminPassword]" },
-          "osProfile": { "value": "[parameters('virtualMachineSettings').osProfile.windows]" }
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": { "id": "[parameters('snid')]" }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('vmComputerName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNicName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('vmAvSetName'))]"
+      ],
+      "properties": {
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvSetName'))]" },
+        "hardwareProfile": { "vmSize": "[parameters('vmSize')]" },
+        "osProfile": {
+          "computerName": "[parameters('vmComputerName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('osProfile').publisher]",
+            "offer": "[parameters('osProfile').offer]",
+            "sku": "[parameters('osProfile').sku]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[variables('vmOsDiskName')]",
+            "vhd": { "uri": "[concat('http://', parameters('vhdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('vmDataDiskName')]",
+              "vhd": { "uri": "[concat('http://', parameters('vhdStorageName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
+              "diskSizeGB": "127",
+              "createOption": "Empty",
+              "lun": 0
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('http://', parameters('diagStorageName'), '.blob.core.windows.net')]"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]" }
+          ]
         }
       }
     }
   ],
   "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[parameters('vmComputerName')]"
+    }
   }
 }
 
