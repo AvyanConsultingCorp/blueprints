@@ -30,7 +30,7 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "app-3-rg",
+        "vnetResourceGroup": "app-6-rg",
         "vnetName": "rs-web-vnet",
         "subnetName": "rs-web-sn",
         "subnetNamePrefix": "web",
