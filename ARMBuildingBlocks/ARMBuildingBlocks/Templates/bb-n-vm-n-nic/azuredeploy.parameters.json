@@ -5,7 +5,7 @@
     "virtualMachinesSettings": {
       "value": {
         "namePrefix": "app6",
-        "computerNamePrefix": "app6",
+        "computerNamePrefix": "dev",
         "size": "Standard_DS1",
         "osType": "windows",
         "adminUsername": "testuser",
