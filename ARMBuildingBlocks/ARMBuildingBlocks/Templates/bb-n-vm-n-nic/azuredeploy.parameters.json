@@ -4,8 +4,8 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "app3",
-        "computerNamePrefix": "rs",
+        "namePrefix": "app6",
+        "computerNamePrefix": "app6",
         "size": "Standard_DS1",
         "osType": "windows",
         "adminUsername": "testuser",
@@ -31,11 +31,11 @@
     "infrastructureSettings": {
       "value": {
         "vnetResourceGroup": "app-6-rg",
-        "vnetName": "rs-web-vnet",
-        "subnetName": "rs-web-sn",
+        "vnetName": "app6-vnet",
+        "subnetName": "app6-web-sn",
         "subnetNamePrefix": "web",
         "ilbIpAddress": "10.4.0.254",
-        "availSetName": "rs-web-avSet"
+        "availSetName": "app6-web-avSet"
       },
       "metadata": {
         "description": "Multiple VMs require availability set name."
