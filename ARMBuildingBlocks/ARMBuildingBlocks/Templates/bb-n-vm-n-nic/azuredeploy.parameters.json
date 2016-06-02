@@ -2,6 +2,7 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "baseName": { "value": "app3" },
     "virtualMachinesSettings": {
       "value": {
         "namePrefix": "rs",
@@ -30,17 +31,16 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "rs-bp-rg",
-        "vnetName": "rs-bp-vnet",
+        "vnetResourceGroup": "app-3-rg",
+        "vnetName": "rs-web-vnet",
         "subnetName": "rs-web-sn",
         "subnetNamePrefix": "web",
-        "ilbIpAddress": "10.0.0.254",
+        "ilbIpAddress": "10.4.0.254",
         "availSetName": "rs-web-avSet"
       },
       "metadata": {
         "description": "Multiple VMs require availability set name."
       }
     }
-
   }
 }
