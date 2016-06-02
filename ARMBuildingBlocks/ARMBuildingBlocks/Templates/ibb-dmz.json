@@ -120,18 +120,6 @@
               "protocol": "Tcp"
             }
           }
-        ],
-        "probes": [
-          {
-            "name": "tcpProbe",
-            "properties": {
-              "port": 80,
-              "protocol": "Tcp",
-              "intervalInSeconds": 5,
-              "numberOfProbes": 2,
-              "requestPath": "/"
-            }
-          }
         ]
       }
     },
