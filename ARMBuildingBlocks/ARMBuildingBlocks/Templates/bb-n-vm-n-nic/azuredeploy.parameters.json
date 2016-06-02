@@ -7,7 +7,7 @@
         "namePrefix": "app6",
         "computerNamePrefix": "dev",
         "size": "Standard_DS1",
-        "osType": "windows",
+        "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
         "count": 2,
