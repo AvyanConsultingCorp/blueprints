@@ -2,7 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": { "type": "string" },
     "virtualMachinesSettings": {
       "type": "object",
       "metadata": {
@@ -19,8 +18,8 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "storageAccountIdentifier": "[toLower(concat(replace(parameters('baseName'),'-',''), uniqueString(resourceGroup().id)))]",
-    "networkResourcePrefix": "[concat(parameters('baseName'), '-', parameters('infrastructureSettings').subnetNamePrefix)]",
+    "storageAccountIdentifier": "[toLower(concat(replace(parameters('virtualMachinesSettings').namePrefix,'-',''), uniqueString(resourceGroup().id)))]",
+    "networkResourcePrefix": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('infrastructureSettings').subnetNamePrefix)]",
     "internalLoadBalancer": {
       "name": "[concat(variables('networkResourcePrefix'), '-ilb')]",
       "backendPoolName": "[concat(variables('networkResourcePrefix'), '-bep')]",
@@ -69,7 +68,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('baseName'), copyindex(1))]",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, copyindex(1))]",
       "copy": {
         "name": "vmCount",
         "count": "[parameters('virtualMachinesSettings').count]"
@@ -87,7 +86,7 @@
               "ilbbackendPoolId": "[reference('deploy-ilb').outputs.ilbBackendPoolId.value]",
               "storageAccountName": "[concat(variables('storageAccountIdentifier'), copyindex(1))]",
               "subnetId": "[variables('virtualNetwork').subnetId]",
-              "vmName": "[concat(parameters('baseName'),'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]"
+              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]"
             }
           }
         }

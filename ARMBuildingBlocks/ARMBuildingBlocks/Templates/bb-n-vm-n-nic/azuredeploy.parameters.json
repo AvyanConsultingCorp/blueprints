@@ -2,10 +2,9 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": { "value": "app3" },
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "rs",
+        "namePrefix": "app3",
         "computerNamePrefix": "rs",
         "size": "Standard_DS1",
         "osType": "windows",
