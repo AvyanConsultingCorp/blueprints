@@ -9,8 +9,8 @@
         "computerNamePrefix": "rs",
         "size": "Standard_DS1",
         "osType": "windows",
-        "adminUsername": "pnpadmin",
-        "adminPassword": "Passw0rd!",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
         "count": 2,
         "osProfile": {
           "windows": {
