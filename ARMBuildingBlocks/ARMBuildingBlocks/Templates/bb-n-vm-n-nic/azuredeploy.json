@@ -33,9 +33,8 @@
       "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('infrastructureSettings').subnetName)]"
     },
     "path": {
-      "vmTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-n-vm-n-nic-lbbe.json",
-      "nicTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nic.json",
-      "ilbTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-ilb.json"
+      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../bb-n-vm-n-nic-lbbe.json')]",
+      "ilbTemplate": "[uri(deployment().properties.templateLink.uri, '../bb-ilb.json')]"
     }
   },
   "resources": [
@@ -68,9 +67,9 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, copyindex(1))]",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm-', copyindex(1))]",
       "copy": {
-        "name": "vmCount",
+        "name": "vmLoop",
         "count": "[parameters('virtualMachinesSettings').count]"
       },
       "properties": {
