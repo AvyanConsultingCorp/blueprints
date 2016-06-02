@@ -6,7 +6,7 @@
     "networkSettings": { "type": "object" }
   },
   "variables": {
-    "frontendIpConfigNameArray": "[split(parameters('ilbSettings').frontendIpConfigId,'-')]"
+    "frontendIpConfigNameArray": "[split(parameters('ilbSettings').frontendIpConfigId,'/')]"
   },
   "resources": [
     {
