@@ -24,8 +24,8 @@
       "name": "[concat(variables('networkResourcePrefix'), '-ilb')]",
       "backendPoolName": "[concat(variables('networkResourcePrefix'), '-bep')]",
       "id": "[resourceId('Microsoft.Network/loadBalancers', concat(variables('networkResourcePrefix'), '-ilb'))]",
-      "backendPoolId": "[concat('Microsoft.Network/loadBalancers/', variables('networkResourcePrefix'), '-ilb/backendAddressPools/', variables('networkResourcePrefix'), '-bep')]",
-      "frontendIpConfigId": "[concat('Microsoft.Network/loadBalancers/', variables('networkResourcePrefix'), '-ilb/frontendIPConfigurations/', 'ipconfig1')]",
+      "backendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', concat(variables('networkResourcePrefix'), '-ilb'), concat(variables('networkResourcePrefix'), '-bep'))]",
+      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', concat(variables('networkResourcePrefix'), '-ilb'), 'ipconfig1')]",
       "privateIpAddress": "[parameters('infrastructureSettings').ilbIpAddress]"
     },
     "virtualNetwork": {
