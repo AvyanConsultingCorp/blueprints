@@ -91,7 +91,7 @@
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancer').name)]",
+        "Microsoft.Resources/deployments/deploy-ilb",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier'), parameters('virtualMachinesSettings').count)]"
       ]
     }
