@@ -17,7 +17,7 @@
       "properties": {
         "frontendIPConfigurations": [
           {
-            "name": "[variables('frontendIpConfigNameArray')[sub(variables('frontendIpConfigNameArray').length,1)])",
+            "name": "[variables('frontendIpConfigNameArray')[sub(variables('frontendIpConfigNameArray').length,1)]]",
             "properties": {
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[parameters('ilbSettings').privateIpAddress]",
