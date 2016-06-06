@@ -6,6 +6,9 @@
     "feSubnetId": { "type": "string" },
     "beSubnetId": { "type": "string" },
     "mgmtSubnetId": { "type": "string" },
+    "mgmtSubnetPrefix": { "type": "string" },
+    "vnetPrefix": {"type": "string"},
+    "ilbIpAddress": { "type": "string" },
     "adminUsername": { "type": "string" },
     "adminPassword": { "type": "securestring" },
     "vmSize": {
@@ -35,55 +38,34 @@
         "Standard_DS14_v2",
         "Standard_DS15_v2"
       ]
-    },
-    "publicIPAddressName": {
-      "type": "string",
-      "defaultValue": "myPublicIP",
-      "metadata": {
-        "description": "Public IP Name"
-      }
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "vmNamePrefix": "dmz",
-    "vmComputerNamePrefix": "dmz",
+    "vmNamePrefix": "nva",
+    "vmComputerNamePrefix": "nva",
     "numVMs": 2,
     "osType": "Ubuntu",
-    "lbName": "[concat(parameters('baseName'),'-dmz-lb')]",
-    "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
-    "lbFEName": "feIpConfig1",
-    "lbFEId": "[concat(variables('lbId'),'/frontendIPConfigurations/',variables('lbFEName'))]",
-    "lbBEName": "beAddPool",
-    "lbBEId": "[concat(variables('lbId'),'/backendAddressPools/',variables('lbBEName'))]",
+    "lbName": "[concat(parameters('baseName'),'-nva-ilb')]",
+    "ilbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+    "ilbFEName": "feIpConfig1",
+    "ilbFEId": "[concat(variables('ilbId'),'/frontendIPConfigurations/',variables('ilbFEName'))]",
+    "ilbBEName": "beAddPool",
+    "ilbBEId": "[concat(variables('ilbId'),'/backendAddressPools/',variables('ilbBEName'))]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "vmAvSetName": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),'-as')]",
     "vmsTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vms-3nics-lbbe.json",
     "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-custom-linux-extension.json",
-    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/dmz-nva.sh",
-    "scriptName": "dmz-nva.sh",
-    "publicIPAddressType": "Static",
-    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('publicIPAddressName'))]"
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/nva.sh",
+    "scriptName": "nva.sh",
+    "udrName": "[concat(parameters('baseName'), '-gw-udr')]"
   },
   "resources": [
-    {
-      "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2016-03-30",
-      "name": "[parameters('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-      }
-    },
-
     {
       "type": "Microsoft.Network/loadBalancers",
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "name": "[variables('lbName')]",
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPAddressName'))]"
-      ],
       "tags": {
         "displayName": "Load balancer"
       },
@@ -92,19 +74,19 @@
           {
             "name": "feIpConfig1",
             "properties": {
-              "publicIPAddress": {
-                "id": "[variables('publicIPAddressID')]"
-              }
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('ilbIpAddress')]",
+              "subnet": { "id": "[parameters('feSubnetId')]" }
             }
           }
         ],
-        "backendAddressPools": [ { "name": "[variables('lbBEName')]" } ],
+        "backendAddressPools": [ { "name": "[variables('ilbBEName')]" } ],
         "loadBalancingRules": [
           {
             "name": "http",
             "properties": {
-              "frontendIPConfiguration": { "id": "[variables('lbFEId')]" },
-              "backendAddressPool": { "id": "[variables('lbBEId')]" },
+              "frontendIPConfiguration": { "id": "[variables('ilbFEId')]" },
+              "backendAddressPool": { "id": "[variables('ilbBEId')]" },
               "frontendPort": 80,
               "backendPort": 80,
               "protocol": "Tcp"
@@ -113,8 +95,8 @@
           {
             "name": "https",
             "properties": {
-              "frontendIPConfiguration": { "id": "[variables('lbFEId')]" },
-              "backendAddressPool": { "id": "[variables('lbBEId')]" },
+              "frontendIPConfiguration": { "id": "[variables('ilbFEId')]" },
+              "backendAddressPool": { "id": "[variables('ilbBEId')]" },
               "frontendPort": 443,
               "backendPort": 443,
               "protocol": "Tcp"
@@ -123,7 +105,6 @@
         ]
       }
     },
-
     {
       "type": "Microsoft.Compute/availabilitySets",
       "apiVersion": "2015-06-15",
@@ -137,7 +118,6 @@
         "platformUpdateDomainCount": 5
       }
     },
-
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2015-06-15",
@@ -152,7 +132,31 @@
       },
       "properties": { "accountType": "Premium_LRS" }
     },
-
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('udrName')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "toFrontEnd",
+            "properties": {
+              "addressPrefix": "[parameters('vnetPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('ilbIpAddress')]"
+            }
+          },
+          {
+            "name": "toMgmt",
+            "properties": {
+              "addressPrefix": "[parameters('mgmtSubnetPrefix')]",
+              "nextHopType": "VnetLocal"
+            }
+          }
+        ]
+      }
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -176,7 +180,7 @@
           "snid3": { "value": "[parameters('mgmtSubnetId')]" },
           "nic1IpForwarding": { "value": true },
           "nic2IpForwarding": { "value": true },
-          "lbBackendPoolId": { "value": "[variables('lbBEId')]" },
+          "lbBackendPoolId": { "value": "[variables('ilbBEId')]" },
           "stgAccountNames": {
             "value": [
               "[concat(parameters('baseName'),'1',variables('uniqueString'))]",
@@ -190,7 +194,6 @@
         }
       }
     },
-
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -212,6 +215,10 @@
     }
   ],
   "outputs": {
+    "udrName": {
+      "type": "string",
+      "value": "[variables('udrName')]"
+    },
     "resourceGroup": {
       "type": "string",
       "value": "[resourceGroup().Name]"
