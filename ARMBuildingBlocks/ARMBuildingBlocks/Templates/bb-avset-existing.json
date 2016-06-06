@@ -13,7 +13,7 @@
   "resources": [ ],
   "outputs": {
     "availabilitySetInfo": {
-      "value": "[reference(concat('Microsoft.Compute/availabilitySets',parameters('avSetName')),providers('Microsoft.Compute','availabilitySets').apiVersions[0])]",
+      "value": "[reference(concat('Microsoft.Compute/availabilitySets/',parameters('avSetName')),providers('Microsoft.Compute','availabilitySets').apiVersions[0])]",
       "type": "object"
     }
   }
