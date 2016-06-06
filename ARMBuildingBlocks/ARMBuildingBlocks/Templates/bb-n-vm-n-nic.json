@@ -1,0 +1,127 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual machines."
+      }
+    },
+    "infrastructureSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for infrastructure."
+      }
+    },
+    "environmentSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for other parameters such as load balancer backend pool, storage account names."
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vmProfile": {
+      "nicName": "[concat(parameters('environmentSettings').vmName,'-nic')]",
+      "osDiskName": "[concat(parameters('environmentSettings').vmName,'-os.vhd')]",
+      "dataDiskName": "[concat(parameters('environmentSettings').vmName,'-data.vhd')]",
+      "storageAccountContainerName": "vhds"
+    },
+    "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-01-01",
+      "type": "Microsoft.Resources/deployments",
+      "name": "[concat(variables('vmProfile').nicName, copyIndex(1))]",
+      "copy": {
+        "count": "[length(parameters('environmentSettings').subnetsConfig)]",
+        "name": "nicLoop"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri,'../bb-nic.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "nicName": {
+            "value": "[concat(variables('vmProfile').nicName, copyIndex(1))]"
+          },
+          "ipConfigurations": {
+            "value": [
+              {
+                "name": "ipconfig1",
+                "properties": {
+                  "privateIPAllocationMethod": "Dynamic",
+                  "subnet": { "id": "[concat(parameters('environmentSettings').vnetId, '/subnets/', parameters('environmentSettings').subnetsConfig[copyIndex()].name)]" }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('environmentSettings').vmName]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM" },
+      "copy": {
+        "count": "[length(parameters('environmentSettings').subnetsConfig)]",
+        "name": "nicAssignLoop"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('vmProfile').nicName, length(parameters('environmentSettings').subnetsConfig))]"
+      ],
+      "properties": {
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availSetName)]" },
+        "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
+        "osProfile": {
+          "computerName": "[parameters('environmentSettings').vmName]",
+          "adminUsername": "[parameters('virtualMachinesSettings').adminUsername]",
+          "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].publisher]",
+            "offer": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].offer]",
+            "sku": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].sku]",
+            "version": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].version]"
+          },
+          "osDisk": {
+            "name": "[variables('vmProfile').osDiskName]",
+            "vhd": { "uri": "[concat('http://', parameters('environmentSettings').storageAccount.vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').osDiskName)]" },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('vmProfile').dataDiskName]",
+              "vhd": { "uri": "[concat('http://', parameters('environmentSettings').storageAccount.vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').dataDiskName)]" },
+              "diskSizeGB": "127",
+              "createOption": "Empty",
+              "lun": 0
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmProfile').nicName, copyIndex(1)))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('environmentSettings').storageAccount.diagnostic, '.blob.core.windows.net')]"
+          }
+        }
+      }
+    }
+  ]
+}

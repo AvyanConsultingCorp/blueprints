@@ -28,5 +28,11 @@
         "displayName": "nic"
       }
     }
-  ]
+  ],
+  "outputs": {
+    "nicId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicName'))]"
+    }
+  }
 }

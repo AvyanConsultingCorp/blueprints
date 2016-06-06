@@ -18,38 +18,36 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "storageAccountIdentifier": "[toLower(concat(replace(parameters('virtualMachinesSettings').namePrefix,'-',''), uniqueString(resourceGroup().id)))]",
-    "networkResourcePrefix": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('infrastructureSettings').subnetNamePrefix)]",
-    "internalLoadBalancer": {
-      "name": "[concat(variables('networkResourcePrefix'), '-ilb')]",
-      "backendPoolName": "[concat(variables('networkResourcePrefix'), '-bep')]",
-      "id": "[resourceId('Microsoft.Network/loadBalancers', concat(variables('networkResourcePrefix'), '-ilb'))]",
-      "backendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', concat(variables('networkResourcePrefix'), '-ilb'), concat(variables('networkResourcePrefix'), '-bep'))]",
-      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', concat(variables('networkResourcePrefix'), '-ilb'), 'ipconfig1')]",
-      "privateIpAddress": "[parameters('infrastructureSettings').ilbIpAddress]"
-    },
-    "virtualNetwork": {
-      "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
-      "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('infrastructureSettings').subnetName)]"
+    "storageAccountIdentifier": {
+      "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'st'))]",
+      "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]"
     },
     "path": {
-      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../bb-n-vm-n-nic-lbbe.json')]",
-      "ilbTemplate": "[uri(deployment().properties.templateLink.uri, '../bb-ilb.json')]"
+      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../bb-n-vm-n-nic.json')]",
+      "avSetTemplate": "[uri(deployment().properties.templateLink.uri, concat('../bb-avset-',parameters('infrastructureSettings').availabilitySet.newOrExisting, '.json'))]"
     }
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
-      "name": "deploy-ilb",
       "apiVersion": "2015-01-01",
+      "name": "deploy-avset",
+      "location": "[variables('location')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('path').ilbTemplate]"
+          "uri": "[variables('path').avSetTemplate]"
         },
         "parameters": {
-          "ilbSettings": { "value": "[variables('internalLoadBalancer')]" },
-          "networkSettings": { "value": "[variables('virtualNetwork')]" }
+          "platformFaultDomainCount": {
+            "value": 5
+          },
+          "platformUpdateDomainCount": {
+            "value": 3
+          },
+          "avSetName": {
+            "value": "parameters('infrastructureSettings').availabilitySet.name"
+          }
         }
       }
     },
@@ -57,7 +55,14 @@
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
-      "name": "[concat(variables('storageAccountIdentifier'), copyindex(1))]",
+      "name": "[variables('storageAccountIdentifier').diagnostic]",
+      "properties": { "accountType": "Standard_LRS" }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[concat(variables('storageAccountIdentifier').vhd, copyindex(1))]",
       "copy": {
         "name": "storageLoop",
         "count": "[parameters('virtualMachinesSettings').count]"
@@ -80,22 +85,23 @@
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
           "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
-          "miscSettings": {
+          "environmentSettings": {
             "value": {
-              "ilbbackendPoolId": "[reference('deploy-ilb').outputs.ilbBackendPoolId.value]",
-              "storageAccountName": "[concat(variables('storageAccountIdentifier'), copyindex(1))]",
-              "subnetId": "[variables('virtualNetwork').subnetId]",
-              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]"
+              "storageAccount": {
+                "vhd": "[concat(variables('storageAccountIdentifier').vhd, copyindex(1))]",
+                "diagnostic": "[variables('storageAccountIdentifier').diagnostic]"
+              },
+              "vnetId": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
+              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]",
+              "subnetsConfig": "[parameters('infrastructureSettings').subnetsConfig]"
             }
           }
         }
       },
       "dependsOn": [
-        "Microsoft.Resources/deployments/deploy-ilb",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier'), parameters('virtualMachinesSettings').count)]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier').vhd, parameters('virtualMachinesSettings').count)]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier').diagnostic)]"
       ]
     }
-  ],
-  "outputs": {
-  }
+  ]
 }

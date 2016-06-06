@@ -27,20 +27,31 @@
         }
       },
       "metadata": {
-        "description": "Name prefix is the prefix for VM name as appears in portal."
+        "description": "Do not include a hyphen in namePrefix since it is used to generate storage account names."
       }
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "app-6-rg",
+        "vnetResourceGroup": "app6-rg",
         "vnetName": "app6-vnet",
-        "subnetName": "app6-web-sn",
-        "subnetNamePrefix": "web",
+        "subnetsConfig": [
+          {
+            "name": "app6-fe-subnet",
+            "prefix": "fe"
+          },
+          {
+            "name": "app6-be-subnet",
+            "prefix": "be"
+          }
+        ],
         "ilbIpAddress": "10.4.0.254",
-        "availSetName": "app6-web-avSet"
+        "availabilitySet": {
+          "newOrExisting": "new",
+          "name": "app6-fe-as"
+        }
       },
       "metadata": {
-        "description": "Multiple VMs require availability set name."
+        "description": "Availability set name is required for both new and existing scenarios."
       }
     }
   }
