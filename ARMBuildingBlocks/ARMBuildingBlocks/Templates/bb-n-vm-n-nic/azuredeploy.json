@@ -32,7 +32,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "name": "deploy-avset",
-      "location": "[variables('location')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
