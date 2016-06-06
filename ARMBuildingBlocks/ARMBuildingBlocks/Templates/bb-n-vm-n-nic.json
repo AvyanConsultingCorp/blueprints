@@ -43,7 +43,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri,'../bb-nic.json')]",
+          "uri": "[uri(deployment().properties.templateLink.uri,'bb-nic.json')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
