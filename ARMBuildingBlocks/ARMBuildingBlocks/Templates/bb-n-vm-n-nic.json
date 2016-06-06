@@ -70,10 +70,6 @@
       "name": "[parameters('environmentSettings').vmName]",
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
-      "copy": {
-        "count": "[length(parameters('environmentSettings').subnetsConfig)]",
-        "name": "nicAssignLoop"
-      },
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', variables('vmProfile').nicName, length(parameters('environmentSettings').subnetsConfig))]"
       ],
@@ -111,7 +107,10 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmProfile').nicName, copyIndex(1)))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmProfile').nicName, '1'))]"
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmProfile').nicName, '2'))]"
             }
           ]
         },
