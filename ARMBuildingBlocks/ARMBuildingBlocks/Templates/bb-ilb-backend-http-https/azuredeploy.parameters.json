@@ -15,8 +15,45 @@
       "vnetResourceGroup": "rs-bp-rg",
       "vnetName": "rs-bp-vnet",
       "subnetName": "rs-web-sn",
-      "subnetNamePrefix": "web",
-      "ilbIpAddress": "10.0.0.254"
+      "subnetNamePrefix": "web"
+    },
+    "loadBalancerSettings": {
+      "frontendIPConfigurations": [
+        {
+          "name": "config1",
+          "loadBalancerType": "public",
+          "internalLoadBalancerSettings": {
+            "privateIPAddress": "10.0.0.254",
+            "subnetName": "test-sn"
+          }
+        }
+      ],
+      "loadBalancingRules": [
+        {
+          "frontendPort": 80,
+          "backendPort": 80,
+          "protocol": "Tcp",
+          "frontendIPConfigurationName": "config1"
+        },
+        {
+          "frontendPort": 443,
+          "backendPort": 443,
+          "protocol": "Tcp",
+          "frontendIPConfigurationName": "config1"
+        }
+      ],
+      "probes": [
+        {
+          "port": 80,
+          "protocol": "Http",
+          "requestPath": "/"
+        },
+        {
+          "port": 443,
+          "protocol": "Http",
+          "requestPath": "/"
+        }
+      ]
     }
 
   }
