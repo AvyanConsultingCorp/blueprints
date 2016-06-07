@@ -1,0 +1,90 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string"
+    },
+    "infrastructureSettings": {
+      "type": "object"
+    }
+  },
+  "variables": {
+    "vnetName": "[parameters('infrastructureSettings').vnetName]",
+    "subnetName": "[parameters('infrastructureSettings').subnetName]",
+    "routeTableName": "[parameters('infrastructureSettings').routeTable.name]",
+    "routeTableRoutes": "[parameters('infrastructureSettings').routeTable.routes]",
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, 'collector.json')]",
+    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, 'reference.json')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "routeTableRoutesTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "source": {
+            "value": "[variables('routeTableRoutes')]"
+          },
+          "context": {
+            "value": { }
+          },
+          "name": {
+            "value": "routeTable-routes"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "name": "[variables('routeTableName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "routes": "[reference('routeTableRoutesTemplate').outputs.result.value]"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "subnetReference",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('referenceTemplate')]"
+        },
+        "parameters": {
+          "resourceType": {
+            "value": "Microsoft.Network/virtualNetworks/subnets"
+          },
+          "resourceName1": {
+            "value": "[variables('vnetName')]"
+          },
+          "resourceName2": {
+            "value": "[variables('subnetName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2016-03-30",
+      "name": "[concat(variables('vnetName'), '/', variables('subnetName'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressPrefix": "[reference('subnetReference').outputs.reference.value.addressPrefix]",
+        "routeTable": {
+          "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableName'))]"
+        }
+      },
+      "dependsOn": [
+        "[variables('routeTableName')]"
+      ]
+    }
+  ],
+  "outputs": {
+  }
+}

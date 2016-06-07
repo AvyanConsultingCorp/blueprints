@@ -14,7 +14,8 @@
       "lb-probes": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json",
       "lb-loadBalancingRules": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json",
       "lb-frontendIPConfiguration-internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json",
-      "lb-frontendIPConfiguration-public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json"
+      "lb-frontendIPConfiguration-public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json",
+      "routeTable-routes": "[uri(deployment().properties.templateLink.uri, 'routeTable-routes.json')]"
     }
   },
   "resources": [

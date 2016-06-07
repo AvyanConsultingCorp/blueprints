@@ -74,6 +74,13 @@
     <None Include="Templates\lb-frontendIPConfiguration-public.json" />
     <None Include="Templates\lb-loadBalancingRules.json" />
     <None Include="Templates\lb-probes.json" />
+    <None Include="Templates\reference.json" />
+    <None Include="Templates\referenceOneParameter.json" />
+    <None Include="Templates\referenceTwoParameters.json" />
+    <None Include="Templates\routeTable-routes.json" />
+    <None Include="Templates\routeTable.json" />
+    <None Include="Templates\rt-routes-no-next-hop-ip-address.json" />
+    <None Include="Templates\rt-routes-with-next-hop-ip-address.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />
