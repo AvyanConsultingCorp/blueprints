@@ -11,6 +11,14 @@
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
         "count": 2,
+        "nics": [
+          {
+            "subnetName": "app6-fe-subnet"
+          },
+          {
+            "subnetName": "app6-be-subnet"
+          }
+        ],
         "osProfile": {
           "windows": {
             "publisher": "MicrosoftWindowsServer",
@@ -34,16 +42,6 @@
       "value": {
         "vnetResourceGroup": "app6-rg",
         "vnetName": "app6-vnet",
-        "subnetsConfig": [
-          {
-            "name": "app6-fe-subnet",
-            "prefix": "fe"
-          },
-          {
-            "name": "app6-be-subnet",
-            "prefix": "be"
-          }
-        ],
         "availabilitySet": {
           "newOrExisting": "new",
           "name": "app6-as"

@@ -29,38 +29,27 @@
       "dataDiskName": "[concat(parameters('environmentSettings').vmName,'-data.vhd')]",
       "storageAccountContainerName": "vhds"
     },
-    "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]"
+    "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
+    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
+
   },
   "resources": [
     {
-      "apiVersion": "2015-01-01",
       "type": "Microsoft.Resources/deployments",
-      "name": "[concat(variables('vmProfile').nicName, copyIndex(1))]",
-      "copy": {
-        "count": "[length(parameters('environmentSettings').subnetsConfig)]",
-        "name": "nicLoop"
-      },
+      "apiVersion": "2015-01-01",
+      "name": "nicTemplate",
       "properties": {
         "mode": "Incremental",
-        "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri,'bb-nic.json')]",
-          "contentVersion": "1.0.0.0"
-        },
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
-          "nicName": {
-            "value": "[concat(variables('vmProfile').nicName, copyIndex(1))]"
+          "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
+          "context": {
+            "value": {
+              "vnetName": "[parameters('infrastructureSettings').vnetName]",
+              "vmName": "[parameters('environmentSettings').vmName]"
+            }
           },
-          "ipConfigurations": {
-            "value": [
-              {
-                "name": "ipconfig1",
-                "properties": {
-                  "privateIPAllocationMethod": "Dynamic",
-                  "subnet": { "id": "[concat(parameters('environmentSettings').vnetId, '/subnets/', parameters('environmentSettings').subnetsConfig[copyIndex()].name)]" }
-                }
-              }
-            ]
-          }
+          "name": { "value": "vm-nics" }
         }
       }
     },
@@ -104,16 +93,7 @@
             }
           ]
         },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmProfile').nicName, '1'))]"
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('vmProfile').nicName, '2'))]"
-            }
-          ]
-        },
+        "networkProfile": "[reference('nicTemplate').outputs.result.value]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",

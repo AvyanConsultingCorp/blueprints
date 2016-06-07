@@ -91,8 +91,7 @@
                 "diagnostic": "[variables('storageAccountIdentifier').diagnostic]"
               },
               "vnetId": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
-              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]",
-              "subnetsConfig": "[parameters('infrastructureSettings').subnetsConfig]"
+              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]"
             }
           }
         }

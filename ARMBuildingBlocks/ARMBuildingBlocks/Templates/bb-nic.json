@@ -2,37 +2,73 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "nicName": {
-      "type": "string",
-      "metadata": {
-        "Description": "The name of the nic to create or update."
-      }
-    },
-    "ipConfigurations": {
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "state": {
       "type": "array",
-      "metadata": {
-        "Description": "The IP configurations of the nic."
-      }
+      "defaultValue": [ ]
+    },
+    "copyIndex": {
+      "type": "int",
+      "defaultValue": 0
     }
   },
   "resources": [
     {
-      "name": "[parameters('nicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
       "apiVersion": "2016-03-30",
+      "name": "[concat('nicTemplate', parameters('copyIndex'))]",
       "properties": {
-        "ipConfigurations": "[parameters('ipConfigurations')]"
-      },
-      "tags": {
-        "displayName": "nic"
+        "mode": "Incremental",
+        "parameters": { },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "variables": { },
+          "resources": [
+            {
+              "apiVersion": "2016-03-30",
+              "type": "Microsoft.Network/networkInterfaces",
+              "name": "[concat(parameters('context').vmName, '-nic', parameters('copyIndex'))]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "ipConfigurations": {
+                  "value": [
+                    {
+                      "name": "ipconfig1",
+                      "properties": {
+                        "privateIPAllocationMethod": "Dynamic",
+                        "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" }
+                      }
+                    }
+                  ]
+                }
+              },
+              "tags": {
+                "displayName": "nic"
+              }
+            }
+          ],
+          "outputs": {
+            "instance": {
+              "type": "array",
+              "value": [
+                {
+                  "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('context').vmName, '-nic', parameters('copyIndex')))]"
+                }
+              ]
+            }
+          }
+        }
       }
     }
   ],
   "outputs": {
-    "nicId": {
-      "type": "string",
-      "value": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicName'))]"
+    "collection": {
+      "type": "array",
+      "value": "[concat(parameters('state'), reference(concat('nicTemplate', parameters('copyIndex'))).outputs.instance.value)]"
     }
   }
 }
