@@ -1,0 +1,90 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string"
+    },
+    "infrastructureSettings": {
+      "type": "object"
+    }
+  },
+  "variables": {
+    "vnetName": "[parameters('infrastructureSettings').vnetName]",
+    "subnetName": "[parameters('infrastructureSettings').subnetName]",
+    "networkSecurityGroupName": "[parameters('infrastructureSettings').networkSecurityGroup.name]",
+    "networkSecurityGroupSecurityRules": "[parameters('infrastructureSettings').networkSecurityGroup.securityRules]",
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, 'collector.json')]",
+    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, 'reference.json')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "networkSecurityGroupSecurityRulesTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "source": {
+            "value": "[variables('networkSecurityGroupSecurityRules')]"
+          },
+          "context": {
+            "value": { }
+          },
+          "name": {
+            "value": "networkSecurityGroup-securityRules"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": "[reference('networkSecurityGroupSecurityRulesTemplate').outputs.result.value]"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "subnetReference",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('referenceTemplate')]"
+        },
+        "parameters": {
+          "resourceType": {
+            "value": "Microsoft.Network/virtualNetworks/subnets"
+          },
+          "resourceName1": {
+            "value": "[variables('vnetName')]"
+          },
+          "resourceName2": {
+            "value": "[variables('subnetName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2016-03-30",
+      "name": "[concat(variables('vnetName'), '/', variables('subnetName'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressPrefix": "[reference('subnetReference').outputs.reference.value.addressPrefix]",
+        "networksecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        }
+      },
+      "dependsOn": [
+        "[variables('networkSecurityGroupName')]"
+      ]
+    }
+  ],
+  "outputs": {
+  }
+}
