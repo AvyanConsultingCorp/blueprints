@@ -1,0 +1,60 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "source": { "type": "array" },
+    "context": {"type": "object"},
+    "name": {"type": "string"}
+  },
+  "variables": {
+    "count": "[length(parameters('source'))]",
+    "templateBaseName": "[parameters('name')]",
+    "mapperTemplates": {
+      "nop": "https://aoarmtest.blob.core.windows.net/templates/empty.json",
+      "lb-probes": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json",
+      "lb-loadBalancingRules": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json",
+      "lb-frontendIPConfiguration-internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json",
+      "lb-frontendIPConfiguration-public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('templateBaseName'), '-template0')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('mapperTemplates')['nop']]" },
+        "parameters": {
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('templateBaseName'), '-template', copyindex(1))]",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('templateBaseName'), '-template', copyindex())]"
+      ],
+      "copy": {
+        "name": "iterator",
+        "count": "[variables('count')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('mapperTemplates')[parameters('name')]]" },
+        "parameters": {
+          "source": { "value": "[parameters('source')[copyindex()]]" },
+          "context": { "value": "[parameters('context')]" },
+          "state": { "value": "[reference(concat(variables('templateBaseName'), '-template', copyindex())).outputs.collection.value]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "result": {
+      "type": "array",
+      "value": "[reference(concat(variables('templateBaseName'), '-template', variables('count'))).outputs.collection.value]"
+    }
+  }
+}

@@ -14,139 +14,112 @@
       "metadata": {
         "description": "Settings for infrastructure"
       }
+    },
+    "loadBalancerSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for infrastructure"
+      }
     }
-
   },
   "variables": {
     "location": "[resourceGroup().location]",
+    "subnetNamePrefix": "[parameters('infrastructureSettings').subnetNamePrefix]",
+    "lbName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-ilb')]",
+    "bepName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-bep')]",
     "internalLoadBalancer": {
-      "name": "[concat(parameters('baseName'), '-', parameters('infrastructureSettings').subnetNamePrefix, '-ilb')]",
-      "backendPoolName": "[concat(parameters('baseName'), '-', parameters('infrastructureSettings').subnetNamePrefix, '-bep')]",
-      "id": "[resourceId('Microsoft.Network/loadBalancers', concat(parameters('baseName'), '-', parameters('infrastructureSettings').subnetNamePrefix, '-ilb'))]",
-      "backendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', concat(parameters('baseName'), '-', parameters('infrastructureSettings').subnetNamePrefix, '-ilb'), concat(parameters('baseName'), '-', parameters('infrastructureSettings').subnetNamePrefix, '-bep'))]",
-      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', concat(parameters('baseName'), '-', parameters('infrastructureSettings').subnetNamePrefix, '-ilb'), 'ipconfig1')]"
+      "name": "[variables('lbName')]",
+      "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
+      "backendPoolName": "[variables('bepName')]",
+      "backendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('bepName'))]",
+      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), 'ipconfig1')]"
     },
     "virtualNetwork": {
       "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
       "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('infrastructureSettings').subnetName)]"
     },
     "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('virtualMachinesSettings').namePrefix,'-as')]",
-    "uniqueString": "[uniqueString(resourceGroup().Id)]",
-    "createVMs": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-lbbe.json"
+    "probes": "[parameters('loadBalancerSettings').probes]",
+    "probesCount": "[length(variables('probes'))]",
+    "ipConfigurations": {
+      "public": "lb-frontendIPConfiguration-public",
+      "internal": "lb-frontendIPConfiguration-internal"
+    },
+    "ipConfigurationPath": "[variables('ipConfigurations')[toLower(parameters('loadBalancerSettings').frontendIPConfigurations[0].loadBalancerType)]]",
+    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
   },
   "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "feIPConfigurationTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "name": { "value": "[variables('ipConfigurationPath')]" },
+          "source": { "value": "[parameters('loadBalancerSettings').frontendIPConfigurations]" },
+          "context": {
+            "value": {
+              "vetName": "parameters('infrastructureSettings').vnetName"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "lbRulesTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "source": { "value": "[parameters('loadBalancerSettings').loadBalancingRules]" },
+          "context": {
+            "value": {
+              "loadBalancerName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-ilb')]",
+              "backendAddressPool": "[variables('internalLoadBalancer').backendPoolId]"
+            }
+          },
+          "name": { "value": "lb-loadBalancingRules" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "probeTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "source": { "value": "[parameters('loadBalancerSettings').probes]" },
+          "context": { "value": { } },
+          "name": { "value": "lb-probes" }
+        }
+      }
+    },
     {
       "type": "Microsoft.Network/loadBalancers",
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "name": "[variables('internalLoadBalancer').name]",
       "properties": {
-        "S": null,
-        "frontendIPConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('infrastructureSettings').ilbIpAddress]",
-              "subnet": { "id": "[variables('virtualNetwork').subnetId]" }
-            }
-          }
-        ],
+        "frontendIPConfigurations": "[reference('feIPConfigurationTemplate').outputs.result.value]",
         "backendAddressPools": [
           {
             "name": "[variables('internalLoadBalancer').backendPoolName]"
           }
         ],
-        "loadBalancingRules": [
-          {
-            "name": "http-rule",
-            "properties": {
-              "backendAddressPool": { "id": "[variables('internalLoadBalancer').backendPoolId]" },
-              "frontendIPConfiguration": { "id": "[variables('internalLoadBalancer').frontendIpConfigId]" },
-              "frontendPort": 80,
-              "backendPort": 80,
-              "protocol": "Tcp"
-            }
-
-          },
-          {
-            "name": "https-rule",
-            "properties": {
-              "backendAddressPool": { "id": "[variables('internalLoadBalancer').backendPoolId]" },
-              "frontendIPConfiguration": { "id": "[variables('internalLoadBalancer').frontendIpConfigId]" },
-              "frontendPort": 443,
-              "backendPort": 443,
-              "protocol": "Tcp"
-            }
-          }
-        ],
-        "probes": [
-          {
-            "name": "ilb-probe",
-            "properties": {
-              "port": 80,
-              "protocol": "Http",
-              "requestPath": "/"
-            }
-          }
-        ]
+        "loadBalancingRules": "[reference('lbRulesTemplate').outputs.result.value]",
+        "probes": "[reference('probeTemplate').outputs.result.value]"
       }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2015-06-15",
-      "location": "[variables('location')]",
-      "name": "[toLower(concat(replace(parameters('baseName'),'-',''), copyindex(1), variables('uniqueString')))]",
-      "copy": {
-        "name": "stgCount",
-        "count": "[parameters('virtualMachinesSettings').count]"
-      },
-      "properties": { "accountType": "Premium_LRS" }
-    },
-    {
-      "type": "Microsoft.Compute/availabilitySets",
-      "name": "[variables('vmAvailabilitySetName')]",
-      "apiVersion": "2015-06-15",
-      "location": "[variables('location')]",
-      "properties": {
-        "platformFaultDomainCount": 3,
-        "platformUpdateDomainCount": 5
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('baseName'), copyindex(1))]",
-      "copy": {
-        "name": "vmCount",
-        "count": "[parameters('virtualMachinesSettings').count]"
-      },
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('createVMs')]"
-        },
-        "parameters": {
-          "baseName": { "value": "[parameters('baseName')]" },
-          "vmNamePrefix": { "value": "[concat(parameters('virtualMachinesSettings').namePrefix, copyindex(1))]" },
-          "vmComputerName": { "value": "[concat(parameters('virtualMachinesSettings').computerNamePrefix, copyindex(1))]" },
-          "vmSize": { "value": "[parameters('virtualMachinesSettings').size]" },
-          "snid": { "value": "[variables('virtualNetwork').subnetId]" },
-          "lbBackendPoolId": { "value": "[variables('internalLoadBalancer').backendPoolId]" },
-          "osType": { "value": "[parameters('virtualMachinesSettings').osType]" },
-          "adminUsername": { "value": "[parameters('virtualMachinesSettings').adminUserName]" },
-          "adminPassword": { "value": "[parameters('virtualMachinesSettings').adminPassword]" },
-          "stgAccountName": { "value": "[concat(parameters('baseName'), copyindex(1), variables('uniqueString'))]" },
-          "vmAvSetName": { "value": "[variables('vmAvailabilitySetName')]" }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/loadBalancers', variables('internalLoadBalancer').name)]",
-        "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvailabilitySetName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', parameters('baseName'), parameters('virtualMachinesSettings').count, variables('uniqueString'))]"
-      ]
     }
+
+
   ],
   "outputs": {
+
   }
 }

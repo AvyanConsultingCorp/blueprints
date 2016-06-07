@@ -1,0 +1,37 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "instance": [
+      {
+        "name": "[concat(parameters('source').protocol, '-', parameters('source').port)]",
+        "properties": {
+          "port": "[parameters('source').port]",
+          "protocol": "[parameters('source').protocol]",
+          "requestPath": "[parameters('source').requestPath]",
+          "intervalInSeconds": 15,
+          "numberOfProbes": 2
+        }
+      }
+    ]
+
+  },
+  "resources": [
+
+  ],
+  "outputs": {
+    "collection": {
+      "type": "array",
+      "value": "[concat(parameters('state'), variables('instance'))]"
+    }
+  }
+}
