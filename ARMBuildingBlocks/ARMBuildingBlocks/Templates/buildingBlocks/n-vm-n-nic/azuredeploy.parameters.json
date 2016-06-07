@@ -44,7 +44,7 @@
         "vnetName": "app6-vnet",
         "availabilitySet": {
           "newOrExisting": "new",
-          "name": "avset"
+          "name": "app6-dev-as"
         }
       },
       "metadata": {

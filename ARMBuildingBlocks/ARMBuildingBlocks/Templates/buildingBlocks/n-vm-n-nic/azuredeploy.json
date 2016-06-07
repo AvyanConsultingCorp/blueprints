@@ -18,13 +18,12 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "storageAccountIdentifier": {
-      "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'st'))]",
+    "storageAccountName": {
       "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]"
     },
     "path": {
-      "vmTemplate": "https://aoarmtest.blob.core.windows.net/templates/bb-n-vm-n-nic.json",
-      "avSetTemplate": "https://aoarmtest.blob.core.windows.net/templates/bb-avset-new.json"
+      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../../bb-n-vm-n-nic.json')]",
+      "avSetTemplate": "[uri(deployment().properties.templateLink.uri, concat('../../resources/virtualMachines/bb-avset-',parameters('infrastructureSettings').availabilitySet.newOrExisting, '.json'))]"
     }
   },
   "resources": [
@@ -54,19 +53,8 @@
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
-      "name": "[variables('storageAccountIdentifier').diagnostic]",
+      "name": "[variables('storageAccountName').diagnostic]",
       "properties": { "accountType": "Standard_LRS" }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2015-06-15",
-      "location": "[variables('location')]",
-      "name": "[concat(variables('storageAccountIdentifier').vhd, copyindex(1))]",
-      "copy": {
-        "name": "storageLoop",
-        "count": "[parameters('virtualMachinesSettings').count]"
-      },
-      "properties": { "accountType": "Premium_LRS" }
     },
     {
       "type": "Microsoft.Resources/deployments",
@@ -86,9 +74,8 @@
           "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
           "environmentSettings": {
             "value": {
-              "storageAccount": {
-                "vhd": "[concat(variables('storageAccountIdentifier').vhd, copyindex(1))]",
-                "diagnostic": "[variables('storageAccountIdentifier').diagnostic]"
+              "storageAccountName": {
+                "diagnostic": "[variables('storageAccountName').diagnostic]"
               },
               "vnetId": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
               "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]"
@@ -97,8 +84,7 @@
         }
       },
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier').vhd, parameters('virtualMachinesSettings').count)]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier').diagnostic)]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName').diagnostic)]"
       ]
     }
   ]
