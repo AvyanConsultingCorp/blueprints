@@ -80,13 +80,13 @@ WEB_ILB_IP_ADDRESS=10.0.1.254
 BIZ_ILB_IP_ADDRESS=10.0.2.254
 DB_ILB_IP_ADDRESS=10.0.3.254
 
-NVA_FE_VM_IP_ADDRESSES=["10.0.0.29","10.0.0.28"]
-NVA_BE_VM_IP_ADDRESSES=["10.0.0.62","10.0.0.61"]
-NVA_MGMT_VM_IP_ADDRESSES=["10.0.0.253","10.0.0.252"]
+NVA_FE_VM_IP_ADDRESSES=[\"10.0.0.29\",\"10.0.0.28\"]
+NVA_BE_VM_IP_ADDRESSES=[\"10.0.0.62\",\"10.0.0.61\"]
+NVA_MGMT_VM_IP_ADDRESSES=[\"10.0.0.253\",\"10.0.0.252\"]
 
-DMZ_FE_VM_IP_ADDRESSES=["10.0.0.94","10.0.0.93"]
-DMZ_BE_VM_IP_ADDRESSES=["10.0.0.126","10.0.0.125"]
-DMZ_MGMT_VM_IP_ADDRESSES=["10.0.0.251","10.0.0.250"]
+DMZ_FE_VM_IP_ADDRESSES=[\"10.0.0.94\",\"10.0.0.93\"]
+DMZ_BE_VM_IP_ADDRESSES=[\"10.0.0.126\",\"10.0.0.125\"]
+DMZ_MGMT_VM_IP_ADDRESSES=[\"10.0.0.251\",\"10.0.0.250\"]
 
 WEB_NUMBER_VMS=2
 BIZ_NUMBER_VMS=2
@@ -266,7 +266,7 @@ VM_IP_ADDRESS_1_ARRAY=${NVA_FE_VM_IP_ADDRESSES}
 VM_IP_ADDRESS_2_ARRAY=${NVA_BE_VM_IP_ADDRESSES}
 VM_IP_ADDRESS_3_ARRAY=${NVA_MGMT_VM_IP_ADDRESSES}
 
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmIPaddress1Array\":{\"value\":\"${VM_IP_ADDRESS_1_ARRAY}\"},\"vmIPaddress2Array\":{\"value\":\"${VM_IP_ADDRESS_2_ARRAY}\"},\"vmIPaddress3Array\":{\"value\":\"${VM_IP_ADDRESS_3_ARRAY}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"mgmtSubnetPrefix\":{\"value\":\"${MGMT_SUBNET_PREFIX}\"},\"feSubnetId\":{\"value\":\"${FE_SUBNET_ID}\"},\"beSubnetId\":{\"value\":\"${BE_SUBNET_ID}\"},\"mgmtSubnetId\":{\"value\":\"${MGMT_SUBNET_ID}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmIPaddress1Array\":{\"value\":${VM_IP_ADDRESS_1_ARRAY}},\"vmIPaddress2Array\":{\"value\":${VM_IP_ADDRESS_2_ARRAY}},\"vmIPaddress3Array\":{\"value\":${VM_IP_ADDRESS_3_ARRAY}},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"mgmtSubnetPrefix\":{\"value\":\"${MGMT_SUBNET_PREFIX}\"},\"feSubnetId\":{\"value\":\"${FE_SUBNET_ID}\"},\"beSubnetId\":{\"value\":\"${BE_SUBNET_ID}\"},\"mgmtSubnetId\":{\"value\":\"${MGMT_SUBNET_ID}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
 echo
 echo
 echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
@@ -347,7 +347,7 @@ VM_IP_ADDRESS_1_ARRAY=${DMZ_FE_VM_IP_ADDRESSES}
 VM_IP_ADDRESS_2_ARRAY=${DMZ_BE_VM_IP_ADDRESSES}
 VM_IP_ADDRESS_3_ARRAY=${DMZ_MGMT_VM_IP_ADDRESSES}
 
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},,\"vmIPaddress1Array\":{\"value\":\"${VM_IP_ADDRESS_1_ARRAY}\"},\"vmIPaddress2Array\":{\"value\":\"${VM_IP_ADDRESS_2_ARRAY}\"},\"vmIPaddress3Array\":{\"value\":\"${VM_IP_ADDRESS_3_ARRAY}\"},\"feSubnetId\":{\"value\":\"${FE_SUBNET_ID}\"},\"beSubnetId\":{\"value\":\"${BE_SUBNET_ID}\"},\"mgmtSubnetId\":{\"value\":\"${MGMT_SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"},\"publicIPAddressName\":{\"value\":\"${PUBLIC_IP_ADDRESS_NAME}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},,\"vmIPaddress1Array\":{\"value\":${VM_IP_ADDRESS_1_ARRAY}},\"vmIPaddress2Array\":{\"value\":${VM_IP_ADDRESS_2_ARRAY}},\"vmIPaddress3Array\":{\"value\":${VM_IP_ADDRESS_3_ARRAY}},\"feSubnetId\":{\"value\":\"${FE_SUBNET_ID}\"},\"beSubnetId\":{\"value\":\"${BE_SUBNET_ID}\"},\"mgmtSubnetId\":{\"value\":\"${MGMT_SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"},\"publicIPAddressName\":{\"value\":\"${PUBLIC_IP_ADDRESS_NAME}\"}}"
 echo
 echo
 echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
