@@ -1,0 +1,57 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "value": {
+        "namePrefix": "app6",
+        "computerNamePrefix": "dev",
+        "size": "Standard_DS1",
+        "osType": "linux",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "count": 2,
+        "osProfile": {
+          "windows": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter",
+            "version": "latest"
+          },
+          "linux": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "14.04.2-LTS",
+            "version": "latest"
+          }
+        }
+      },
+      "metadata": {
+        "description": "Do not include a hyphen in namePrefix since it is used to generate storage account names."
+      }
+    },
+    "infrastructureSettings": {
+      "value": {
+        "vnetResourceGroup": "app6-rg",
+        "vnetName": "app6-vnet",
+        "subnetsConfig": [
+          {
+            "name": "app6-fe-subnet",
+            "prefix": "fe"
+          },
+          {
+            "name": "app6-be-subnet",
+            "prefix": "be"
+          }
+        ],
+        "availabilitySet": {
+          "newOrExisting": "new",
+          "name": "app6-as"
+        }
+      },
+      "metadata": {
+        "description": "Availability set name is required for both new and existing scenarios."
+      }
+    }
+  }
+}

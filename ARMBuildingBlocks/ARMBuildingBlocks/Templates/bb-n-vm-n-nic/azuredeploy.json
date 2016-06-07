@@ -1,0 +1,106 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual machines"
+      }
+    },
+    "infrastructureSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for infrastructure"
+      }
+    }
+
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "storageAccountIdentifier": {
+      "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'st'))]",
+      "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]"
+    },
+    "path": {
+      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../bb-n-vm-n-nic.json')]",
+      "avSetTemplate": "[uri(deployment().properties.templateLink.uri, concat('../bb-avset-',parameters('infrastructureSettings').availabilitySet.newOrExisting, '.json'))]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "deploy-avset",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('path').avSetTemplate]"
+        },
+        "parameters": {
+          "platformFaultDomainCount": {
+            "value": 5
+          },
+          "platformUpdateDomainCount": {
+            "value": 3
+          },
+          "avSetName": {
+            "value": "parameters('infrastructureSettings').availabilitySet.name"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[variables('storageAccountIdentifier').diagnostic]",
+      "properties": { "accountType": "Standard_LRS" }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[concat(variables('storageAccountIdentifier').vhd, copyindex(1))]",
+      "copy": {
+        "name": "storageLoop",
+        "count": "[parameters('virtualMachinesSettings').count]"
+      },
+      "properties": { "accountType": "Premium_LRS" }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm-', copyindex(1))]",
+      "copy": {
+        "name": "vmLoop",
+        "count": "[parameters('virtualMachinesSettings').count]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('path').vmTemplate]"
+        },
+        "parameters": {
+          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
+          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
+          "environmentSettings": {
+            "value": {
+              "storageAccount": {
+                "vhd": "[concat(variables('storageAccountIdentifier').vhd, copyindex(1))]",
+                "diagnostic": "[variables('storageAccountIdentifier').diagnostic]"
+              },
+              "vnetId": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
+              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]",
+              "subnetsConfig": "[parameters('infrastructureSettings').subnetsConfig]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier').vhd, parameters('virtualMachinesSettings').count)]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountIdentifier').diagnostic)]"
+      ]
+    }
+  ]
+}

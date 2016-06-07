@@ -1,0 +1,36 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachineSettings": {
+      "value": {
+        "size": "Standard_DS1",
+        "osType": "Windows",
+        "adminUserName": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "appName": "app1",
+        "appType": "dev",
+        "osProfile": {
+          "windows": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter"
+          },
+          "linux": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "14.04.2-LTS"
+          }
+        }
+      }
+    },
+    "infrastructureSettings": {
+      "value": {
+        "vnetResourceGroup": "rs-bp-rg",
+        "vnetName": "rs-bp-vnet",
+        "subnetName": "rs-web-sn"
+
+      }
+    }
+  }
+  }

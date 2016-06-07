@@ -1,0 +1,47 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "platformFaultDomainCount": {
+      "type": "int",
+      "maxValue": 20,
+      "defaultValue": 5,
+      "metadata": {
+        "description": "Platform domain count value."
+      }
+    },
+    "platformUpdateDomainCount": {
+      "type": "int",
+      "maxValue": 20,
+      "defaultValue": 3,
+      "metadata": {
+        "description": "Platform domain count value."
+      }
+    },
+    "avSetName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Availability set name."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "2015-06-15",
+      "name": "[parameters('avSetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]",
+        "platformUpdateDomainCount": "[parameters('platformUpdateDomainCount')]"
+      }
+    }
+  ],
+  "outputs": {
+    "availabilitySetInfo": {
+      "value": "[reference(concat('Microsoft.Compute/availabilitySets/',parameters('avSetName')),providers('Microsoft.Compute','availabilitySets').apiVersions[0])]",
+      "type": "object"
+    }
+  }
+}
