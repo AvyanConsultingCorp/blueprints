@@ -4,7 +4,6 @@
   "parameters": {
     "avSetName": {
       "type": "string",
-      "minLength": 1,
       "metadata": {
         "description": "Availability set name."
       }
