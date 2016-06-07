@@ -18,7 +18,7 @@
       "lb-loadBalancingRules": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json",
       "lb-frontendIPConfiguration-internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json",
       "lb-frontendIPConfiguration-public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json",
-      "routeTable-routes": "[uri(deployment().properties.templateLink.uri, 'routeTable-routes.json')]",
+      "routeTable-routes": "[uri(deployment().properties.templateLink.uri, '../routeTable/routeTable-routes.json')]",
       "vm-nics": "https://aoarmtest.blob.core.windows.net/templates/bb-nic.json",
       "networkSecurityGroup-securityRules": "[uri(deployment().properties.templateLink.uri, 'networkSecurityGroup-securityRules.json')]"
     }
