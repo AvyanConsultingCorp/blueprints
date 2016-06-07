@@ -1,0 +1,57 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "virtualNetworkSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual network"
+      }
+    }
+  },
+  "variables": {
+    "vnetName": "[concat(parameters('baseName'), '-', parameters('virtualNetworkSettings').namePrefix, '-vnet')]",
+    "location": "[resourceGroup().location]",
+    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
+  },
+  "resources": [
+    {
+      "name": "[variables('vnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[variables('location')]",
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "vnet"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "addressSpace": {
+          "addressPrefixes": "[parameters('virtualNetworkSettings').addressPrefixes]"
+        },
+        "subnets": "[reference('subnetTemplate').outputs.result.value]"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "subnetTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "name": { "value": "vnet-subnet" },
+          "source": { "value": "[parameters('virtualNetworkSettings').subnets]" },
+          "context": {
+            "value": {
+              "baseName": "[parameters('baseName')]"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+
+  }
+}

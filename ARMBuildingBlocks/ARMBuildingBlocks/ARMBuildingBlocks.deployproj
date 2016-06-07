@@ -59,6 +59,8 @@
     <None Include="Templates\buildingBlocks\n-vm-n-nic\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vm-1nic\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\vm-1nic\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vpn-gateway-connection\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\vpn-gateway-connection\azuredeploy.parameters.json" />
     <None Include="Templates\ibb-vm-iis.json" />
@@ -82,6 +84,7 @@
     <None Include="Templates\resources\virtualMachines\bb-avset-existing.json" />
     <None Include="Templates\resources\virtualMachines\bb-avset-new.json" />
     <None Include="Templates\resources\virtualMachines\bb-nic.json" />
+    <None Include="Templates\resources\virtualNetwork\virtualNetwork-subnets.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />

@@ -20,7 +20,8 @@
       "lb-frontendIPConfiguration-public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json",
       "routeTable-routes": "[uri(deployment().properties.templateLink.uri, 'routeTable-routes.json')]",
       "vm-nics": "https://aoarmtest.blob.core.windows.net/templates/bb-nic.json",
-      "networkSecurityGroup-securityRules": "[uri(deployment().properties.templateLink.uri, 'networkSecurityGroup-securityRules.json')]"
+      "networkSecurityGroup-securityRules": "[uri(deployment().properties.templateLink.uri, 'networkSecurityGroup-securityRules.json')]",
+      "vnet-subnet": "https://aoarmtest.blob.core.windows.net/templates/virtualNetwork-subnets.json"
     }
   },
   "resources": [

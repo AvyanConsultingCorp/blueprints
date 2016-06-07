@@ -1,0 +1,33 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "copyIndex": { "type": "int", "defaultValue": 0 }
+  },
+  "variables": {
+    "instance": [
+      {
+        "name": "[concat(parameters('context').baseName, '-', parameters('source').namePrefix, '-sn')]",
+        "properties": {
+          "addressPrefix": "[parameters('source').addressPrefix]"
+        }
+      }
+    ]
+
+  },
+  "resources": [
+
+  ],
+  "outputs": {
+    "collection": {
+      "type": "array",
+      "value": "[concat(parameters('state'), variables('instance'))]"
+    }
+  }
+}
