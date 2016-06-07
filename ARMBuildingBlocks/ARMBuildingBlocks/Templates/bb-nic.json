@@ -15,9 +15,8 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
       "name": "[concat('nicTemplate', parameters('copyIndex'))]",
       "properties": {
         "mode": "Incremental",
@@ -34,17 +33,15 @@
               "name": "[concat(parameters('context').vmName, '-nic', parameters('copyIndex'))]",
               "location": "[resourceGroup().location]",
               "properties": {
-                "ipConfigurations": {
-                  "value": [
-                    {
-                      "name": "ipconfig1",
-                      "properties": {
-                        "privateIPAllocationMethod": "Dynamic",
-                        "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" }
-                      }
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" }
                     }
-                  ]
-                }
+                  }
+                ]
               },
               "tags": {
                 "displayName": "nic"

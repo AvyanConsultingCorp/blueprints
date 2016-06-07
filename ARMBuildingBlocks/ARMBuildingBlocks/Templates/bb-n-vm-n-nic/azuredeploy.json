@@ -23,8 +23,8 @@
       "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]"
     },
     "path": {
-      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../bb-n-vm-n-nic.json')]",
-      "avSetTemplate": "[uri(deployment().properties.templateLink.uri, concat('../bb-avset-',parameters('infrastructureSettings').availabilitySet.newOrExisting, '.json'))]"
+      "vmTemplate": "https://aoarmtest.blob.core.windows.net/templates/bb-n-vm-n-nic.json",
+      "avSetTemplate": "https://aoarmtest.blob.core.windows.net/templates/bb-avset-new.json"
     }
   },
   "resources": [
@@ -39,13 +39,13 @@
         },
         "parameters": {
           "platformFaultDomainCount": {
-            "value": 5
-          },
-          "platformUpdateDomainCount": {
             "value": 3
           },
+          "platformUpdateDomainCount": {
+            "value": 5
+          },
           "avSetName": {
-            "value": "parameters('infrastructureSettings').availabilitySet.name"
+            "value": "[parameters('infrastructureSettings').availabilitySet.name]"
           }
         }
       }
