@@ -46,7 +46,7 @@
         ],
         "availabilitySet": {
           "newOrExisting": "new",
-          "name": "app6-fe-as"
+          "name": "app6-as"
         }
       },
       "metadata": {
