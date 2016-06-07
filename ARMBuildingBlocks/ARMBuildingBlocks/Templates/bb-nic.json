@@ -1,0 +1,38 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "nicName": {
+      "type": "string",
+      "metadata": {
+        "Description": "The name of the nic to create or update."
+      }
+    },
+    "ipConfigurations": {
+      "type": "array",
+      "metadata": {
+        "Description": "The IP configurations of the nic."
+      }
+    }
+  },
+  "resources": [
+    {
+      "name": "[parameters('nicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "properties": {
+        "ipConfigurations": "[parameters('ipConfigurations')]"
+      },
+      "tags": {
+        "displayName": "nic"
+      }
+    }
+  ],
+  "outputs": {
+    "nicId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/networkInterfaces',parameters('nicName'))]"
+    }
+  }
+}

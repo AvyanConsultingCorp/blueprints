@@ -1,0 +1,20 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "avSetName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Availability set name."
+      }
+    }
+  },
+  "resources": [ ],
+  "outputs": {
+    "availabilitySetInfo": {
+      "value": "[reference(concat('Microsoft.Compute/availabilitySets/',parameters('avSetName')),providers('Microsoft.Compute','availabilitySets').apiVersions[0])]",
+      "type": "object"
+    }
+  }
+}
