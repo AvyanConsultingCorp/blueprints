@@ -16,7 +16,7 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
-    "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), 'jumpbox', variables('uniqueString')))]",
+    "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), 'jb', variables('uniqueString')))]",
     "jumpBoxTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json"
   },
   "resources": [
