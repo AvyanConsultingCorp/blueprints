@@ -44,7 +44,6 @@
             "prefix": "be"
           }
         ],
-        "ilbIpAddress": "10.4.0.254",
         "availabilitySet": {
           "newOrExisting": "new",
           "name": "app6-fe-as"
