@@ -87,7 +87,7 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "vmTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-3nics-lbbe.json",
+    "vmTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-3nics-lbbe-static-ip.json",
     "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
   },
   "resources": [
