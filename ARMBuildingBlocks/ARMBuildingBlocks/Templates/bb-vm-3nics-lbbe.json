@@ -8,6 +8,9 @@
       "type": "string",
       "maxLength": 15
     },
+    "vmIPaddress1": { "type": "string" },
+    "vmIPaddress2": { "type": "string" },
+    "vmIPaddress3": { "type": "string" },
     "snid1": { "type": "string" },
     "snid2": { "type": "string" },
     "snid3": { "type": "string" },
@@ -60,10 +63,10 @@
         "Standard_DS15_v2"
       ]
     },
-      "adminUsername": { "type": "string" },
-      "adminPassword": { "type": "securestring" },
-      "vmAvSetName": { "type": "string" }
-    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+    "vmAvSetName": { "type": "string" }
+  },
     "variables": {
       "VMSettings": {
         "Windows": {
@@ -101,7 +104,8 @@
             {
               "name": "ipconfig1",
               "properties": {
-                "privateIPAllocationMethod": "Dynamic",
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[parameters('vmIPaddress1')]",
                 "loadBalancerBackendAddressPools": [ { "id": "[parameters('lbBackendPoolId')]" } ],
                 "subnet": { "id": "[parameters('snid1')]" }
               }
@@ -121,7 +125,8 @@
             {
               "name": "ipconfig1",
               "properties": {
-                "privateIPAllocationMethod": "Dynamic",
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[parameters('vmIPaddress2')]",
                 "subnet": { "id": "[parameters('snid2')]" }
               }
             }
@@ -140,7 +145,8 @@
             {
               "name": "ipconfig1",
               "properties": {
-                "privateIPAllocationMethod": "Dynamic",
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[parameters('vmIPaddress3')]",
                 "subnet": { "id": "[parameters('snid3')]" }
               }
             }

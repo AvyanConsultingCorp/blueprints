@@ -62,7 +62,28 @@
     },
     "adminUsername": { "type": "string" },
     "adminPassword": { "type": "securestring" },
-    "numberVMs": { "type": "int" }
+    "numberVMs": { "type": "int" },
+    "vmIPaddress1Array": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.29",
+        "10.0.0.28"
+      ]
+    },
+    "vmIPaddress2Array": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.62",
+        "10.0.0.61"
+      ]
+    },
+    "vmIPaddress3Array": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.253",
+        "10.0.0.252"
+      ]
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -76,7 +97,7 @@
       "location": "[variables('location')]",
       "name": "[variables('vmAvSetName')]",
       "properties": {
-        "platformFaultDomainCount": 3,        
+        "platformFaultDomainCount": 3,
         "platformUpdateDomainCount": 5
       }
     },
@@ -99,6 +120,9 @@
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "[concat(parameters('vmNamePrefix'),copyindex(1))]" },
           "vmComputerName": { "value": "[concat(parameters('vmComputerNamePrefix'),copyindex(1))]" },
+          "vmIPaddress1": { "value": "[parameters('vmIPaddress1Array')[copyIndex()]]" },
+          "vmIPaddress2": { "value": "[parameters('vmIPaddress2Array')[copyIndex()]]" },
+          "vmIPaddress3": { "value": "[parameters('vmIPaddress3Array')[copyIndex()]]" },
           "vmSize": { "value": "[parameters('vmSize')]" },
           "snid1": { "value": "[parameters('snid1')]" },
           "snid2": { "value": "[parameters('snid2')]" },

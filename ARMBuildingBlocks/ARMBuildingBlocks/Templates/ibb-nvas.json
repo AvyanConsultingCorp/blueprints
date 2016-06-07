@@ -7,7 +7,7 @@
     "beSubnetId": { "type": "string" },
     "mgmtSubnetId": { "type": "string" },
     "mgmtSubnetPrefix": { "type": "string" },
-    "vnetPrefix": {"type": "string"},
+    "vnetPrefix": { "type": "string" },
     "ilbIpAddress": { "type": "string" },
     "adminUsername": { "type": "string" },
     "adminPassword": { "type": "securestring" },
@@ -37,6 +37,27 @@
         "Standard_DS13_v2",
         "Standard_DS14_v2",
         "Standard_DS15_v2"
+      ]
+    },
+    "vmIPaddress1Array": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.29",
+        "10.0.0.28"
+      ]
+    },
+    "vmIPaddress2Array": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.62",
+        "10.0.0.61"
+      ]
+    },
+    "vmIPaddress3Array": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.253",
+        "10.0.0.252"
       ]
     }
   },
@@ -175,6 +196,9 @@
           "vmNamePrefix": { "value": "[variables('vmNamePrefix')]" },
           "vmComputerNamePrefix": { "value": "[variables('vmComputerNamePrefix')]" },
           "vmSize": { "value": "[parameters('vmSize')]" },
+          "vmIPaddress1Array": { "value": "[parameters('vmIPaddress1Array')]" },
+          "vmIPaddress2Array": { "value": "[parameters('vmIPaddress2Array')]" },
+          "vmIPaddress3Array": { "value": "[parameters('vmIPaddress3Array')]" },
           "snid1": { "value": "[parameters('feSubnetId')]" },
           "snid2": { "value": "[parameters('beSubnetId')]" },
           "snid3": { "value": "[parameters('mgmtSubnetId')]" },
