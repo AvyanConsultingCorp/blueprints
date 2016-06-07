@@ -25,6 +25,7 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
+    <Folder Include="Templates\resources\gateway\" />
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
@@ -36,49 +37,51 @@
     <None Include="Scripts\iisaspnet.ps1" />
     <None Include="Scripts\iisaspnet.ps1.zip" />
     <None Include="Scripts\nva.sh" />
-    <None Include="Templates\bb-avset-existing.json" />
-    <None Include="Templates\bb-avset-new.json" />
     <None Include="Templates\bb-custom-linux-extension.json" />
     <None Include="Templates\bb-dsc-extension.json" />
     <None Include="Templates\bb-dsc-extension2.json" />
-    <None Include="Templates\bb-ilb-backend-http-https\azuredeploy.json" />
-    <None Include="Templates\bb-ilb-backend-http-https\azuredeploy.parameters.json" />
     <None Include="Templates\bb-ilb.json" />
-    <None Include="Templates\bb-n-vm-n-nic\azuredeploy.json" />
-    <None Include="Templates\bb-n-vm-n-nic\azuredeploy.parameters.json" />
-    <None Include="Templates\bb-nic.json" />
     <None Include="Templates\bb-nsg.json" />
     <None Include="Templates\bb-gatewaysubnet-udr.json" />
     <None Include="Templates\bb-gatewaysubnet.json" />
     <None Include="Templates\bb-ntwk-forced-tunneling.json" />
     <None Include="Templates\bb-n-vm-n-nic.json" />
     <None Include="Templates\bb-vm-1nic.json" />
-    <None Include="Templates\bb-vm-1nic\azuredeploy.json" />
-    <None Include="Templates\bb-vm-1nic\azuredeploy.parameters.json" />
     <None Include="Templates\bb-vm-3nics-lbbe.json" />
     <None Include="Templates\bb-vm-1nic-lbbe.json" />
     <None Include="Templates\bb-vm-1nic-static-private-ip.json" />
     <None Include="Templates\bb-vms-3nics-lbbe.json" />
     <None Include="Templates\bb-vms-1nic-lbbe.json" />
     <None Include="Templates\bb-vnet-1subnet.json" />
-    <None Include="Templates\bb-vpn-gateway-connection\azuredeploy.json" />
-    <None Include="Templates\bb-vpn-gateway-connection\azuredeploy.parameters.json" />
-    <None Include="Templates\collector.json" />
+    <None Include="Templates\buildingBlocks\ilb-backend-http-https\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\ilb-backend-http-https\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\n-vm-n-nic\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\n-vm-n-nic\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\vm-1nic\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\vm-1nic\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\vpn-gateway-connection\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\vpn-gateway-connection\azuredeploy.parameters.json" />
     <None Include="Templates\ibb-vm-iis.json" />
     <None Include="Templates\ibb-vm-apache.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
     <None Include="Templates\ibb-nvas-mgmt.json" />
-    <None Include="Templates\lb-frontendIPConfiguration-internal.json" />
-    <None Include="Templates\lb-frontendIPConfiguration-public.json" />
-    <None Include="Templates\lb-loadBalancingRules.json" />
-    <None Include="Templates\lb-probes.json" />
-    <None Include="Templates\reference.json" />
-    <None Include="Templates\referenceOneParameter.json" />
-    <None Include="Templates\referenceTwoParameters.json" />
-    <None Include="Templates\routeTable-routes.json" />
-    <None Include="Templates\routeTable.json" />
-    <None Include="Templates\rt-routes-no-next-hop-ip-address.json" />
-    <None Include="Templates\rt-routes-with-next-hop-ip-address.json" />
+    <None Include="Templates\resources\common\collector.json" />
+    <None Include="Templates\resources\common\reference.json" />
+    <None Include="Templates\resources\common\referenceOneParameter.json" />
+    <None Include="Templates\resources\common\referenceTwoParameters.json" />
+    <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-internal.json" />
+    <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-public.json" />
+    <None Include="Templates\resources\loadBalancer\lb-loadBalancingRules.json" />
+    <None Include="Templates\resources\loadBalancer\lb-probes.json" />
+    <None Include="Templates\resources\networkSecurityGroup\networkSecurityGroup-securityRules.json" />
+    <None Include="Templates\resources\networkSecurityGroup\networkSecurityGroup.json" />
+    <None Include="Templates\resources\routeTable\routeTable-routes.json" />
+    <None Include="Templates\resources\routeTable\routeTable.json" />
+    <None Include="Templates\resources\routeTable\rt-routes-no-next-hop-ip-address.json" />
+    <None Include="Templates\resources\routeTable\rt-routes-with-next-hop-ip-address.json" />
+    <None Include="Templates\resources\virtualMachines\bb-avset-existing.json" />
+    <None Include="Templates\resources\virtualMachines\bb-avset-new.json" />
+    <None Include="Templates\resources\virtualMachines\bb-nic.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />
