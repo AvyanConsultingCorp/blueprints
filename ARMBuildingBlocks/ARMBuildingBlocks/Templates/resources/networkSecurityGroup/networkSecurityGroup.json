@@ -14,8 +14,8 @@
     "subnetName": "[parameters('infrastructureSettings').subnetName]",
     "networkSecurityGroupName": "[parameters('infrastructureSettings').networkSecurityGroup.name]",
     "networkSecurityGroupSecurityRules": "[parameters('infrastructureSettings').networkSecurityGroup.securityRules]",
-    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, 'collector.json')]",
-    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, 'reference.json')]"
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
+    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]"
   },
   "resources": [
     {
