@@ -30,7 +30,7 @@
       "storageAccountContainerName": "vhds"
     },
     "storageAccountName": {
-      "vhd": "[toLower(concat(replace(parameters('environmentSettings').vmName,'-',''), uniqueString(resourceGroup().id), 'st'))]"
+      "vhd": "[toLower(concat(replace(parameters('environmentSettings').vmName,'-',''), substring(uniqueString(resourceGroup().id),0,5), 'st'))]"
     },
     "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
