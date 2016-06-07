@@ -3,14 +3,17 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "source": { "type": "array" },
-    "context": {"type": "object"},
-    "name": {"type": "string"}
+    "context": { "type": "object" },
+    "name": { "type": "string" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    }
   },
   "variables": {
     "count": "[length(parameters('source'))]",
     "templateBaseName": "[parameters('name')]",
     "mapperTemplates": {
-      "nop": "https://aoarmtest.blob.core.windows.net/templates/empty.json",
       "lb-probes": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json",
       "lb-loadBalancingRules": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json",
       "lb-frontendIPConfiguration-internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json",
@@ -25,8 +28,19 @@
       "name": "[concat(variables('templateBaseName'), '-template0')]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('mapperTemplates')['nop']]" },
-        "parameters": {
+        "parameters": { },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "variables": { },
+          "resources": [],
+          "outputs": {
+            "collection": {
+              "type": "array",
+              "value": "[parameters('state')]"
+            }
+          }
         }
       }
     },
@@ -47,7 +61,8 @@
         "parameters": {
           "source": { "value": "[parameters('source')[copyindex()]]" },
           "context": { "value": "[parameters('context')]" },
-          "state": { "value": "[reference(concat(variables('templateBaseName'), '-template', copyindex())).outputs.collection.value]" }
+          "state": { "value": "[reference(concat(variables('templateBaseName'), '-template', copyindex())).outputs.collection.value]" },
+          "copyIndex": { "value": "[copyindex()]" }
         }
       }
     }

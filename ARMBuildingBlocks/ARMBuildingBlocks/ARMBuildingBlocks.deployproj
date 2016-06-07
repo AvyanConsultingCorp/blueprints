@@ -64,12 +64,10 @@
     <None Include="Templates\bb-vpn-gateway-connection\azuredeploy.json" />
     <None Include="Templates\bb-vpn-gateway-connection\azuredeploy.parameters.json" />
     <None Include="Templates\collector.json" />
-    <None Include="Templates\empty.json" />
     <None Include="Templates\ibb-vm-iis.json" />
     <None Include="Templates\ibb-vm-apache.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
     <None Include="Templates\ibb-nvas-mgmt.json" />
-    <None Include="Templates\ilbrules.json" />
     <None Include="Templates\lb-frontendIPConfiguration-internal.json" />
     <None Include="Templates\lb-frontendIPConfiguration-public.json" />
     <None Include="Templates\lb-loadBalancingRules.json" />

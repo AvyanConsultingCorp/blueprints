@@ -7,10 +7,14 @@
     "state": {
       "type": "array",
       "defaultValue": [ ]
+    },
+    "copyIndex": {
+      "type": "int",
+      "defaultValue": 0
     }
   },
   "variables": {
-    "publicIpAddressName": "[concat(parameters('source').name, '-pip')]"
+    "publicIpAddressName": "[concat(parameters('source').name, parameters('copyIndex'), '-pip')]"
   },
   "resources": [
     {

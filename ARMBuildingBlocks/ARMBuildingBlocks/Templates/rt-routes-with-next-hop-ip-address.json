@@ -11,7 +11,8 @@
     "state": {
       "type": "array",
       "defaultValue": [ ]
-    }
+    },
+    "copyIndex": { "type": "int", "defaultValue": 0 }
   },
   "variables": {
     "instance": [
