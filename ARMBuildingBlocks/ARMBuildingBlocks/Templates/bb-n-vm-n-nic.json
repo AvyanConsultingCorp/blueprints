@@ -47,7 +47,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('environmentSettings').vmName, '-nicTemplate')]",
+      "name": "[concat(parameters('environmentSettings').vmName, 'nicTemplate')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
@@ -70,7 +70,7 @@
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', parameters('environmentSettings').vmName, '-nicTemplate')]",
+        "[concat('Microsoft.Resources/deployments/', parameters('environmentSettings').vmName, 'nicTemplate')]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName').vhd)]"
       ],
       "properties": {
