@@ -13,11 +13,11 @@
         "count": 2,
         "nics": [
           {
-            "isPrimary": true,
+            "isPrimary": "true",
             "subnetName": "app6-fe-subnet"
           },
           {
-            "isPrimary": false,
+            "isPrimary": "false",
             "subnetName": "app6-be-subnet"
           }
         ],
