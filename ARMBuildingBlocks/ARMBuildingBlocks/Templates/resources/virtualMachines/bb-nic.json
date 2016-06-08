@@ -33,7 +33,6 @@
               "name": "[concat(parameters('context').vmName, '-nic', parameters('numSuffix'))]",
               "location": "[resourceGroup().location]",
               "properties": {
-                "primary": "[parameters('source').isPrimary]",
                 "ipConfigurations": [
                   {
                     "name": "ipconfig1",
@@ -54,7 +53,10 @@
               "type": "array",
               "value": [
                 {
-                  "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('context').vmName, '-nic', parameters('numSuffix')))]"
+                  "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('context').vmName, '-nic', parameters('numSuffix')))]",
+                  "properties": {
+                    "primary": "[parameters('source').isPrimary]"
+                  }
                 }
               ]
             }
