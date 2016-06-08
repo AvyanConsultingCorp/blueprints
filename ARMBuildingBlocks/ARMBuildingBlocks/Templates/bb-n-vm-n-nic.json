@@ -104,7 +104,10 @@
             }
           ]
         },
-        "networkProfile": "[reference('nicTemplate').outputs.result.value]",
+        "networkProfile": {
+          "networkInterfaces": "[reference('nicTemplate').outputs.result.value]"
+        },
+        
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
