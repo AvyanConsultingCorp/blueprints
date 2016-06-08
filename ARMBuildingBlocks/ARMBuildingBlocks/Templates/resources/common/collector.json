@@ -13,6 +13,7 @@
   "variables": {
     "count": "[length(parameters('source'))]",
     "templateBaseName": "[parameters('name')]",
+    "nicTemplateUri" : "vm-nics",
     "mapperTemplates": {
       "lb-probes": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json",
       "lb-loadBalancingRules": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json",
@@ -60,7 +61,7 @@
       },
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('mapperTemplates')[parameters('name')]]" },
+        "templateLink": { "uri": "[variables('mapperTemplates')[variables('nicTemplateUri')]]" },
         "parameters": {
           "source": { "value": "[parameters('source')[copyindex()]]" },
           "context": { "value": "[parameters('context')]" },

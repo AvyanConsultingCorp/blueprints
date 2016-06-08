@@ -59,7 +59,7 @@
               "vmName": "[parameters('environmentSettings').vmName]"
             }
           },
-          "name": { "value": "vm-nics" }
+          "name": { "value": "[concat(parameters('environmentSettings').vmName, '-nics')]" }
         }
       }
     },
