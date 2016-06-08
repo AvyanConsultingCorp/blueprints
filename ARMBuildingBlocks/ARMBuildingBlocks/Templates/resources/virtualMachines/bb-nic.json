@@ -17,7 +17,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('nicTemplate', parameters('copyIndex'))]",
+      "name": "[concat(parameters('context').vmName, 'nicTemplate', parameters('copyIndex'))]",
       "properties": {
         "mode": "Incremental",
         "parameters": { },
@@ -37,6 +37,7 @@
                   {
                     "name": "ipconfig1",
                     "properties": {
+                      "primary": "[parameters('source').isPrimary]",
                       "privateIPAllocationMethod": "Dynamic",
                       "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" }
                     }
