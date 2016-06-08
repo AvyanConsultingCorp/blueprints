@@ -6,7 +6,7 @@
       "value": {
         "namePrefix": "app6",
         "computerNamePrefix": "dev",
-        "size": "Standard_DS1",
+        "size": "Standard_DS2",
         "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
