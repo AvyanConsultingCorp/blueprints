@@ -66,7 +66,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[concat(parameters('state'), reference(concat('nicTemplate', parameters('copyIndex'))).outputs.instance.value)]"
+      "value": "[concat(parameters('state'), reference(concat(parameters('context').vmName, 'nicTemplate', parameters('copyIndex'))).outputs.instance.value)]"
     }
   }
 }
