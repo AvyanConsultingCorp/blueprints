@@ -33,11 +33,11 @@
               "name": "[concat(parameters('context').vmName, '-nic', parameters('numSuffix'))]",
               "location": "[resourceGroup().location]",
               "properties": {
+                "primary": "[parameters('source').isPrimary]",
                 "ipConfigurations": [
                   {
                     "name": "ipconfig1",
                     "properties": {
-                      "primary": "[parameters('source').isPrimary]",
                       "privateIPAllocationMethod": "Dynamic",
                       "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" }
                     }
