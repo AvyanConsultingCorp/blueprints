@@ -70,7 +70,7 @@
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
       "dependsOn": [
-        "Microsoft.Resources/deployments/nicTemplate",
+        "[concat('Microsoft.Resources/deployments/', parameters('environmentSettings').vmName, '-nicTemplate')]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName').vhd)]"
       ],
       "properties": {
