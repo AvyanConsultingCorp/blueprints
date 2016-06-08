@@ -47,7 +47,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "nicTemplate",
+      "name": "[concat(parameters('environmentSettings').vmName, '-nicTemplate')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
