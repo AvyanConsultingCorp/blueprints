@@ -8,13 +8,13 @@
       "type": "array",
       "defaultValue": [ ]
     },
-    "copyIndex": {
+    "iteration": {
       "type": "int",
       "defaultValue": 0
     }
   },
   "variables": {
-    "publicIpAddressName": "[concat(parameters('source').name, parameters('copyIndex'), '-pip')]"
+    "publicIpAddressName": "[concat(parameters('source').name, parameters('iteration'), '-pip')]"
   },
   "resources": [
     {

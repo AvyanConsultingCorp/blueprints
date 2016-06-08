@@ -8,7 +8,10 @@
       "type": "array",
       "defaultValue": [ ]
     },
-    "copyIndex": { "type": "int", "defaultValue": 0 }
+    "iteration": {
+      "type": "int",
+      "defaultValue": 0
+    }
   },
   "variables": {
     "instance": [

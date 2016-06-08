@@ -8,7 +8,7 @@
       "type": "array",
       "defaultValue": [ ]
     },
-    "numSuffix": {
+    "iteration": {
       "type": "int",
       "defaultValue": 0
     }
@@ -17,7 +17,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('context').vmName, '-nic', parameters('numSuffix'))]",
+      "name": "[concat('deploy-', parameters('context').vmName, '-nic', parameters('iteration'))]",
       "properties": {
         "mode": "Incremental",
         "parameters": { },
@@ -30,7 +30,7 @@
             {
               "apiVersion": "2016-03-30",
               "type": "Microsoft.Network/networkInterfaces",
-              "name": "[concat(parameters('context').vmName, '-nic', parameters('numSuffix'))]",
+              "name": "[concat(parameters('context').vmName, '-nic', parameters('iteration'))]",
               "location": "[resourceGroup().location]",
               "properties": {
                 "ipConfigurations": [
@@ -53,7 +53,7 @@
               "type": "array",
               "value": [
                 {
-                  "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('context').vmName, '-nic', parameters('numSuffix')))]",
+                  "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('context').vmName, '-nic', parameters('iteration')))]",
                   "properties": {
                     "primary": "[parameters('source').isPrimary]"
                   }
@@ -68,7 +68,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('context').vmName, '-nic', parameters('numSuffix'))).outputs.instance.value)]"
+      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('context').vmName, '-nic', parameters('iteration'))).outputs.instance.value)]"
     }
   }
 }

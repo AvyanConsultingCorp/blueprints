@@ -8,7 +8,7 @@
       "type": "array",
       "defaultValue": [ ]
     },
-    "copyIndex": {
+    "iteration": {
       "type": "int",
       "defaultValue": 0
     }
