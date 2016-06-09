@@ -60,8 +60,7 @@
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')]",
-        "[concat('Microsoft.Storage/storageAccounts/', parameters('context').storageAccount.vhd)]"
+        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')]"
       ],
       "properties": {
         "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.name)]" },
