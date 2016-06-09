@@ -31,6 +31,7 @@
       <Visible>False</Visible>
     </None>
     <None Include="README.md" />
+    <None Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <None Include="Templates\ra-vnet-subnets-udr-nsg\azuredeploy.parameters.json" />
     <None Include="Templates\ra-vnet-subnets-udr-nsg\README.md" />
   </ItemGroup>
