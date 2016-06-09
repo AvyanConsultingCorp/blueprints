@@ -2,9 +2,10 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "parentResourceName": {"type": "string", "defaultValue": "default"},
     "source": { "type": "array" },
     "context": { "type": "object" },
-    "name": { "type": "string" },
+    "mapperTemplateUri": { "type": "string" },
     "state": {
       "type": "array",
       "defaultValue": [ ]
@@ -12,24 +13,14 @@
   },
   "variables": {
     "count": "[length(parameters('source'))]",
-    "templateBaseName": "[parameters('name')]",
-    "nicTemplateUri" : "vm-nics",
-    "mapperTemplates": {
-      "lb-probes": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json",
-      "lb-loadBalancingRules": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json",
-      "lb-frontendIPConfiguration-internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json",
-      "lb-frontendIPConfiguration-public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json",
-      "routeTable-routes": "[uri(deployment().properties.templateLink.uri, '../routeTable/routeTable-routes.json')]",
-      "vm-nics": "https://aoarmtest.blob.core.windows.net/templates/bb-nic.json",
-      "networkSecurityGroup-securityRules": "[uri(deployment().properties.templateLink.uri, '../networkSecurityGroup/networkSecurityGroup-securityRules.json')]",
-      "vnet-subnet": "https://aoarmtest.blob.core.windows.net/templates/virtualNetwork-subnets.json"
-    }
+    "templateNamePrefix": "[concat(parameters('parentResourceName'), '-', split(split(parameters('mapperTemplateUri'), '/')[sub(length(split(parameters('mapperTemplateUri'), '/')), 1)], '.')[0])]",
+    "templateNamePostfix": "[concat('-', uniqueString(concat(string(parameters('source')), string(parameters('context')), string(parameters('state')))))]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(variables('templateBaseName'), '-template0')]",
+      "name": "[concat(variables('templateNamePrefix'), '0', variables('templateNamePostfix'))]",
       "properties": {
         "mode": "Incremental",
         "parameters": { },
@@ -38,7 +29,7 @@
           "contentVersion": "1.0.0.0",
           "parameters": { },
           "variables": { },
-          "resources": [],
+          "resources": [ ],
           "outputs": {
             "collection": {
               "type": "array",
@@ -51,9 +42,9 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(variables('templateBaseName'), '-template', copyindex(1))]",
+      "name": "[concat(variables('templateNamePrefix'), copyindex(1), variables('templateNamePostfix'))]",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', variables('templateBaseName'), '-template', copyindex())]"
+        "[concat('Microsoft.Resources/deployments/', variables('templateNamePrefix'), copyindex(), variables('templateNamePostfix'))]"
       ],
       "copy": {
         "name": "iterator",
@@ -61,11 +52,11 @@
       },
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('mapperTemplates')[variables('nicTemplateUri')]]" },
+        "templateLink": { "uri": "[parameters('mapperTemplateUri')]" },
         "parameters": {
           "source": { "value": "[parameters('source')[copyindex()]]" },
           "context": { "value": "[parameters('context')]" },
-          "state": { "value": "[reference(concat(variables('templateBaseName'), '-template', copyindex())).outputs.collection.value]" },
+          "state": { "value": "[reference(concat(variables('templateNamePrefix'), copyindex(), variables('templateNamePostfix'))).outputs.collection.value]" },
           "iteration": { "value": "[copyindex(1)]" }
         }
       }
@@ -74,7 +65,7 @@
   "outputs": {
     "result": {
       "type": "array",
-      "value": "[reference(concat(variables('templateBaseName'), '-template', variables('count'))).outputs.collection.value]"
+      "value": "[reference(concat(variables('templateNamePrefix'), variables('count'), variables('templateNamePostfix'))).outputs.collection.value]"
     }
   }
 }

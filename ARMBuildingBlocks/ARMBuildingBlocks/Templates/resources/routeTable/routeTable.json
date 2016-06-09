@@ -32,8 +32,8 @@
           "context": {
             "value": { }
           },
-          "name": {
-            "value": "routeTable-routes"
+          "mapperTemplateUri": {
+            "value": "[uri(deployment().properties.templateLink.uri, '../routeTable/routeTable-routes.json')]"
           }
         }
       }

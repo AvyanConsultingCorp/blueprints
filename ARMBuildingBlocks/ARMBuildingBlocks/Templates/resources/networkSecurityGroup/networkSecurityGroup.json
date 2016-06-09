@@ -32,8 +32,8 @@
           "context": {
             "value": { }
           },
-          "name": {
-            "value": "networkSecurityGroup-securityRules"
+          "mapperTemplateUri": {
+            "value": "[uri(deployment().properties.templateLink.uri, '../networkSecurityGroup/networkSecurityGroup-securityRules.json')]"
           }
         }
       }

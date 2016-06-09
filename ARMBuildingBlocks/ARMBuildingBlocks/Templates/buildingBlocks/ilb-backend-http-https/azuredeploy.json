@@ -42,8 +42,8 @@
     "probes": "[parameters('loadBalancerSettings').probes]",
     "probesCount": "[length(variables('probes'))]",
     "ipConfigurations": {
-      "public": "lb-frontendIPConfiguration-public",
-      "internal": "lb-frontendIPConfiguration-internal"
+      "public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json",
+      "internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json"
     },
     "ipConfigurationPath": "[variables('ipConfigurations')[toLower(parameters('loadBalancerSettings').frontendIPConfigurations[0].loadBalancerType)]]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
@@ -82,7 +82,7 @@
               "backendAddressPool": "[variables('internalLoadBalancer').backendPoolId]"
             }
           },
-          "name": { "value": "lb-loadBalancingRules" }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json" }
         }
       }
     },
@@ -96,7 +96,7 @@
         "parameters": {
           "source": { "value": "[parameters('loadBalancerSettings').probes]" },
           "context": { "value": { } },
-          "name": { "value": "lb-probes" }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json" }
         }
       }
     },
