@@ -45,7 +45,6 @@
     <None Include="Templates\bb-gatewaysubnet-udr.json" />
     <None Include="Templates\bb-gatewaysubnet.json" />
     <None Include="Templates\bb-ntwk-forced-tunneling.json" />
-    <None Include="Templates\bb-n-vm-n-nic.json" />
     <None Include="Templates\bb-vm-1nic.json" />
     <None Include="Templates\bb-vm-3nics-lbbe.json" />
     <None Include="Templates\bb-vm-1nic-lbbe.json" />
@@ -81,9 +80,11 @@
     <None Include="Templates\resources\routeTable\routeTable.json" />
     <None Include="Templates\resources\routeTable\rt-routes-no-next-hop-ip-address.json" />
     <None Include="Templates\resources\routeTable\rt-routes-with-next-hop-ip-address.json" />
-    <None Include="Templates\resources\virtualMachines\bb-avset-existing.json" />
-    <None Include="Templates\resources\virtualMachines\bb-avset-new.json" />
-    <None Include="Templates\resources\virtualMachines\bb-nic.json" />
+    <None Include="Templates\resources\virtualMachines\availabilitySet-existing.json" />
+    <None Include="Templates\resources\virtualMachines\availabilitySet-new.json" />
+    <None Include="Templates\resources\virtualMachines\single-vm-n-nic.parameters.json" />
+    <None Include="Templates\resources\virtualMachines\single-vm-n-nic.json" />
+    <None Include="Templates\resources\virtualMachines\virtualMachine-nic.json" />
     <None Include="Templates\resources\virtualNetwork\virtualNetwork-subnets.json" />
   </ItemGroup>
   <ItemGroup>

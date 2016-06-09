@@ -14,7 +14,7 @@
         "description": "Settings for infrastructure."
       }
     },
-    "environmentSettings": {
+    "context": {
       "type": "object",
       "metadata": {
         "description": "Settings for other parameters such as load balancer backend pool, storage account names."
@@ -24,13 +24,13 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "vmProfile": {
-      "nicName": "[concat(parameters('environmentSettings').vmName,'-nic')]",
-      "osDiskName": "[concat(parameters('environmentSettings').vmName,'-os.vhd')]",
-      "dataDiskName": "[concat(parameters('environmentSettings').vmName,'-data.vhd')]",
+      "nicName": "[concat(parameters('context').vmName, '-nic')]",
+      "osDiskName": "[concat(parameters('context').vmName, '-os.vhd')]",
+      "dataDiskName": "[concat(parameters('context').vmName, '-data.vhd')]",
       "storageAccountContainerName": "vhds"
     },
     "storageAccountName": {
-      "vhd": "[toLower(concat(replace(parameters('environmentSettings').vmName,'-',''), substring(uniqueString(resourceGroup().id),0,5), 'st'))]"
+      "vhd": "[toLower(concat(replace(parameters('context').vmName, '-', ''), substring(uniqueString(resourceGroup().id), 0, 5), 'st'))]"
     },
     "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
@@ -47,37 +47,38 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('environmentSettings').vmName, '-nic')]",
+      "name": "[concat('deploy-', parameters('context').vmName, '-nic')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
+          "parentResourceName": { "value": "[parameters('context').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
           "context": {
             "value": {
               "vnetName": "[parameters('infrastructureSettings').vnetName]",
-              "vmName": "[parameters('environmentSettings').vmName]"
+              "vmName": "[parameters('context').vmName]"
             }
           },
-          "name": { "value": "[concat(parameters('environmentSettings').vmName, '-nics')]" }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-nic.json" }
         }
       }
     },
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('environmentSettings').vmName]",
+      "name": "[parameters('context').vmName]",
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('environmentSettings').vmName, '-nic')]",
+        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName').vhd)]"
       ],
       "properties": {
         "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.name)]" },
         "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
         "osProfile": {
-          "computerName": "[parameters('environmentSettings').vmName]",
+          "computerName": "[parameters('context').vmName]",
           "adminUsername": "[parameters('virtualMachinesSettings').adminUsername]",
           "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]"
         },
@@ -105,13 +106,13 @@
           ]
         },
         "networkProfile": {
-          "networkInterfaces": "[reference(concat('Microsoft.Resources/deployments/', 'deploy-', parameters('environmentSettings').vmName, '-nic')).outputs.result.value]"
+          "networkInterfaces": "[reference(concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')).outputs.result.value]"
         },
-        
+
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('environmentSettings').storageAccountName.diagnostic, '.blob.core.windows.net')]"
+            "storageUri": "[concat('http://', parameters('context').diagnosticStorageAccountName, '.blob.core.windows.net')]"
           }
         }
       }

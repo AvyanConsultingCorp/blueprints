@@ -41,15 +41,15 @@
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
           "parentResourceName": { "value": "[variables('vnetName')]" },
-            "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualNetwork-subnets.json" },
-            "source": { "value": "[parameters('virtualNetworkSettings').subnets]" },
-            "context": {
-              "value": {
-                "baseName": "[parameters('baseName')]"
-              }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualNetwork-subnets.json" },
+          "source": { "value": "[parameters('virtualNetworkSettings').subnets]" },
+          "context": {
+            "value": {
+              "baseName": "[parameters('baseName')]"
             }
           }
         }
+      }
     }
   ],
   "outputs": {
