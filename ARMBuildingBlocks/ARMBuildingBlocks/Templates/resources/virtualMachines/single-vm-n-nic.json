@@ -29,21 +29,10 @@
       "dataDiskName": "[concat(parameters('context').vmName, '-data.vhd')]",
       "storageAccountContainerName": "vhds"
     },
-    "storageAccountName": {
-      "vhd": "[toLower(concat(replace(parameters('context').vmName, '-', ''), substring(uniqueString(resourceGroup().id), 0, 5), 'st'))]"
-    },
     "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
-
   },
   "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2015-06-15",
-      "location": "[variables('location')]",
-      "name": "[variables('storageAccountName').vhd]",
-      "properties": { "accountType": "Premium_LRS" }
-    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -72,7 +61,7 @@
       "tags": { "displayName": "VM" },
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName').vhd)]"
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('context').storageAccount.vhd)]"
       ],
       "properties": {
         "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.name)]" },
@@ -91,14 +80,14 @@
           },
           "osDisk": {
             "name": "[variables('vmProfile').osDiskName]",
-            "vhd": { "uri": "[concat('http://', variables('storageAccountName').vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').osDiskName)]" },
+            "vhd": { "uri": "[concat('http://', parameters('context').storageAccount.vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').osDiskName)]" },
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
           "dataDisks": [
             {
               "name": "[variables('vmProfile').dataDiskName]",
-              "vhd": { "uri": "[concat('http://', variables('storageAccountName').vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').dataDiskName)]" },
+              "vhd": { "uri": "[concat('http://', parameters('context').storageAccount.vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').dataDiskName)]" },
               "diskSizeGB": "127",
               "createOption": "Empty",
               "lun": 0
@@ -112,7 +101,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://', parameters('context').diagnosticStorageAccountName, '.blob.core.windows.net')]"
+            "storageUri": "[concat('http://', parameters('context').storageAccount.diagnostic, '.blob.core.windows.net')]"
           }
         }
       }

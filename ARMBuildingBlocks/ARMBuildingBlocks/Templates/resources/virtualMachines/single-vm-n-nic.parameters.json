@@ -55,8 +55,12 @@
     },
     "context": {
       "value": {
-        "diagnosticStorageAccountName": "bbteststorageacc",
+        "storageAccount": {
+          "diagnostic": "bbteststorageacc",
+          "vhd": "rsdevvmst"
+        },
         "vmName": "rs-dev-vm"
       }
     }
+  }
 }
