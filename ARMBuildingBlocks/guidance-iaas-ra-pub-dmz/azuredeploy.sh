@@ -176,7 +176,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 # install iis/apache to web vms
-for i in `seq 1 ${NUMBER_VMS}`;
+for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
 	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
