@@ -55,8 +55,9 @@
       "apiVersion": "2016-01-01",
       "location": "[variables('location')]",
       "name": "[variables('storageAccount').diagnostic]",
-      "properties": {
-        "accountType": "Standard_LRS" 
+      "kind": "Storage",
+      "sku": {
+        "name": "Standard_LRS"
       }
     },
     {
@@ -68,7 +69,10 @@
         "count": "[parameters('virtualMachinesSettings').count]",
         "name": "storageAccountLoop"
       },
-      "properties": { "accountType": "Premium_LRS" }
+      "kind": "Storage",
+      "sku": {
+        "name": "Premium_LRS"
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
