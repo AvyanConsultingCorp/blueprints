@@ -50,9 +50,9 @@
             "name": "app0-web-as"
           },
           "no": {
-            "name":  null
+            "name": [ ]
           },
-          "yesOrNo": "yes"
+          "yesOrNo": "no"
         }
       },
       "metadata": {
