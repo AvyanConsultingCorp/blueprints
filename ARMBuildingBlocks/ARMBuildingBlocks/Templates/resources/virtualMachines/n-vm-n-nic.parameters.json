@@ -10,7 +10,7 @@
         "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "count": 2,
+        "count": 3,
         "nics": [
           {
             "isPrimary": "true",
@@ -57,9 +57,9 @@
       "value": {
         "storageAccount": {
           "diagnostic": "app0devdiag",
-          "vhd": "app0devvm1st"
+          "vhd": "app0devvmst"
         },
-        "startCount": 10
+        "startCount": 5
       }
     }
   }
