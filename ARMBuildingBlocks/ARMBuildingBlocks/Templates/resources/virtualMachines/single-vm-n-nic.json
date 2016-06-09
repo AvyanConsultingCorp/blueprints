@@ -63,7 +63,7 @@
         "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')]"
       ],
       "properties": {
-        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet[parameters('infrastructureSettings').availabilitySet.yesOrNo].name)]" },
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.name)]" },
         "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
         "osProfile": {
           "computerName": "[parameters('context').vmName]",
