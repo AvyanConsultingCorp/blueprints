@@ -25,7 +25,6 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
-    <Folder Include="Templates\buildingBlocks\n-vm-n-nic\" />
     <Folder Include="Templates\resources\gateway\" />
     <Folder Include="Tools\" />
   </ItemGroup>
@@ -53,10 +52,10 @@
     <None Include="Templates\bb-vms-3nics-lbbe.json" />
     <None Include="Templates\bb-vms-1nic-lbbe.json" />
     <None Include="Templates\bb-vnet-1subnet.json" />
-    <None Include="Templates\buildingBlocks\ilb-backend-http-https\azuredeploy.json" />
-    <None Include="Templates\buildingBlocks\ilb-backend-http-https\azuredeploy.parameters.json" />
-    <None Include="Templates\buildingBlocks\vm-1nic\azuredeploy.json" />
-    <None Include="Templates\buildingBlocks\vm-1nic\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vpn-gateway-connection\azuredeploy.json" />

@@ -1,0 +1,66 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "value": {
+        "namePrefix": "app0",
+        "computerNamePrefix": "dev",
+        "size": "Standard_DS2",
+        "osType": "linux",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "count": 2,
+        "nics": [
+          {
+            "isPrimary": "true",
+            "subnetName": "app0-fe-subnet"
+          },
+          {
+            "isPrimary": "false",
+            "subnetName": "app0-be-subnet"
+          }
+        ],
+        "osProfile": {
+          "windows": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2012-R2-Datacenter",
+            "version": "latest"
+          },
+          "linux": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "14.04.2-LTS",
+            "version": "latest"
+          }
+        }
+      },
+      "metadata": {
+        "description": "Do not include a hyphen in namePrefix since it is used to generate storage account names."
+      }
+    },
+    "infrastructureSettings": {
+      "value": {
+        "vnetResourceGroup": "app0-rg",
+        "vnetName": "app0-vnet",
+        "availabilitySet": {
+          "newOrExisting": "new",
+          "name": "app0-web-as"
+        }
+      },
+      "metadata": {
+        "description": "Availability set name is required for both new and existing scenarios."
+      }
+    },
+    "context": {
+      "value": {
+        "storageAccount": {
+          "diagnostic": "app0devdiag",
+          "vhd": "app0devvm1st"
+        },
+        "startCount": 10
+      }
+    }
+  }
+}
