@@ -4,7 +4,7 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "app6",
+        "namePrefix": "app0",
         "computerNamePrefix": "dev",
         "size": "Standard_DS2",
         "osType": "linux",
@@ -14,11 +14,11 @@
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "vv-web-sn"
+            "subnetName": "app0-fe-subnet"
           },
           {
             "isPrimary": "false",
-            "subnetName": "vv-biz-sn"
+            "subnetName": "app0-be-subnet"
           }
         ],
         "osProfile": {
@@ -42,11 +42,11 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "rs-bb1-rg",
-        "vnetName": "vv-dev-vnet",
+        "vnetResourceGroup": "app0-rg",
+        "vnetName": "app0-vnet",
         "availabilitySet": {
           "newOrExisting": "new",
-          "name": "vv-dev-as"
+          "name": "app0-web-as"
         }
       },
       "metadata": {
@@ -56,10 +56,10 @@
     "context": {
       "value": {
         "storageAccount": {
-          "diagnostic": "bbteststorageacc",
-          "vhd": "rsdevvmst"
+          "diagnostic": "app0devdiag",
+          "vhd": "app0devvm1st"
         },
-        "vmName": "rs-dev-vm"
+        "vmName": "app0devvm1"
       }
     }
   }
