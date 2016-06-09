@@ -45,19 +45,22 @@
         "vnetResourceGroup": "app0-rg",
         "vnetName": "app0-vnet",
         "availabilitySet": {
-          "yes": {
-            "newOrExisting": "new",
-            "name": "app0-web-as"
-          },
-          "no": {
-            "name": ""
-          },
-          "yesOrNo": "no"
+          "newOrExisting": "new",
+          "name": "app0-web-as"
         }
       },
       "metadata": {
         "description": "Availability set name is required for both new and existing scenarios."
       }
+    },
+    "context": {
+      "value": {
+        "storageAccount": {
+          "diagnostic": "app0devdiag",
+          "vhd": "app0devvm1st"
+        },
+        "startCount": 10
+      }
     }
   }
-  }
+}
