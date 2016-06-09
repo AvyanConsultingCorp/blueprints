@@ -10,7 +10,7 @@
         "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "count": 2,
+        "count": 1,
         "nics": [
           {
             "isPrimary": "true",
@@ -45,8 +45,14 @@
         "vnetResourceGroup": "app6-rg",
         "vnetName": "app6-vnet",
         "availabilitySet": {
-          "newOrExisting": "new",
-          "name": "app6-dev-as"
+          "yes": {
+            "newOrExisting": "new",
+            "name": "app6-dev-as"
+          },
+          "no": {
+            "name":  null
+          },
+          "yesOrNo": "no"
         }
       },
       "metadata": {
@@ -54,4 +60,4 @@
       }
     }
   }
-}
+  }

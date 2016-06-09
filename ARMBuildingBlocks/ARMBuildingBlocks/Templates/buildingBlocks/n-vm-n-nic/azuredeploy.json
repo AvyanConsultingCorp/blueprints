@@ -23,7 +23,7 @@
     },
     "path": {
       "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../../bb-n-vm-n-nic.json')]",
-      "avSetTemplate": "[uri(deployment().properties.templateLink.uri, concat('../../resources/virtualMachines/bb-avset-',parameters('infrastructureSettings').availabilitySet.newOrExisting, '.json'))]"
+      "avSetTemplate": "[uri(deployment().properties.templateLink.uri, concat('../../resources/virtualMachines/bb-avset-',parameters('infrastructureSettings').availabilitySet.yes.newOrExisting, '.json'))]"
     }
   },
   "resources": [
@@ -44,7 +44,7 @@
             "value": 5
           },
           "avSetName": {
-            "value": "[parameters('infrastructureSettings').availabilitySet.name]"
+            "value": "[parameters('infrastructureSettings').availabilitySet[parameters('infrastructureSettings').availabilitySet.yesOrNo].name]"
           }
         }
       }
