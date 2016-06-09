@@ -4,21 +4,21 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "app6",
+        "namePrefix": "app0",
         "computerNamePrefix": "dev",
         "size": "Standard_DS2",
         "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "count": 1,
+        "count": 2,
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "app6-fe-subnet"
+            "subnetName": "app0-fe-subnet"
           },
           {
             "isPrimary": "false",
-            "subnetName": "app6-be-subnet"
+            "subnetName": "app0-be-subnet"
           }
         ],
         "osProfile": {
@@ -42,12 +42,12 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "app6-rg",
-        "vnetName": "app6-vnet",
+        "vnetResourceGroup": "app0-rg",
+        "vnetName": "app0-vnet",
         "availabilitySet": {
           "yes": {
             "newOrExisting": "new",
-            "name": "app6-dev-as"
+            "name": "app0-web-as"
           },
           "no": {
             "name":  null
