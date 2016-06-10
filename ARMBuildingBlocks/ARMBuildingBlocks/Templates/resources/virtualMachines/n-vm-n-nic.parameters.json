@@ -37,7 +37,7 @@
         },
         "storageProfile": [
           {
-            "dataDiskSize": 128
+            "dataDiskSize": 127
           },
           {
             "dataDiskSize": 512
@@ -46,7 +46,7 @@
             "dataDiskSize": 256
           },
                     {
-            "dataDiskSize": 1024
+            "dataDiskSize": 1023
           }
         ]
       },
