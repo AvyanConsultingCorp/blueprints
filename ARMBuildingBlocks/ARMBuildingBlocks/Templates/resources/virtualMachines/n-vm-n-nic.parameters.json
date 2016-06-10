@@ -35,12 +35,14 @@
             "version": "latest"
           }
         },
-        "storageProfile": {
-          "dataDisk": {
-            "count": 4,
-            "size": 127
+        "storageProfile": [
+          {
+            "dataDisk": {
+              "count": 4,
+              "size": 127
+            }
           }
-        }
+        ]
       },
       "metadata": {
         "description": "Do not include a hyphen in namePrefix since it is used to generate storage account names."
