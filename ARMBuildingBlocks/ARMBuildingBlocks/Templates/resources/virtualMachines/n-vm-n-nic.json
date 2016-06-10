@@ -24,10 +24,6 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "storageAccount": {
-      "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]",
-      "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix,parameters('virtualMachinesSettings').computerNamePrefix,'vm', substring(uniquestring(resourceGroup().id), 0, 5), 'st'))]"
-    },
     "path": {
       "vmTemplate": "[uri(deployment().properties.templateLink.uri,'single-vm-n-nic.json')]"
     }
@@ -52,8 +48,8 @@
           "context": {
             "value": {
               "storageAccount": {
-                "diagnostic": "app0devdiag",
-                "vhd": "app0devvm1st"
+                "diagnostic": "[parameters('context').storageAccount.diagnostic]",
+                "vhd": "[parameters('context').storageAccount.vhd]"
               },
               "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', add(parameters('context').startCount, copyindex()))]"
             }
