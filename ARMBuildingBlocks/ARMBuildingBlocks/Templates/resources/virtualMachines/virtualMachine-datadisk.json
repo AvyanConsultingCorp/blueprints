@@ -31,7 +31,7 @@
               "value": [
                 {
                   "name": "[concat('dataDisk', parameters('iteration'))]",
-                  "diskSizeGB": "[parameters('source').dataDisk.size]",
+                  "diskSizeGB": "[parameters('source').dataDiskSize]",
                   "lun": "[parameters('iteration')]",
                   "vhd": {
                     "uri": "[concat('http://', parameters('context').storageAccount.name, 'blob.core.windows.net/',parameters('context').storageAccount.container, '/',parameters('context').vmName,'dataDisk',parameters('iteration'),'.vhd')]"

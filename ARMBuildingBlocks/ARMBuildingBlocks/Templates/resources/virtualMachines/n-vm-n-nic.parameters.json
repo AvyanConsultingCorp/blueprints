@@ -10,7 +10,7 @@
         "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "count": 3,
+        "count": 2,
         "nics": [
           {
             "isPrimary": "true",
@@ -37,10 +37,16 @@
         },
         "storageProfile": [
           {
-            "dataDisk": {
-              "count": 4,
-              "size": 127
-            }
+            "dataDiskSize": 128
+          },
+          {
+            "dataDiskSize": 512
+          },
+          {
+            "dataDiskSize": 256
+          },
+                    {
+            "dataDiskSize": 1024
           }
         ]
       },
