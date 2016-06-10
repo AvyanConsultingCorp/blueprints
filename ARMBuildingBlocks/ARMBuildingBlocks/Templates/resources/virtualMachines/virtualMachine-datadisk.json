@@ -17,7 +17,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('context').storageAccount.name, '-datadisk', parameters('iteration'))]",
+      "name": "[concat('deploy-', parameters('context').vmName, '-datadisk', parameters('iteration'))]",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -49,7 +49,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('context').storageAccount.name, '-datadisk', parameters('iteration'))).outputs.instance.value)]"
+      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('context').vmName, '-datadisk', parameters('iteration'))).outputs.instance.value)]"
     }
   }
 }
