@@ -34,7 +34,21 @@
             "sku": "14.04.2-LTS",
             "version": "latest"
           }
-        }
+        },
+        "storageProfile": [
+          {
+            "dataDiskSize": 127
+          },
+          {
+            "dataDiskSize": 512
+          },
+          {
+            "dataDiskSize": 256
+          },
+                    {
+            "dataDiskSize": 1023
+          }
+        ]
       },
       "metadata": {
         "description": "Do not include a hyphen in namePrefix since it is used to generate storage account names."
@@ -57,10 +71,10 @@
       "value": {
         "storageAccount": {
           "diagnostic": "app0devdiag",
-          "vhd": "app0devvm1st"
+          "vhd": "app0devvmst"
         },
-        "startCount": 10
+        "startCount": 5
       }
     }
   }
-}
+  }

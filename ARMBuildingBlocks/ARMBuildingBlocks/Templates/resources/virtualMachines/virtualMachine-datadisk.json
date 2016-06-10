@@ -1,0 +1,55 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "iteration": {
+      "type": "int",
+      "defaultValue": 0
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat('deploy-', parameters('context').vmName, '-datadisk', parameters('iteration'))]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "resources": [ ],
+          "outputs": {
+            "instance": {
+              "type": "array",
+              "value": [
+                {
+                  "name": "[concat('dataDisk', parameters('iteration'))]",
+                  "diskSizeGB": "[parameters('source').dataDiskSize]",
+                  "lun": "[parameters('iteration')]",
+                  "vhd": {
+                    "uri": "[concat('http://', parameters('context').storageAccount.name, '.blob.core.windows.net/',parameters('context').storageAccount.container, '/',parameters('context').vmName,'dataDisk',parameters('iteration'),'.vhd')]"
+                  },
+                  "caching": "None",
+                  "createOption": "Empty"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "collection": {
+      "type": "array",
+      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('context').vmName, '-datadisk', parameters('iteration'))).outputs.instance.value)]"
+    }
+  }
+}

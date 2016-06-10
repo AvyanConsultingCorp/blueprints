@@ -24,66 +24,15 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "storageAccount": {
-      "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]",
-      "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix,parameters('virtualMachinesSettings').computerNamePrefix,'vm', substring(uniquestring(resourceGroup().id), 0, 5), 'st'))]"
-    },
     "path": {
-      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'../../resources/virtualMachines/single-vm-n-nic.json')]",
-      "avSetTemplate": "[uri(deployment().properties.templateLink.uri, concat('../../resources/virtualMachines/availabilitySet-',parameters('infrastructureSettings').availabilitySet.yes.newOrExisting, '.json'))]"
+      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'single-vm-n-nic.json')]"
     }
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "deploy-avset",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('path').avSetTemplate]"
-        },
-        "parameters": {
-          "platformFaultDomainCount": {
-            "value": 3
-          },
-          "platformUpdateDomainCount": {
-            "value": 5
-          },
-          "avSetName": {
-            "value": "[parameters('infrastructureSettings').availabilitySet[parameters('infrastructureSettings').availabilitySet.yesOrNo].name]"
-          }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2016-01-01",
-      "location": "[variables('location')]",
-      "name": "[variables('storageAccount').diagnostic]",
-      "kind": "Storage",
-      "sku": {
-        "name": "Standard_LRS"
-      }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2016-01-01",
-      "location": "[variables('location')]",
-      "name": "[concat(variables('storageAccount').vhd, copyIndex(1))]",
-      "copy": {
-        "count": "[parameters('virtualMachinesSettings').count]",
-        "name": "storageAccountLoop"
-      },
-      "kind": "Storage",
-      "sku": {
-        "name": "Premium_LRS"
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('virtualMachinesSettings').namePrefix, '-vm-', copyindex(1))]",
+      "name": "[concat('deploy-', parameters('virtualMachinesSettings').namePrefix, '-vm-', add(parameters('context').startCount, copyindex()))]",
       "copy": {
         "name": "vmLoop",
         "count": "[parameters('virtualMachinesSettings').count]"
@@ -99,19 +48,14 @@
           "context": {
             "value": {
               "storageAccount": {
-                "diagnostic": "[variables('storageAccount').diagnostic]",
-                "vhd": "[concat(variables('storageAccount').vhd, copyIndex(1))]"
+                "diagnostic": "[parameters('context').storageAccount.diagnostic]",
+                "vhd": "[parameters('context').storageAccount.vhd]"
               },
-              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', copyIndex(1))]"
+              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', add(parameters('context').startCount, copyindex()))]"
             }
           }
         }
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccount').diagnostic)]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccount').vhd, copyIndex(1))]",
-        "Microsoft.Resources/deployments/deploy-avset"
-      ]
+      }
     }
   ]
 }
