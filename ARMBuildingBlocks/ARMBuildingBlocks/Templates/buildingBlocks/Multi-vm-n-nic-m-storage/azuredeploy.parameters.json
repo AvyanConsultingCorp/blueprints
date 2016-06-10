@@ -10,7 +10,8 @@
         "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "count": 2,
+        "storageAccountCount": 3,
+        "vmCount": 17,
         "nics": [
           {
             "isPrimary": "true",
@@ -51,15 +52,6 @@
       },
       "metadata": {
         "description": "Availability set name is required for both new and existing scenarios."
-      }
-    },
-    "context": {
-      "value": {
-        "storageAccount": {
-          "diagnostic": "app0devdiag",
-          "vhd": "app0devvm1st"
-        },
-        "startCount": 10
       }
     }
   }

@@ -13,17 +13,12 @@
       "metadata": {
         "description": "Settings for infrastructure"
       }
-    },
-    "context": {
-      "type": "object",
-      "metadata": {
-        "description": "Settings for other parameters such as load balancer backend pool, storage account names."
-      }
     }
-
   },
   "variables": {
     "location": "[resourceGroup().location]",
+    "vmGroupCount": "parameters('virtualMachinesSettings').storageAccountCount",
+    "vmPerGroup": "[div(parameters('virtualMachinesSettings').vmCount, parameters('virtualMachinesSettings').storageAccountCount)]",
     "storageAccount": {
       "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]",
       "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix,parameters('virtualMachinesSettings').computerNamePrefix,'vm', substring(uniquestring(resourceGroup().id), 0, 5), 'st'))]"
@@ -72,7 +67,7 @@
       "location": "[variables('location')]",
       "name": "[concat(variables('storageAccount').vhd, copyIndex(1))]",
       "copy": {
-        "count": "[parameters('virtualMachinesSettings').count]",
+        "count": "[parameters('virtualMachinesSettings').storageAccountCount]",
         "name": "storageAccountLoop"
       },
       "kind": "Storage",
