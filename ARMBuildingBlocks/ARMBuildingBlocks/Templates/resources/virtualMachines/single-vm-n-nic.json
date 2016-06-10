@@ -54,13 +54,39 @@
       }
     },
     {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat('deploy-', parameters('context').vmName, '-dataDisk')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[parameters('context').vmName]" },
+          "source": { "value": "[parameters('virtualMachinesSettings').storageProfile]" },
+          "context": {
+            "value": {
+              "storageAccount": {
+                "name": "[parameters('context').storageAccount.vhd]",
+                "container": "[variables('vmProfile').storageAccountContainerName]"
+              },
+              "vmName": "[parameters('context').vmName]"
+            }
+          },
+          "mapperTemplateUri": {
+            "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-datadisk.json"
+          }
+        }
+      }
+    },
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('context').vmName]",
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')]"
+        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')]",
+        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-dataDisk')]"
       ],
       "properties": {
         "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.name)]" },
@@ -83,15 +109,7 @@
             "caching": "ReadWrite",
             "createOption": "FromImage"
           },
-          "dataDisks": [
-            {
-              "name": "[variables('vmProfile').dataDiskName]",
-              "vhd": { "uri": "[concat('http://', parameters('context').storageAccount.vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').dataDiskName)]" },
-              "diskSizeGB": "127",
-              "createOption": "Empty",
-              "lun": 0
-            }
-          ]
+          "dataDisks": "[reference(concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-dataDisk')).outputs.result.value]"
         },
         "networkProfile": {
           "networkInterfaces": "[reference(concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nic')).outputs.result.value]"
