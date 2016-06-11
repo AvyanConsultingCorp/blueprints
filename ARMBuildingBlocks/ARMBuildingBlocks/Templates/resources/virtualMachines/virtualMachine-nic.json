@@ -15,7 +15,7 @@
   },
   "variables": {
     "ipAllocationMethod": "[parameters('source').ipAllocation.staticOrDynamic]",
-    "ipAddress": "[parameters('source').ipAllocation.static[parameters('source').ipAllocation.staticOrDynamic]]"
+    "ipAddress": "[parameters('source').ipAllocation[parameters('source').ipAllocation.staticOrDynamic]]"
   },
   "resources": [
     {
