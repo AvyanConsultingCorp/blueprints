@@ -13,6 +13,10 @@
       "defaultValue": 0
     }
   },
+  "variables": {
+    "ipAllocationMethod": "[parameters('source').ipAllocation.staticOrDynamic]",
+    "ipAddress": "[parameters('source').ipAllocation.static[parameters('source').ipAllocation.staticOrDynamic]]"
+  },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
@@ -37,8 +41,9 @@
                   {
                     "name": "ipconfig1",
                     "properties": {
-                      "privateIPAllocationMethod": "Dynamic",
-                      "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" }
+                      "privateIPAllocationMethod": "[variables('ipAllocationMethod')]",
+                      "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" },
+                      "privateIPAddress": "[variables('ipAddress')]"
                     }
                   }
                 ]

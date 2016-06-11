@@ -14,7 +14,11 @@
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "app0-fe-subnet"
+            "subnetName": "app0-fe-subnet",
+            "ipAllocation": {
+              "static": "10.4.0.250",
+              "staticOrDynamic": "static"
+            }
           },
           {
             "isPrimary": "false",
@@ -41,12 +45,6 @@
           },
           {
             "dataDiskSize": 512
-          },
-          {
-            "dataDiskSize": 256
-          },
-                    {
-            "dataDiskSize": 1023
           }
         ]
       },
