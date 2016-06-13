@@ -24,7 +24,7 @@
             "isPrimary": "false",
             "subnetName": "app0-be-subnet",
             "ipAllocation": {
-              "ipAddress":  "",
+              "ipAddress": "0.0.0.0",
               "staticOrDynamic": "dynamic"
             }
           }
@@ -43,14 +43,12 @@
             "version": "latest"
           }
         },
-        "storageProfile": [
-          {
-            "dataDiskSize": 127
-          },
-          {
-            "dataDiskSize": 512
+        "dataDisks": {
+          "count": 3,
+          "properties": {
+            "size": 127
           }
-        ]
+        }
       },
       "metadata": {
         "description": "Do not include a hyphen in namePrefix since it is used to generate storage account names."

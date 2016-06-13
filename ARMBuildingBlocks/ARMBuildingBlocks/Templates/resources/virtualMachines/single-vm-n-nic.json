@@ -30,7 +30,8 @@
       "storageAccountContainerName": "vhds"
     },
     "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
+    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
+    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json"
   },
   "resources": [
     {
@@ -62,7 +63,7 @@
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
           "parentResourceName": { "value": "[parameters('context').vmName]" },
-          "source": { "value": "[parameters('virtualMachinesSettings').storageProfile]" },
+          "source": { "value": "[parameters('virtualMachinesSettings').dataDisks]" },
           "context": {
             "value": {
               "storageAccount": {
