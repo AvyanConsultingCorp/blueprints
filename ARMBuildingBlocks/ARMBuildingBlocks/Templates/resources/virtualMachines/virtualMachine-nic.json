@@ -15,8 +15,9 @@
   },
   "variables": {
     "ipAllocationMethod": "[parameters('source').ipAllocation.staticOrDynamic]",
+    "splitIpAddress": "[split(parameters('source').ipAllocation.ipAddress,'.')]",
     "ipAddress": {
-      "static": "[concat(split(parameters('source').ipAllocation.ipAddress,'.')[0],split(parameters('source').ipAllocation.ipAddress,'.')[1],split(parameters('source').ipAllocation.ipAddress,'.')[2], '.', add(int(split(parameters('source').ipAllocation.ipAddress,'.')[3]), parameters('iteration')))]",
+      "static": "[concat(variables('splitIpAddress')[0],'.', variables('splitIpAddress')[1], '.', variables('splitIpAddress')[2], '.', add(int(variables('splitIpAddress')[3]), parameters('iteration')))]",
       "dynamic": ""
     }
   },
