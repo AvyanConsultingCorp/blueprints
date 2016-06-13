@@ -14,11 +14,19 @@
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "app0-fe-subnet"
+            "subnetName": "app0-fe-subnet",
+            "ipAllocation": {
+              "ipAddress": "10.4.0.250",
+              "staticOrDynamic": "static"
+            }
           },
           {
             "isPrimary": "false",
-            "subnetName": "app0-be-subnet"
+            "subnetName": "app0-be-subnet",
+            "ipAllocation": {
+              "ipAddress":  "",
+              "staticOrDynamic": "dynamic"
+            }
           }
         ],
         "osProfile": {
@@ -41,12 +49,6 @@
           },
           {
             "dataDiskSize": 512
-          },
-          {
-            "dataDiskSize": 256
-          },
-                    {
-            "dataDiskSize": 1023
           }
         ]
       },
