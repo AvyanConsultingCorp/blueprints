@@ -25,14 +25,14 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
-    <Content Include="Templates\ra-vnet-subnets-udr-nsg\azuredeploy.json" />
     <None Include="azuredeploy.sh" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
     <None Include="README.md" />
-    <None Include="Templates\ra-vnet-subnets-udr-nsg\azuredeploy.parameters.json" />
-    <None Include="Templates\ra-vnet-subnets-udr-nsg\README.md" />
+    <None Include="Templates\ra-secure-vnet-pub-dmz\azuredeploy.json" />
+    <None Include="Templates\ra-secure-vnet-pub-dmz\azuredeploy.parameters.json" />
+    <None Include="Templates\ra-secure-vnet-pub-dmz\README.md" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
