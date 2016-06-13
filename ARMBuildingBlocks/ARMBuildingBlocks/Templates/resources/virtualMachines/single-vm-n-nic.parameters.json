@@ -10,7 +10,7 @@
         "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "count": 2,
+        "count": 1,
         "nics": [
           {
             "isPrimary": "true",
