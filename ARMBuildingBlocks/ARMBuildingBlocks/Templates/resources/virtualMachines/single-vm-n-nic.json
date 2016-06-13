@@ -73,6 +73,9 @@
               "vmName": "[parameters('context').vmName]"
             }
           },
+          "copies": {
+            "value": "[parameters('virtualMachinesSettings').dataDisks.count]"
+          }
           "mapperTemplateUri": {
             "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-datadisk.json"
           }
