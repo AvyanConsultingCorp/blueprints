@@ -12,22 +12,24 @@
         "adminPassword": "AweS0me@PW",
         "count": 1,
         "nics": [
-          {
-            "isPrimary": "true",
-            "subnetName": "app0-fe-subnet",
-            "ipAllocation": {
-              "ipAddress": "10.4.0.250",
-              "staticOrDynamic": "static"
+          [
+            {
+              "isPrimary": "true",
+              "subnetName": "app0-fe-subnet",
+              "ipAllocation": {
+                "ipAddress": "10.4.0.253",
+                "staticOrDynamic": "static"
+              }
+            },
+            {
+              "isPrimary": "false",
+              "subnetName": "app0-be-subnet",
+              "ipAllocation": {
+                "ipAddress": "0.0.0.0",
+                "staticOrDynamic": "dynamic"
+              }
             }
-          },
-          {
-            "isPrimary": "false",
-            "subnetName": "app0-be-subnet",
-            "ipAllocation": {
-              "ipAddress": "0.0.0.0",
-              "staticOrDynamic": "dynamic"
-            }
-          }
+          ]
         ],
         "osProfile": {
           "windows": {
@@ -75,7 +77,11 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "vmName": "app0-dev-vm5"
+        "vmName": "app0-dev-vm5",
+        "vmIndex": 0
+      },
+      "metadata": {
+        "description": "TODO: Hate to pass vmIndex as no sense in this scenario. Better way is to create subsets of common VM parameters and single VM parameters."
       }
     }
   }
