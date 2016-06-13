@@ -75,7 +75,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "startCount": 5
+        "vmName": "app0-dev-vm5"
       }
     }
   }

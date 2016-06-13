@@ -46,7 +46,9 @@
         "dataDisks": {
           "count": 3,
           "properties": {
-            "size": 127
+            "size": 127,
+            "caching": "None",
+            "createOption": "Empty"
           }
         }
       },
