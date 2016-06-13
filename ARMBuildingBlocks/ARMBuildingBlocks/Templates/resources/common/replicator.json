@@ -1,0 +1,76 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "parentResourceName": {
+      "type": "string",
+      "defaultValue": "default"
+    },
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "mapperTemplateUri": { "type": "string" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "copies": { "type": "int" }
+  },
+  "variables": {
+    "resources": [ ],
+    "count": "[parameters('copies')]",
+    "templateNamePrefix": "[concat(parameters('parentResourceName'), '-', split(split(parameters('mapperTemplateUri'), '/')[sub(length(split(parameters('mapperTemplateUri'), '/')), 1)], '.')[0])]",
+    "templateNamePostfix": "[concat('-', uniqueString(concat(string(parameters('source')), string(parameters('context')), string(parameters('state')))))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('templateNamePrefix'), '0', variables('templateNamePostfix'))]",
+      "properties": {
+        "mode": "Incremental",
+        "parameters": { },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "variables": { },
+          "resources": [ ],
+          "outputs": {
+            "collection": {
+              "type": "array",
+              "value": "[parameters('state')]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('templateNamePrefix'), copyindex(1), variables('templateNamePostfix'))]",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', variables('templateNamePrefix'), copyindex(), variables('templateNamePostfix'))]"
+      ],
+      "copy": {
+        "name": "iterator",
+        "count": "[variables('count')]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[parameters('mapperTemplateUri')]" },
+        "parameters": {
+          "source": { "value": "[parameters('source')]" },
+          "context": { "value": "[parameters('context')]" },
+          "state": { "value": "[reference(concat(variables('templateNamePrefix'), copyindex(), variables('templateNamePostfix'))).outputs.collection.value]" },
+          "iteration": { "value": "[copyindex(1)]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "result": {
+      "type": "array",
+      "value": "[reference(concat(variables('templateNamePrefix'), variables('count'), variables('templateNamePostfix'))).outputs.collection.value]"
+    }
+  }
+}

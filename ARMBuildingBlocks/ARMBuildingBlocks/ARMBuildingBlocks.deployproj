@@ -68,6 +68,7 @@
     <None Include="Templates\resources\common\reference.json" />
     <None Include="Templates\resources\common\referenceOneParameter.json" />
     <None Include="Templates\resources\common\referenceTwoParameters.json" />
+    <None Include="Templates\resources\common\replicator.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-internal.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-public.json" />
     <None Include="Templates\resources\loadBalancer\lb-loadBalancingRules.json" />
