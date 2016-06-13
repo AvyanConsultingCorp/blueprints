@@ -63,7 +63,7 @@
         "templateLink": { "uri": "[variables('replicatorTemplate')]" },
         "parameters": {
           "parentResourceName": { "value": "[parameters('context').vmName]" },
-          "source": { "value": "[parameters('virtualMachinesSettings').dataDisks]" },
+          "source": { "value": "[parameters('virtualMachinesSettings').dataDisks.properties]" },
           "context": {
             "value": {
               "storageAccount": {
@@ -75,7 +75,7 @@
           },
           "copies": {
             "value": "[parameters('virtualMachinesSettings').dataDisks.count]"
-          }
+          },
           "mapperTemplateUri": {
             "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-datadisk.json"
           }

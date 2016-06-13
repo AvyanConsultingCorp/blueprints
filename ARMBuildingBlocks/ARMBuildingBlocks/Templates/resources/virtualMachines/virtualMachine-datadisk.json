@@ -31,13 +31,13 @@
               "value": [
                 {
                   "name": "[concat('dataDisk', parameters('iteration'))]",
-                  "diskSizeGB": "[parameters('source').properties['size']]",
+                  "diskSizeGB": "[parameters('source').size]",
                   "lun": "[parameters('iteration')]",
                   "vhd": {
                     "uri": "[concat('http://', parameters('context').storageAccount.name, '.blob.core.windows.net/',parameters('context').storageAccount.container, '/',parameters('context').vmName,'dataDisk',parameters('iteration'),'.vhd')]"
                   },
-                  "caching": "[parameters('source').properties['caching']]",
-                  "createOption": "[parameters('source').properties['createOption']]"
+                  "caching": "[parameters('source').caching]",
+                  "createOption": "[parameters('source').createOption]"
                 }
               ]
             }
