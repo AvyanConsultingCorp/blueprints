@@ -43,7 +43,7 @@
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
           "parentResourceName": { "value": "[parameters('context').vmName]" },
-          "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
+          "source": { "value": "[parameters('virtualMachinesSettings').nics[parameters('context').vmIndex]]" },
           "context": {
             "value": {
               "vnetName": "[parameters('infrastructureSettings').vnetName]",

@@ -51,7 +51,8 @@
                 "diagnostic": "[parameters('context').storageAccount.diagnostic]",
                 "vhd": "[parameters('context').storageAccount.vhd]"
               },
-              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', add(parameters('context').startCount, copyindex()))]"
+              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', add(parameters('context').startCount, copyindex()))]",
+              "vmIndex": "[copyIndex()]"
             }
           }
         }

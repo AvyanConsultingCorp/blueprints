@@ -12,22 +12,42 @@
         "adminPassword": "AweS0me@PW",
         "count": 2,
         "nics": [
-          {
-            "isPrimary": "true",
-            "subnetName": "app0-fe-subnet",
-            "ipAllocation": {
-              "ipAddress": "10.4.0.250",
-              "staticOrDynamic": "static"
+          [
+            {
+              "isPrimary": "true",
+              "subnetName": "app0-fe-subnet",
+              "ipAllocation": {
+                "ipAddress": "10.4.0.250",
+                "staticOrDynamic": "static"
+              }
+            },
+            {
+              "isPrimary": "false",
+              "subnetName": "app0-be-subnet",
+              "ipAllocation": {
+                "ipAddress": "0.0.0.0",
+                "staticOrDynamic": "dynamic"
+              }
             }
-          },
-          {
-            "isPrimary": "false",
-            "subnetName": "app0-be-subnet",
-            "ipAllocation": {
-              "ipAddress": "0.0.0.0",
-              "staticOrDynamic": "dynamic"
+          ],
+          [
+            {
+              "isPrimary": "true",
+              "subnetName": "app0-fe-subnet",
+              "ipAllocation": {
+                "ipAddress": "10.4.0.251",
+                "staticOrDynamic": "static"
+              }
+            },
+            {
+              "isPrimary": "false",
+              "subnetName": "app0-be-subnet",
+              "ipAllocation": {
+                "ipAddress": "0.0.0.0",
+                "staticOrDynamic": "dynamic"
+              }
             }
-          }
+          ]
         ],
         "osProfile": {
           "windows": {
