@@ -7,7 +7,7 @@
         "namePrefix": "app0",
         "computerNamePrefix": "dev",
         "size": "Standard_DS2",
-        "osType": "linux",
+        "osType": "windows",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
         "count": 2,
@@ -17,7 +17,7 @@
               "isPrimary": "true",
               "subnetName": "app0-fe-subnet",
               "ipAllocation": {
-                "ipAddress": "10.4.0.250",
+                "ipAddress": "10.4.0.253",
                 "staticOrDynamic": "static"
               }
             },
@@ -35,7 +35,7 @@
               "isPrimary": "true",
               "subnetName": "app0-fe-subnet",
               "ipAllocation": {
-                "ipAddress": "10.4.0.251",
+                "ipAddress": "10.4.0.254",
                 "staticOrDynamic": "static"
               }
             },
@@ -64,7 +64,7 @@
           }
         },
         "dataDisks": {
-          "count": 3,
+          "count": 4,
           "properties": {
             "size": 127,
             "caching": "None",
@@ -95,7 +95,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "startCount": 5
+        "startCount": 6
       }
     }
   }
