@@ -15,7 +15,10 @@
   },
   "variables": {
     "ipAllocationMethod": "[parameters('source').ipAllocation.staticOrDynamic]",
-    "ipAddress": "[parameters('source').ipAllocation[parameters('source').ipAllocation.staticOrDynamic]]"
+    "ipAddress": {
+      "static": "[concat(split(parameters('source').ipAllocation.ipAddress,'.')[0],split(parameters('source').ipAllocation.ipAddress,'.')[1],split(parameters('source').ipAllocation.ipAddress,'.')[2], '.', add(split(parameters('source').ipAllocation.ipAddress,'.')[0], parameters('iteration')))]",
+      "dynamic": ""
+    }
   },
   "resources": [
     {
@@ -43,7 +46,7 @@
                     "properties": {
                       "privateIPAllocationMethod": "[variables('ipAllocationMethod')]",
                       "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" },
-                      "privateIPAddress": "[variables('ipAddress')]"
+                      "privateIPAddress": "[variables('ipAddress')[variables('ipAllocationMethod')]]"
                     }
                   }
                 ]
