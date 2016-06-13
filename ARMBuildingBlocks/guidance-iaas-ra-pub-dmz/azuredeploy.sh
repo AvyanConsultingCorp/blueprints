@@ -53,8 +53,8 @@ NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 
 # VPN parameter defaults
 INPUT_ON_PREMISES_PUBLIC_IP=
-INPUT_ON_PREMISES_ADDRESS_SPACE=192.168.0.0/16
-INPUT_VPN_IPSEC_SHARED_KEY=myipsecsharedkey123
+INPUT_ON_PREMISES_ADDRESS_SPACE=
+INPUT_VPN_IPSEC_SHARED_KEY=
 
 # VNet parameter defaults
 VNET_PREFIX=10.0.0.0/16
@@ -113,7 +113,7 @@ echo azure config mode arm
 ############################################################################
 
 
-TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-pub-dmz/Templates/ra-vnet-subnets-udr-nsg/azuredeploy.json
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-pub-dmz/Templates/ra-secure-vnet-pub-dmz/azuredeploy.json
 
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
