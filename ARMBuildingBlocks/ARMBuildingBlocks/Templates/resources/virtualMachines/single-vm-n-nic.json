@@ -60,7 +60,7 @@
       "name": "[concat('deploy-', parameters('context').vmName, '-dataDisk')]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "templateLink": { "uri": "[variables('replicatorTemplate')]" },
         "parameters": {
           "parentResourceName": { "value": "[parameters('context').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').dataDisks]" },
