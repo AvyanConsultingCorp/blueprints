@@ -81,7 +81,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "vmName": "app0-dev-vm10",
+        "vmName": "app0-dev-vm11",
         "vmIndex": 0
       },
       "metadata": {
