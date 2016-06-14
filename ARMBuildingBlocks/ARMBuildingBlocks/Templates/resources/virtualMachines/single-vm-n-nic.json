@@ -34,7 +34,7 @@
     "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
     "availabilitySetName": {
       "no": { },
-      "yes": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.name)]" }
+      "yes": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.yes.name)]" }
     }
   },
   "resources": [
