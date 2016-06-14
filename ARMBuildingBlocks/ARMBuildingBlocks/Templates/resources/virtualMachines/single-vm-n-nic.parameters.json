@@ -17,7 +17,7 @@
               "isPrimary": "true",
               "subnetName": "app0-fe-subnet",
               "ipAllocation": {
-                "ipAddress": "10.4.0.249",
+                "ipAddress": "10.4.0.248",
                 "staticOrDynamic": "static"
               }
             },
@@ -46,7 +46,7 @@
           }
         },
         "dataDisks": {
-          "count": 3,
+          "count": 2,
           "properties": {
             "size": 127,
             "caching": "None",
@@ -63,8 +63,14 @@
         "vnetResourceGroup": "app0-rg",
         "vnetName": "app0-vnet",
         "availabilitySet": {
-          "newOrExisting": "new",
-          "name": "app0-web-as"
+          "yes": {
+            "newOrExisting": "new",
+            "name": "app6-dev-as"
+          },
+          "no": {
+            "name":  ""
+          },
+          "yesOrNo": "no"
         }
       },
       "metadata": {
@@ -77,7 +83,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "vmName": "app0-dev-vm9",
+        "vmName": "app0-dev-vm10",
         "vmIndex": 0
       },
       "metadata": {
