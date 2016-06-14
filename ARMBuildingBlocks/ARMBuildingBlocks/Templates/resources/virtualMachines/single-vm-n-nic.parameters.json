@@ -67,9 +67,7 @@
             "newOrExisting": "new",
             "name": "app0-web-as"
           },
-          "no": {
-            "name":  ""
-          },
+
           "yesOrNo": "no"
         }
       },
