@@ -10,7 +10,7 @@
         "osType": "linux",
         "osAuthenticationType": "sshPublicKey",
         "adminUsername": "testuser",
-        "adminPassword": "",
+        "adminPassword": "AweS0me@PW",
         "sshPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCfgSNk2cn0X9AeQuZQ4pOfQwXXLQPWFc8h1qtzIyxx/ixxDIMVLD37Ly9LDJsnoTfoQH8EcYTXvPQMl/HXBlPMMyrjA/3gmJYExy/5B5T79sYvzpV7a35e8eR7aq6csGlTclZJcTnUDxdacoOewWHBC4LkuT1quBNC0fc/yTh7/Q== kirpas@KIRPASDEV02",
         "count": 1,
         "nics": [
