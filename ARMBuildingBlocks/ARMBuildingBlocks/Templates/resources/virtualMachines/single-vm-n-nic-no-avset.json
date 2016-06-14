@@ -31,7 +31,7 @@
     },
     "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
-    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json"
+    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
   },
   "resources": [
     {
@@ -93,7 +93,6 @@
         "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-dataDisk')]"
       ],
       "properties": {
-        "availabilitySet": { "id": "[parameters('infrastructureSettings').availabilitySet.yes.name]" },
         "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
         "osProfile": {
           "computerName": "[parameters('context').vmName]",
@@ -128,4 +127,4 @@
       }
     }
   ]
-    }
+}

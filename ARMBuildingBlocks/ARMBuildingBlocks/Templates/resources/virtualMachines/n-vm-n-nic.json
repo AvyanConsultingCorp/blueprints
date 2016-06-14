@@ -24,8 +24,12 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
+
     "path": {
-      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'single-vm-n-nic.json')]"
+      "vmTemplate": {
+        "yes": "[uri(deployment().properties.templateLink.uri,'single-vm-n-nic.json')]",
+        "no": "[uri(deployment().properties.templateLink.uri,'single-vm-n-nic-no-avset.json')]"
+      }
     }
   },
   "resources": [
@@ -40,7 +44,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('path').vmTemplate]"
+          "uri": "[variables('path').vmTemplate[parameters('infrastructureSettings').availabilitySet.yesOrNo]]"
         },
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },

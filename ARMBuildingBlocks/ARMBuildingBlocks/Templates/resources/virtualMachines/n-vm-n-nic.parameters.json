@@ -81,8 +81,14 @@
         "vnetResourceGroup": "app0-rg",
         "vnetName": "app0-vnet",
         "availabilitySet": {
-          "newOrExisting": "new",
-          "name": "app0-web-as"
+          "yes": {
+            "newOrExisting": "new",
+            "name": "app0-web-as"
+          },
+          "no": {
+            "name":  ""
+          },
+          "yesOrNo": "no"
         }
       },
       "metadata": {

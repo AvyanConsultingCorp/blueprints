@@ -65,7 +65,7 @@
         "availabilitySet": {
           "yes": {
             "newOrExisting": "new",
-            "name": "app6-dev-as"
+            "name": "app0-web-as"
           },
           "no": {
             "name":  ""
