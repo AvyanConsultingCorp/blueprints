@@ -8,8 +8,10 @@
         "computerNamePrefix": "dev",
         "size": "Standard_DS2",
         "osType": "linux",
+        "osAuthenticationType": "sshPublicKey",
         "adminUsername": "testuser",
-        "adminPassword": "AweS0me@PW",
+        "adminPassword": "",
+        "sshPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAs8YQxEgOFsDAYfhokajnYhEgyOWavCRYz4UTE6weyTOhMy0LRdYeD+k1M7yLYLbtXAfMFdPzZmaYzx2DP1tE6MwlQ25hzvgRx2W7s0t7BZb9BeA0sVacKU4vJM6b+H+N2B/jZJV+k6onBR74rNbBva2Bups+HS6yhGJk/U7qVT0nDKbd/QW33X9nEOn0YMiQQs3REbGu75KTj6xzZmlz3GoT1oU336j03ubpadLlGijM+Lq/RYpfLN/jrykQsLDpBnBBv8eZM8jGNRaHnomIdM1Z3hJ+FKCikcoAtAJrXp6x1uOaCUYOyjtr86bHuiv7qERzNZ3byMdi+8V5yN5p5Q== rsa-key-20160614",
         "count": 1,
         "nics": [
           [
@@ -17,7 +19,7 @@
               "isPrimary": "true",
               "subnetName": "app0-fe-subnet",
               "ipAllocation": {
-                "ipAddress": "10.4.0.246",
+                "ipAddress": "10.4.0.245",
                 "staticOrDynamic": "static"
               }
             },
@@ -68,7 +70,7 @@
             "name": "app0-web-as"
           },
 
-          "yesOrNo": "no"
+          "yesOrNo": "yes"
         }
       },
       "metadata": {
@@ -81,7 +83,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "vmName": "app0-dev-vm11",
+        "vmName": "app0-dev-vm12",
         "vmIndex": 0
       },
       "metadata": {
