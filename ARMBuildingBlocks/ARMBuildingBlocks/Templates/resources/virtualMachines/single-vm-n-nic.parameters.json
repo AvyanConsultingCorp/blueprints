@@ -17,7 +17,7 @@
               "isPrimary": "true",
               "subnetName": "app0-fe-subnet",
               "ipAllocation": {
-                "ipAddress": "10.4.0.248",
+                "ipAddress": "10.4.0.246",
                 "staticOrDynamic": "static"
               }
             },
@@ -25,7 +25,6 @@
               "isPrimary": "false",
               "subnetName": "app0-be-subnet",
               "ipAllocation": {
-                "ipAddress": "0.0.0.0",
                 "staticOrDynamic": "dynamic"
               }
             }
