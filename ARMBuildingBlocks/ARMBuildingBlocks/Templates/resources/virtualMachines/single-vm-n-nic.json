@@ -33,7 +33,7 @@
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
     "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
     "availabilitySetName": {
-      "no": { },
+      "no": { "id": "" },
       "yes": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.yes.name)]" }
     }
   },
