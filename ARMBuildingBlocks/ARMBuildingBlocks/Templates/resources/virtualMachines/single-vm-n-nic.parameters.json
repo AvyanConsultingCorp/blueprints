@@ -19,7 +19,7 @@
               "isPrimary": "true",
               "subnetName": "app0-fe-subnet",
               "ipAllocation": {
-                "ipAddress": "10.4.0.245",
+                "ipAddress": "10.4.0.242",
                 "staticOrDynamic": "static"
               }
             },
@@ -83,7 +83,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "vmName": "app0-dev-vm12",
+        "vmName": "app0-dev-vm13",
         "vmIndex": 0
       },
       "metadata": {
