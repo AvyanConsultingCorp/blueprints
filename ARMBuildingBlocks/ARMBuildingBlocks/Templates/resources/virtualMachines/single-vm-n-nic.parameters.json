@@ -11,7 +11,7 @@
         "osAuthenticationType": "sshPublicKey",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "sshPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCfgSNk2cn0X9AeQuZQ4pOfQwXXLQPWFc8h1qtzIyxx/ixxDIMVLD37Ly9LDJsnoTfoQH8EcYTXvPQMl/HXBlPMMyrjA/3gmJYExy/5B5T79sYvzpV7a35e8eR7aq6csGlTclZJcTnUDxdacoOewWHBC4LkuT1quBNC0fc/yTh7/Q== kirpas@KIRPASDEV02",
+        "sshPublicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAoXXSIbIMNFRt+su1rpL/FO1yciTxpwe36+myWbty85MfvLvIFT5K71x5ardJ2B3L27YwdFzQkDyYVbJUvocvs6fvcHciel/YDlgad0fuhb4u97euVrREVaBx3jcxJ2MEH16ZHSrI4AcEHG90Lhs6rwntJkNkidKwnqM1MUVUfB6hfTYSeSJcepTQ9V6qGQX7yrk1yADQuMEhFCBK9LrDm6TVHAJ4rH2ePmo5IElIUDboCRc/+rnPTO++5oAcS2/6JJR03e+kNBpmGUzpjNOM8SVbVUD4TCJF0IzbyhuAiYtDbolNh6lLhXTXGf8Q39qxu6TJDXgK1U9mtxT9aUtaQQ== rsa-key-20160615",
         "count": 1,
         "nics": [
           [
@@ -19,7 +19,7 @@
               "isPrimary": "true",
               "subnetName": "app0-fe-subnet",
               "ipAllocation": {
-                "ipAddress": "10.4.0.242",
+                "ipAddress": "10.4.0.240",
                 "staticOrDynamic": "static"
               }
             },
@@ -43,7 +43,7 @@
           "linux": {
             "publisher": "Canonical",
             "offer": "UbuntuServer",
-            "sku": "14.04.2-LTS",
+            "sku": "15.10",
             "version": "latest"
           }
         },
@@ -83,7 +83,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "vmName": "app0-dev-vm13",
+        "vmName": "app0-dev-vm14",
         "vmIndex": 0
       },
       "metadata": {
