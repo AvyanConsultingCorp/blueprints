@@ -13,20 +13,20 @@
         "count": 1,
         "nics": [
           {
-            "name": "app0-dev-vm15-nic1",
+            "name": "app0-dev-vm16-nic1",
             "ipConfigurations": [
               {
                 "name": "ipconfig1",
                 "properties": {
                   "privateIPAllocationMethod": "static",
                   "subnet": { "id": "Microsoft.Network/virtualNetworks/subnets/app0-vnet/app0-fe-subnet" },
-                  "privateIPAddress": "10.4.0.242"
+                  "privateIPAddress": "10.4.0.239"
                 }
               }
             ]
           },
           {
-            "name": "app0-dev-vm15-nic2",
+            "name": "app0-dev-vm16-nic2",
             "ipConfigurations": [
               {
                 "name": "ipconfig1",
@@ -83,7 +83,7 @@
       "value": {
         "vnetResourceGroup": "app0-rg",
         "vnetName": "app0-vnet",
-        "availabilitySetName": ""
+        "availabilitySetName": "app0-web-as"
       },
       "metadata": {
         "description": "Availability set name is required for both new and existing scenarios."
@@ -95,7 +95,7 @@
           "diagnostic": "app0devdiag",
           "vhd": "app0devvmst"
         },
-        "vmName": "app0-dev-vm15"
+        "vmName": "app0-dev-vm16"
       },
       "metadata": {
         "description": "This may change!"

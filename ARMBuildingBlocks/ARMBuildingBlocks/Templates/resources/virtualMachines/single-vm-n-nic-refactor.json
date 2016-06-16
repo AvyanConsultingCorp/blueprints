@@ -90,7 +90,7 @@
         "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-dataDisks')]"
       ],
       "properties": {
-        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.yes.name)]" },
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySetName)]" },
         "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
         "osProfile": {
           "computerName": "[parameters('context').vmName]",
