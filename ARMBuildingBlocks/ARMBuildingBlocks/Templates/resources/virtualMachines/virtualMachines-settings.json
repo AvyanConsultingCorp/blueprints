@@ -1,0 +1,109 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "iteration": {
+      "type": "int",
+      "defaultValue": 0
+    }
+  },
+  "variables": {
+    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
+    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-nics-template')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]" },
+          "source": { "value": "[parameters('source').nics]" },
+          "context": {
+            "value": {
+              "vnetResourceGroup": "[parameters('context').vnetResourceGroup]",
+              "vnetName": "[parameters('context').vnetName]",
+              "vmName": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]",
+              "vmIndex": "[parameters('iteration')]"
+            }
+          },
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-nics-settings.json" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-datadisks-template')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('replicatorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]" },
+          "source": { "value": "[parameters('source').dataDisks.properties]" },
+          "context": {
+            "value": {
+              "vnetResourceGroup": "[parameters('context').vnetResourceGroup]",
+              "vnetName": "[parameters('context').vnetName]",
+              "storageAccounts": "[parameters('context').storageAccounts]",
+              "vmName": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]",
+              "vmIndex": "[parameters('iteration')]"
+            }
+          },
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-datadisk.json" },
+          "copies": { "value": "[parameters('source').dataDisks.count]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration'))), '-vmsettings-template')]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "resources": [ ],
+          "outputs": {
+            "instance": {
+              "type": "array",
+              "value": [
+                {
+                  "vmName": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]",
+                  "size": "[parameters('source').size]",
+                  "adminUsername": "[parameters('source').adminUsername]",
+                  "adminPassword": "[parameters('source').adminPassword]",
+                  "nics": "[reference(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-nics-template')).outputs.result.value]",
+                  "osProfile": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2012-R2-Datacenter",
+                    "version": "latest"
+                  },
+                  "dataDisks": "[reference(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-datadisks-template')).outputs.result.value]"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "collection": {
+      "type": "array",
+      "value": "[concat(parameters('state'), reference(concat(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration'))), '-vmsettings-template')).outputs.instance.value)]"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "iteration": {
+      "type": "int",
+      "defaultValue": 0
+    }
+  },
+  "variables": {
+    "nicTemplate": {
+      "static": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-static-nics-settings.json",
+      "dynamic": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-dynamic-nics-settings.json"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('context').vmName, '-nic', parameters('iteration'), '-template')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nicTemplate')[parameters('source').ipAllocationMethod]]" },
+        "parameters": {
+          "source": { "value": "[parameters('source')]" },
+          "context": { "value": "[parameters('context')]" },
+          "state": { "value": "[parameters('state')]" },
+          "iteration": { "value": "[parameters('iteration')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "collection": {
+      "type": "array",
+      "value": "[concat(parameters('state'), reference(concat(parameters('context').vmName, '-nic', parameters('iteration'), '-template')).outputs.collection.value)]"
+    }
+  }
+}
