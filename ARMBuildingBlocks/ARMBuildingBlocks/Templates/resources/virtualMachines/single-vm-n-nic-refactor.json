@@ -59,6 +59,7 @@
         "parameters": {
           "parentResourceName": { "value": "[parameters('context').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').dataDisks]" },
+          "context": { "value": { } },
           "mapperTemplateUri": {
             "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-datadisk-refactor.json"
           }
@@ -75,6 +76,7 @@
         "parameters": {
           "parentResourceName": { "value": "[parameters('context').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
+          "context": { "value": { } },
           "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-nic-refactor.json" }
         }
       }
