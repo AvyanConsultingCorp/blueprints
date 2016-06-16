@@ -28,7 +28,9 @@
           "outputs": {
             "instance": {
               "type": "array",
-              "value": "[parameters('source')]"
+              "value": [
+                "[parameters('source')]"
+              ]
             }
           }
         }
