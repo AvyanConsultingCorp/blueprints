@@ -18,7 +18,7 @@
                 "properties": {
                   "privateIPAllocationMethod": "static",
                   "subnet": {
-                    "id": "/subscriptions/ce0f816f-6ffb-4e1c-bc6c-d8a5bc69765c/resourceGroups/app0-rg/providers/Microsoft.Network/virtualNetworks/app0-vnet/subnets/app0-fe-subnet"
+                    "id": "/subscriptions/6df485a0-aafa-4020-893d-32e833d056d6/resourceGroups/app0-rg/providers/Microsoft.Network/virtualNetworks/app0-vnet/subnets/app0-fe-subnet"
                   },
                   "privateIPAddress": "10.0.2.235"
                 }
@@ -34,7 +34,7 @@
                 "properties": {
                   "privateIPAllocationMethod": "dynamic",
                   "subnet": {
-                    "id": "/subscriptions/ce0f816f-6ffb-4e1c-bc6c-d8a5bc69765c/resourceGroups/app0-rg/providers/Microsoft.Network/virtualNetworks/app0-vnet/subnets/app0-be-subnet"
+                    "id": "/subscriptions/6df485a0-aafa-4020-893d-32e833d056d6/resourceGroups/app0-rg/providers/Microsoft.Network/virtualNetworks/app0-vnet/subnets/app0-be-subnet"
                   }
                 }
               }
