@@ -17,7 +17,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('context').vmName, '-datadisk', parameters('iteration'), '-template')]",
+      "name": "[concat('deploy-', parameters('source').name)]",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -29,14 +29,7 @@
             "instance": {
               "type": "array",
               "value": [
-                {
-                  "name": "[concat('dataDisk', add(parameters('iteration'), 1))]",
-                  "diskSizeGB": "[parameters('source').diskSizeGB]",
-                  "lun": "[parameters('iteration')]",
-                  "vhd": { "uri": "[concat('http://', parameters('context').storageAccounts.vhd, '.blob.core.windows.net/vhds/', parameters('context').vmName, '-dataDisk', add(parameters('iteration'), 1), '.vhd')]" },
-                  "caching": "[parameters('source').caching]",
-                  "createOption": "[parameters('source').createOption]"
-                }
+                "[parameters('source')]"
               ]
             }
           }
@@ -47,7 +40,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[concat(parameters('state'), reference(concat(parameters('context').vmName, '-datadisk', parameters('iteration'), '-template')).outputs.instance.value)]"
+      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('source').name)).outputs.instance.value)]"
     }
   }
 }
