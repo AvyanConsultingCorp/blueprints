@@ -32,21 +32,6 @@
     "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
     "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
-    "osAuthentication": {
-      "password": { },
-      "sshPublicKey": {
-        "disablePasswordAuthentication": "true",
-        "ssh": {
-          "publicKeys": [
-            {
-              "path": "[concat('/home/', parameters('virtualMachinesSettings').adminUsername, '/.ssh/authorized_keys')]",
-              "keyData": "[parameters('virtualMachinesSettings').sshPublicKey]"
-            }
-          ]
-        }
-      }
-    },
-    "linuxConfiguration": "[variables('osAuthentication')[parameters('virtualMachinesSettings').osAuthenticationType]]"
   },
   "resources": [
     {
@@ -108,13 +93,11 @@
         "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-dataDisk')]"
       ],
       "properties": {
-        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySet.yes.name)]" },
         "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
         "osProfile": {
           "computerName": "[parameters('context').vmName]",
           "adminUsername": "[parameters('virtualMachinesSettings').adminUsername]",
-          "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]",
-          "linuxConfiguration": "[variables('linuxConfiguration')]"
+          "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]"
         },
         "storageProfile": {
           "imageReference": {
@@ -144,4 +127,4 @@
       }
     }
   ]
-    }
+}
