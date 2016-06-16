@@ -45,7 +45,7 @@
                 {
                   "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('source').name)]",
                   "properties": {
-                    "primary": "[parameters('source').isPrimary]"
+                    "primary": "[parameters('source').primary]"
                   }
                 }
               ]

@@ -7,57 +7,24 @@
       "metadata": {
         "description": "Settings for virtual machines."
       }
-    },
-    "infrastructureSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Settings for infrastructure."
-      }
-    },
-    "context": {
-      "type": "object",
-      "metadata": {
-        "description": "Settings for other parameters such as load balancer backend pool, storage account names."
-      }
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "vmProfile": {
-      "nicName": "[concat(parameters('context').vmName, '-nic')]",
-      "osDiskName": "[concat(parameters('context').vmName, '-os.vhd')]",
-      "dataDiskName": "[concat(parameters('context').vmName, '-data.vhd')]",
-      "storageAccountContainerName": "vhds"
-    },
-    "windowsOrlinux": "[toLower(parameters('virtualMachinesSettings').osType)]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
-    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
-    "osAuthentication": {
-      "password": { },
-      "sshPublicKey": {
-        "disablePasswordAuthentication": "true",
-        "ssh": {
-          "publicKeys": [
-            {
-              "path": "[concat('/home/', parameters('virtualMachinesSettings').adminUsername, '/.ssh/authorized_keys')]",
-              "keyData": "[parameters('virtualMachinesSettings').sshPublicKey]"
-            }
-          ]
-        }
-      }
-    },
-    "linuxConfiguration": "[variables('osAuthentication')[parameters('virtualMachinesSettings').osAuthenticationType]]"
+    "dataDiskDeployment": "[concat('deploy-', parameters('virtualMachinesSettings').vmName, '-dataDisks')]",
+    "nicsDeployment": "[concat('deploy-', parameters('virtualMachinesSettings').vmName, '-nics')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('context').vmName, '-dataDisks')]",
+      "name": "[variables('dataDiskDeployment')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
-          "parentResourceName": { "value": "[parameters('context').vmName]" },
+          "parentResourceName": { "value": "[parameters('virtualMachinesSettings').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').dataDisks]" },
           "context": { "value": { } },
           "mapperTemplateUri": {
@@ -69,12 +36,12 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('context').vmName, '-nics')]",
+      "name": "[variables('nicsDeployment')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
-          "parentResourceName": { "value": "[parameters('context').vmName]" },
+          "parentResourceName": { "value": "[parameters('virtualMachinesSettings').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
           "context": { "value": { } },
           "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-nic-refactor.json" }
@@ -84,45 +51,44 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('context').vmName]",
+      "name": "[parameters('virtualMachinesSettings').vmName]",
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nics')]",
-        "[concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-dataDisks')]"
+        "[concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))]",
+        "[concat('Microsoft.Resources/deployments/', variables('dataDiskDeployment'))]"
       ],
       "properties": {
-        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('infrastructureSettings').availabilitySetName)]" },
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('virtualMachinesSettings').availabilitySetName)]" },
         "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
         "osProfile": {
-          "computerName": "[parameters('context').vmName]",
+          "computerName": "[parameters('virtualMachinesSettings').vmName]",
           "adminUsername": "[parameters('virtualMachinesSettings').adminUsername]",
-          "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]",
-          "linuxConfiguration": "[variables('linuxConfiguration')]"
+          "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]"
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].publisher]",
-            "offer": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].offer]",
-            "sku": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].sku]",
-            "version": "[parameters('virtualMachinesSettings').osProfile[variables('windowsOrlinux')].version]"
+            "publisher": "[parameters('virtualMachinesSettings').imageReference.publisher]",
+            "offer": "[parameters('virtualMachinesSettings').imageReference.offer]",
+            "sku": "[parameters('virtualMachinesSettings').imageReference.sku]",
+            "version": "[parameters('virtualMachinesSettings').imageReference.version]"
           },
           "osDisk": {
-            "name": "[variables('vmProfile').osDiskName]",
-            "vhd": { "uri": "[concat('http://', parameters('context').storageAccount.vhd, '.blob.core.windows.net/', variables('vmProfile').storageAccountContainerName, '/', variables('vmProfile').osDiskName)]" },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
+            "name": "[parameters('virtualMachinesSettings').osDisk.name]",
+            "vhd": { "uri": "[parameters('virtualMachinesSettings').osDisk.vhd.uri]" },
+            "caching": "[parameters('virtualMachinesSettings').osDisk.caching]",
+            "createOption": "[parameters('virtualMachinesSettings').osDisk.createOption]"
           },
-          "dataDisks": "[reference(concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-dataDisks')).outputs.result.value]"
+          "dataDisks": "[reference(concat('Microsoft.Resources/deployments/', variables('dataDiskDeployment'))).outputs.result.value]"
         },
         "networkProfile": {
-          "networkInterfaces": "[reference(concat('Microsoft.Resources/deployments/', 'deploy-', parameters('context').vmName, '-nics')).outputs.result.value]"
+          "networkInterfaces": "[reference(concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))).outputs.result.value]"
         },
 
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://', parameters('context').storageAccount.diagnostic, '.blob.core.windows.net')]"
+            "storageUri": "[parameters('virtualMachinesSettings').diagnosticsStorageUri]"
           }
         }
       }
