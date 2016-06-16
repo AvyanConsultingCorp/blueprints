@@ -1,0 +1,44 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "source": { "type": "object" },
+    "context": { "type": "object" },
+    "state": {
+      "type": "array",
+      "defaultValue": [ ]
+    },
+    "iteration": {
+      "type": "int",
+      "defaultValue": 0
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat('deploy-', parameters('source').name)]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "resources": [ ],
+          "outputs": {
+            "instance": {
+              "type": "array",
+              "value": "[parameters('source')]"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "collection": {
+      "type": "array",
+      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('source').name)).outputs.instance.value)]"
+    }
+  }
+}
