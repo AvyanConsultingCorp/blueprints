@@ -20,7 +20,7 @@
                 "name": "ipconfig1",
                 "properties": {
                   "privateIPAllocationMethod": "static",
-                  "subnet": { "id": "Microsoft.Network/virtualNetworks/subnets/app0-vnet/app0-fe-subnet" },
+                  "subnet": { "id": "/subscriptions/6df485a0-aafa-4020-893d-32e833d056d6/resourceGroups/app0-rg/providers/Microsoft.Network/virtualNetworks/app0-vnet/subnets/app0-fe-subnet" },
                   "privateIPAddress": "10.4.0.239"
                 }
               }
@@ -34,7 +34,7 @@
                 "name": "ipconfig1",
                 "properties": {
                   "privateIPAllocationMethod": "dynamic",
-                  "subnet": { "id": "Microsoft.Network/virtualNetworks/subnets/app0-vnet/app0-be-subnet" }
+                  "subnet": { "id": "/subscriptions/6df485a0-aafa-4020-893d-32e833d056d6/resourceGroups/app0-rg/providers/Microsoft.Network/virtualNetworks/app0-vnet/subnets/app0-be-subnet" }
                 }
               }
             ]
