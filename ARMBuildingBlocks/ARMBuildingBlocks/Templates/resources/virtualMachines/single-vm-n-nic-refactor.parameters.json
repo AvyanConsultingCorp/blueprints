@@ -14,9 +14,9 @@
         "nics": [
           {
             "name": "app0-dev-vm16-nic1",
+            "isPrimary": "true",
             "ipConfigurations": [
               {
-                "isPrimary": "true",
                 "name": "ipconfig1",
                 "properties": {
                   "privateIPAllocationMethod": "static",
@@ -28,9 +28,9 @@
           },
           {
             "name": "app0-dev-vm16-nic2",
+            "isPrimary": "false",
             "ipConfigurations": [
               {
-                "isPrimary": "false",
                 "name": "ipconfig1",
                 "properties": {
                   "privateIPAllocationMethod": "dynamic",
