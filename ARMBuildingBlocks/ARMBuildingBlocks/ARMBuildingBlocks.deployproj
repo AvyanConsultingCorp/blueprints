@@ -87,6 +87,10 @@
     <None Include="Templates\resources\virtualMachines\single-vm-n-nic.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachine-datadisk.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachine-nic.json" />
+    <None Include="Templates\resources\virtualMachines\virtualMachines-dynamic-nics-settings.json" />
+    <None Include="Templates\resources\virtualMachines\virtualMachines-nics-settings.json" />
+    <None Include="Templates\resources\virtualMachines\virtualMachines-settings.json" />
+    <None Include="Templates\resources\virtualMachines\virtualMachines-static-nics-settings.json" />
     <None Include="Templates\resources\virtualNetwork\virtualNetwork-subnets.json" />
   </ItemGroup>
   <ItemGroup>

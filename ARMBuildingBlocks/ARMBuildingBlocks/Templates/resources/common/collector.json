@@ -57,7 +57,7 @@
           "source": { "value": "[parameters('source')[copyindex()]]" },
           "context": { "value": "[parameters('context')]" },
           "state": { "value": "[reference(concat(variables('templateNamePrefix'), copyindex(), variables('templateNamePostfix'))).outputs.collection.value]" },
-          "iteration": { "value": "[copyindex(1)]" }
+          "iteration": { "value": "[copyindex()]" }
         }
       }
     }

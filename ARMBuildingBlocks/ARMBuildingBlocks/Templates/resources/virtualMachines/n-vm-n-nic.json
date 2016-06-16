@@ -23,40 +23,40 @@
 
   },
   "variables": {
-    "location": "[resourceGroup().location]",
-    "path": {
-      "vmTemplate": "[uri(deployment().properties.templateLink.uri,'single-vm-n-nic.json')]"
-    }
+    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('virtualMachinesSettings').namePrefix, '-vm-', add(parameters('context').startCount, copyindex()))]",
-      "copy": {
-        "name": "vmLoop",
-        "count": "[parameters('virtualMachinesSettings').count]"
-      },
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vms')]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('path').vmTemplate]"
-        },
+        "templateLink": { "uri": "[variables('replicatorTemplate')]" },
         "parameters": {
-          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
-          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
+          "parentResourceName": { "value": "[concat(parameters('virtualMachinesSettings').namePrefix, '-startindex-', parameters('virtualMachinesSettings').namePostfixStartIndex)]" },
+          "source": { "value": "[parameters('virtualMachinesSettings')]" },
           "context": {
             "value": {
-              "storageAccount": {
-                "diagnostic": "[parameters('context').storageAccount.diagnostic]",
-                "vhd": "[parameters('context').storageAccount.vhd]"
+              "vnetResourceGroup": "[parameters('infrastructureSettings').vnetResourceGroup]",
+              "vnetName": "[parameters('infrastructureSettings').vnetName]",
+              "storageAccounts": {
+                "diagnostic": "[parameters('context').storageAccounts.diagnostic]",
+                "vhd": "[parameters('context').storageAccounts.vhd]"
               },
-              "vmName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').computerNamePrefix,'-vm', add(parameters('context').startCount, copyindex()))]",
-              "vmIndex": "[copyIndex()]"
+              "availabilitySetName": "[parameters('context').availabilitySetName]"
             }
-          }
+          },
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-settings.json" },
+          "copies": { "value": "[parameters('context').vmCount]" }
         }
       }
     }
-  ]
+  ],
+  "outputs": {
+    "collection": {
+      "type": "array",
+      "value": "[reference(concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vms')).outputs.result.value]"
+    }
+  }
 }
