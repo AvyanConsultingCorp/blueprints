@@ -27,7 +27,7 @@
             "primary": "true"
           },
           {
-            "name": "rs-vm5-nic2",
+            "name": "app0-dev-vm17-nic2",
             "ipConfigurations": [
               {
                 "name": "ipconfig1",
