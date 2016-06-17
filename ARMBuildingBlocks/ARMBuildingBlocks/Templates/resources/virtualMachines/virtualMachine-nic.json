@@ -13,43 +13,25 @@
       "defaultValue": 0
     }
   },
-  "variables": {
-    "ipAllocationMethod": "[parameters('source').ipAllocation.staticOrDynamic]",
-    "ipAddress": {
-      "static": "[parameters('source').ipAllocation.ipAddress]",
-      "dynamic": ""
-    }
-  },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('context').vmName, '-nic', parameters('iteration'))]",
+      "name": "[concat('deploy-', parameters('source').name)]",
       "properties": {
         "mode": "Incremental",
-        "parameters": { },
         "template": {
           "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
           "parameters": { },
-          "variables": { },
           "resources": [
             {
               "apiVersion": "2016-03-30",
               "type": "Microsoft.Network/networkInterfaces",
-              "name": "[concat(parameters('context').vmName, '-nic', parameters('iteration'))]",
+              "name": "[parameters('source').name]",
               "location": "[resourceGroup().location]",
               "properties": {
-                "ipConfigurations": [
-                  {
-                    "name": "ipconfig1",
-                    "properties": {
-                      "privateIPAllocationMethod": "[variables('ipAllocationMethod')]",
-                      "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" },
-                      "privateIPAddress": "[variables('ipAddress')[variables('ipAllocationMethod')]]"
-                    }
-                  }
-                ]
+                "ipConfigurations": "[parameters('source').ipConfigurations]"
               },
               "tags": {
                 "displayName": "nic"
@@ -61,9 +43,9 @@
               "type": "array",
               "value": [
                 {
-                  "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('context').vmName, '-nic', parameters('iteration')))]",
+                  "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('source').name)]",
                   "properties": {
-                    "primary": "[parameters('source').isPrimary]"
+                    "primary": "[parameters('source').primary]"
                   }
                 }
               ]
@@ -76,7 +58,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('context').vmName, '-nic', parameters('iteration'))).outputs.instance.value)]"
+      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('source').name)).outputs.instance.value)]"
     }
   }
 }
