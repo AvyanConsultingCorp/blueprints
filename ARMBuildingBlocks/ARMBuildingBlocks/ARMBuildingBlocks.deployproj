@@ -83,14 +83,10 @@
     <None Include="Templates\resources\virtualMachines\availabilitySet-new.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.parameters.json" />
-    <None Include="Templates\resources\virtualMachines\single-vm-n-nic-refactor.json" />
-    <None Include="Templates\resources\virtualMachines\single-vm-n-nic-refactor.parameters.json" />
-    <None Include="Templates\resources\virtualMachines\single-vm-n-nic-no-avset.json" />
-    <None Include="Templates\resources\virtualMachines\single-vm-n-nic.parameters.json" />
     <None Include="Templates\resources\virtualMachines\single-vm-n-nic.json" />
-    <None Include="Templates\resources\virtualMachines\virtualMachine-datadisk-refactor.json" />
+    <None Include="Templates\resources\virtualMachines\single-vm-n-nic.parameters.json" />
+    <None Include="Templates\resources\virtualMachines\single-vm-n-nic-no-avset.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachine-datadisk.json" />
-    <None Include="Templates\resources\virtualMachines\virtualMachine-nic-refactor.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachine-nic.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachines-dynamic-nics-settings.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachines-nics-settings.json" />
