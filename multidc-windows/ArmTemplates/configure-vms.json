@@ -196,8 +196,8 @@
       ]
     },
     "vmArray": [
-      "concat(variables('vmSettings').vmName[2]",
-      "concat(variables('vmSettings').vmName[4]"
+      "[variables('vmSettings').vmName[2]]",
+      "[variables('vmSettings').vmName[4]]"
     ]
   },
   "resources": [
