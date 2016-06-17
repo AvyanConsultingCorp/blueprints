@@ -15,7 +15,8 @@
   },
   "variables": {
     "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
+    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
+    "storageAccountContainerName": "vhds"
   },
   "resources": [
     {
@@ -81,17 +82,25 @@
               "value": [
                 {
                   "vmName": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]",
+                  "availabilitySetName": "[parameters('context').availabilitySetName]",
                   "size": "[parameters('source').size]",
                   "adminUsername": "[parameters('source').adminUsername]",
                   "adminPassword": "[parameters('source').adminPassword]",
                   "nics": "[reference(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-nics-template')).outputs.result.value]",
-                  "osProfile": {
-                    "publisher": "MicrosoftWindowsServer",
-                    "offer": "WindowsServer",
-                    "sku": "2012-R2-Datacenter",
-                    "version": "latest"
+                  "imageReference": {
+                    "publisher": "[parameters('source').imageReference.publisher]",
+                    "offer": "[parameters('source').imageReference.offer]",
+                    "sku": "[parameters('source').imageReference.sku]",
+                    "version": "[parameters('source').imageReference.version]"
                   },
-                  "dataDisks": "[reference(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-datadisks-template')).outputs.result.value]"
+                  "osDisk": {
+                    "name": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-os.vhd')]",
+                    "vhd": { "uri": "[concat('http://', parameters('context').storageAccounts.vhd, '.blob.core.windows.net/', variables('storageAccountContainerName'), '/', concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-os.vhd'))]" },
+                    "createOption": "FromImage",
+                    "caching": "[parameters('source').osDisk.caching]"
+                  },
+                  "dataDisks": "[reference(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-datadisks-template')).outputs.result.value]",
+                  "diagnosticsStorageUri": "[concat('http://', parameters('context').storageAccounts.diagnostic, '.blob.core.windows.net')]"
                 }
               ]
             }
