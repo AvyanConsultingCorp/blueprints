@@ -38,8 +38,7 @@
       "location": "[variables('location')]",
       "tags": { "displayName": "VM" },
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))]",
-        "[concat('Microsoft.Resources/deployments/', variables('dataDiskDeployment'))]"
+        "[concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))]"
       ],
       "properties": {
         "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('virtualMachinesSettings').availabilitySetName)]" },

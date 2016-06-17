@@ -46,7 +46,7 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "rs-bb33-rg",
+        "vnetResourceGroup": "rs-bb22-rg",
         "vnetName": "rs-dev-vnet"
       },
       "metadata": {
@@ -56,8 +56,8 @@
     "context": {
       "value": {
         "storageAccounts": {
-          "diagnostic": "rsdevdiag",
-          "vhd": "rsdevvmst"
+          "diagnostic": "rsdevdiag1",
+          "vhd": "rsdevvmst1"
         },
         "availabilitySetName": "rs-testav",
         "vmCount": 3
