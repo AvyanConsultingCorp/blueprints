@@ -12,13 +12,13 @@
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "app0-fe-subnet",
+            "subnetName": "rs-web-sn",
             "ipAllocationMethod": "static",
-            "startingIPAddress": "10.0.2.240"
+            "startingIPAddress": "10.0.0.240"
           },
           {
-            "isPrimary": "true",
-            "subnetName": "app0-fe-subnet",
+            "isPrimary": "false",
+            "subnetName": "rs-biz-sn",
             "ipAllocationMethod": "dynamic"
           }
         ],
@@ -46,8 +46,8 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "app0-rg",
-        "vnetName": "app0-vnet"
+        "vnetResourceGroup": "rs-bb33-rg",
+        "vnetName": "rs-dev-vnet"
       },
       "metadata": {
         "description": "Availability set name is required for both new and existing scenarios."
@@ -56,8 +56,8 @@
     "context": {
       "value": {
         "storageAccounts": {
-          "diagnostic": "app0devdiag",
-          "vhd": "app0devvmst"
+          "diagnostic": "rsdevdiag",
+          "vhd": "rsdevvmst"
         },
         "availabilitySetName": "rs-testav",
         "vmCount": 3

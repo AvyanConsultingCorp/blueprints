@@ -19,23 +19,6 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[variables('dataDiskDeployment')]",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('collectorTemplate')]" },
-        "parameters": {
-          "parentResourceName": { "value": "[parameters('virtualMachinesSettings').vmName]" },
-          "source": { "value": "[parameters('virtualMachinesSettings').dataDisks]" },
-          "context": { "value": { } },
-          "mapperTemplateUri": {
-            "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-datadisk-refactor.json"
-          }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
       "name": "[variables('nicsDeployment')]",
       "properties": {
         "mode": "Incremental",
@@ -44,7 +27,7 @@
           "parentResourceName": { "value": "[parameters('virtualMachinesSettings').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
           "context": { "value": { } },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-nic-refactor.json" }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-nic.json" }
         }
       }
     },
@@ -79,7 +62,7 @@
             "caching": "[parameters('virtualMachinesSettings').osDisk.caching]",
             "createOption": "[parameters('virtualMachinesSettings').osDisk.createOption]"
           },
-          "dataDisks": "[reference(concat('Microsoft.Resources/deployments/', variables('dataDiskDeployment'))).outputs.result.value]"
+          "dataDisks": "[parameters('virtualMachinesSettings').dataDisks]"
         },
         "networkProfile": {
           "networkInterfaces": "[reference(concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))).outputs.result.value]"

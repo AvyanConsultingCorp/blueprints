@@ -23,13 +23,14 @@
 
   },
   "variables": {
-    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json"
+    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
+    "singleVMTemplate": "https://aoarmtest.blob.core.windows.net/templates/single-vm-n-nic.json"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vms')]",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vmsettings')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('replicatorTemplate')]" },
@@ -51,12 +52,27 @@
           "copies": { "value": "[parameters('context').vmCount]" }
         }
       }
+    },
+    {
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-', copyindex(), '-vms')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "copy": {
+        "name": "vmCount",
+        "count": "[parameters('context').vmCount]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('singleVMTemplate')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "virtualMachinesSettings": {
+            "value": "[reference(concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vmsettings')).outputs.result.value[copyindex()]]"
+          }
+        }
+      }
     }
-  ],
-  "outputs": {
-    "collection": {
-      "type": "array",
-      "value": "[reference(concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vms')).outputs.result.value]"
-    }
-  }
+  ]
 }
