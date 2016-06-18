@@ -11,67 +11,22 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
-    "dataDiskDeployment": "[concat('deploy-', parameters('virtualMachinesSettings').vmName, '-dataDisks')]",
-    "nicsDeployment": "[concat('deploy-', parameters('virtualMachinesSettings').vmName, '-nics')]"
+    "needAvset": "[substring(parameters('virtualMachinesSettings').availabilitySetName,0, 1)]",
+    "templateToInvoke": {
+      "": "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic-no-avset.json'))]",
+      "avset": "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic-avset.json'))]"
+    }
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[variables('nicsDeployment')]",
+      "name": "[concat('deploy-', variables('templateToInvoke'))]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "templateLink": { "uri": "[variables('templateToInvoke')[length(variables('needAvset'))]]" },
         "parameters": {
-          "parentResourceName": { "value": "[parameters('virtualMachinesSettings').vmName]" },
-          "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
-          "context": { "value": { } },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-nic.json" }
-        }
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('virtualMachinesSettings').vmName]",
-      "location": "[variables('location')]",
-      "tags": { "displayName": "VM" },
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))]"
-      ],
-      "properties": {
-        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('virtualMachinesSettings').availabilitySetName)]" },
-        "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
-        "osProfile": {
-          "computerName": "[parameters('virtualMachinesSettings').vmName]",
-          "adminUsername": "[parameters('virtualMachinesSettings').adminUsername]",
-          "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[parameters('virtualMachinesSettings').imageReference.publisher]",
-            "offer": "[parameters('virtualMachinesSettings').imageReference.offer]",
-            "sku": "[parameters('virtualMachinesSettings').imageReference.sku]",
-            "version": "[parameters('virtualMachinesSettings').imageReference.version]"
-          },
-          "osDisk": {
-            "name": "[parameters('virtualMachinesSettings').osDisk.name]",
-            "vhd": { "uri": "[parameters('virtualMachinesSettings').osDisk.vhd.uri]" },
-            "caching": "[parameters('virtualMachinesSettings').osDisk.caching]",
-            "createOption": "[parameters('virtualMachinesSettings').osDisk.createOption]"
-          },
-          "dataDisks": "[parameters('virtualMachinesSettings').dataDisks]"
-        },
-        "networkProfile": {
-          "networkInterfaces": "[reference(concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))).outputs.result.value]"
-        },
-
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[parameters('virtualMachinesSettings').diagnosticsStorageUri]"
-          }
+          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" }
         }
       }
     }
