@@ -25,7 +25,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-single-vm-n-nic-', variables('deploymentSuffix'))]",
+      "name": "[concat('deploy-', parameters('virtualMachinesSettings').vmName, '-', variables('deploymentSuffix'))]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('templateToInvoke')]" },
