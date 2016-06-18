@@ -41,6 +41,7 @@
         "[concat('Microsoft.Resources/deployments/', variables('nicsDeployment'))]"
       ],
       "properties": {
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('virtualMachinesSettings').availabilitySetName)]" },
         "hardwareProfile": { "vmSize": "[parameters('virtualMachinesSettings').size]" },
         "osProfile": {
           "computerName": "[parameters('virtualMachinesSettings').vmName]",
