@@ -11,11 +11,10 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "needAvset": "[substring(parameters('virtualMachinesSettings').availabilitySetName,0, 1)]",
-    "templateToInvoke": {
-      "": "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic-no-avset.json'))]",
-      "avset": "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic-avset.json'))]"
-    }
+    "templateToInvoke": [
+      "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic-no-avset.json'))]",
+      "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic-avset.json'))]"
+    ]
   },
   "resources": [
     {
@@ -24,7 +23,7 @@
       "name": "[concat('deploy-', variables('templateToInvoke'))]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('templateToInvoke')[length(variables('needAvset'))]]" },
+        "templateLink": { "uri": "[variables('templateToInvoke')[mod(add(length(parameters('virtualMachinesSettings').availabilitySetName), 2), add(length(parameters('virtualMachinesSettings').availabilitySetName), 1))]]" },
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" }
         }
