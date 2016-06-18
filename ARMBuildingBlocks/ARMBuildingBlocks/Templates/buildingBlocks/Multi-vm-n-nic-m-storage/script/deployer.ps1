@@ -16,6 +16,8 @@ $avsetName='app13-web-avSet'
 $vnetAddressPrefix='10.4.0.0/16'
 $subnetAddressPrefix1='10.4.0.0/24'
 $subnetAddressPrefix2='10.4.1.0/24'
+$diagStorage='app13devdiag'
+$vhdStorage='app13devvmst'
 
 # Create new resource group
 New-AzureRmResourceGroup -Name $resourceGroupName -Location $location
@@ -31,10 +33,14 @@ New-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $resourceGroupName 
 # Create a new availability set
 New-AzureRmAvailabilitySet -ResourceGroupName $resourceGroupName -Name $avsetName -Location $location -PlatformUpdateDomainCount 5 -PlatformFaultDomainCount 3
 
+# Create storage accounts
+New-AzureRmStorageAccount -ResourceGroupName $resourceGroupName -Name $diagStorage -Type Standard_LRS -Location $location
+New-AzureRmStorageAccount -ResourceGroupName $resourceGroupName -Name $vhdStorage -Type Premium_LRS -Location $location
+
 
 # Template and first parameter file URIs
-$templateUri = 'https://raw.githubusercontent.com/mspnp/blueprints/refarch/buildingblocks/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-n-vm-n-nic/azuredeploy.json'
-$templateParamUri = 'https://raw.githubusercontent.com/mspnp/blueprints/refarch/buildingblocks/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-n-vm-n-nic/azuredeploy.parameters.json'
+$templateUri = 'https://raw.githubusercontent.com/mspnp/blueprints/refarch/buildingblocks/ARMBuildingBlocks/ARMBuildingBlocks/Templates/resources/virtualMachines/n-vm-n-nic.json'
+$templateLocalParam='C:\dev\bbtest\n-vm-n-nic.parameters.json'
 
-Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri
-New-AzureRmResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri -Verbose
+Test-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateUri $templateUri -TemplateParameterFile $templateLocalParam
+New-AzureRmResourceGroupDeployment -Name $deploymentName -ResourceGroupName $resourceGroupName -TemplateUri $templateUri -TemplateParameterFile $templateLocalParam -Verbose
