@@ -20,7 +20,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', variables('templateToInvoke'))]",
+      "name": "[concat('deploy-single-vm-n-nic')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('templateToInvoke')]" },
