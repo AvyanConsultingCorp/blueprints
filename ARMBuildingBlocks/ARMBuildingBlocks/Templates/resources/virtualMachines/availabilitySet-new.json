@@ -5,7 +5,7 @@
     "platformFaultDomainCount": {
       "type": "int",
       "maxValue": 20,
-      "defaultValue": 5,
+      "defaultValue": 3,
       "metadata": {
         "description": "Platform domain count value."
       }
@@ -13,23 +13,22 @@
     "platformUpdateDomainCount": {
       "type": "int",
       "maxValue": 20,
-      "defaultValue": 3,
+      "defaultValue": 5,
       "metadata": {
         "description": "Platform domain count value."
       }
     },
-    "avSetName": {
-      "type": "string",
-      "metadata": {
-        "description": "Availability set name."
-      }
-    }
+    "baseName": { "type": "string" },
+    "availabilitySetSettings": { "type": "object" }
+  },
+  "variables": {
+    "avSetName": "[concat(parameters('baseName'), '-', parameters('availabilitySetSettings').prefix, '-as')]"
   },
   "resources": [
     {
       "type": "Microsoft.Compute/availabilitySets",
       "apiVersion": "2015-06-15",
-      "name": "[parameters('avSetName')]",
+      "name": "[variables('avSetName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "platformFaultDomainCount": "[parameters('platformFaultDomainCount')]",
@@ -38,9 +37,9 @@
     }
   ],
   "outputs": {
-    "availabilitySetInfo": {
-      "value": "[reference(concat('Microsoft.Compute/availabilitySets/',parameters('avSetName')),providers('Microsoft.Compute','availabilitySets').apiVersions[0])]",
-      "type": "object"
+    "availabilitySetName": {
+      "value": "[variables('avSetName')]",
+      "type": "string"
     }
   }
 }

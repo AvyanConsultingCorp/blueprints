@@ -3,17 +3,14 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
-    "availabilitySetSettings": { "type": "object" },
-    "vmCount": { "type": "int" }
-  },
-  "variables": {
+    "availabilitySetSettings": { "type": "object" }
   },
   "resources": [
   ],
   "outputs": {
     "availabilitySetName": {
-      "type": "string",
-      "value": "[parameters('availabilitySetSettings').name]"
+      "value": "",
+      "type": "string"
     }
   }
 }

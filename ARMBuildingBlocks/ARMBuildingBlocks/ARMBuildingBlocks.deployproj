@@ -79,7 +79,9 @@
     <None Include="Templates\resources\routeTable\routeTable.json" />
     <None Include="Templates\resources\routeTable\rt-routes-no-next-hop-ip-address.json" />
     <None Include="Templates\resources\routeTable\rt-routes-with-next-hop-ip-address.json" />
+    <None Include="Templates\resources\virtualMachines\availabilitySet-neworempty.json" />
     <None Include="Templates\resources\virtualMachines\availabilitySet-existing.json" />
+    <None Include="Templates\resources\virtualMachines\availabilitySet-empty.json" />
     <None Include="Templates\resources\virtualMachines\availabilitySet-new.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.parameters.json" />

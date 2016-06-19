@@ -4,37 +4,39 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "app0",
-        "computerNamePrefix": "dev",
+        "namePrefix": "rs",
         "size": "Standard_DS2",
-        "osType": "linux",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
-        "storageAccountCount": 3,
-        "vmCount": 17,
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "app0-fe-subnet"
+            "subnetName": "rs-web-sn",
+            "ipAllocationMethod": "static",
+            "startingIPAddress": "10.0.0.240"
           },
           {
             "isPrimary": "false",
-            "subnetName": "app0-be-subnet"
+            "subnetName": "rs-biz-sn",
+            "ipAllocationMethod": "dynamic"
           }
         ],
-        "osProfile": {
-          "windows": {
-            "publisher": "MicrosoftWindowsServer",
-            "offer": "WindowsServer",
-            "sku": "2012-R2-Datacenter",
-            "version": "latest"
-          },
-          "linux": {
-            "publisher": "Canonical",
-            "offer": "UbuntuServer",
-            "sku": "14.04.2-LTS",
-            "version": "latest"
+        "imageReference": {
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2012-R2-Datacenter",
+          "version": "latest"
+        },
+        "dataDisks": {
+          "count": 4,
+          "properties": {
+            "diskSizeGB": 127,
+            "caching": "None",
+            "createOption": "Empty"
           }
+        },
+        "osDisk": {
+          "caching": "ReadWrite"
         }
       },
       "metadata": {
@@ -43,12 +45,16 @@
     },
     "infrastructureSettings": {
       "value": {
+        "baseName": "rs",
         "vnetResourceGroup": "app0-rg",
         "vnetName": "app0-vnet",
         "availabilitySet": {
-          "newOrExisting": "new",
+          "useExistingAvailabilitySet": "No",
+          "prefix": "xx",
           "name": "app0-web-as"
-        }
+        },
+        "storageAccountsCount": 3,
+        "vmCount": 1
       },
       "metadata": {
         "description": "Availability set name is required for both new and existing scenarios."
