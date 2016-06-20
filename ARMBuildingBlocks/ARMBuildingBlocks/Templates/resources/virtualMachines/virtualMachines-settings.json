@@ -16,25 +16,27 @@
   "variables": {
     "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
-    "storageAccountContainerName": "vhds"
+    "storageAccountContainerName": "vhds",
+    "vmName": "[concat(parameters('context').vmNamePrefix, '-vm', add(parameters('context').vmNamePostFixStartIndex, parameters('iteration')))]"
+
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-nics-template')]",
+      "name": "[concat(variables('vmName'), '-nics-template')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
-          "parentResourceName": { "value": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]" },
+          "parentResourceName": { "value": "[variables('vmName')]" },
           "source": { "value": "[parameters('source').nics]" },
           "context": {
             "value": {
               "vnetResourceGroup": "[parameters('context').vnetResourceGroup]",
               "vnetName": "[parameters('context').vnetName]",
-              "vmName": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]",
-              "vmIndex": "[parameters('iteration')]"
+              "vmName": "[variables('vmName')]",
+              "vmIndex": "[add(parameters('iteration'), parameters('context').deployedVMCount)]"
             }
           },
           "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-nics-settings.json" }
@@ -44,19 +46,19 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-datadisks-template')]",
+      "name": "[concat(variables('vmName'), '-datadisks-template')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('replicatorTemplate')]" },
         "parameters": {
-          "parentResourceName": { "value": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]" },
+          "parentResourceName": { "value": "[variables('vmName')]" },
           "source": { "value": "[parameters('source').dataDisks.properties]" },
           "context": {
             "value": {
               "vnetResourceGroup": "[parameters('context').vnetResourceGroup]",
               "vnetName": "[parameters('context').vnetName]",
               "storageAccounts": "[parameters('context').storageAccounts]",
-              "vmName": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]",
+              "vmName": "[variables('vmName')]",
               "vmIndex": "[parameters('iteration')]"
             }
           },
@@ -68,7 +70,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration'))), '-vmsettings-template')]",
+      "name": "[concat(variables('vmName'), '-vmsettings-template')]",
       "properties": {
         "mode": "Incremental",
         "template": {
@@ -81,12 +83,12 @@
               "type": "array",
               "value": [
                 {
-                  "vmName": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')))]",
+                  "vmName": "[variables('vmName')]",
                   "availabilitySetName": "[parameters('context').availabilitySetName]",
                   "size": "[parameters('source').size]",
                   "adminUsername": "[parameters('source').adminUsername]",
                   "adminPassword": "[parameters('source').adminPassword]",
-                  "nics": "[reference(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-nics-template')).outputs.result.value]",
+                  "nics": "[reference(concat(variables('vmName'), '-nics-template')).outputs.result.value]",
                   "imageReference": {
                     "publisher": "[parameters('source').imageReference.publisher]",
                     "offer": "[parameters('source').imageReference.offer]",
@@ -94,12 +96,12 @@
                     "version": "[parameters('source').imageReference.version]"
                   },
                   "osDisk": {
-                    "name": "[concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-os.vhd')]",
-                    "vhd": { "uri": "[concat('http://', parameters('context').storageAccounts.vhd, '.blob.core.windows.net/', variables('storageAccountContainerName'), '/', concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-os.vhd'))]" },
+                    "name": "[concat(variables('vmName'), '-os.vhd')]",
+                    "vhd": { "uri": "[concat('http://', parameters('context').storageAccounts.vhd, '.blob.core.windows.net/', variables('storageAccountContainerName'), '/', concat(variables('vmName'), '-os.vhd'))]" },
                     "createOption": "FromImage",
                     "caching": "[parameters('source').osDisk.caching]"
                   },
-                  "dataDisks": "[reference(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration')), '-datadisks-template')).outputs.result.value]",
+                  "dataDisks": "[reference(concat(variables('vmName'), '-datadisks-template')).outputs.result.value]",
                   "diagnosticsStorageUri": "[concat('http://', parameters('context').storageAccounts.diagnostic, '.blob.core.windows.net')]"
                 }
               ]
@@ -112,7 +114,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[concat(parameters('state'), reference(concat(concat(parameters('source').namePrefix, add(parameters('source').namePostfixStartIndex, parameters('iteration'))), '-vmsettings-template')).outputs.instance.value)]"
+      "value": "[concat(parameters('state'), reference(concat(variables('vmName'), '-vmsettings-template')).outputs.instance.value)]"
     }
   }
 }

@@ -20,27 +20,30 @@
         "description": "Settings for other parameters such as load balancer backend pool, storage account names."
       }
     }
-
   },
   "variables": {
+    "templateUniqueString": "[uniqueString(concat(string(parameters('virtualMachinesSettings')), string(parameters('infrastructureSettings')), string(parameters('context'))))]",
     "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
-    "singleVMTemplate": "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic.json'))]"
+    "singleVMTemplate": "https://aoarmtest.blob.core.windows.net/templates/single-vm-n-nic.json"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vmsettings')]",
+      "name": "[concat('settings-vmbatch-', parameters('context').iteration, '-', variables('templateUniqueString'))]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('replicatorTemplate')]" },
         "parameters": {
-          "parentResourceName": { "value": "[concat(parameters('virtualMachinesSettings').namePrefix, '-startindex-', parameters('virtualMachinesSettings').namePostfixStartIndex)]" },
+          "parentResourceName": { "value": "[concat(parameters('virtualMachinesSettings').namePrefix, '-startindex-', add(parameters('context').vmStartIndex, parameters('context').deployedVMCount))]" },
           "source": { "value": "[parameters('virtualMachinesSettings')]" },
           "context": {
             "value": {
               "vnetResourceGroup": "[parameters('infrastructureSettings').vnetResourceGroup]",
               "vnetName": "[parameters('infrastructureSettings').vnetName]",
+              "vmNamePrefix": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix)]",
+              "vmNamePostFixStartIndex": "[add(parameters('context').vmStartIndex, parameters('context').deployedVMCount)]",
+              "deployedVMCount": "[parameters('context').deployedVMCount]",
               "storageAccounts": {
                 "diagnostic": "[parameters('context').storageAccounts.diagnostic]",
                 "vhd": "[parameters('context').storageAccounts.vhd]"
@@ -54,7 +57,7 @@
       }
     },
     {
-      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-', copyindex(), '-vms')]",
+      "name": "[concat('deploy-vms', parameters('virtualMachinesSettings').namePrefix, '-', add(add(parameters('context').vmStartIndex, parameters('context').deployedVMCount), copyindex()))]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
       "copy": {
@@ -69,10 +72,17 @@
         },
         "parameters": {
           "virtualMachinesSettings": {
-            "value": "[reference(concat(parameters('virtualMachinesSettings').namePrefix, '-', parameters('context').vmCount, '-vmsettings')).outputs.result.value[copyindex()]]"
+            "value": "[reference(concat('settings-vmbatch-', parameters('context').iteration, '-', variables('templateUniqueString'))).outputs.result.value[copyindex()]]"
           }
         }
       }
     }
-  ]
+
+  ],
+  "outputs": {
+    "vmsettings": {
+      "type": "array",
+      "value": "[reference(concat('settings-vmbatch-', parameters('context').iteration, '-', variables('templateUniqueString'))).outputs.result.value]"
+    }
+  }
 }

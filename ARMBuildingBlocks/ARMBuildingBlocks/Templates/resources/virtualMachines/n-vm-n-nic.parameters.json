@@ -4,8 +4,9 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "rs-vm",
-        "namePostfixStartIndex": 5,
+        "namePrefix": "rs",
+        "computerNamePrefix": "",
+        "startIndex": 3,
         "size": "Standard_DS2",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
@@ -46,8 +47,14 @@
     },
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "rs-bb22-rg",
-        "vnetName": "rs-dev-vnet"
+        "baseName": "rs",
+        "vnetResourceGroup": "app0-rg",
+        "vnetName": "app0-vnet",
+        "availabilitySet": {
+          "useExistingAvailabilitySet": "No",
+          "prefix": "xx",
+          "name": "app0-web-as"
+        }
       },
       "metadata": {
         "description": "Availability set name is required for both new and existing scenarios."
@@ -60,7 +67,9 @@
           "vhd": "rsdevvmst1"
         },
         "availabilitySetName": "rs-testav",
-        "vmCount": 3
+        "vmCount": 3,
+        "vmStartIndex": 5,
+        "iteration": 2
       }
     }
   }

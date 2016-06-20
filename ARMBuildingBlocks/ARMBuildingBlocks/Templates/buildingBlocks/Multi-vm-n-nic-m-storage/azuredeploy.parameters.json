@@ -4,20 +4,21 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "rs",
+        "namePrefix": "vmn",
+        "computerNamePrefix": "cn",
         "size": "Standard_DS2",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "rs-web-sn",
+            "subnetName": "rs1-web-sn",
             "ipAllocationMethod": "static",
             "startingIPAddress": "10.0.0.240"
           },
           {
             "isPrimary": "false",
-            "subnetName": "rs-biz-sn",
+            "subnetName": "rs1-biz-sn",
             "ipAllocationMethod": "dynamic"
           }
         ],
@@ -28,7 +29,7 @@
           "version": "latest"
         },
         "dataDisks": {
-          "count": 4,
+          "count": 2,
           "properties": {
             "diskSizeGB": 127,
             "caching": "None",
@@ -40,25 +41,26 @@
         }
       },
       "metadata": {
-        "description": "Do not include a hyphen in namePrefix since it is used to generate storage account names."
+        "description": "Settings for Virtual Machines"
       }
     },
     "infrastructureSettings": {
       "value": {
-        "baseName": "rs",
-        "vnetResourceGroup": "app0-rg",
-        "vnetName": "app0-vnet",
+        "baseName": "rs1",
+        "vnetResourceGroup": "rs-bb99-rg",
+        "vnetName": "rs1-dev-vnet",
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
           "prefix": "xx",
-          "name": "app0-web-as"
-        },
-        "storageAccountsCount": 3,
-        "vmCount": 1
+          "name": ""
+        }
       },
       "metadata": {
-        "description": "Availability set name is required for both new and existing scenarios."
+        "description": "Infrastructure Settings"
       }
-    }
+    },
+    "storageAccountsCount": { "value":3 },
+    "vmCount": { "value": 5 },
+    "vmStartIndex": { "value": 11 }
   }
 }
