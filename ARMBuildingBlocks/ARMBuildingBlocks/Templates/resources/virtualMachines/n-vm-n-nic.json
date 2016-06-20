@@ -24,7 +24,7 @@
   },
   "variables": {
     "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
-    "singleVMTemplate": "[uri(deployment().properties.templateLink.uri, concat('single-vm-n-nic.json'))]"
+    "singleVMTemplate": "[uri(deployment().properties.templateLink.uri, 'single-vm-n-nic.json')]"
   },
   "resources": [
     {
