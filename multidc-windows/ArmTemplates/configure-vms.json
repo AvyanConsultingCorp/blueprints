@@ -769,6 +769,7 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmArray')[copyindex()],'/configure-sql-alwayson')]",
       "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
       "copy": {
         "count": 2,
         "name": "configLoop"
