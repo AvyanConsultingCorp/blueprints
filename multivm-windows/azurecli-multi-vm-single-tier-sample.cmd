@@ -75,8 +75,7 @@ CALL azure network vnet subnet create --vnet-name %VNET_NAME% --address-prefix ^
 CALL azure network public-ip create --name %IP_NAME% --location %LOCATION% %POSTFIX%
 
 :: Create the storage account for diagnostics logs
-CALL azure storage account create --type LRS --location %LOCATION% %POSTFIX% ^
-  %DIAGNOSTICS_STORAGE%
+CALL :CallCLI azure storage account create --sku-name LRS --kind Storage --location %LOCATION% %POSTFIX% %DIAGNOSTICS_STORAGE%
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Load balancer
@@ -137,8 +136,7 @@ CALL azure network nic inbound-nat-rule add --name %NIC_NAME% --lb-name ^
   %LB_NAME% --lb-inbound-nat-rule-name rdp-vm%1 %POSTFIX%
 
 :: Create the storage account for the OS VHD
-CALL azure storage account create --type PLRS --location %LOCATION% ^
- %VHD_STORAGE% %POSTFIX%
+CALL :CallCLI azure storage account create --sku-name PLRS --kind Storage --location %LOCATION% %POSTFIX% %DIAGNOSTICS_STORAGE%
 
 :: Create the VM
 CALL azure vm create --name %VM_NAME% --os-type Windows --image-urn ^
