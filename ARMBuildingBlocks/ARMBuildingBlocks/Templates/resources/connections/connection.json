@@ -1,0 +1,44 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "infrastructureSettings": {
+      "type": "object"
+    }
+  },
+  "variables": {
+    "templates": {
+      "IPsec": "connection-IPsec.json",
+      "Vnet2Vnet": "connection-Vnet2Vnet.json",
+      "ExpressRoute": "connection-ExpressRoute.json"
+    },
+    "templateName": "[concat(parameters('infrastructureSettings').connection.name, '-properties')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[variables('templateName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, variables('templates')[parameters('infrastructureSettings').connection.connectionType])]"
+        },
+        "parameters": {
+          "infrastructureSettings": {
+            "value": "[parameters('infrastructureSettings')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "name": "[parameters('infrastructureSettings').connection.name]",
+      "type": "Microsoft.Network/connections",
+      "location": "[resourceGroup().location]",
+      "properties": "[reference(variables('templateName')).outputs.properties.value]"
+    }
+  ],
+    "outputs": {
+    }
+}

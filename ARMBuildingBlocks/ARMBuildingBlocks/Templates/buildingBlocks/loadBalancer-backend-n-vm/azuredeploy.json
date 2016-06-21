@@ -40,8 +40,6 @@
       "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
       "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('loadBalancerSettings').subnetName)]"
     },
-    "probes": "[parameters('loadBalancerSettings').probes]",
-    "probesCount": "[length(variables('probes'))]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
   },
   "resources": [

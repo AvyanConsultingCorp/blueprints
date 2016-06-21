@@ -1,0 +1,61 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "infrastructureSettings": {
+      "type": "object"
+    }
+  },
+  "variables": {
+    "publicIPAddressName": "[concat(parameters('infrastructureSettings').virtualNetworkGateway.name, '-pip')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/virtualNetworkGateways",
+      "name": "[parameters('infrastructureSettings').virtualNetworkGateway.name]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[variables('publicIPAddressName')]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "[concat(parameters('infrastructureSettings').virtualNetworkGateway.name, '-ipconfig')]",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('infrastructureSettings').vnetName, 'GatewaySubnet')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              }
+            }
+          }
+        ],
+        "gatewayType": "[parameters('infrastructureSettings').virtualNetworkGateway.gatewayType]",
+        "vpnType": "[parameters('infrastructureSettings').virtualNetworkGateway.vpnType]",
+        "enableBgp": "false",
+        "sku": {
+          "name": "[parameters('infrastructureSettings').virtualNetworkGateway.sku]",
+          "tier": "[parameters('infrastructureSettings').virtualNetworkGateway.sku]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "publicIPAddress": {
+      "type": "object",
+      "value": "[reference(variables('publicIPAddressName'))]"
+    }
+  }
+}

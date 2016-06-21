@@ -3,6 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "virtualMachinesSettings": {
+<<<<<<< HEAD
       "value": {
         "namePrefix": "vmn",
         "computerNamePrefix": "cn",
@@ -43,6 +44,15 @@
       "metadata": {
         "description": "Settings for Virtual Machines"
       }
+=======
+      "namePrefix": "app0",
+      "computerNamePrefix": "rs",
+      "size": "Standard_DS1",
+      "osType": "Windows",
+      "adminUserName": "pnpadmin",
+      "adminPassword": "Passw0rd!",
+      "count": 2
+>>>>>>> 7c8c0f2d95977ea93324f92ed8ce629436301bf4
     },
     "infrastructureSettings": {
       "value": {
