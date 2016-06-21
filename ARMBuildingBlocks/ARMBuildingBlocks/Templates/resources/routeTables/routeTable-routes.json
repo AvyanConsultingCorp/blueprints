@@ -22,13 +22,14 @@
       "HyperNetGateway": "[uri(deployment().properties.templateLink.uri, 'rt-routes-no-next-hop-ip-address.json')]",
       "None": "[uri(deployment().properties.templateLink.uri, 'rt-routes-no-next-hop-ip-address.json')]",
       "VirtualAppliance": "[uri(deployment().properties.templateLink.uri, 'rt-routes-with-next-hop-ip-address.json')]"
-    }
+    },
+    "routeTableMapperTemplateName": "[concat(parameters('context').routeTableName, '-routes-mapper')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "routeTableRoutesMapper",
+      "name": "[variables('routeTableMapperTemplateName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -51,7 +52,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[concat(parameters('state'), reference('routeTableRoutesMapper').outputs.collection.value)]"
+      "value": "[concat(parameters('state'), reference(variables('routeTableMapperTemplateName')).outputs.collection.value)]"
     }
   }
 }

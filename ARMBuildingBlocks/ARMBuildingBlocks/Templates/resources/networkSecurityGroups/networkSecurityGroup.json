@@ -12,45 +12,47 @@
   "variables": {
     "vnetName": "[parameters('infrastructureSettings').vnetName]",
     "subnetName": "[parameters('infrastructureSettings').subnetName]",
-    "routeTableName": "[parameters('infrastructureSettings').routeTable.name]",
-    "routeTableRoutes": "[parameters('infrastructureSettings').routeTable.routes]",
+    "networkSecurityGroupName": "[parameters('infrastructureSettings').networkSecurityGroup.name]",
+    "networkSecurityGroupSecurityRules": "[parameters('infrastructureSettings').networkSecurityGroup.securityRules]",
     "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
-    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]"
+    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]",
+    "nsgRulesTemplateName": "[concat(variables('networkSecurityGroupName'), '-rules')]",
+    "subnetReferenceTemplateName": "[concat(variables('subnetName'), '-nsg-reference')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "routeTableRoutesTemplate",
+      "name": "[variables('nsgRulesTemplateName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
           "source": {
-            "value": "[variables('routeTableRoutes')]"
+            "value": "[variables('networkSecurityGroupSecurityRules')]"
           },
           "context": {
             "value": { }
           },
           "mapperTemplateUri": {
-            "value": "[uri(deployment().properties.templateLink.uri, '../routeTable/routeTable-routes.json')]"
+            "value": "[uri(deployment().properties.templateLink.uri, 'networkSecurityGroup-securityRules.json')]"
           }
         }
       }
     },
     {
-      "type": "Microsoft.Network/routeTables",
-      "name": "[variables('routeTableName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupName')]",
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
-        "routes": "[reference('routeTableRoutesTemplate').outputs.result.value]"
+        "securityRules": "[reference(variables('nsgRulesTemplateName')).outputs.result.value]"
       }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "subnetReference",
+      "name": "[variables('subnetReferenceTemplateName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -75,13 +77,13 @@
       "name": "[concat(variables('vnetName'), '/', variables('subnetName'))]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "addressPrefix": "[reference('subnetReference').outputs.reference.value.addressPrefix]",
-        "routeTable": {
-          "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableName'))]"
+        "addressPrefix": "[reference(variables('subnetReferenceTemplateName')).outputs.reference.value.properties.addressPrefix]",
+        "networksecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
         }
       },
       "dependsOn": [
-        "[variables('routeTableName')]"
+        "[variables('networkSecurityGroupName')]"
       ]
     }
   ],
