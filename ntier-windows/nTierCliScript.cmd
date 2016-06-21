@@ -105,7 +105,7 @@ SET POSTFIX=--resource-group %RESOURCE_GROUP% --subscription %SUBSCRIPTION%
 :: Create root level resources
 
 :: Create the storage account for diagnostics logs
-CALL :CallCLI azure storage account create --type LRS --location %LOCATION% %POSTFIX% %DIAGNOSTICS_STORAGE%
+CALL :CallCLI azure storage account create --sku-name LRS --kind Storage --location %LOCATION% %POSTFIX% %DIAGNOSTICS_STORAGE%
 
 :: Create the jumpbox public IP address (dynamic)
 CALL :CallCLI azure network public-ip create --name %JUMPBOX_PUBLIC_IP_NAME% --location %LOCATION% %POSTFIX%
@@ -371,8 +371,7 @@ IF NOT "%LB_NAME%"=="" (
 )  
   
 :: Create the storage account for the OS VHD
-CALL :CallCLI azure storage account create --type PLRS --location %LOCATION% ^
- %VHD_STORAGE% %POSTFIX%
+CALL :CallCLI azure storage account create --sku-name PLRS --kind Storage --location %LOCATION% %POSTFIX% %DIAGNOSTICS_STORAGE%
 
 SET AVAILSET_SCRIPT=
 IF "%NEEDS_AVAILABILITY_SET%"=="true" (
