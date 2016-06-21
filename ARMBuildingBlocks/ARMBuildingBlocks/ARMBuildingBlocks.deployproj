@@ -25,7 +25,6 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
-    <Folder Include="Templates\resources\gateway\" />
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
@@ -69,10 +68,15 @@
     <None Include="Templates\resources\common\referenceOneParameter.json" />
     <None Include="Templates\resources\common\referenceTwoParameters.json" />
     <None Include="Templates\resources\common\replicator.json" />
+    <None Include="Templates\resources\connections\connection-ExpressRoute.json" />
+    <None Include="Templates\resources\connections\connection-IPsec.json" />
+    <None Include="Templates\resources\connections\connection-Vnet2Vnet.json" />
+    <None Include="Templates\resources\connections\connection.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-internal.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-public.json" />
     <None Include="Templates\resources\loadBalancer\lb-loadBalancingRules.json" />
     <None Include="Templates\resources\loadBalancer\lb-probes.json" />
+    <None Include="Templates\resources\localNetworkGateway\localNetworkGateway.json" />
     <None Include="Templates\resources\networkSecurityGroup\networkSecurityGroup-securityRules.json" />
     <None Include="Templates\resources\networkSecurityGroup\networkSecurityGroup.json" />
     <None Include="Templates\resources\routeTable\routeTable-routes.json" />
@@ -96,6 +100,7 @@
     <None Include="Templates\resources\virtualMachines\virtualMachines-settings.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachines-static-nics-settings.json" />
     <None Include="Templates\resources\virtualMachines\vm-per-storage-helper.json" />
+    <None Include="Templates\resources\virtualNetworkGateways\virtualNetworkGateway.json" />
     <None Include="Templates\resources\virtualNetwork\virtualNetwork-subnets.json" />
   </ItemGroup>
   <ItemGroup>
