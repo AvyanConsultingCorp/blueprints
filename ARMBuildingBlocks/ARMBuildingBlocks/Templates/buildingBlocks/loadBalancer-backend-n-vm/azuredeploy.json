@@ -2,7 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": { "type": "string" },
     "virtualMachinesSettings": {
       "type": "object",
       "metadata": {
@@ -25,8 +24,8 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "subnetNamePrefix": "[parameters('infrastructureSettings').subnetNamePrefix]",
-    "lbName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-ilb')]",
-    "bepName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-bep')]",
+    "lbName": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', variables('subnetNamePrefix'), '-ilb')]",
+    "bepName": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', variables('subnetNamePrefix'), '-bep')]",
     "internalLoadBalancer": {
       "name": "[variables('lbName')]",
       "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
@@ -38,7 +37,7 @@
       "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
       "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('infrastructureSettings').subnetName)]"
     },
-    "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('virtualMachinesSettings').namePrefix,'-as')]",
+    "vmAvailabilitySetName": "[concat(parameters('virtualMachinesSettings').namePrefix,'-',parameters('virtualMachinesSettings').namePrefix,'-as')]",
     "probes": "[parameters('loadBalancerSettings').probes]",
     "probesCount": "[length(variables('probes'))]",
     "ipConfigurations": {
@@ -78,7 +77,7 @@
           "source": { "value": "[parameters('loadBalancerSettings').loadBalancingRules]" },
           "context": {
             "value": {
-              "loadBalancerName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-ilb')]",
+              "loadBalancerName": "[concat(parameters('virtualMachinesSettings').namePrefix, '-', variables('subnetNamePrefix'), '-ilb')]",
               "backendAddressPool": "[variables('internalLoadBalancer').backendPoolId]"
             }
           },

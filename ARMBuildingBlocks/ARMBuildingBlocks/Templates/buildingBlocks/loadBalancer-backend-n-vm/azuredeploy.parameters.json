@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "virtualMachinesSettings": {
-      "namePrefix": "rs",
+      "namePrefix": "app0",
       "computerNamePrefix": "rs",
       "size": "Standard_DS1",
       "osType": "Windows",
