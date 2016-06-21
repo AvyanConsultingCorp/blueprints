@@ -3,58 +3,111 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "virtualMachinesSettings": {
-      "namePrefix": "rs",
-      "computerNamePrefix": "rs",
-      "size": "Standard_DS1",
-      "osType": "Windows",
-      "adminUserName": "pnpadmin",
-      "adminPassword": "Passw0rd!",
-      "count": 2
+      "value": {
+        "namePrefix": "vmn",
+        "computerNamePrefix": "cn",
+        "size": "Standard_DS2",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "nics": [
+          {
+            "isPrimary": "true",
+            "subnetName": "rs1-web-sn",
+            "ipAllocationMethod": "static",
+            "startingIPAddress": "10.0.0.240"
+          },
+          {
+            "isPrimary": "false",
+            "subnetName": "rs1-biz-sn",
+            "ipAllocationMethod": "dynamic"
+          }
+        ],
+        "imageReference": {
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2012-R2-Datacenter",
+          "version": "latest"
+        },
+        "dataDisks": {
+          "count": 2,
+          "properties": {
+            "diskSizeGB": 127,
+            "caching": "None",
+            "createOption": "Empty"
+          }
+        },
+        "osDisk": {
+          "caching": "ReadWrite"
+        }
+      },
+      "metadata": {
+        "description": "Settings for Virtual Machines"
+      }
     },
     "infrastructureSettings": {
-      "vnetResourceGroup": "rs-bp-rg",
-      "vnetName": "rs-bp-vnet",
-      "subnetName": "rs-web-sn",
-      "subnetNamePrefix": "web"
+      "value": {
+        "baseName": "rs1",
+        "vnetResourceGroup": "rs-bb1-rg",
+        "vnetName": "rs1-dev-vnet",
+        "availabilitySet": {
+          "useExistingAvailabilitySet": "No",
+          "prefix": "xx",
+          "name": ""
+        }
+      },
+      "metadata": {
+        "description": "Infrastructure Settings"
+      }
     },
     "loadBalancerSettings": {
-      "frontendIPConfigurations": [
-        {
-          "name": "config1",
-          "loadBalancerType": "public",
-          "internalLoadBalancerSettings": {
-            "privateIPAddress": "10.0.0.254",
-            "subnetName": "test-sn"
+      "value": {
+        "subnetName": "rs-web-sn",
+        "namePrefix": "web",
+        "frontendIPConfigurations": [
+          {
+            "name": "config1",
+            "loadBalancerType": "public",
+            "internalLoadBalancerSettings": {
+              "privateIPAddress": "10.0.0.254",
+              "subnetName": "test-sn"
+            }
           }
-        }
-      ],
-      "loadBalancingRules": [
-        {
-          "frontendPort": 80,
-          "backendPort": 80,
-          "protocol": "Tcp",
-          "frontendIPConfigurationName": "config1"
-        },
-        {
-          "frontendPort": 443,
-          "backendPort": 443,
-          "protocol": "Tcp",
-          "frontendIPConfigurationName": "config1"
-        }
-      ],
-      "probes": [
-        {
-          "port": 80,
-          "protocol": "Http",
-          "requestPath": "/"
-        },
-        {
-          "port": 443,
-          "protocol": "Http",
-          "requestPath": "/"
-        }
-      ]
-    }
+        ],
+        "loadBalancingRules": [
+          {
+            "frontendPort": 80,
+            "backendPort": 80,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
+          },
+          {
+            "frontendPort": 443,
+            "backendPort": 443,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
+          }
+        ],
+        "probes": [
+          {
+            "port": 80,
+            "protocol": "Http",
+            "requestPath": "/"
+          },
+          {
+            "port": 443,
+            "protocol": "Http",
+            "requestPath": "/"
+          }
+        ],
+        "backendPoolNics": [
+          "rs1-vmn-vm1-nic1",
+          "rs1-vmn-vm2-nic1"
+        ]
+      }
+    },
+    "storageAccountsCount": { "value": 1 },
+    "vmCount": { "value": 3 },
+    "vmStartIndex": { "value": 1 }
 
   }
 }
