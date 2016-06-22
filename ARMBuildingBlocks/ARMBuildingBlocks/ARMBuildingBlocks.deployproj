@@ -74,6 +74,7 @@
     <None Include="Templates\resources\connections\connection.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-internal.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-public.json" />
+    <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-settings.json" />
     <None Include="Templates\resources\loadBalancer\lb-loadBalancingRules.json" />
     <None Include="Templates\resources\loadBalancer\lb-probes.json" />
     <None Include="Templates\resources\localNetworkGateway\localNetworkGateway.json" />

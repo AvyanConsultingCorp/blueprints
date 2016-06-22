@@ -2,7 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": { "type": "string" },
     "virtualMachinesSettings": {
       "type": "object",
       "metadata": {
@@ -20,13 +19,16 @@
       "metadata": {
         "description": "Settings for infrastructure"
       }
-    }
+    },
+    "storageAccountsCount": { "type": "int" },
+    "vmCount": { "type": "int" },
+    "vmStartIndex": { "type": "int" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "subnetNamePrefix": "[parameters('infrastructureSettings').subnetNamePrefix]",
-    "lbName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-ilb')]",
-    "bepName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-bep')]",
+    "namePrefix": "[parameters('loadBalancerSettings').namePrefix]",
+    "lbName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-ilb')]",
+    "bepName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-bep')]",
     "internalLoadBalancer": {
       "name": "[variables('lbName')]",
       "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
@@ -36,16 +38,8 @@
     },
     "virtualNetwork": {
       "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
-      "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('infrastructureSettings').subnetName)]"
+      "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('loadBalancerSettings').subnetName)]"
     },
-    "vmAvailabilitySetName": "[concat(parameters('baseName'),'-',parameters('virtualMachinesSettings').namePrefix,'-as')]",
-    "probes": "[parameters('loadBalancerSettings').probes]",
-    "probesCount": "[length(variables('probes'))]",
-    "ipConfigurations": {
-      "public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json",
-      "internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json"
-    },
-    "ipConfigurationPath": "[variables('ipConfigurations')[toLower(parameters('loadBalancerSettings').frontendIPConfigurations[0].loadBalancerType)]]",
     "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
   },
   "resources": [
@@ -57,13 +51,15 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
-          "name": { "value": "[variables('ipConfigurationPath')]" },
+          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
           "source": { "value": "[parameters('loadBalancerSettings').frontendIPConfigurations]" },
           "context": {
             "value": {
-              "vetName": "parameters('infrastructureSettings').vnetName"
+              "loadBalancerName": "[variables('internalLoadBalancer').name]",
+              "vetName": "[parameters('infrastructureSettings').vnetName]"
             }
-          }
+          },
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-settings.json" }
         }
       }
     },
@@ -75,10 +71,11 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
+          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
           "source": { "value": "[parameters('loadBalancerSettings').loadBalancingRules]" },
           "context": {
             "value": {
-              "loadBalancerName": "[concat(parameters('baseName'), '-', variables('subnetNamePrefix'), '-ilb')]",
+              "loadBalancerName": "[variables('internalLoadBalancer').name]",
               "backendAddressPool": "[variables('internalLoadBalancer').backendPoolId]"
             }
           },
@@ -94,6 +91,7 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
+          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
           "source": { "value": "[parameters('loadBalancerSettings').probes]" },
           "context": { "value": { } },
           "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json" }
