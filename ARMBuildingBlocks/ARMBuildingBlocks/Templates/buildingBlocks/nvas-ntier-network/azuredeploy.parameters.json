@@ -1,0 +1,109 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "value": {
+        "namePrefix": "vmn",
+        "computerNamePrefix": "cn",
+        "size": "Standard_DS2",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "nics": [
+          {
+            "isPrimary": "true",
+            "subnetName": "rs1-web-sn",
+            "ipAllocationMethod": "static",
+            "startingIPAddress": "10.0.0.240"
+          },
+          {
+            "isPrimary": "false",
+            "subnetName": "rs1-biz-sn",
+            "ipAllocationMethod": "dynamic"
+          }
+        ],
+        "imageReference": {
+          "publisher": "canonical",
+          "offer": "ubuntuserver",
+          "sku": "15.10",
+          "version": "latest"
+        },
+        "dataDisks": {
+          "count": 2,
+          "properties": {
+            "diskSizeGB": 127,
+            "caching": "None",
+            "createOption": "Empty"
+          }
+        },
+        "osDisk": {
+          "caching": "ReadWrite"
+        }
+      },
+      "metadata": {
+        "description": "Settings for Virtual Machines"
+      }
+    },
+
+    "loadBalancerSettings": {
+      "value": {
+        "frontendIPConfigurations": [ ],
+        "loadBalancingRules": [ ],
+        "probes": [ ]
+      }
+    },
+
+    "infrastructureSettings": {
+      "value": {
+        "vnetResourceGroup": "appn-rg",
+        "vnetName": "appn-vnet",
+        "routeTable": [
+          {
+            "name": "appn-rtable",
+            "subnetName": "GatewaySubnet",
+            "routes": [
+              {
+                "name": "route1",
+                "properties": {
+                  "addressPrefix": "",
+                  "nextHopType": "VirtualAppliance",
+                  "nextHopIpAddress": ""
+                }
+              },
+              {
+                "name": "route2",
+                "properties": {
+                  "addressPrefix": "",
+                  "nextHopType": "VirtualAppliance",
+                  "nextHopIpAddress": ""
+                }
+              }
+            ]
+          },
+          {
+            "name": "appn-rtable2",
+            "subnetName": "appn-web-subnet",
+            "routes": [
+              {
+                "name": "route1",
+                "properties": {
+                  "addressPrefix": "",
+                  "nextHopType": "VirtualAppliance",
+                  "nextHopIpAddress": ""
+                }
+              },
+              {
+                "name": "route2",
+                "properties": {
+                  "addressPrefix": "",
+                  "nextHopType": "VirtualAppliance",
+                  "nextHopIpAddress": ""
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
