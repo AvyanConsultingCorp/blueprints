@@ -47,7 +47,7 @@
     "infrastructureSettings": {
       "value": {
         "baseName": "rs1",
-        "vnetResourceGroup": "rs-bb1-rg",
+        "vnetResourceGroup": "rs-bb2-rg",
         "vnetName": "rs1-dev-vnet",
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
@@ -61,7 +61,7 @@
     },
     "loadBalancerSettings": {
       "value": {
-        "subnetName": "rs-web-sn",
+        "subnetName": "rs1-web-sn",
         "namePrefix": "web",
         "frontendIPConfigurations": [
           {
@@ -98,10 +98,6 @@
             "protocol": "Http",
             "requestPath": "/"
           }
-        ],
-        "backendPoolNics": [
-          "rs1-vmn-vm1-nic1",
-          "rs1-vmn-vm2-nic1"
         ]
       }
     },
