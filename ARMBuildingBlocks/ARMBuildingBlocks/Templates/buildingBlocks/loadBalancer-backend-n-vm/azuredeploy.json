@@ -28,19 +28,18 @@
     "location": "[resourceGroup().location]",
     "namePrefix": "[parameters('loadBalancerSettings').namePrefix]",
     "lbName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-ilb')]",
-    "bepName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-bep')]",
+    "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
     "internalLoadBalancer": {
       "name": "[variables('lbName')]",
       "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
-      "backendPoolName": "[variables('bepName')]",
-      "backendPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('bepName'))]",
       "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), 'ipconfig1')]"
     },
     "virtualNetwork": {
       "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
       "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('loadBalancerSettings').subnetName)]"
     },
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
+    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
+    "multiVMTemplate": "https://aoarmtest.blob.core.windows.net/templates/buildingBlocks/Multi-vm-n-nic-m-storage/azuredeploy.json"
   },
   "resources": [
     {
@@ -59,7 +58,7 @@
               "vetName": "[parameters('infrastructureSettings').vnetName]"
             }
           },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-settings.json" }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/resources/loadBalancer/lb-frontendIPConfiguration-settings.json" }
         }
       }
     },
@@ -76,10 +75,10 @@
           "context": {
             "value": {
               "loadBalancerName": "[variables('internalLoadBalancer').name]",
-              "backendAddressPool": "[variables('internalLoadBalancer').backendPoolId]"
+              "backendPoolName": "[variables('backendPoolName')]"
             }
           },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/lb-loadBalancingRules.json" }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/resources/loadBalancer/lb-loadBalancingRules.json" }
         }
       }
     },
@@ -94,7 +93,7 @@
           "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
           "source": { "value": "[parameters('loadBalancerSettings').probes]" },
           "context": { "value": { } },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/lb-probes.json" }
+          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/resources/loadBalancer/lb-probes.json" }
         }
       }
     },
@@ -107,14 +106,61 @@
         "frontendIPConfigurations": "[reference('feIPConfigurationTemplate').outputs.result.value]",
         "backendAddressPools": [
           {
-            "name": "[variables('internalLoadBalancer').backendPoolName]"
+            "name": "[variables('backendPoolName')]"
           }
         ],
         "loadBalancingRules": "[reference('lbRulesTemplate').outputs.result.value]",
         "probes": "[reference('probeTemplate').outputs.result.value]"
       }
-    }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "multiVMDeployTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('multiVMTemplate')]" },
+        "parameters": {
+          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
+          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
+          "storageAccountsCount": { "value": "[parameters('storageAccountsCount')]" },
+          "vmCount": { "value": "[parameters('vmCount')]" },
+          "vmStartIndex": { "value": "[parameters('vmStartIndex')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2016-03-30",
+      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', copyindex(1), '-nic1')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'multiVMDeployTemplate')]",
+        "[concat('Microsoft.Network/loadBalancers/', variables('internalLoadBalancer').name)]"
+      ],
+      "copy": {
+        "name": "VMCount",
+        "count": "[parameters('vmCount')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('backendPoolName'))]"
+                }
+              ],
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('infrastructureSettings').vnetName, parameters('virtualMachinesSettings').nics[0].subnetName)]"
 
+              }
+            }
+          }
+        ]
+      }
+    }
 
   ],
   "outputs": {

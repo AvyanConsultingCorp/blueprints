@@ -72,6 +72,7 @@
     <None Include="Templates\resources\connections\connection-IPsec.json" />
     <None Include="Templates\resources\connections\connection-Vnet2Vnet.json" />
     <None Include="Templates\resources\connections\connection.json" />
+    <None Include="Templates\resources\loadBalancer\lb-backendPools.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-internal.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-public.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-settings.json" />
