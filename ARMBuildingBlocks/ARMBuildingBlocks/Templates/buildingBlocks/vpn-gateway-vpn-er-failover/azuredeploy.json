@@ -1,0 +1,89 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "maxLength": 10,
+      "metadata": { "description": "Prefix used for all resources created by this template." }
+    },
+    "infrastructureSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Infrastructure settings"
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "expressRouteGatewayDeployment",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworkGateways/virtualNetworkGateway.json')]"
+        },
+        "parameters": {
+          "infrastructureSettings": {
+            "value": {
+              "vnetName": "[parameters('infrastructureSettings').vnetName]",
+              "virtualNetworkGateway": "[parameters('infrastructureSettings').expressRoute.virtualNetworkGateway]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "virtualNetworkGatewayDeployment",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworkGateways/virtualNetworkGateway.json')]"
+        },
+        "parameters": {
+          "infrastructureSettings": {
+            "value": {
+              "vnetName": "[parameters('infrastructureSettings').vnetName]",
+              "virtualNetworkGateway": "[parameters('infrastructureSettings').ipsec.virtualNetworkGateway]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "expressRouteGatewayDeployment"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "connectionDeployment",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/connections/connection.json')]"
+        },
+        "parameters": {
+          "infrastructureSettings": {
+            "value": {
+              "connection": "[parameters('infrastructureSettings').ipsec.connection]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "virtualNetworkGatewayDeployment"
+      ]
+    }
+  ],
+  "outputs": {
+    "publicIPAddress": {
+      "type": "object",
+      "value": "[reference('virtualNetworkGatewayDeployment').outputs.publicIPAddress.value]"
+    }
+  }
+}
