@@ -7,7 +7,8 @@
     }
   },
   "variables": {
-    "publicIPAddressName": "[concat(parameters('infrastructureSettings').virtualNetworkGateway.name, '-pip')]"
+    "publicIPAddressName": "[concat(parameters('infrastructureSettings').virtualNetworkGateway.name, '-pip')]",
+    "publicIPAddressReferenceTemplateName": "[concat(variables('publicIPAddressName'), '-reference-deployment')]"
   },
   "resources": [
     {
@@ -50,12 +51,34 @@
           "tier": "[parameters('infrastructureSettings').virtualNetworkGateway.sku]"
         }
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[variables('publicIPAddressReferenceTemplateName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]"
+        },
+        "parameters": {
+          "resourceType": {
+            "value": "Microsoft.Network/publicIPAddresses"
+          },
+          "resourceName1": {
+            "value": "[variables('publicIPAddressName')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[parameters('infrastructureSettings').virtualNetworkGateway.name]"
+      ]
     }
   ],
   "outputs": {
     "publicIPAddress": {
       "type": "object",
-      "value": "[reference(variables('publicIPAddressName'))]"
+      "value": "[reference(variables('publicIPAddressReferenceTemplateName')).outputs.reference.value]"
     }
   }
 }
