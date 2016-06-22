@@ -35,13 +35,14 @@
     "referenceTemplates": [
       "referenceOneParameter.json",
       "referenceTwoParameters.json"
-    ]
+    ],
+    "templateName": "[concat('reference-', parameters('resourceName1'), parameters('resourceName2'))]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "referenceTemplate",
+      "name": "[variables('templateName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -70,7 +71,7 @@
   "outputs": {
     "reference": {
       "type": "object",
-      "value": "[reference('referenceTemplate').outputs.reference.value]"
+      "value": "[reference(variables('templateName')).outputs.reference.value]"
     }
   }
 }

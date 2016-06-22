@@ -28,7 +28,10 @@
   "outputs": {
     "reference": {
       "type": "object",
-      "value": "[reference(resourceId(parameters('subscription'), parameters('resourceGroup'), parameters('resourceType'), parameters('resourceName1'), parameters('resourceName2')), providers(variables('provider'), variables('resourceType')).apiVersions[0])]"
+      "value": {
+        "name": "[parameters('resourceName2')]",
+        "properties": "[reference(resourceId(parameters('subscription'), parameters('resourceGroup'), parameters('resourceType'), parameters('resourceName1'), parameters('resourceName2')), providers(variables('provider'), variables('resourceType')).apiVersions[0])]"
+      }
     }
   }
 }

@@ -15,13 +15,15 @@
     "networkSecurityGroupName": "[parameters('infrastructureSettings').networkSecurityGroup.name]",
     "networkSecurityGroupSecurityRules": "[parameters('infrastructureSettings').networkSecurityGroup.securityRules]",
     "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
-    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]"
+    "referenceTemplate": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]",
+    "nsgRulesTemplateName": "[concat(variables('networkSecurityGroupName'), '-rules')]",
+    "subnetReferenceTemplateName": "[concat(variables('subnetName'), '-nsg-reference')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "networkSecurityGroupSecurityRulesTemplate",
+      "name": "[variables('nsgRulesTemplateName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
@@ -33,7 +35,7 @@
             "value": { }
           },
           "mapperTemplateUri": {
-            "value": "[uri(deployment().properties.templateLink.uri, '../networkSecurityGroup/networkSecurityGroup-securityRules.json')]"
+            "value": "[uri(deployment().properties.templateLink.uri, 'networkSecurityGroup-securityRules.json')]"
           }
         }
       }
@@ -44,13 +46,13 @@
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "properties": {
-        "securityRules": "[reference('networkSecurityGroupSecurityRulesTemplate').outputs.result.value]"
+        "securityRules": "[reference(variables('nsgRulesTemplateName')).outputs.result.value]"
       }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "subnetReference",
+      "name": "[variables('subnetReferenceTemplateName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -75,7 +77,7 @@
       "name": "[concat(variables('vnetName'), '/', variables('subnetName'))]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "addressPrefix": "[reference('subnetReference').outputs.reference.value.addressPrefix]",
+        "addressPrefix": "[reference(variables('subnetReferenceTemplateName')).outputs.reference.value.properties.addressPrefix]",
         "networksecurityGroup": {
           "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
         }
