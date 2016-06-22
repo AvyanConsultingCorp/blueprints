@@ -57,8 +57,8 @@
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.parameters.json" />
-    <None Include="Templates\buildingBlocks\vpn-gateway-connection\azuredeploy.json" />
-    <None Include="Templates\buildingBlocks\vpn-gateway-connection\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\vpn-gateway-vpn-connection\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\vpn-gateway-vpn-connection\azuredeploy.parameters.json" />
     <None Include="Templates\ibb-vm-iis.json" />
     <None Include="Templates\ibb-vm-apache.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />
