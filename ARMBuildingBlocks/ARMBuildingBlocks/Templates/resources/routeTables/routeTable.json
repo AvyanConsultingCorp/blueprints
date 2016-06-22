@@ -37,7 +37,7 @@
             }
           },
           "mapperTemplateUri": {
-            "value": "[uri(deployment().properties.templateLink.uri, '../routeTable/routeTable-routes.json')]"
+            "value": "[uri(deployment().properties.templateLink.uri, 'routeTable-routes.json')]"
           }
         }
       }
