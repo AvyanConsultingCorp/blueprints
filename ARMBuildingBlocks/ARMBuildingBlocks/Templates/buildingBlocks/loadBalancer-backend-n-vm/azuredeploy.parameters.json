@@ -47,7 +47,7 @@
     "infrastructureSettings": {
       "value": {
         "baseName": "rs1",
-        "vnetResourceGroup": "rs-bb2-rg",
+        "vnetResourceGroup": "rs-bb3-rg",
         "vnetName": "rs1-dev-vnet",
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
