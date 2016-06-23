@@ -80,7 +80,7 @@
     {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', copyindex(1), '/nva-extension')]",
+      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex()), '/nva-extension')]",
       "copy": {
         "count": "[parameters('vmCount')]",
         "name": "nvaSetupLoop"
