@@ -54,6 +54,7 @@
           "prefix": "xx",
           "name": ""
         },
+        "subnetName": "GatewaySubnet",
         "routeTable": {
           "name": "app0-rt1",
           "subnetName": "GatewaySubnet",
