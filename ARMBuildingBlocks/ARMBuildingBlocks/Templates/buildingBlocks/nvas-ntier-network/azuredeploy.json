@@ -26,18 +26,6 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "namePrefix": "[parameters('loadBalancerSettings').namePrefix]",
-    "lbName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-ilb')]",
-    "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
-    "internalLoadBalancer": {
-      "name": "[variables('lbName')]",
-      "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
-      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), 'ipconfig1')]"
-    },
-    "virtualNetwork": {
-      "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
-      "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('loadBalancerSettings').subnetName)]"
-    },
     "routeTableTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/routeTables/routeTable.json')]",
     "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../loadBalancer-backend-n-vm/azuredeploy.json')]"
   },
@@ -74,9 +62,31 @@
           "vmStartIndex": { "value": "[parameters('vmStartIndex')]" }
         }
       }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "extensionTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "https://aoarmtest.blob.core.windows.net/templates/resources/virtualMachines/extensions/linux/enable-ip-forwarding/extension-enable-ip-forwarding.json" },
+        "parameters": {
+          "virtualMachineSettings": {
+            "value": "[parameters('virtualMachinesSettings')]"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', copyindex(1), '/nva-extension')]",
+      "copy": {
+        "count": "[parameters('vmCount')]",
+        "name": "nvaSetupLoop"
+      },
+      "location": "[resourceGroup().location]",
+      "properties": "[reference('extensionTemplate').outputs.properties.value]"
     }
-  ],
-  "outputs": {
-
-  }
+  ]
 }

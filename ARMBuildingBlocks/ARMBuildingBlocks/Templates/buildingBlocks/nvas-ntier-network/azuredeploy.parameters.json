@@ -4,7 +4,7 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "app0",
+        "namePrefix": "dev",
         "computerNamePrefix": "dev",
         "size": "Standard_DS2",
         "adminUsername": "testuser",
@@ -12,13 +12,13 @@
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "app0-web-subnet",
+            "subnetName": "GatewaySubnet",
             "ipAllocationMethod": "static",
-            "startingIPAddress": "10.0.0.240"
+            "startingIPAddress": "10.0.2.240"
           },
           {
             "isPrimary": "false",
-            "subnetName": "app0-biz-subnet",
+            "subnetName": "app0-web-subnet",
             "ipAllocationMethod": "dynamic"
           }
         ],
@@ -51,7 +51,7 @@
         "vnetName": "app0-vnet",
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
-          "prefix": "xx",
+          "prefix": "dev",
           "name": ""
         },
         "subnetName": "GatewaySubnet",
@@ -62,17 +62,17 @@
             {
               "name": "route1",
               "properties": {
-                "addressPrefix": "10.0.0.0/24",
+                "addressPrefix": "10.0.1.0/24",
                 "nextHopType": "VirtualAppliance",
-                "nextHopIpAddress": "10.0.0.254"
+                "nextHopIpAddress": "10.0.2.254"
               }
             },
             {
               "name": "route2",
               "properties": {
-                "addressPrefix": "10.0.010/24",
+                "addressPrefix": "10.0.1.0/24",
                 "nextHopType": "VirtualAppliance",
-                "nextHopIpAddress": "10.0.0.254"
+                "nextHopIpAddress": "10.0.2.254"
               }
             }
           ]
@@ -91,7 +91,7 @@
             "name": "config1",
             "loadBalancerType": "public",
             "internalLoadBalancerSettings": {
-              "privateIPAddress": "10.0.0.254",
+              "privateIPAddress": "10.0.2.254",
               "subnetName": "app0-web-subnet"
             }
           }
@@ -125,7 +125,7 @@
       }
     },
     "storageAccountsCount": { "value": 1 },
-    "vmCount": { "value": 3 },
+    "vmCount": { "value": 2 },
     "vmStartIndex": { "value": 1 }
   }
 }
