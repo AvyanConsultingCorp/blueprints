@@ -81,7 +81,7 @@
         "vnetname": "secondary-dc1-vnet",
         "casssubnet": "cass-dc1-subnet",
         "vmname": "dc1vm",
-        "uniqueString": "2t4mq67ouk57c"
+        "uniqueString": "tf7gjkld2hhjo"
     },
     "resources": [
         {
@@ -246,7 +246,7 @@
                 "autoUpgradeMinorVersion": true,
                 "publisher": "Microsoft.OSTCExtensions",
                 "settings": {
-                    "commandToExecute": "[concat('bash node.sh ',parameters('dclocation'),' ', variables('uniqueString'), ' dc1-',parameters('location'))]",
+                    "commandToExecute": "[concat('bash node.sh ',parameters('dclocation'),' ', variables('uniqueString'), ' dc0-',parameters('location'))]",
                     "fileUris": [
                         "https://raw.githubusercontent.com/benofben/azure-resource-manager-dse/master/extensions/node.sh"
                     ]
@@ -265,7 +265,7 @@
 
         "xtensioncmd": {
             "type": "string",
-            "value": "[concat('bash node.sh ',parameters('dclocation'),' ', variables('uniqueString'), ' dc1-',parameters('location'))]"
+            "value": "[concat('bash node.sh ',parameters('dclocation'),' ', variables('uniqueString'), ' dc0-',parameters('location'))]"
         },
 
         "uniquestr": {

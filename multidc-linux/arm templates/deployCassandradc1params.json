@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
     "parameters": {
         "nodeCount": {
-            "value": "3"
+            "value": 3
         },
         "vmSize": {
             "value": "Standard_DS4"
         },
         "adminUsername": {
-            "value": "someAdmin1"
+            "value": "administrator1"
         },
         "adminPassword": {
-            "value": "somePassword"
+            "value": "Pag$2Lab"
         },
         "location": {
             "value": "eastus2"
