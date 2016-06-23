@@ -3,6 +3,9 @@
 ###############################################################################
 * text=auto
 
+# Keep shell scripts with LF
+*.sh text eol=lf
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #

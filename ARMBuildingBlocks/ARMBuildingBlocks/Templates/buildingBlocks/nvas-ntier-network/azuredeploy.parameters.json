@@ -4,21 +4,21 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "vmn",
-        "computerNamePrefix": "cn",
+        "namePrefix": "dev",
+        "computerNamePrefix": "dev",
         "size": "Standard_DS2",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "rs1-web-sn",
+            "subnetName": "GatewaySubnet",
             "ipAllocationMethod": "static",
-            "startingIPAddress": "10.0.0.240"
+            "startingIPAddress": "10.0.2.240"
           },
           {
             "isPrimary": "false",
-            "subnetName": "rs1-biz-sn",
+            "subnetName": "app0-web-subnet",
             "ipAllocationMethod": "dynamic"
           }
         ],
@@ -44,66 +44,88 @@
         "description": "Settings for Virtual Machines"
       }
     },
-
-    "loadBalancerSettings": {
-      "value": {
-        "frontendIPConfigurations": [ ],
-        "loadBalancingRules": [ ],
-        "probes": [ ]
-      }
-    },
-
     "infrastructureSettings": {
       "value": {
-        "vnetResourceGroup": "appn-rg",
-        "vnetName": "appn-vnet",
-        "routeTable": [
-          {
-            "name": "appn-rtable",
-            "subnetName": "GatewaySubnet",
-            "routes": [
-              {
-                "name": "route1",
-                "properties": {
-                  "addressPrefix": "",
-                  "nextHopType": "VirtualAppliance",
-                  "nextHopIpAddress": ""
-                }
-              },
-              {
-                "name": "route2",
-                "properties": {
-                  "addressPrefix": "",
-                  "nextHopType": "VirtualAppliance",
-                  "nextHopIpAddress": ""
-                }
+        "baseName": "app0",
+        "vnetResourceGroup": "app0-rg",
+        "vnetName": "app0-vnet",
+        "availabilitySet": {
+          "useExistingAvailabilitySet": "No",
+          "prefix": "dev",
+          "name": ""
+        },
+        "subnetName": "GatewaySubnet",
+        "routeTable": {
+          "name": "app0-rt1",
+          "subnetName": "GatewaySubnet",
+          "routes": [
+            {
+              "name": "route1",
+              "properties": {
+                "addressPrefix": "10.0.1.0/24",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.0.2.254"
               }
-            ]
+            },
+            {
+              "name": "route2",
+              "properties": {
+                "addressPrefix": "10.0.1.0/24",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.0.2.254"
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "description": "Infrastructure Settings"
+        }
+      }
+    },
+    "loadBalancerSettings": {
+      "value": {
+        "subnetName": "app0-web-subnet",
+        "namePrefix": "web",
+        "frontendIPConfigurations": [
+          {
+            "name": "config1",
+            "loadBalancerType": "public",
+            "internalLoadBalancerSettings": {
+              "privateIPAddress": "10.0.2.254",
+              "subnetName": "app0-web-subnet"
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "frontendPort": 80,
+            "backendPort": 80,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
           },
           {
-            "name": "appn-rtable2",
-            "subnetName": "appn-web-subnet",
-            "routes": [
-              {
-                "name": "route1",
-                "properties": {
-                  "addressPrefix": "",
-                  "nextHopType": "VirtualAppliance",
-                  "nextHopIpAddress": ""
-                }
-              },
-              {
-                "name": "route2",
-                "properties": {
-                  "addressPrefix": "",
-                  "nextHopType": "VirtualAppliance",
-                  "nextHopIpAddress": ""
-                }
-              }
-            ]
+            "frontendPort": 443,
+            "backendPort": 443,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
+          }
+        ],
+        "probes": [
+          {
+            "port": 80,
+            "protocol": "Http",
+            "requestPath": "/"
+          },
+          {
+            "port": 443,
+            "protocol": "Http",
+            "requestPath": "/"
           }
         ]
       }
-    }
+    },
+    "storageAccountsCount": { "value": 1 },
+    "vmCount": { "value": 2 },
+    "vmStartIndex": { "value": 1 }
   }
 }

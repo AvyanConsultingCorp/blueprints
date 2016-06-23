@@ -14,132 +14,79 @@
         "description": "Settings for infrastructure"
       }
     },
+    "loadBalancerSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for infrastructure"
+      }
+    },
     "storageAccountsCount": { "type": "int" },
     "vmCount": { "type": "int" },
     "vmStartIndex": { "type": "int" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "templateUniqueString": "[uniqueString(concat(string(parameters('virtualMachinesSettings')), string(parameters('infrastructureSettings'))))]",
-    "availabilitySetTemplates": {
-      "yes": "https://aoarmtest.blob.core.windows.net/templates/availabilitySet-existing.json",
-      "no": "https://aoarmtest.blob.core.windows.net/templates/availabilitySet-neworempty.json"
-    },
-    "storageAccount": {
-      "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]",
-      "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, 'vm', uniqueString(resourceGroup().id), 'st'))]"
-    },
-    "nVirtualMachinesTemplate": "https://aoarmtest.blob.core.windows.net/templates/n-vm-n-nic.json",
-    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json"
-
+    "routeTableTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/routeTables/routeTable.json')]",
+    "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../loadBalancer-backend-n-vm/azuredeploy.json')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('settings-avset-', variables('templateUniqueString'))]",
+      "name": "deploy-route-table",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/deploy-load-balancer-multivm"
+      ],
       "properties": {
         "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('availabilitySetTemplates')[toLower(parameters('infrastructureSettings').availabilitySet.useExistingAvailabilitySet)]]"
-        },
+        "templateLink": { "uri": "[variables('routeTableTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('infrastructureSettings').baseName]" },
-          "availabilitySetSettings": { "value": "[parameters('infrastructureSettings').availabilitySet]" },
-          "vmCount": { "value": "[parameters('vmCount')]" }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2016-01-01",
-      "location": "[variables('location')]",
-      "name": "[variables('storageAccount').diagnostic]",
-      "kind": "Storage",
-      "sku": {
-        "name": "Standard_LRS"
-      }
-    },
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2016-01-01",
-      "location": "[variables('location')]",
-      "name": "[concat(variables('storageAccount').vhd, copyIndex(1))]",
-      "copy": {
-        "count": "[parameters('storageAccountsCount')]",
-        "name": "storageAccountIterator"
-      },
-      "kind": "Storage",
-      "sku": {
-        "name": "Premium_LRS"
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "[concat('settings-vmindex-', variables('templateUniqueString'))]",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('replicatorTemplate')]" },
-        "parameters": {
-          "parentResourceName": { "value": "settings-vmindex" },
-          "source": { "value": { } },
-          "context": {
-            "value": {
-              "storageAccountsCount": "[parameters('storageAccountsCount')]",
-              "vmCount": "[parameters('vmCount')]"
-            }
-          },
-          "state": {
-            "value": [
-              {
-                "vmCount": 0,
-                "index": 0
-              }
-            ]
-          },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/vm-per-storage-helper.json" },
-          "copies": { "value": "[parameters('storageAccountsCount')]" }
+          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" }
         }
       }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('settings-vmSet-', copyindex(), '-', variables('templateUniqueString'))]",
-      "copy": {
-        "name": "virtualMachinesSetIterator",
-        "count": "[parameters('storageAccountsCount')]"
-      },
+      "name": "deploy-load-balancer-multivm",
       "properties": {
         "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('nVirtualMachinesTemplate')]"
-        },
+        "templateLink": { "uri": "[variables('loadBalancerTemplate')]" },
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
           "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
-          "context": {
-            "value": {
-              "storageAccounts": {
-                "diagnostic": "[variables('storageAccount').diagnostic]",
-                "vhd": "[concat(variables('storageAccount').vhd, copyIndex(1))]"
-              },
-              "availabilitySetName": "[reference(concat('settings-avset-', variables('templateUniqueString'))).outputs.availabilitySetName.value]",
-              "vmCount": "[reference(concat('settings-vmindex-', variables('templateUniqueString'))).outputs.result.value[copyindex(1)].vmCount]",
-              "deployedVMCount": "[reference(concat('settings-vmindex-', variables('templateUniqueString'))).outputs.result.value[copyindex(1)].index]",
-              "vmStartIndex": "[parameters('vmStartIndex')]",
-              "iteration": "[copyindex()]"
-            }
+          "loadbalancerSettings": { "value": "[parameters('loadBalancerSettings')]" },
+          "storageAccountsCount": { "value": "[parameters('storageAccountsCount')]" },
+          "vmCount": { "value": "[parameters('vmCount')]" },
+          "vmStartIndex": { "value": "[parameters('vmStartIndex')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "extensionTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "https://aoarmtest.blob.core.windows.net/templates/resources/virtualMachines/extensions/linux/enable-ip-forwarding/extension-enable-ip-forwarding.json" },
+        "parameters": {
+          "virtualMachineSettings": {
+            "value": "[parameters('virtualMachinesSettings')]"
           }
         }
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', copyindex(1), '/nva-extension')]",
+      "copy": {
+        "count": "[parameters('vmCount')]",
+        "name": "nvaSetupLoop"
       },
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccount').diagnostic)]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccount').vhd, copyIndex(1))]",
-        "[concat('settings-avset-', variables('templateUniqueString'))]"
-      ]
+      "location": "[resourceGroup().location]",
+      "properties": "[reference('extensionTemplate').outputs.properties.value]"
     }
-
   ]
 }

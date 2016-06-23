@@ -56,6 +56,8 @@
     <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\nvas-ntier-network\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\nvas-ntier-network\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vpn-gateway-vpn-connection\azuredeploy.json" />
@@ -75,7 +77,6 @@
     <None Include="Templates\resources\connections\connection-IPsec.json" />
     <None Include="Templates\resources\connections\connection-Vnet2Vnet.json" />
     <None Include="Templates\resources\connections\connection.json" />
-    <None Include="Templates\resources\loadBalancer\lb-backendPools.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-internal.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-public.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-settings.json" />
@@ -92,6 +93,10 @@
     <None Include="Templates\resources\virtualMachines\availabilitySet-existing.json" />
     <None Include="Templates\resources\virtualMachines\availabilitySet-empty.json" />
     <None Include="Templates\resources\virtualMachines\availabilitySet-new.json" />
+    <None Include="Templates\resources\virtualMachines\extensions\linux\enable-ip-forwarding\enable-ip-forwarding.sh" />
+    <None Include="Templates\resources\virtualMachines\extensions\linux\enable-ip-forwarding\extension-enable-ip-forwarding.json" />
+    <None Include="Templates\resources\virtualMachines\extensions\linux\extension-custom-script-for-linux.json" />
+    <None Include="Templates\resources\virtualMachines\extensions\windows\extension-powershell-dsc.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.parameters.json" />
     <None Include="Templates\resources\virtualMachines\single-vm-n-nic.json" />
