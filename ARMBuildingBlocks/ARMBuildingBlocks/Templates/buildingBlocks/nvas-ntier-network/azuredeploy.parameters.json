@@ -62,7 +62,7 @@
             {
               "name": "route1",
               "properties": {
-                "addressPrefix": "10.0.1.10",
+                "addressPrefix": "10.0.1.10/24",
                 "nextHopType": "VirtualAppliance",
                 "nextHopIpAddress": "10.0.255.224"
               }
@@ -70,7 +70,7 @@
             {
               "name": "route2",
               "properties": {
-                "addressPrefix": "10.0.2.10",
+                "addressPrefix": "10.0.2.10/24",
                 "nextHopType": "VirtualAppliance",
                 "nextHopIpAddress": "10.0.255.224"
               }
