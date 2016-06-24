@@ -28,6 +28,7 @@
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="azuredeploy.json" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
@@ -36,7 +37,6 @@
     <None Include="Scripts\iisaspnet.ps1" />
     <None Include="Scripts\iisaspnet.ps1.zip" />
     <None Include="Scripts\nva.sh" />
-    <None Include="Templates\azuredeploy.json" />
     <None Include="Templates\bb-custom-linux-extension.json" />
     <None Include="Templates\bb-dsc-extension.json" />
     <None Include="Templates\bb-dsc-extension2.json" />
@@ -82,6 +82,7 @@
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-settings.json" />
     <None Include="Templates\resources\loadBalancer\lb-loadBalancingRules.json" />
     <None Include="Templates\resources\loadBalancer\lb-probes.json" />
+    <None Include="Templates\resources\loadBalancer\loadBalancer.json" />
     <None Include="Templates\resources\localNetworkGateway\localNetworkGateway.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup-securityRules.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup.json" />

@@ -1,0 +1,106 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "infrastructureSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for infrastructure"
+      }
+    },
+    "loadBalancerSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for infrastructure"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "namePrefix": "[parameters('loadBalancerSettings').namePrefix]",
+    "lbName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-ilb')]",
+    "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
+    "internalLoadBalancer": {
+      "name": "[variables('lbName')]",
+      "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
+      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), 'ipconfig1')]"
+    },
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "feIPConfigurationTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
+          "source": { "value": "[parameters('loadBalancerSettings').frontendIPConfigurations]" },
+          "context": {
+            "value": {
+              "loadBalancerName": "[variables('internalLoadBalancer').name]",
+              "vetName": "[parameters('infrastructureSettings').vnetName]"
+            }
+          },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-frontendIPConfiguration-settings.json')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "lbRulesTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
+          "source": { "value": "[parameters('loadBalancerSettings').loadBalancingRules]" },
+          "context": {
+            "value": {
+              "loadBalancerName": "[variables('internalLoadBalancer').name]",
+              "backendPoolName": "[variables('backendPoolName')]"
+            }
+          },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-loadBalancingRules.json')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "probeTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
+          "source": { "value": "[parameters('loadBalancerSettings').probes]" },
+          "context": { "value": { } },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-probes.json')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "2016-03-30",
+      "location": "[variables('location')]",
+      "name": "[variables('internalLoadBalancer').name]",
+      "properties": {
+        "frontendIPConfigurations": "[reference('feIPConfigurationTemplate').outputs.result.value]",
+        "backendAddressPools": [
+          {
+            "name": "[variables('backendPoolName')]"
+          }
+        ],
+        "loadBalancingRules": "[reference('lbRulesTemplate').outputs.result.value]",
+        "probes": "[reference('probeTemplate').outputs.result.value]"
+      }
+    }
+  ],
+  "outputs": {
+
+  }
+}

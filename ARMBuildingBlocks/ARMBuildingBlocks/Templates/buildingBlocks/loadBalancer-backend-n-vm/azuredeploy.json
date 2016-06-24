@@ -29,88 +29,21 @@
     "namePrefix": "[parameters('loadBalancerSettings').namePrefix]",
     "lbName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-ilb')]",
     "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
-    "internalLoadBalancer": {
-      "name": "[variables('lbName')]",
-      "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
-      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), 'ipconfig1')]"
-    },
-    "virtualNetwork": {
-      "id": "[resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName)]",
-      "subnetId": "[concat(resourceId(parameters('infrastructureSettings').vnetResourceGroup, 'Microsoft.Network/virtualNetworks', parameters('infrastructureSettings').vnetName), '/subnets/', parameters('loadBalancerSettings').subnetName)]"
-    },
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
-    "multiVMTemplate": "https://aoarmtest.blob.core.windows.net/templates/buildingBlocks/Multi-vm-n-nic-m-storage/azuredeploy.json"
+    "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/loadBalancer/loadBalancer.json')]",
+    "multiVMTemplate": "[uri(deployment().properties.templateLink.uri, '../Multi-vm-n-nic-m-storage/azuredeploy.json')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "feIPConfigurationTemplate",
+      "name": "loadBalancerTemplate",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "templateLink": { "uri": "[variables('loadBalancerTemplate')]" },
         "parameters": {
-          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
-          "source": { "value": "[parameters('loadBalancerSettings').frontendIPConfigurations]" },
-          "context": {
-            "value": {
-              "loadBalancerName": "[variables('internalLoadBalancer').name]",
-              "vetName": "[parameters('infrastructureSettings').vnetName]"
-            }
-          },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/resources/loadBalancer/lb-frontendIPConfiguration-settings.json" }
+          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
+          "loadBalancerSettings": { "value": "[parameters('loadBalancerSettings')]" }
         }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "lbRulesTemplate",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('collectorTemplate')]" },
-        "parameters": {
-          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
-          "source": { "value": "[parameters('loadBalancerSettings').loadBalancingRules]" },
-          "context": {
-            "value": {
-              "loadBalancerName": "[variables('internalLoadBalancer').name]",
-              "backendPoolName": "[variables('backendPoolName')]"
-            }
-          },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/resources/loadBalancer/lb-loadBalancingRules.json" }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "probeTemplate",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('collectorTemplate')]" },
-        "parameters": {
-          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
-          "source": { "value": "[parameters('loadBalancerSettings').probes]" },
-          "context": { "value": { } },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/resources/loadBalancer/lb-probes.json" }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Network/loadBalancers",
-      "apiVersion": "2016-03-30",
-      "location": "[variables('location')]",
-      "name": "[variables('internalLoadBalancer').name]",
-      "properties": {
-        "frontendIPConfigurations": "[reference('feIPConfigurationTemplate').outputs.result.value]",
-        "backendAddressPools": [
-          {
-            "name": "[variables('backendPoolName')]"
-          }
-        ],
-        "loadBalancingRules": "[reference('lbRulesTemplate').outputs.result.value]",
-        "probes": "[reference('probeTemplate').outputs.result.value]"
       }
     },
     {
@@ -132,11 +65,11 @@
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2016-03-30",
-      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', copyindex(1), '-nic1')]",
+      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex(1)), '-nic1')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'multiVMDeployTemplate')]",
-        "[concat('Microsoft.Network/loadBalancers/', variables('internalLoadBalancer').name)]"
+        "[concat('Microsoft.Resources/deployments/', 'loadBalancerTemplate')]"
       ],
       "copy": {
         "name": "VMCount",
