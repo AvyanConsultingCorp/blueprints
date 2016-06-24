@@ -27,7 +27,10 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "routeTableTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/routeTables/routeTable.json')]",
-    "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../loadBalancer-backend-n-vm/azuredeploy.json')]"
+    "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../loadBalancer-backend-n-vm/azuredeploy.json')]",
+    "extIpFwdTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/enable-ip-forwarding/extension-enable-ip-forwarding.json')]",
+    "extensionTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/extension-custom-script-for-linux.json')]",
+    "scriptPath": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/enable-ip-forwarding/enable-ip-forwarding.sh')]"
   },
   "resources": [
     {
@@ -64,29 +67,25 @@
       }
     },
     {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "extensionTemplate",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "https://aoarmtest.blob.core.windows.net/templates/resources/virtualMachines/extensions/linux/enable-ip-forwarding/extension-enable-ip-forwarding.json" },
-        "parameters": {
-          "virtualMachineSettings": {
-            "value": "[parameters('virtualMachinesSettings')]"
-          }
-        }
-      }
-    },
-    {
-      "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2015-06-15",
       "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex()), '/nva-extension')]",
       "copy": {
         "count": "[parameters('vmCount')]",
         "name": "nvaSetupLoop"
       },
       "location": "[resourceGroup().location]",
-      "properties": "[reference('extensionTemplate').outputs.properties.value]"
+      "properties": {
+        "publisher": "Microsoft.OSTCExtensions",
+        "type": "CustomScriptForLinux",
+        "typeHandlerVersion": "1.4",
+        "settings": {
+          "fileUris": [
+            "[variables('extensionTemplate')]"
+          ],
+          "commandToExecute": "[concat('sh ', variables('scriptPath'))]"
+        }
+      }
     }
   ]
 }
