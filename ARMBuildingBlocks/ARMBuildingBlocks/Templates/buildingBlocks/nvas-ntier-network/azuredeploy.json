@@ -76,7 +76,8 @@
         "name": "nvaSetupLoop"
       },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/',variables('vmPrefix'), add(parameters('vmStartIndex'), copyindex()))]"
+        "Microsoft.Resources/deployments/deploy-load-balancer-multivm",
+        "Microsoft.Resources/deployments/deploy-route-table"
       ],
       "location": "[resourceGroup().location]",
       "properties": {
