@@ -26,6 +26,7 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
+    "vmPrefix": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm')]",
     "routeTableTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/routeTables/routeTable.json')]",
     "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../loadBalancer-backend-n-vm/azuredeploy.json')]",
     "extIpFwdTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/enable-ip-forwarding/extension-enable-ip-forwarding.json')]",
@@ -69,11 +70,14 @@
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2015-06-15",
-      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex()), '/nva-extension')]",
+      "name": "[concat(variables('vmPrefix'), add(parameters('vmStartIndex'), copyindex()), '/nva-extension')]",
       "copy": {
         "count": "[parameters('vmCount')]",
         "name": "nvaSetupLoop"
       },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/',variables('vmPrefix'), add(parameters('vmStartIndex'), copyindex()))]"
+      ],
       "location": "[resourceGroup().location]",
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
