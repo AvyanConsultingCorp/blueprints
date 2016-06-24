@@ -65,7 +65,7 @@
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2016-03-30",
-      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex(1)), '-nic1')]",
+      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex()), '-nic1')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'multiVMDeployTemplate')]",
