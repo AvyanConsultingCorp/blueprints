@@ -7,6 +7,8 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "ARMBuildingBlocks", "ARMBui
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-hybrid-network-secure-vnet", "guidance-hybrid-network-secure-vnet\guidance-hybrid-network-secure-vnet.deployproj", "{5B5343CE-CAFF-42CF-893D-CABCC55858BB}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-compute-cassandra", "guidance-compute-cassandra\guidance-compute-cassandra.deployproj", "{97288355-D546-48E4-8049-D3FFE495073C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5B5343CE-CAFF-42CF-893D-CABCC55858BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B5343CE-CAFF-42CF-893D-CABCC55858BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B5343CE-CAFF-42CF-893D-CABCC55858BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97288355-D546-48E4-8049-D3FFE495073C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97288355-D546-48E4-8049-D3FFE495073C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97288355-D546-48E4-8049-D3FFE495073C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97288355-D546-48E4-8049-D3FFE495073C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
