@@ -43,9 +43,9 @@
     }
   ],
   "outputs": {
-    "collection": {
+    "result": {
       "type": "array",
-      "value": "[reference(concat('deploy-', parameters('source').name, '-', variables('suffixToUse')).outputs.collection.value)]"
+      "value": "[reference(concat('deploy-', parameters('source').name, '-', variables('suffixToUse'))).outputs.collection.value]"
     }
   }
 }
