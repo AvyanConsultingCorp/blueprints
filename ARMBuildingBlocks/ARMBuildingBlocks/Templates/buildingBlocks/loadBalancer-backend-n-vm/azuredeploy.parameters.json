@@ -26,9 +26,7 @@
           {
             "isPublic": "true",
             "isPrimary": "true",
-            "subnetName": "rs1-web-sn",
-            "ipAllocationMethod": "static",
-            "startingIPAddress": "10.0.0.240"
+            "ipAllocationMethod": "static"
           }
         ],
         "imageReference": {

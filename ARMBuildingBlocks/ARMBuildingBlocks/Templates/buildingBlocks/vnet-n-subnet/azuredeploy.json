@@ -13,7 +13,7 @@
   "variables": {
     "vnetName": "[concat(parameters('baseName'), '-', parameters('virtualNetworkSettings').namePrefix, '-vnet')]",
     "location": "[resourceGroup().location]",
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json"
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/common/collector.json')]"
   },
   "resources": [
     {
@@ -41,7 +41,7 @@
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
           "parentResourceName": { "value": "[variables('vnetName')]" },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualNetwork-subnets.json" },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworks/virtualNetwork-subnets.json')]" },
           "source": { "value": "[parameters('virtualNetworkSettings').subnets]" },
           "context": {
             "value": {
