@@ -78,6 +78,7 @@
     <None Include="Templates\resources\virtualMachines\extensions\linux\enable-ip-forwarding\enable-ip-forwarding.sh" />
     <None Include="Templates\resources\virtualMachines\extensions\linux\enable-ip-forwarding\extension-enable-ip-forwarding.json" />
     <None Include="Templates\resources\virtualMachines\extensions\linux\extension-custom-script-for-linux.json" />
+    <None Include="Templates\resources\virtualMachines\extensions\virtualMachine-nic.json" />
     <None Include="Templates\resources\virtualMachines\extensions\windows\extension-powershell-dsc.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.json" />
     <None Include="Templates\resources\virtualMachines\single-vm-n-nic.json" />
@@ -85,6 +86,8 @@
     <None Include="Templates\resources\virtualMachines\single-vm-n-nic-avset.json" />
     <None Include="Templates\resources\virtualMachines\single-vm-n-nic.parameters.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachine-datadisk.json" />
+    <None Include="Templates\resources\virtualMachines\virtualMachine-nic-no-public-ip.json" />
+    <None Include="Templates\resources\virtualMachines\virtualMachine-nic-public-ip.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachine-nic.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachines-dynamic-nics-settings.json" />
     <None Include="Templates\resources\virtualMachines\virtualMachines-nics-settings.json" />
