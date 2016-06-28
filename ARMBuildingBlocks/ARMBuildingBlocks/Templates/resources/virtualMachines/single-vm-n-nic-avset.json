@@ -11,7 +11,7 @@
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
     "dataDiskDeployment": "[concat('deploy-', parameters('virtualMachinesSettings').vmName, '-dataDisks')]",
     "nicsDeployment": "[concat('deploy-', parameters('virtualMachinesSettings').vmName, '-nics')]"
   },
@@ -27,7 +27,7 @@
           "parentResourceName": { "value": "[parameters('virtualMachinesSettings').vmName]" },
           "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
           "context": { "value": { } },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-nic.json" }
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'virtualMachine-nic.json')]" }
         }
       }
     },

@@ -16,17 +16,11 @@
   "variables": {
     "instance": [
       {
-        "isPublic":  "false",
+        "isPublic":  "true",
         "name": "[concat(parameters('context').vmName, '-nic', add(parameters('iteration') ,1))]",
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "dynamic",
-              "subnet": { "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('context').vnetName, parameters('source').subnetName)]" }
-            }
-          }
-        ],
+        "properties": {
+          "publicIPAllocationMethod": "[parameters('source').ipAllocationMethod]"
+        },
         "primary": "[parameters('source').isPrimary]"
       }
     ]

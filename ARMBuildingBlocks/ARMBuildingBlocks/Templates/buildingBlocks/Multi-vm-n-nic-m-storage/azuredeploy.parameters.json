@@ -11,6 +11,7 @@
         "adminPassword": "AweS0me@PW",
         "nics": [
           {
+            "isPublic":  "true",
             "isPrimary": "true",
             "subnetName": "rs1-web-sn",
             "ipAllocationMethod": "static",

@@ -14,8 +14,8 @@
     }
   },
   "variables": {
-    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json",
-    "collectorTemplate": "https://aoarmtest.blob.core.windows.net/templates/collector.json",
+    "replicatorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/replicator.json')]",
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
     "storageAccountContainerName": "vhds",
     "vmName": "[concat(parameters('context').vmNamePrefix, '-vm', add(parameters('context').vmNamePostFixStartIndex, parameters('iteration')))]"
 
@@ -39,7 +39,7 @@
               "vmIndex": "[add(parameters('iteration'), parameters('context').deployedVMCount)]"
             }
           },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-nics-settings.json" }
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-nics-settings.json')]" }
         }
       }
     },
@@ -62,7 +62,7 @@
               "vmIndex": "[parameters('iteration')]"
             }
           },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/virtualMachine-datadisk.json" },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'virtualMachine-datadisk.json')]" },
           "copies": { "value": "[parameters('source').dataDisks.count]" }
         }
       }

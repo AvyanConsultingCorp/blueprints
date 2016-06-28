@@ -15,8 +15,14 @@
   },
   "variables": {
     "nicTemplate": {
-      "static": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-static-nics-settings.json",
-      "dynamic": "https://aoarmtest.blob.core.windows.net/templates/virtualMachines-dynamic-nics-settings.json"
+      "false": {
+        "static": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-static-nics-settings.json')]",
+        "dynamic": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-dynamic-nics-settings.json')]"
+      },
+      "true": {
+        "static": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-public-nic-settings.json')]",
+        "dynamic": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-public-nic-settings.json')]"
+      }
     }
   },
   "resources": [
