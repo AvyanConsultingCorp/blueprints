@@ -2,6 +2,12 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "virtualNetworkSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual machines"
+      }
+    },
     "virtualMachinesSettings": {
       "type": "object",
       "metadata": {
@@ -27,16 +33,32 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "multiVMTemplate": "[uri(deployment().properties.templateLink.uri, '../Multi-vm-n-nic-m-storage/azuredeploy.json')]",
+    "netWorkTemplate": "[uri(deployment().properties.templateLink.uri, '../Multi-vm-n-nic-m-storage/azuredeploy.json')]",
     "vmPrefix": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm')]",
     "scriptPath": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/enable-ip-forwarding/enable-ip-forwarding.sh')]",
     "extensionTemplate": "https://raw.githubusercontent.com/benofben/azure-resource-manager-dse/master/extensions/node.sh",
-    "datacenterName" :  "dc-eastus2"
+    "datacenterName": "dc-eastus2"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
+      "name": "NetWorkDeployTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('netWorkTemplate')]" },
+        "parameters": {
+          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
       "name": "CassandraVMSDeployTemplate",
+      "dependsOn": [
+        "Microsoft.Resources/deployments/NetworkDeployTemplate"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('multiVMTemplate')]" },
@@ -51,15 +73,14 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "apiVersion": "2015-06-15",      
+      "apiVersion": "2015-06-15",
       "name": "[concat(variables('vmPrefix'), add(parameters('vmStartIndex'), copyindex()), '/installdsenode')]",
       "copy": {
         "count": "[parameters('vmCount')]",
         "name": "xtensionsloop"
       },
       "dependsOn": [
-        "Microsoft.Resources/deployments/CassandraVMSDeployTemplate",
-        "Microsoft.Resources/deployments/deploy-route-table"
+        "Microsoft.Resources/deployments/CassandraVMSDeployTemplate"
       ],
       "location": "[resourceGroup().location]",
       "properties": {

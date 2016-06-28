@@ -2,6 +2,19 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "baseName": { "value": "rs1" },
+    "virtualNetworkSettings": {
+      "value": {
+        "namePrefix": "dev",
+        "addressPrefixes": "10.8.2.0/24",
+        "subnets": [
+          {
+            "namePrefix": "web",
+            "addressPrefix": "10.0.0.0/24"
+          }
+        ]       
+      }
+    },
     "virtualMachinesSettings": {
       "value": {
         "namePrefix": "cass-",
