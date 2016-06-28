@@ -22,15 +22,15 @@
     "location": "[resourceGroup().location]",
     "templateUniqueString": "[uniqueString(concat(string(parameters('virtualMachinesSettings')), string(parameters('infrastructureSettings'))))]",
     "availabilitySetTemplates": {
-      "yes": "https://aoarmtest.blob.core.windows.net/templates/availabilitySet-existing.json",
-      "no": "https://aoarmtest.blob.core.windows.net/templates/availabilitySet-neworempty.json"
+      "yes": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/availabilitySet-existing.json')]",
+      "no": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/availabilitySet-neworempty.json')]"
     },
     "storageAccount": {
       "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]",
       "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, 'vm', uniqueString(resourceGroup().id), 'st'))]"
     },
-    "nVirtualMachinesTemplate": "https://aoarmtest.blob.core.windows.net/templates/n-vm-n-nic.json",
-    "replicatorTemplate": "https://aoarmtest.blob.core.windows.net/templates/replicator.json"
+    "nVirtualMachinesTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/n-vm-n-nic.json')]",
+    "replicatorTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/common/replicator.json')]"
 
   },
   "resources": [
@@ -98,7 +98,7 @@
               }
             ]
           },
-          "mapperTemplateUri": { "value": "https://aoarmtest.blob.core.windows.net/templates/vm-per-storage-helper.json" },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/vm-per-storage-helper.json')]" },
           "copies": { "value": "[parameters('storageAccountsCount')]" }
         }
       }

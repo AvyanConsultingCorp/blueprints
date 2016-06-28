@@ -32,7 +32,7 @@
       "name": "[concat(parameters('context').vmName, '-nic', parameters('iteration'), '-template')]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('nicTemplate')[parameters('source').ipAllocationMethod]]" },
+        "templateLink": { "uri": "[variables('nicTemplate')[parameters('source').isPublic][parameters('source').ipAllocationMethod]]" },
         "parameters": {
           "source": { "value": "[parameters('source')]" },
           "context": { "value": "[parameters('context')]" },

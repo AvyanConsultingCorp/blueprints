@@ -11,16 +11,22 @@
         "adminPassword": "AweS0me@PW",
         "nics": [
           {
-            "isPublic":  "true",
+            "isPublic": "false",
             "isPrimary": "true",
             "subnetName": "rs1-web-sn",
             "ipAllocationMethod": "static",
             "startingIPAddress": "10.0.0.240"
           },
           {
+            "isPublic": "false",
             "isPrimary": "false",
             "subnetName": "rs1-biz-sn",
             "ipAllocationMethod": "dynamic"
+          },
+          {
+            "isPublic": "true",
+            "isPrimary": "true",
+            "ipAllocationMethod": "static"
           }
         ],
         "imageReference": {
@@ -48,7 +54,7 @@
     "infrastructureSettings": {
       "value": {
         "baseName": "rs1",
-        "vnetResourceGroup": "rs-bb99-rg",
+        "vnetResourceGroup": "rs-bb1-rg",
         "vnetName": "rs1-dev-vnet",
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
@@ -60,8 +66,8 @@
         "description": "Infrastructure Settings"
       }
     },
-    "storageAccountsCount": { "value":3 },
-    "vmCount": { "value": 5 },
-    "vmStartIndex": { "value": 11 }
+    "storageAccountsCount": { "value":1 },
+    "vmCount": { "value": 3 },
+    "vmStartIndex": { "value": 2 }
   }
 }
