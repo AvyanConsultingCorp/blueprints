@@ -81,6 +81,9 @@ They will test that the ValidateRG.py code can test for the following 4 issues:
 3. An asset is missing from the deployment
 4. Azure asset found that isn't specified in the baseline
 
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+
 
 
 
