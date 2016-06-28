@@ -12,13 +12,13 @@
         "nics": [
           {
             "isPrimary": "true",
-            "subnetName": "GatewaySubnet",
+            "subnetName": "app0-in-subnet",
             "ipAllocationMethod": "static",
-            "startingIPAddress": "10.0.2.240"
+            "startingIPAddress": "10.0.1.240"
           },
           {
             "isPrimary": "false",
-            "subnetName": "app0-web-subnet",
+            "subnetName": "app0-out-subnet",
             "ipAllocationMethod": "dynamic"
           }
         ],
@@ -56,23 +56,23 @@
         },
         "subnetName": "GatewaySubnet",
         "routeTable": {
-          "name": "app0-rt1",
+          "name": "app0-rtable1",
           "subnetName": "GatewaySubnet",
           "routes": [
             {
               "name": "route1",
               "properties": {
-                "addressPrefix": "10.0.1.0/24",
+                "addressPrefix": "10.0.1.10/24",
                 "nextHopType": "VirtualAppliance",
-                "nextHopIpAddress": "10.0.2.254"
+                "nextHopIpAddress": "10.0.255.224"
               }
             },
             {
               "name": "route2",
               "properties": {
-                "addressPrefix": "10.0.1.0/24",
+                "addressPrefix": "10.0.2.10/24",
                 "nextHopType": "VirtualAppliance",
-                "nextHopIpAddress": "10.0.2.254"
+                "nextHopIpAddress": "10.0.255.224"
               }
             }
           ]
@@ -84,15 +84,15 @@
     },
     "loadBalancerSettings": {
       "value": {
-        "subnetName": "app0-web-subnet",
+        "subnetName": "GatewaySubnet",
         "namePrefix": "web",
         "frontendIPConfigurations": [
           {
             "name": "config1",
             "loadBalancerType": "public",
             "internalLoadBalancerSettings": {
-              "privateIPAddress": "10.0.2.254",
-              "subnetName": "app0-web-subnet"
+              "privateIPAddress": "10.0.1.10",
+              "subnetName": "app0-in-subnet"
             }
           }
         ],
