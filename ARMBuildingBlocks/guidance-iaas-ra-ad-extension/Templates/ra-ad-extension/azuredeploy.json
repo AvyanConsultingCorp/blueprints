@@ -45,7 +45,7 @@
         "templateLink": { "uri": "[variables('nsgTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "nsgNamePrefix": { "value": "mgmt" },
+          "nsgNamePrefix": { "value": "ad" },
           "rulesNames": { "value": [ "on-prem-rdp-allow", "on-prem-ssh-allow", "gateway-allow", "self-allow", "vnet-allow" ] },
           "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound", "Inbound" ] },
           "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Allow", "Allow" ] },
