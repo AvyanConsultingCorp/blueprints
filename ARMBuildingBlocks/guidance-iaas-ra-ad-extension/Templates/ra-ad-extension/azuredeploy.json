@@ -5,6 +5,7 @@
     "baseName": { "type": "string" },
     "onpremNetPrefix": { "type": "string" },
     "vnetPrefix": { "type": "string" },
+    "vnetAdSubnetPrefix": { "type": "string" },
     "vnetMgmtSubnetPrefix": { "type": "string" },
     "vnetNvaFeSubnetPrefix": { "type": "string" },
     "vnetNvaBeSubnetPrefix": { "type": "string" },
@@ -13,11 +14,13 @@
     "vnetDbSubnetPrefix": { "type": "string" },
     "vnetGwSubnetPrefix": { "type": "string" },
     "vnetDmzFeSubnetPrefix": { "type": "string" },
-    "vnetDmzBeSubnetPrefix": { "type": "string" }
+    "vnetDmzBeSubnetPrefix": { "type": "string" },
+    "onpremDnsServerAddress": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "vnetName": "[concat(parameters('baseName'),'-vnet')]",
+    "vnetAdSubnetName": "[concat(parameters('baseName'),'-ad-sn')]",
     "vnetNvaFeSubnetName": "[concat(parameters('baseName'),'-nva-fe-sn')]",
     "vnetNvaBeSubnetName": "[concat(parameters('baseName'),'-nva-be-sn')]",
     "vnetMgmtSubnetName": "[concat(parameters('baseName'),'-mgmt-sn')]",
@@ -33,6 +36,27 @@
     "nsgTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-nsg.json"
   },
   "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "ad-nsg",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('nsgTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "nsgNamePrefix": { "value": "ad" },
+          "rulesNames": { "value": [ "vnet-allow" ] },
+          "rulesDirections": { "value": [ "Inbound" ] },
+          "rulesAccess": { "value": [ "Allow"] },
+          "rulesSourceAddressPrefixes": { "value": [ "*" ] },
+          "rulesSourcePorts": { "value": [ "*" ] },
+          "rulesDestinationAddressPrefixes": { "value": [ "*" ] },
+          "rulesDestinationPorts": { "value": [ "*" ] },
+          "rulesProtocol": { "value": [ "*" ] }
+        }
+      }
+    },
 
     {
       "type": "Microsoft.Resources/deployments",
@@ -158,6 +182,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
+        "Microsoft.Resources/deployments/ad-nsg",
         "Microsoft.Resources/deployments/mgmt-nsg",
         "Microsoft.Resources/deployments/web-nsg",
         "Microsoft.Resources/deployments/biz-nsg",
@@ -176,7 +201,17 @@
             "[parameters('vnetPrefix')]"
           ]
         },
+        "dnsSettings": {
+          "dnsServers": "[parameters('onpremDnsServerAddress')]"
+        },
         "subnets": [
+          {
+            "name": "[variables('vnetAdSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('vnetAdSubnetPrefix')]",
+              "networkSecurityGroup": { "id": "[reference('ad-nsg').outputs.nsgid.value]" }
+            }
+          },
           {
             "name": "[variables('vnetMgmtSubnetName')]",
             "properties": {

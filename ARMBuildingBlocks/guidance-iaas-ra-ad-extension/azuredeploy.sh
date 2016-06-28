@@ -55,6 +55,7 @@ NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 INPUT_ON_PREMISES_PUBLIC_IP=
 INPUT_ON_PREMISES_ADDRESS_SPACE=
 INPUT_VPN_IPSEC_SHARED_KEY=
+ON_PREMISES_DNS_SERVER_ADDRESS=
 
 # VNet parameter defaults
 VNET_PREFIX=10.0.0.0/16
@@ -71,7 +72,7 @@ VNET_WEB_SUBNET_PREFIX=10.0.1.0/24
 VNET_BIZ_SUBNET_PREFIX=10.0.2.0/24
 VNET_DB_SUBNET_PREFIX=10.0.3.0/24
 VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
-
+VNET_AD_SUBNET_PREFIX=10.0.255.192/27
 
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
@@ -117,7 +118,7 @@ TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-pub-dmz/Templates/ra-secure-vnet-pub-d
 
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"},\"onpremDnsServerAddress\":{\"value\":\"${ONPREM_DNS_SERVER_ADDRESS}\"}}"
 
 echo
 echo
