@@ -45,7 +45,7 @@
   "outputs": {
     "result": {
       "type": "array",
-      "value": "[reference(concat('deploy-', parameters('source').name, '-', variables('suffixToUse'))).outputs.result.value]"
+      "value": "[reference(concat('deploy-', parameters('source').name, '-', variables('suffixToUse'))).outputs.collection.value]"
     }
   }
 }
