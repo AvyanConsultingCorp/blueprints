@@ -13,6 +13,8 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-hybrid-network-sec
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-iaas-ra-pub-dmz", "guidance-iaas-ra-pub-dmz\guidance-iaas-ra-pub-dmz.deployproj", "{B1BF8B7B-C4CC-4191-AFF3-688B03348642}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-iaas-ra-ad-extension", "guidance-iaas-ra-ad-extension\guidance-iaas-ra-ad-extension.deployproj", "{F2003085-E99D-46B9-B0BA-AB395E8D6E85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{B1BF8B7B-C4CC-4191-AFF3-688B03348642}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1BF8B7B-C4CC-4191-AFF3-688B03348642}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1BF8B7B-C4CC-4191-AFF3-688B03348642}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2003085-E99D-46B9-B0BA-AB395E8D6E85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2003085-E99D-46B9-B0BA-AB395E8D6E85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2003085-E99D-46B9-B0BA-AB395E8D6E85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2003085-E99D-46B9-B0BA-AB395E8D6E85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
