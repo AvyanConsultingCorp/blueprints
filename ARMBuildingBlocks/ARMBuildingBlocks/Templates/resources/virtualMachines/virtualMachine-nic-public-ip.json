@@ -43,13 +43,15 @@
               "name": "[parameters('source').name]",
               "location": "[resourceGroup().location]",
               "properties": {
-                "ipConfigurations": {
-                  "name": "publicIpConfig1",
-                  "properties": {
-                    "publicIPAddress": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('source').name, '-pip'))]"
+                "ipConfigurations": [
+                  {
+                    "name": "publicIpConfig1",
+                    "properties": {
+                      "publicIPAddress": {"id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('source').name, '-pip'))]"}
 
+                    }
                   }
-                }
+                ]
               },
               "tags": {
                 "displayName": "nic"
