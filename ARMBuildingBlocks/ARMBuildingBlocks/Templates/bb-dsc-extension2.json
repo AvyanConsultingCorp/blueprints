@@ -10,7 +10,7 @@
     "location": "[resourceGroup().location]",
     "publisher": "Microsoft.Powershell",
     "type": "DSC",
-    "typeHandlerVersion": "2.8",
+    "typeHandlerVersion": "2.17",
     "ModulesUrl": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/iisaspnet.ps1.zip",
     "SasToken": "",
     "ConfigurationFunction": "iisaspnet.ps1\\IISASPNET"
