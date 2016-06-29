@@ -23,7 +23,6 @@
     "updatedIPAddressString": "[concat(string(variables('newIPAddress_part1')), '.', string(variables('newIPAddress_part2')), '.', string(variables('newIPAddress_part3')), '.', string(variables('newIPAddress_part4')))]",
     "instance": [
       {
-        "isPublic": "false",
         "name": "[concat(parameters('context').vmName, '-nic', add(parameters('iteration'), 1))]",
         "ipConfigurations": [
           {

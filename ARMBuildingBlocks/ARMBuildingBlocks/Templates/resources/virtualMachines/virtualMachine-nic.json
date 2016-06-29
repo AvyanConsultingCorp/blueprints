@@ -13,31 +13,44 @@
       "defaultValue": 0
     }
   },
-  "variables": {
-    "nicTemplates": {
-      "false": "[uri(deployment().properties.templateLink.uri, 'virtualMachine-nic-no-public-ip.json')]",
-      "true": "[uri(deployment().properties.templateLink.uri, 'virtualMachine-nic-public-ip.json')]"
-    },
-    "templateToInvoke": "[variables('nicTemplates')[parameters('source').isPublic]]",
-    "deploymentSuffixes": {
-      "false": "no-public-ip",
-      "true": "public-ip"
-    },
-    "suffixToUse": "[variables('deploymentSuffixes')[parameters('source').isPublic]]"
-  },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat('deploy-', parameters('source').name, '-', variables('suffixToUse'))]",
+      "name": "[concat('deploy-', parameters('source').name)]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('templateToInvoke')]" },
-        "parameters": {
-          "source": { "value": "[parameters('source')]" },
-          "context": { "value": "[parameters('context')]" },
-          "state": { "value": "[parameters('state')]" },
-          "iteration": { "value": "[parameters('iteration')]" }
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "resources": [
+            {
+              "apiVersion": "2016-03-30",
+              "type": "Microsoft.Network/networkInterfaces",
+              "name": "[parameters('source').name]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "ipConfigurations": "[parameters('source').ipConfigurations]"
+              },
+              "tags": {
+                "displayName": "nic"
+              }
+            }
+          ],
+          "outputs": {
+            "instance": {
+              "type": "array",
+              "value": [
+                {
+                  "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('source').name)]",
+                  "properties": {
+                    "primary": "[parameters('source').primary]"
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     }
@@ -45,7 +58,7 @@
   "outputs": {
     "collection": {
       "type": "array",
-      "value": "[reference(concat('deploy-', parameters('source').name, '-', variables('suffixToUse'))).outputs.collection.value]"
+      "value": "[concat(parameters('state'), reference(concat('deploy-', parameters('source').name)).outputs.instance.value)]"
     }
   }
 }

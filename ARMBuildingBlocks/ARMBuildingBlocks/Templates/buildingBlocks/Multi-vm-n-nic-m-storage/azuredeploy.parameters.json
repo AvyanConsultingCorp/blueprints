@@ -6,22 +6,30 @@
       "value": {
         "namePrefix": "vmn",
         "computerNamePrefix": "cn",
-        "size": "Standard_DS2",
+        "size": "Standard_DS3",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
         "nics": [
           {
             "isPublic": "false",
-            "isPrimary": "true",
             "subnetName": "rs1-web-sn",
-            "ipAllocationMethod": "static",
-            "startingIPAddress": "10.0.0.240"
+            "privateIPAllocationMethod": "static",
+            "startingIPAddress": "10.0.0.240",
+            "isPrimary": "false"
+          },
+          {
+            "isPublic": "false",
+            "subnetName": "rs1-biz-sn",
+            "privateIPAllocationMethod": "dynamic",
+            "isPrimary": "false"
           },
           {
             "isPublic": "true",
-            "isPrimary": "false",
-            "subnetName": "rs1-biz-sn",
-            "ipAllocationMethod": "dynamic"
+            "publicIPAllocationMethod": "dynamic",
+            "subnetName": "rs1-data-sn",
+            "privateIPAllocationMethod": "static",
+            "startingIPAddress": "10.0.2.240",
+            "isPrimary": "true"
           }
         ],
         "imageReference": {

@@ -16,12 +16,12 @@
   "variables": {
     "nicTemplate": {
       "false": {
-        "static": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-static-nics-settings.json')]",
-        "dynamic": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-dynamic-nics-settings.json')]"
+        "static": "[uri(deployment().properties.templateLink.uri, 'private-static-nics-settings.json')]",
+        "dynamic": "[uri(deployment().properties.templateLink.uri, 'private-dynamic-nics-settings.json')]"
       },
       "true": {
-        "static": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-public-nic-settings.json')]",
-        "dynamic": "[uri(deployment().properties.templateLink.uri, 'virtualMachines-public-nic-settings.json')]"
+        "static": "[uri(deployment().properties.templateLink.uri, 'public-nic-static-private-settings.json')]",
+        "dynamic": "[uri(deployment().properties.templateLink.uri, 'public-nic-dynamic-private-settings.json')]"
       }
     }
   },
@@ -32,7 +32,7 @@
       "name": "[concat(parameters('context').vmName, '-nic', parameters('iteration'), '-template')]",
       "properties": {
         "mode": "Incremental",
-        "templateLink": { "uri": "[variables('nicTemplate')[parameters('source').isPublic][parameters('source').ipAllocationMethod]]" },
+        "templateLink": { "uri": "[variables('nicTemplate')[parameters('source').isPublic][parameters('source').privateIPAllocationMethod]]" },
         "parameters": {
           "source": { "value": "[parameters('source')]" },
           "context": { "value": "[parameters('context')]" },
