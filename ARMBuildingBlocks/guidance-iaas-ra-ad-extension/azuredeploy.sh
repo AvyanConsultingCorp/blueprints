@@ -79,6 +79,8 @@ VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
 VNET_AD_SUBNET_PREFIX=10.0.255.192/27
 
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
+AD_SERVER_IP_ADDRESS=10.0.255.222
+
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
 NVA_FE_ILB_IP_ADDRESS=10.0.0.30
 WEB_ILB_IP_ADDRESS=10.0.1.254
@@ -92,6 +94,7 @@ NVA_MGMT_VM_IP_ADDRESSES=[\"10.0.0.253\",\"10.0.0.252\"]
 DMZ_FE_VM_IP_ADDRESSES=[\"10.0.0.94\",\"10.0.0.93\"]
 DMZ_BE_VM_IP_ADDRESSES=[\"10.0.0.126\",\"10.0.0.125\"]
 DMZ_MGMT_VM_IP_ADDRESSES=[\"10.0.0.251\",\"10.0.0.250\"]
+
 
 WEB_NUMBER_VMS=2
 BIZ_NUMBER_VMS=2
@@ -137,6 +140,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 
 # the following variables are used in the above resource group, you need to use them later to create web/biz/db tier. don't change their values.
 DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
+DEPLOYED_AD_SUBNET_NAME_PREFIX=ad
 DEPLOYED_MGMT_SUBNET_NAME_PREFIX=mgmt
 DEPLOYED_NVA_FE_SUBNET_NAME_PREFIX=nva-fe
 DEPLOYED_NVA_BE_SUBNET_NAME_PREFIX=nva-be
@@ -154,6 +158,19 @@ DEPLOYED_DB_UDR_NAME=${BASE_NAME}-db-udr
 
 DEPLOYED_DMZ_FE_SUBNET_NAME_PREFIX=dmz-fe
 DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX=dmz-be
+
+############################################################################
+## Create adds/dns server in ad subnet
+############################################################################
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-ad-server.json
+RESOURCE_GROUP=${BASE_NAME}-ad-rg
+AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
+AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddress\":{\"value\":\"${AD_SERVER_IP_ADDRESS}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 ############################################################################
 ## Create ILB and VMs in web, biz, db

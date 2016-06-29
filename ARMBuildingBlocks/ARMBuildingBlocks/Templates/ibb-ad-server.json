@@ -1,0 +1,58 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "adSubnetId": { "type": "string" },
+    "adServerIpAddress": { "type": "string" },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "uniqueString": "[uniqueString(resourceGroup().Id)]",
+    "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), 'jb', variables('uniqueString')))]",
+    "adServerTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[variables('stgAccountName')]",
+      "tags": {
+        "displayName": "Storage accounts"
+      },
+      "properties": { "accountType": "Premium_LRS" }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "adserver",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/',variables('stgAccountName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('adServerTemplate')]" },
+        "parameters": {
+          "baseName": { "value": "[parameters('baseName')]" },
+          "vmNamePrefix": { "value": "jb" },
+          "vmComputerName": { "value": "jb" },
+          "vmIPaddress": { "value": "[parameters('adServerIpAddress')]" },
+          "snid": { "value": "[parameters('adSubnetId')]" },
+          "stgAccountName": { "value": "[variables('stgAccountName')]" },
+          "osType": { "value": "Windows" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "resourceGroup": {
+      "type": "string",
+      "value": "[resourceGroup().Name]"
+    }
+  }
+}

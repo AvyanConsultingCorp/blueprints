@@ -72,6 +72,7 @@
     <None Include="Templates\bb-vpn-gateway-connection.json" />
     <None Include="Templates\bb-vpn-gateway-connection.parameters.json" />
     <None Include="Templates\ibb-dmz.json" />
+    <None Include="Templates\ibb-ad-server.json" />
     <None Include="Templates\ibb-mgmt-jumpbox.json" />
     <None Include="Templates\ibb-nvas.json" />
     <None Include="Templates\ibb-vm-iis.json" />
