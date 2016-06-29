@@ -201,8 +201,8 @@
             "[parameters('vnetPrefix')]"
           ]
         },
-        "dnsSettings": {
-          "dnsServers": "[parameters('onpremDnsServerAddress')]"
+        "dhcpOptions": {
+          "dnsServers": [ "[parameters('onpremDnsServerAddress')]" ]
         },
         "subnets": [
           {
