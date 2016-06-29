@@ -163,7 +163,7 @@ DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX=dmz-be
 ## Create adds/dns server in ad subnet
 ############################################################################
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-ad-server.json
-RESOURCE_GROUP=${BASE_NAME}-ad-rg
+RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddress\":{\"value\":\"${AD_SERVER_IP_ADDRESS}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
