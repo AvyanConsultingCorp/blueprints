@@ -33,7 +33,6 @@
           "source": { "value": "[parameters('source').nics]" },
           "context": {
             "value": {
-              "vnetResourceGroup": "[parameters('context').vnetResourceGroup]",
               "vnetName": "[parameters('context').vnetName]",
               "vmName": "[variables('vmName')]",
               "vmIndex": "[add(parameters('iteration'), parameters('context').deployedVMCount)]"
@@ -55,7 +54,6 @@
           "source": { "value": "[parameters('source').dataDisks.properties]" },
           "context": {
             "value": {
-              "vnetResourceGroup": "[parameters('context').vnetResourceGroup]",
               "vnetName": "[parameters('context').vnetName]",
               "storageAccounts": "[parameters('context').storageAccounts]",
               "vmName": "[variables('vmName')]",

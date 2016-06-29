@@ -8,10 +8,10 @@
         "description": "Settings for virtual machines"
       }
     },
-    "infrastructureSettings": {
+    "virtualNetworkSettings": {
       "type": "object",
       "metadata": {
-        "description": "Settings for infrastructure"
+        "description": "Settings for virtual network"
       }
     },
     "context": {
@@ -22,7 +22,7 @@
     }
   },
   "variables": {
-    "templateUniqueString": "[uniqueString(concat(string(parameters('virtualMachinesSettings')), string(parameters('infrastructureSettings')), string(parameters('context'))))]",
+    "templateUniqueString": "[uniqueString(concat(string(parameters('virtualMachinesSettings')), string(parameters('context'))))]",
     "replicatorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/replicator.json')]",
     "singleVMTemplate": "[uri(deployment().properties.templateLink.uri, 'single-vm-n-nic.json')]"
   },
@@ -39,9 +39,8 @@
           "source": { "value": "[parameters('virtualMachinesSettings')]" },
           "context": {
             "value": {
-              "vnetResourceGroup": "[parameters('infrastructureSettings').vnetResourceGroup]",
-              "vnetName": "[parameters('infrastructureSettings').vnetName]",
-              "vmNamePrefix": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix)]",
+              "vnetName": "[parameters('virtualNetworkSettings').name]",
+              "vmNamePrefix": "[parameters('virtualMachinesSettings').namePrefix]",
               "vmNamePostFixStartIndex": "[add(parameters('context').vmStartIndex, parameters('context').deployedVMCount)]",
               "deployedVMCount": "[parameters('context').deployedVMCount]",
               "storageAccounts": {

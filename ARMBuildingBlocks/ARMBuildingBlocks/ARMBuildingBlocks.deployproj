@@ -67,6 +67,7 @@
     <None Include="Templates\resources\localNetworkGateway\localNetworkGateway.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup-securityRules.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup.json" />
+    <None Include="Templates\resources\routeTables\bb-nsg-remote-access.json" />
     <None Include="Templates\resources\routeTables\routeTable-routes.json" />
     <None Include="Templates\resources\routeTables\routeTable.json" />
     <None Include="Templates\resources\routeTables\rt-routes-no-next-hop-ip-address.json" />

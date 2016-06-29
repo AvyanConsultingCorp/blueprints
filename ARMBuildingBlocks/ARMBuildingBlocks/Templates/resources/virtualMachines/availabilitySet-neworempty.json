@@ -2,7 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": { "type": "string" },
     "availabilitySetSettings": { "type": "object" },
     "vmCount": { "type": "int" }
   },
@@ -17,12 +16,11 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('baseName'), '-assettings')]",
+      "name": "[concat(parameters('availabilitySetSettings').name, '-assettings')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('avSetTemplate')]" },
         "parameters": {
-          "baseName": { "value": "[parameters('baseName')]" },
           "availabilitySetSettings": { "value": "[parameters('availabilitySetSettings')]" }
         }
       }
@@ -30,7 +28,7 @@
   ],
   "outputs": {
     "availabilitySetName": {
-      "value": "[reference(concat(parameters('baseName'), '-assettings')).outputs.availabilitySetName.value]",
+      "value": "[reference(concat(parameters('availabilitySetSettings').name, '-assettings')).outputs.availabilitySetName.value]",
       "type": "string"
     }
   }

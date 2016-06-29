@@ -18,11 +18,10 @@
         "description": "Platform domain count value."
       }
     },
-    "baseName": { "type": "string" },
     "availabilitySetSettings": { "type": "object" }
   },
   "variables": {
-    "avSetName": "[concat(parameters('baseName'), '-', parameters('availabilitySetSettings').prefix, '-as')]"
+    "avSetName": "[concat(parameters('availabilitySetSettings').name, '-as')]"
   },
   "resources": [
     {
