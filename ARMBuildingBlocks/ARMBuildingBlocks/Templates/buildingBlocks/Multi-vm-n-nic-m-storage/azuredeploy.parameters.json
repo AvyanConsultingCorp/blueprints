@@ -18,15 +18,10 @@
             "startingIPAddress": "10.0.0.240"
           },
           {
-            "isPublic": "false",
+            "isPublic": "true",
             "isPrimary": "false",
             "subnetName": "rs1-biz-sn",
             "ipAllocationMethod": "dynamic"
-          },
-          {
-            "isPublic": "true",
-            "isPrimary": "true",
-            "ipAllocationMethod": "static"
           }
         ],
         "imageReference": {

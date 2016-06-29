@@ -47,8 +47,9 @@
                   {
                     "name": "publicIpConfig1",
                     "properties": {
-                      "publicIPAddress": {"id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('source').name, '-pip'))]"}
-
+                      "publicIPAddress": { "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('source').name, '-pip'))]" },
+                      "privateIPAllocationMethod": "[parameters('source').properties.privateIPAllocationMethod]",
+                      "subnet": "[parameters('source').properties.subnet]"
                     }
                   }
                 ]
