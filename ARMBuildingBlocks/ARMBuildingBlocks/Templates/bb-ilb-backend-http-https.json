@@ -202,7 +202,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets',variables('vmAvailabilitySetName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),parameters('numberVMs'),variables('uniqueString'))]"
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),copyindex(1),variables('uniqueString'))]",
       ]
     }
   ],
