@@ -1,0 +1,29 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "value": "myapp" },
+    "virtualNetworkSettings": {
+      "value": {
+        "namePrefix": "dev",
+        "addressPrefixes": [
+          "10.0.0.0/16"
+        ],
+        "subnets": [
+          {
+            "namePrefix": "web",
+            "addressPrefix": "10.0.0.0/24"
+          },
+          {
+            "namePrefix": "biz",
+            "addressPrefix": "10.0.1.0/24"
+          },
+          {
+            "namePrefix": "data",
+            "addressPrefix": "10.0.2.0/24"
+          }
+        ]
+      }
+    }
+  }
+}
