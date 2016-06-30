@@ -4,7 +4,7 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "rsvm",
+        "namePrefix": "rs-vm",
         "computerNamePrefix": "cn",
         "size": "Standard_DS3",
         "adminUsername": "testuser",
