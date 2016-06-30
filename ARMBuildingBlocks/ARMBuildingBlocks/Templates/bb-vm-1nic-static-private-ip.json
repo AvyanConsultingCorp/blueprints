@@ -48,7 +48,11 @@
       "defaultValue": "Standard_DS3"
     },
     "adminUsername": { "type": "string" },
-    "adminPassword": { "type": "securestring" }
+    "adminPassword": { "type": "securestring" },
+    "vmAvSetName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]"
+    }
   },
   "variables": {
     "VMSettings": {
@@ -74,14 +78,12 @@
     "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
     "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
     "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]",
-    "vmAvSetName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-as')]",
-    
   },
   "resources": [
     {
       "type": "Microsoft.Compute/availabilitySets",
       "apiVersion": "2015-06-15",
-      "name": "[variables('vmAvSetName')]",
+      "name": "[parameters('vmAvSetName')]",
       "location": "[variables('location')]",
       "tags": { "displayName": "VM Availability Set" },
       "properties": {

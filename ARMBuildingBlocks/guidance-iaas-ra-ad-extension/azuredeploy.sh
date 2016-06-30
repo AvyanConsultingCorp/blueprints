@@ -170,7 +170,7 @@ AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
 VM_SIZE=Standard_DS3
 NUMBER_VMS=${AD_NUMBER_VMS}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressaArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
 SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 echo

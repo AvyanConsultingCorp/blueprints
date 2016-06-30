@@ -56,6 +56,7 @@
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), 'ad', variables('uniqueString')))]",
     "vmNamePrefix": "ad",
+    "vmComputerNamePrefix": "ad",
     "vmAvSetName": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),'-as')]",
     "adServerTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json"
   },
@@ -70,7 +71,7 @@
       },
       "properties": {
         "platformFaultDomainCount": 3,
-        "platformUpdateDomainCount": 5
+        "platformUpdateDomainCount": 3
       }
     },
 
@@ -107,15 +108,16 @@
         "templateLink": { "uri": "[variables('adServerTemplate')]" },
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
-          "vmNamePrefix": { "value": "ad" },
-          "vmComputerName": { "value": "ad" },
+          "vmNamePrefix": { "value": "[concat(variables('vmNamePrefix'),copyindex(1))]" },
+          "vmComputerName": { "value": "[concat(variables('vmComputerNamePrefix'),copyindex(1))]" },
           "vmSize": { "value": "[parameters('vmSize')]" },
           "vmIPaddress": { "value": "[parameters('adServerIpAddressArray')[copyIndex()]]" },
           "snid": { "value": "[parameters('adSubnetId')]" },
           "stgAccountName": { "value": "[concat(parameters('baseName'), copyindex(1), variables('uniqueString'))]" },
           "osType": { "value": "Windows" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" }
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "vmAvSetName": { "value": "[variables('vmAvSetName')]" }
         }
       }
     }
