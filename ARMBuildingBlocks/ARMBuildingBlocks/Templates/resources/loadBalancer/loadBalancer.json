@@ -2,23 +2,23 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "infrastructureSettings": {
+    "loadBalancerSettings": {
       "type": "object",
       "metadata": {
         "description": "Settings for infrastructure"
       }
     },
-    "loadBalancerSettings": {
+    "virtualNetworkSettings": {
       "type": "object",
       "metadata": {
-        "description": "Settings for infrastructure"
+        "description": "Settings for virtual network"
       }
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "namePrefix": "[parameters('loadBalancerSettings').namePrefix]",
-    "lbName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-ilb')]",
+    "lbName": "[concat(variables('namePrefix'), '-ilb')]",
     "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
     "internalLoadBalancer": {
       "name": "[variables('lbName')]",
@@ -41,7 +41,7 @@
           "context": {
             "value": {
               "loadBalancerName": "[variables('internalLoadBalancer').name]",
-              "vetName": "[parameters('infrastructureSettings').vnetName]"
+              "vetName": "[parameters('virtualNetworkSettings').name]"
             }
           },
           "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-frontendIPConfiguration-settings.json')]" }
