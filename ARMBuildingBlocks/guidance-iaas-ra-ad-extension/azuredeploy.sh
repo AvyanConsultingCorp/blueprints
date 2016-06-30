@@ -58,6 +58,7 @@ INPUT_VPN_IPSEC_SHARED_KEY=
 INPUT_ON_PREMISES_DNS_SERVER_ADDRESS=
 ####################################
 ####################################
+DSC_TYPE_HANDLER_VERSION=2.19
 
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 
@@ -202,9 +203,10 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
 	if [ "${OS_TYPE}" == "Windows" ]; then
 		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-iis.json
+		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"
+		
 		echo
 		echo
 		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
@@ -212,6 +214,7 @@ do
 	fi
 	if [ "${OS_TYPE}" == "Ubuntu" ]; then
 		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-apache.json
+		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
 		echo
 		echo
 		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}

@@ -4,13 +4,16 @@
   "parameters": {
     "vmName": {
       "type": "string"
+    },
+    "dscTypeHandlerVersion": {
+      "type": "string",
+      "defaultValue": "2.19"
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "publisher": "Microsoft.Powershell",
     "type": "DSC",
-    "typeHandlerVersion": "2.19",
     "ModulesUrl": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/iisaspnet.ps1.zip",
     "SasToken": "",
     "ConfigurationFunction": "iisaspnet.ps1\\IISASPNET"
@@ -24,7 +27,7 @@
       "properties": {
         "publisher": "[variables('publisher')]",
         "type": "[variables('type')]",
-        "typeHandlerVersion": "[variables('typeHandlerVersion')]",
+        "typeHandlerVersion": "[parameters('dscTypeHandlerVersion')]",
         "settings": {
           "ModulesUrl": "[variables('ModulesUrl')]",
           "SasToken": "[variables('SasToken')]",
