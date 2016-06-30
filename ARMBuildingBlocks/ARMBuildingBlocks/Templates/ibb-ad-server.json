@@ -34,7 +34,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('vmName'),variables('uniqueString'))]",
+      "name": "[concat(variables('vmName'),variables('uniqueString'))]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',variables('stgAccountName'))]"
       ],
@@ -59,7 +59,7 @@
       "apiVersion": "2015-01-01",
       "name": "[concat(variables('vmName'),'-vm-adds-installation',variables('uniqueString'))]",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/',parameters('vmName'),variables('uniqueString'))]"
+        "[concat('Microsoft.Resources/deployments/',variables('vmName'),variables('uniqueString'))]"
       ],
       "properties": {
         "mode": "Incremental",
