@@ -75,6 +75,7 @@
     <None Include="Templates\ibb-ad-server.json" />
     <None Include="Templates\ibb-mgmt-jumpbox.json" />
     <None Include="Templates\ibb-nvas.json" />
+    <None Include="Templates\ibb-vm-adds.json" />
     <None Include="Templates\ibb-vm-iis.json" />
     <None Include="Templates\ibb-vm-apache.json" />
     <None Include="Templates\ibb-nvas-mgmt.parameters.json" />

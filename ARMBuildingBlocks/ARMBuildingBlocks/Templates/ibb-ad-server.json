@@ -4,39 +4,103 @@
   "parameters": {
     "baseName": { "type": "string" },
     "adSubnetId": { "type": "string" },
-    "adServerIpAddress": { "type": "string" },
     "adminUsername": { "type": "string" },
     "adminPassword": { "type": "securestring" },
-    "dscTypeHandlerVersion": {
+    "numberVMs": {
+      "type": "int",
+      "defaultValue": 2,
+      "minValue": 2,
+      "metadata": { "description": "Number of VMs in subnet." }
+    },
+    "adServerIpAddressArray": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.255.222",
+        "10.0.255.221"
+      ]
+    },
+    "vmSize": {
       "type": "string",
-      "defaultValue": "2.19"
+      "allowedValues": [
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_GS1",
+        "Standard_GS2",
+        "Standard_GS3",
+        "Standard_GS4",
+        "Standard_GS5",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2"
+      ],
+      "defaultValue": "Standard_DS3"
     }
+
+
   },
   "variables": {
-    "vmName": "[concat(parameters('baseName'),'-ad-vm')]",
     "location": "[resourceGroup().location]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), 'ad', variables('uniqueString')))]",
-    "adServerTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json",
-    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-dsc-extension2.json"
+    "vmNamePrefix": "ad",
+    "vmAvSetName": "[concat(parameters('baseName'),'-',variables('vmNamePrefix'),'-as')]",
+    "adServerTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json"
   },
   "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[variables('vmAvSetName')]",
+      "tags": {
+        "displayName": "Availability set"
+      },
+      "properties": {
+        "platformFaultDomainCount": 3,
+        "platformUpdateDomainCount": 5
+      }
+    },
+
     {
       "type": "Microsoft.Storage/storageAccounts",
       "apiVersion": "2015-06-15",
       "location": "[variables('location')]",
-      "name": "[variables('stgAccountName')]",
+      "name": "[toLower(concat(replace(parameters('baseName'),'-',''), copyindex(1), variables('uniqueString')))]",
       "tags": {
         "displayName": "Storage accounts"
       },
+      "copy": {
+        "name": "stgCount",
+        "count": "[parameters('numberVMs')]"
+      },
       "properties": { "accountType": "Premium_LRS" }
     },
+
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(variables('vmName'),variables('uniqueString'))]",
+      "name": "[concat(parameters('baseName'), copyindex(1))]",
+      "copy": {
+        "name": "vmCount",
+        "count": "[parameters('numberVMs')]"
+      },
+
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/',variables('stgAccountName'))]"
+        "[resourceId('Microsoft.Compute/availabilitySets',variables('vmAvSetName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('baseName'),copyindex(1),variables('uniqueString'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -45,28 +109,13 @@
           "baseName": { "value": "[parameters('baseName')]" },
           "vmNamePrefix": { "value": "ad" },
           "vmComputerName": { "value": "ad" },
-          "vmIPaddress": { "value": "[parameters('adServerIpAddress')]" },
+          "vmSize": { "value": "[parameters('vmSize')]" },
+          "vmIPaddress": { "value": "[parameters('adServerIpAddressArray')[copyIndex()]]" },
           "snid": { "value": "[parameters('adSubnetId')]" },
-          "stgAccountName": { "value": "[variables('stgAccountName')]" },
+          "stgAccountName": { "value": "[concat(parameters('baseName'), copyindex(1), variables('uniqueString'))]" },
           "osType": { "value": "Windows" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "name": "[concat(variables('vmName'),'-vm-adds-installation',variables('uniqueString'))]",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/',variables('vmName'),variables('uniqueString'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('extensionTemplate')]" },
-        "parameters": {
-          "vmName": { "value": "[variables('vmName')]" },
-          "dscTypeHandlerVersion": { "value": "[parameters('dscTypeHandlerVersion')]" }
         }
       }
     }

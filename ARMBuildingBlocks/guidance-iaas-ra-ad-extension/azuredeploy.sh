@@ -80,7 +80,7 @@ VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
 VNET_AD_SUBNET_PREFIX=10.0.255.192/27
 
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
-AD_SERVER_IP_ADDRESS=10.0.255.222
+AD_SERVER_IP_ADDRESS_ARRAY=[\"10.0.255.222\",\"10.0.255.211\"]
 
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
 NVA_FE_ILB_IP_ADDRESS=10.0.0.30
@@ -100,6 +100,7 @@ DMZ_MGMT_VM_IP_ADDRESSES=[\"10.0.0.251\",\"10.0.0.250\"]
 WEB_NUMBER_VMS=2
 BIZ_NUMBER_VMS=2
 DB_NUMBER_VMS=2
+AD_NUMBER_VMS=2
 
 if validateNotEmpty ${SUBSCRIPTION};
 then
@@ -161,17 +162,32 @@ DEPLOYED_DMZ_FE_SUBNET_NAME_PREFIX=dmz-fe
 DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX=dmz-be
 
 ############################################################################
-## Create adds/dns server in ad subnet
+## Create ad server in ad subnet
 ############################################################################
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-ad-server.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddress\":{\"value\":\"${AD_SERVER_IP_ADDRESS}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"
+VM_SIZE=Standard_DS3
+NUMBER_VMS=${AD_NUMBER_VMS}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressaArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
+VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+# install adds to ad vms
+for (( i=1; i<=${NUMBER_VMS}; i++ ))
+do
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
+		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
+		echo
+		echo
+		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+done  
 
 ############################################################################
 ## Create ILB and VMs in web, biz, db
