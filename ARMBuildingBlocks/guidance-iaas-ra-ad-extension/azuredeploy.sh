@@ -164,7 +164,7 @@ DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX=dmz-be
 ############################################################################
 ## Create ad server in ad subnet
 ############################################################################
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-ad-server.json
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-1nic-static-private-ip.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
