@@ -7,12 +7,18 @@
     "adServerIpAddress": { "type": "string" },
     "adminUsername": { "type": "string" },
     "adminPassword": { "type": "securestring" },
+    "dscTypeHandlerVersion": {
+      "type": "string",
+      "defaultValue": "2.19"
+    }
   },
   "variables": {
+    "vmName": "[concat(parameters('baseName'),'-ad-vm')]",
     "location": "[resourceGroup().location]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), 'ad', variables('uniqueString')))]",
-    "adServerTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json"
+    "adServerTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-vm-1nic-static-private-ip.json",
+    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-dsc-extension2.json"
   },
   "resources": [
     {
@@ -28,7 +34,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "adserver",
+      "name": "[concat(parameters('vmName'),variables('uniqueString'))]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/',variables('stgAccountName'))]"
       ],
@@ -45,6 +51,22 @@
           "osType": { "value": "Windows" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('vmName'),'-vm-adds-installation',variables('uniqueString'))]",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/',parameters('vmName'),variables('uniqueString'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('extensionTemplate')]" },
+        "parameters": {
+          "vmName": { "value": "[variables('vmName')]" },
+          "dscTypeHandlerVersion": { "value": "[parameters('dscTypeHandlerVersion')]" }
         }
       }
     }
