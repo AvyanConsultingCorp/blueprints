@@ -13,20 +13,9 @@
           {
             "isPublic": "false",
             "isPrimary": "true",
-            "subnetName": "rs1-web-sn",
+            "subnetName": "myapp-web-sn",
             "ipAllocationMethod": "static",
             "startingIPAddress": "10.0.0.240"
-          },
-          {
-            "isPublic": "false",
-            "isPrimary": "false",
-            "subnetName": "rs1-biz-sn",
-            "ipAllocationMethod": "dynamic"
-          },
-          {
-            "isPublic": "true",
-            "isPrimary": "true",
-            "ipAllocationMethod": "static"
           }
         ],
         "imageReference": {
@@ -34,14 +23,6 @@
           "offer": "WindowsServer",
           "sku": "2012-R2-Datacenter",
           "version": "latest"
-        },
-        "dataDisks": {
-          "count": 2,
-          "properties": {
-            "diskSizeGB": 127,
-            "caching": "None",
-            "createOption": "Empty"
-          }
         },
         "osDisk": {
           "caching": "ReadWrite"
@@ -53,9 +34,8 @@
     },
     "infrastructureSettings": {
       "value": {
-        "baseName": "rs1",
-        "vnetResourceGroup": "rs-bb4-rg",
-        "vnetName": "rs1-dev-vnet",
+        "baseName": "myapp",
+        "vnetName": "myapp-vnet",
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
           "prefix": "xx",
@@ -68,14 +48,14 @@
     },
     "loadBalancerSettings": {
       "value": {
-        "subnetName": "rs1-web-sn",
+        "subnetName": "myapp-web-sn",
         "namePrefix": "web",
         "frontendIPConfigurations": [
           {
             "name": "config1",
             "loadBalancerType": "public",
             "internalLoadBalancerSettings": {
-              "privateIPAddress": "10.0.0.254",
+              "privateIPAddress": "10.0.0.10",
               "subnetName": "test-sn"
             }
           }

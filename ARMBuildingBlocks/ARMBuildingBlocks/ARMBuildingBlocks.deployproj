@@ -35,6 +35,7 @@
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <None Include="Drivers\Bash\deploy-template-with-param.sh" />
     <None Include="Drivers\Json\deploy-template-with-param.json" />
+    <None Include="Drivers\Json\deploy-template-with-param.parameters.json" />
     <None Include="Drivers\Powershell\deploy-vnet-n-subnets.ps1" />
     <None Include="Scripts\apache.sh" />
     <None Include="Scripts\iisaspnet.ps1" />
