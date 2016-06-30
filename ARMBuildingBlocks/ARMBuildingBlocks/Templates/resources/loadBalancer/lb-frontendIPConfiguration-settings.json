@@ -15,8 +15,8 @@
   },
   "variables": {
     "ipConfigurations": {
-      "public": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-public.json",
-      "internal": "https://aoarmtest.blob.core.windows.net/templates/lb-frontendIPConfiguration-internal.json"
+      "public": "[uri(deployment().properties.templateLink.uri, 'lb-frontendIPConfiguration-public.json')]",
+      "internal": "[uri(deployment().properties.templateLink.uri, 'lb-frontendIPConfiguration-internal.json')]"
     }
   },
   "resources": [

@@ -2,32 +2,35 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "virtualMachinesSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Settings for virtual machines"
-      }
-    },
-    "infrastructureSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Settings for infrastructure"
-      }
-    },
     "loadBalancerSettings": {
       "type": "object",
       "metadata": {
         "description": "Settings for infrastructure"
       }
     },
-    "storageAccountsCount": { "type": "int" },
-    "vmCount": { "type": "int" },
-    "vmStartIndex": { "type": "int" }
+    "virtualMachinesSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual machines"
+      }
+    },
+    "virtualNetworkSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual network"
+      }
+    },
+    "buildingBlockSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for building block"
+      }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "namePrefix": "[parameters('loadBalancerSettings').namePrefix]",
-    "lbName": "[concat(parameters('infrastructureSettings').baseName, '-', variables('namePrefix'), '-ilb')]",
+    "lbName": "[concat(variables('namePrefix'), '-ilb')]",
     "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
     "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/loadBalancer/loadBalancer.json')]",
     "multiVMTemplate": "[uri(deployment().properties.templateLink.uri, '../Multi-vm-n-nic-m-storage/azuredeploy.json')]"
@@ -41,8 +44,8 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('loadBalancerTemplate')]" },
         "parameters": {
-          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
-          "loadBalancerSettings": { "value": "[parameters('loadBalancerSettings')]" }
+          "loadBalancerSettings": { "value": "[parameters('loadBalancerSettings')]" },
+          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" }
         }
       }
     },
@@ -55,17 +58,15 @@
         "templateLink": { "uri": "[variables('multiVMTemplate')]" },
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
-          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
-          "storageAccountsCount": { "value": "[parameters('storageAccountsCount')]" },
-          "vmCount": { "value": "[parameters('vmCount')]" },
-          "vmStartIndex": { "value": "[parameters('vmStartIndex')]" }
+          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" },
+          "buildingBlockSettings": { "value": "[parameters('buildingBlockSettings')]" }
         }
       }
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2016-03-30",
-      "name": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex()), '-nic1')]",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('buildingBlockSettings').vmStartIndex, copyindex()), '-nic1')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'multiVMDeployTemplate')]",
@@ -73,7 +74,7 @@
       ],
       "copy": {
         "name": "VMCount",
-        "count": "[parameters('vmCount')]"
+        "count": "[parameters('buildingBlockSettings').vmCount]"
       },
       "properties": {
         "ipConfigurations": [
@@ -86,7 +87,7 @@
                 }
               ],
               "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('infrastructureSettings').vnetName, parameters('virtualMachinesSettings').nics[0].subnetName)]"
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkSettings').name, parameters('virtualMachinesSettings').nics[0].subnetName)]"
 
               }
             }
