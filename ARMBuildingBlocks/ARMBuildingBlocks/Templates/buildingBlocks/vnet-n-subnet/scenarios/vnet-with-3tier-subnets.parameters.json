@@ -5,7 +5,7 @@
     "baseName": { "value": "myapp" },
     "virtualNetworkSettings": {
       "value": {
-        "namePrefix": "",
+        "namePrefix": "cn",
         "addressPrefixes": [
           "10.0.0.0/16"
         ],
