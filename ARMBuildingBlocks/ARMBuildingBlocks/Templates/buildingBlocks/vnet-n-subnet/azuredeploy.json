@@ -41,7 +41,7 @@
         "templateLink": { "uri": "[variables('collectorTemplate')]" },
         "parameters": {
           "parentResourceName": { "value": "[variables('vnetName')]" },
-          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetwork/virtualNetwork-subnets.json')]" },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworks/virtualNetwork-subnets.json')]" },
           "source": { "value": "[parameters('virtualNetworkSettings').subnets]" },
           "context": {
             "value": {
