@@ -16,7 +16,7 @@
   "variables": {
     "instance": [
       {
-        "name": "[concat(parameters('context').baseName, '-', parameters('source').namePrefix, '-sn')]",
+        "name": "[parameters('source').name]",
         "properties": {
           "addressPrefix": "[parameters('source').addressPrefix]"
         }
