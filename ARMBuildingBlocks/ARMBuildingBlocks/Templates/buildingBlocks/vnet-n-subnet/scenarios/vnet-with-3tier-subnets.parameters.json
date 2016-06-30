@@ -13,15 +13,15 @@
         ],
         "subnets": [
           {
-            "namePrefix": "web",
+            "name": "myapp-web-sn",
             "addressPrefix": "10.0.0.0/24"
           },
           {
-            "namePrefix": "biz",
+            "namePrefix": "myapp-biz-sn",
             "addressPrefix": "10.0.1.0/24"
           },
           {
-            "namePrefix": "data",
+            "namePrefix": "myapp-data-sn",
             "addressPrefix": "10.0.2.0/24"
           }
         ]
