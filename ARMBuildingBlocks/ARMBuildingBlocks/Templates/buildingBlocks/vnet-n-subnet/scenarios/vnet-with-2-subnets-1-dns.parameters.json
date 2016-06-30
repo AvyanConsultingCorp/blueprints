@@ -4,25 +4,23 @@
   "parameters": {
     "virtualNetworkSettings": {
       "value": {
-        "name": "myapp-cn-vnet",
+        "name": "myapp1-cn-vnet",
         "addressPrefixes": [
           "10.0.0.0/16"
         ],
         "subnets": [
           {
-            "name": "myapp-web-sn",
+            "name": "myapp1-web-sn",
             "addressPrefix": "10.0.0.0/24"
           },
           {
-            "name": "myapp-biz-sn",
-            "addressPrefix": "10.0.1.0/24"
-          },
-          {
-            "name": "myapp-data-sn",
+            "name": "myapp1-data-sn",
             "addressPrefix": "10.0.2.0/24"
           }
         ],
-        "dnsServers": []
+        "dnsServers": [
+          "10.0.0.220"
+        ]
       }
     }
   }
