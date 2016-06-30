@@ -17,11 +17,11 @@
             "addressPrefix": "10.0.0.0/24"
           },
           {
-            "namePrefix": "myapp-biz-sn",
+            "name": "myapp-biz-sn",
             "addressPrefix": "10.0.1.0/24"
           },
           {
-            "namePrefix": "myapp-data-sn",
+            "name": "myapp-data-sn",
             "addressPrefix": "10.0.2.0/24"
           }
         ]
