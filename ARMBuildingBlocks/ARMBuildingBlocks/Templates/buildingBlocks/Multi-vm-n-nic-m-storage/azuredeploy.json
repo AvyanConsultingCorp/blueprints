@@ -8,26 +8,29 @@
         "description": "Settings for virtual machines"
       }
     },
-    "infrastructureSettings": {
+    "virtualNetworkSettings": {
       "type": "object",
       "metadata": {
-        "description": "Settings for infrastructure"
+        "description": "Settings for virtual network"
       }
     },
-    "storageAccountsCount": { "type": "int" },
-    "vmCount": { "type": "int" },
-    "vmStartIndex": { "type": "int" }
+    "buildingBlockSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for building block"
+      }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "templateUniqueString": "[uniqueString(concat(string(parameters('virtualMachinesSettings')), string(parameters('infrastructureSettings'))))]",
+    "templateUniqueString": "[uniqueString(concat(string(parameters('virtualMachinesSettings')), string(parameters('virtualNetworkSettings')), string(parameters('buildingBlockSettings')), resourceGroup().id))]",
     "availabilitySetTemplates": {
       "yes": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/availabilitySet-existing.json')]",
       "no": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/availabilitySet-neworempty.json')]"
     },
     "storageAccount": {
-      "diagnostic": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, uniqueString(resourceGroup().id), 'diag'))]",
-      "vhd": "[toLower(concat(parameters('virtualMachinesSettings').namePrefix, 'vm', uniqueString(resourceGroup().id), 'st'))]"
+      "diagnostic": "[toLower(concat('vm', variables('templateUniqueString'), 'diag'))]",
+      "vhd": "[toLower(concat('vm', variables('templateUniqueString'), 'st'))]"
     },
     "nVirtualMachinesTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/n-vm-n-nic.json')]",
     "replicatorTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/common/replicator.json')]"
@@ -41,12 +44,11 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('availabilitySetTemplates')[toLower(parameters('infrastructureSettings').availabilitySet.useExistingAvailabilitySet)]]"
+          "uri": "[variables('availabilitySetTemplates')[toLower(parameters('virtualMachinesSettings').availabilitySet.useExistingAvailabilitySet)]]"
         },
         "parameters": {
-          "baseName": { "value": "[parameters('infrastructureSettings').baseName]" },
-          "availabilitySetSettings": { "value": "[parameters('infrastructureSettings').availabilitySet]" },
-          "vmCount": { "value": "[parameters('vmCount')]" }
+          "availabilitySetSettings": { "value": "[parameters('virtualMachinesSettings').availabilitySet]" },
+          "vmCount": { "value": "[parameters('buildingBlockSettings').vmCount]" }
         }
       }
     },
@@ -66,7 +68,7 @@
       "location": "[variables('location')]",
       "name": "[concat(variables('storageAccount').vhd, copyIndex(1))]",
       "copy": {
-        "count": "[parameters('storageAccountsCount')]",
+        "count": "[parameters('buildingBlockSettings').storageAccountsCount]",
         "name": "storageAccountIterator"
       },
       "kind": "Storage",
@@ -86,8 +88,8 @@
           "source": { "value": { } },
           "context": {
             "value": {
-              "storageAccountsCount": "[parameters('storageAccountsCount')]",
-              "vmCount": "[parameters('vmCount')]"
+              "storageAccountsCount": "[parameters('buildingBlockSettings').storageAccountsCount]",
+              "vmCount": "[parameters('buildingBlockSettings').vmCount]"
             }
           },
           "state": {
@@ -99,7 +101,7 @@
             ]
           },
           "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/vm-per-storage-helper.json')]" },
-          "copies": { "value": "[parameters('storageAccountsCount')]" }
+          "copies": { "value": "[parameters('buildingBlockSettings').storageAccountsCount]" }
         }
       }
     },
@@ -109,7 +111,7 @@
       "name": "[concat('settings-vmSet-', copyindex(), '-', variables('templateUniqueString'))]",
       "copy": {
         "name": "virtualMachinesSetIterator",
-        "count": "[parameters('storageAccountsCount')]"
+        "count": "[parameters('buildingBlockSettings').storageAccountsCount]"
       },
       "properties": {
         "mode": "Incremental",
@@ -118,7 +120,7 @@
         },
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
-          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
+          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" },
           "context": {
             "value": {
               "storageAccounts": {
@@ -128,7 +130,7 @@
               "availabilitySetName": "[reference(concat('settings-avset-', variables('templateUniqueString'))).outputs.availabilitySetName.value]",
               "vmCount": "[reference(concat('settings-vmindex-', variables('templateUniqueString'))).outputs.result.value[copyindex(1)].vmCount]",
               "deployedVMCount": "[reference(concat('settings-vmindex-', variables('templateUniqueString'))).outputs.result.value[copyindex(1)].index]",
-              "vmStartIndex": "[parameters('vmStartIndex')]",
+              "vmStartIndex": "[parameters('buildingBlockSettings').vmStartIndex]",
               "iteration": "[copyindex()]"
             }
           }

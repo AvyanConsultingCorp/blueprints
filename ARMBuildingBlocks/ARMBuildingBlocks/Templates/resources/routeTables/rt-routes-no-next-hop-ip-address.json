@@ -22,8 +22,8 @@
       {
         "name": "[parameters('source').name]",
         "properties": {
-          "addressPrefix": "[parameters('source').properties.addressPrefix]",
-          "nextHopType": "[parameters('source').properties.nextHopType]"
+          "addressPrefix": "[parameters('source').addressPrefix]",
+          "nextHopType": "[parameters('source').nextHopType]"
         }
       }
     ]

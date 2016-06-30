@@ -2,22 +2,21 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "type": "string"
+    "virtualNetworkSettings": {
+      "type": "object"
     },
-    "infrastructureSettings": {
+    "networkSecurityGroupSettings": {
       "type": "object"
     }
   },
   "variables": {
-    "vnetName": "[parameters('infrastructureSettings').vnetName]",
-    "subnetName": "[parameters('infrastructureSettings').subnetName]",
-    "networkSecurityGroupName": "[parameters('infrastructureSettings').networkSecurityGroup.name]",
-    "networkSecurityGroupSecurityRules": "[parameters('infrastructureSettings').networkSecurityGroup.securityRules]",
+    "vnetName": "[parameters('virtualNetworkSettings').name]",
+    "subnets": "[parameters('networkSecurityGroupSettings').subnets]",
+    "networkSecurityGroupName": "[parameters('networkSecurityGroupSettings').name]",
+    "networkSecurityGroupSecurityRules": "[parameters('networkSecurityGroupSettings').securityRules]",
     "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
     "referenceTemplate": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]",
-    "nsgRulesTemplateName": "[concat(variables('networkSecurityGroupName'), '-rules')]",
-    "subnetReferenceTemplateName": "[concat(variables('subnetName'), '-nsg-reference')]"
+    "nsgRulesTemplateName": "[concat(variables('networkSecurityGroupName'), '-rules')]"
   },
   "resources": [
     {
@@ -52,7 +51,11 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[variables('subnetReferenceTemplateName')]",
+      "name": "[concat(variables('subnets')[copyIndex()], '-ref')]",
+      "copy": {
+        "name": "subnet-reference-iterator",
+        "count": "[length(variables('subnets'))]"
+      },
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -66,25 +69,71 @@
             "value": "[variables('vnetName')]"
           },
           "resourceName2": {
-            "value": "[variables('subnetName')]"
+            "value": "[variables('subnets')[copyIndex()]]"
           }
         }
       }
     },
     {
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "apiVersion": "2016-03-30",
-      "name": "[concat(variables('vnetName'), '/', variables('subnetName'))]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "addressPrefix": "[reference(variables('subnetReferenceTemplateName')).outputs.reference.value.properties.addressPrefix]",
-        "networksecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
-        }
-      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('networkSecurityGroupName'), '-sn-0')]",
       "dependsOn": [
         "[variables('networkSecurityGroupName')]"
-      ]
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "parameters": { },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "variables": { },
+          "resources": [ ],
+          "outputs": { }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('networkSecurityGroupName'), '-sn-', copyindex(1))]",
+      "dependsOn": [
+        "[concat(variables('networkSecurityGroupName'), '-sn-', copyindex())]"
+      ],
+      "copy": {
+        "name": "[concat(variables('networkSecurityGroupName'), '-sn-iterator')]",
+        "count": "[length(variables('subnets'))]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+          },
+          "variables": {
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2016-03-30",
+              "name": "[concat(variables('vnetName'), '/', variables('subnets')[copyIndex()])]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "addressPrefix": "[reference(concat(variables('subnets')[copyIndex()], '-ref')).outputs.reference.value.properties.addressPrefix]",
+                "networksecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                }
+              }
+            }
+          ],
+          "outputs": {
+          }
+        },
+        "parameters": {
+        }
+      }
     }
   ],
   "outputs": {

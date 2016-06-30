@@ -2,22 +2,21 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "type": "string"
+    "virtualNetworkSettings": {
+      "type": "object"
     },
-    "infrastructureSettings": {
+    "routeTableSettings": {
       "type": "object"
     }
   },
   "variables": {
-    "vnetName": "[parameters('infrastructureSettings').vnetName]",
-    "subnetName": "[parameters('infrastructureSettings').subnetName]",
-    "routeTableName": "[parameters('infrastructureSettings').routeTable.name]",
-    "routeTableRoutes": "[parameters('infrastructureSettings').routeTable.routes]",
+    "vnetName": "[parameters('virtualNetworkSettings').name]",
+    "subnets": "[parameters('routeTableSettings').subnets]",
+    "routeTableName": "[parameters('routeTableSettings').name]",
+    "routeTableRoutes": "[parameters('routeTableSettings').routes]",
     "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
     "referenceTemplate": "[uri(deployment().properties.templateLink.uri, '../common/reference.json')]",
-    "routeTablesRoutesTemplateName": "[concat(variables('routeTableName'), '-routes')]",
-    "subnetReferenceTemplateName": "[concat(variables('subnetName'), '-rt-reference')]"
+    "routeTablesRoutesTemplateName": "[concat(variables('routeTableName'), '-routes')]"
   },
   "resources": [
     {
@@ -54,7 +53,11 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[variables('subnetReferenceTemplateName')]",
+      "name": "[concat(variables('subnets')[copyIndex()], '-ref')]",
+      "copy": {
+        "name": "subnet-reference-iterator",
+        "count": "[length(variables('subnets'))]"
+      },
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -68,25 +71,71 @@
             "value": "[variables('vnetName')]"
           },
           "resourceName2": {
-            "value": "[variables('subnetName')]"
+            "value": "[variables('subnets')[copyIndex()]]"
           }
         }
       }
     },
     {
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "apiVersion": "2016-03-30",
-      "name": "[concat(variables('vnetName'), '/', variables('subnetName'))]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "addressPrefix": "[reference(variables('subnetReferenceTemplateName')).outputs.reference.value.properties.addressPrefix]",
-        "routeTable": {
-          "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableName'))]"
-        }
-      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('routeTableName'), '-sn-0')]",
       "dependsOn": [
         "[variables('routeTableName')]"
-      ]
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "parameters": { },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "variables": { },
+          "resources": [ ],
+          "outputs": { }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('routeTableName'), '-sn-', copyindex(1))]",
+      "dependsOn": [
+        "[concat(variables('routeTableName'), '-sn-', copyindex())]"
+      ],
+      "copy": {
+        "name": "[concat(variables('routeTableName'), '-sn-iterator')]",
+        "count": "[length(variables('subnets'))]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+          },
+          "variables": {
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets",
+              "apiVersion": "2016-03-30",
+              "name": "[concat(variables('vnetName'), '/', variables('subnets')[copyIndex()])]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "addressPrefix": "[reference(concat(variables('subnets')[copyIndex()], '-ref')).outputs.reference.value.properties.addressPrefix]",
+                "routeTable": {
+                  "id": "[resourceId('Microsoft.Network/routeTables', variables('routeTableName'))]"
+                }
+              }
+            }
+          ],
+          "outputs": {
+          }
+        },
+        "parameters": {
+        }
+      }
     }
   ],
   "outputs": {

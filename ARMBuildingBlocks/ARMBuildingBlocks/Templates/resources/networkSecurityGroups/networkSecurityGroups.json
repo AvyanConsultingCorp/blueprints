@@ -1,0 +1,42 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkSettings": {
+      "type": "object"
+    },
+    "networkSecurityGroupSettings": {
+      "type": "object"
+    }
+  },
+  "variables": {
+    "networkSecurityGroups": "[parameters('networkSecurityGroupSettings').networkSecurityGroups]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('networkSecurityGroups')[copyIndex()].name, '-tmpl')]",
+      "copy": {
+        "name": "iterator",
+        "count": "[length(variables('networkSecurityGroups'))]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'networkSecurityGroup.json')]"
+        },
+        "parameters": {
+          "virtualNetworkSettings": {
+            "value": "[parameters('virtualNetworkSettings')]"
+          },
+          "networkSecurityGroupSettings": {
+            "value": "[variables('networkSecurityGroups')[copyIndex()]]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
