@@ -10,13 +10,13 @@
   },
   "variables": {
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
-    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-dsc-extension2.json"
+    "extensionTemplate": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Templates/bb-dsc-extension-adds.json"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "[concat(parameters('vmName'),'-vm-iis-installation',variables('uniqueString'))]",
+      "name": "[concat(parameters('vmName'),'-adds-installation',variables('uniqueString'))]",
       "properties": {
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('extensionTemplate')]" },
