@@ -4,7 +4,7 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "vmn",
+        "namePrefix": "myapp",
         "computerNamePrefix": "cn",
         "size": "Standard_DS2",
         "adminUsername": "testuser",
@@ -29,7 +29,7 @@
         },
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
-          "name": "rs1"
+          "name": "myapp"
         }
       },
       "metadata": {
@@ -38,10 +38,10 @@
     },
     "virtualNetworkSettings": {
       "value": {
-        "name": "rs1-dev-vnet"
+        "name": "myapp-vnet"
       },
       "metadata": {
-        "description": "Infrastructure Settings"
+        "description": "Virtual network settings"
       }
     },
     "loadBalancerSettings": {
