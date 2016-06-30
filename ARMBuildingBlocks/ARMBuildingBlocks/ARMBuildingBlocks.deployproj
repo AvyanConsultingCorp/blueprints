@@ -95,7 +95,8 @@
     <None Include="Templates\resources\virtualMachines\private-static-nics-settings.json" />
     <None Include="Templates\resources\virtualMachines\vm-per-storage-helper.json" />
     <None Include="Templates\resources\virtualNetworkGateways\virtualNetworkGateway.json" />
-    <None Include="Templates\resources\virtualNetwork\virtualNetwork-subnets.json" />
+    <None Include="Templates\resources\virtualNetworks\virtualNetwork-subnets.json" />
+    <None Include="Templates\resources\virtualNetworks\virtualNetwork.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />
