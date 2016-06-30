@@ -67,8 +67,10 @@
     <None Include="Templates\resources\localNetworkGateway\localNetworkGateway.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup-securityRules.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup.json" />
+    <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroups.json" />
     <None Include="Templates\resources\routeTables\routeTable-routes.json" />
     <None Include="Templates\resources\routeTables\routeTable.json" />
+    <None Include="Templates\resources\routeTables\routeTables.json" />
     <None Include="Templates\resources\routeTables\rt-routes-no-next-hop-ip-address.json" />
     <None Include="Templates\resources\routeTables\rt-routes-with-next-hop-ip-address.json" />
     <None Include="Templates\resources\virtualMachines\availabilitySet-neworempty.json" />

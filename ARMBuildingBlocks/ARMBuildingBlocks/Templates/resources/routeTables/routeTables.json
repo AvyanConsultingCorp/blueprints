@@ -1,0 +1,42 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualNetworkSettings": {
+      "type": "object"
+    },
+    "routeTableSettings": {
+      "type": "object"
+    }
+  },
+  "variables": {
+    "routeTables": "[parameters('routeTableSettings').routeTables]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(variables('routeTables')[copyIndex()].name, '-tmpl')]",
+      "copy": {
+        "name": "iterator",
+        "count": "[length(variables('routeTables'))]"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[uri(deployment().properties.templateLink.uri, 'routeTable.json')]"
+        },
+        "parameters": {
+          "virtualNetworkSettings": {
+            "value": "[parameters('virtualNetworkSettings')]"
+          },
+          "routeTableSettings": {
+            "value": "[variables('routeTables')[copyIndex()]]"
+          }
+        }
+      }
+    }
+  ],
+    "outputs": {
+    }
+}
