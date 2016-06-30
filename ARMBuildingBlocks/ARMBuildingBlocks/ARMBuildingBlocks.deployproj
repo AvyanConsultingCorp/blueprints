@@ -64,7 +64,6 @@
     <None Include="Templates\resources\loadBalancer\lb-loadBalancingRules.json" />
     <None Include="Templates\resources\loadBalancer\lb-probes.json" />
     <None Include="Templates\resources\loadBalancer\loadBalancer.json" />
-    <None Include="Templates\resources\localNetworkGateway\localNetworkGateway.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup-securityRules.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroups.json" />
