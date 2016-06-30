@@ -2,26 +2,22 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": "rs1",
     "virtualNetworkSettings": {
-      "namePrefix": "dev",
-      "addressPrefixes": [
-        "10.0.0.0/16"
-      ],
-      "subnets": [
-        {
-          "namePrefix": "web",
-          "addressPrefix": "10.0.0.0/24"
-        },
-        {
-          "namePrefix": "biz",
-          "addressPrefix": "10.0.1.0/24"
-        },
-        {
-          "namePrefix": "data",
-          "addressPrefix": "10.0.2.0/24"
-        }
-      ]
+      "value": {
+        "name": "drew-ra-vnet",
+        "addressPrefixes": [ "10.5.0.0/16" ],
+        "subnets": [
+          {
+            "name": "web-sn",
+            "addressPrefix": "10.5.1.0/24"
+          },
+          {
+            "name": "data-sn",
+            "addressPrefix": "10.5.2.0/24"
+          }
+        ],
+        "dnsServers": []
+      }
     }
   }
 }
