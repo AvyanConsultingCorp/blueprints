@@ -29,7 +29,7 @@
         },
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
-          "name": "myapp"
+          "name": "myapp-web-as"
         }
       },
       "metadata": {
@@ -38,7 +38,7 @@
     },
     "virtualNetworkSettings": {
       "value": {
-        "name": "myapp-vnet"
+        "name": "myapp-cn-vnet"
       },
       "metadata": {
         "description": "Virtual network settings"
@@ -90,7 +90,7 @@
       "value": {
         "storageAccountsCount": 1,
         "vmCount": 3,
-        "vmStartIndex": 2
+        "vmStartIndex": 1
       },
       "metadata": {
         "description": "Settings specific to the building block"
