@@ -118,10 +118,10 @@
       "tags": { "displayName": "VM" },
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('vmAvSetName'))]"
+        "[concat('Microsoft.Compute/availabilitySets/', parameters('vmAvSetName'))]"
       ],
       "properties": {
-        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('vmAvSetName'))]" },
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('vmAvSetName'))]" },
         "hardwareProfile": { "vmSize": "[variables('VMSetting').vmSize]" },
         "osProfile": {
           "computerName": "[variables('vmName')]",
