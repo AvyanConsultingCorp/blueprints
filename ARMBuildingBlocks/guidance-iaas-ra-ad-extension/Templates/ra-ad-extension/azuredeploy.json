@@ -202,7 +202,7 @@
           ]
         },
         "dhcpOptions": {
-          "dnsServers": [ "[parameters('onpremDnsServerAddress')]" ]
+          "dnsServers": []
         },
         "subnets": [
           {
