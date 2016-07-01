@@ -14,7 +14,7 @@
             "isPublic": "false",
             "isPrimary": "true",
             "subnetName": "myapp-web-sn",
-            "ipAllocationMethod": "static",
+            "privateIPAllocationMethod": "static",
             "startingIPAddress": "10.0.0.240"
           }
         ],
