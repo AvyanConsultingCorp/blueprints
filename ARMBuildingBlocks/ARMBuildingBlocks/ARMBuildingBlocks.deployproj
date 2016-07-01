@@ -33,18 +33,31 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <None Include="Drivers\Bash\deploy-template-with-param.sh" />
+    <None Include="Drivers\Json\deploy-template-with-param.json" />
+    <None Include="Drivers\Json\deploy-template-with-param.parameters.json" />
+    <None Include="Drivers\Powershell\deploy-vnet-n-subnets.ps1" />
     <None Include="Scripts\apache.sh" />
     <None Include="Scripts\iisaspnet.ps1" />
     <None Include="Scripts\iisaspnet.ps1.zip" />
     <None Include="Scripts\nva.sh" />
     <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\scenarios\3tier-loadbalanced-iaas\biz-tier-4vms-1nic-avset-ilb-2disk.parameters.json" />
+    <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\scenarios\3tier-loadbalanced-iaas\data-tier-2vms-1nic-avset-ilb-2disk.parameters.json" />
+    <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\scenarios\3tier-loadbalanced-iaas\web-tier-3vms-1nic-avset-lb.parameters.json" />
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\scenarios\4-vm-2-sa-2-nic-3-dd-public-ip.parameters.json" />
     <None Include="Templates\buildingBlocks\nvas-ntier-network\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\nvas-ntier-network\azuredeploy.parameters.json" />
-    <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.json" />
+    <None Include="Templates\buildingBlocks\nvas-ntier-network\scenarios\2-nva-gwy-vm-ipfwding-enabled.parameters.json" />
+    <None Include="Templates\buildingBlocks\nvas-ntier-network\scenarios\network-topology.png" />
+    <None Include="Templates\buildingBlocks\nvas-ntier-network\scenarios\setup-script.ps1" />
     <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\vnet-n-subnet\scenarios\vnet-with-2-subnets-1-dns.parameters.json" />
+    <None Include="Templates\buildingBlocks\vnet-n-subnet\scenarios\vnet-with-3tier-subnets.parameters.json" />
+    <None Include="Templates\buildingBlocks\vnet-n-subnet\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\vpn-gateway-vpn-connection\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\vpn-gateway-vpn-connection\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\vpn-gateway-vpn-er-failover\azuredeploy.json" />
