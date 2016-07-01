@@ -35,9 +35,7 @@
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
           "name": "a0-data-as"
-        }	
-	
-	
+        },	
         "osDisk": {
           "caching": "ReadWrite"
         }
