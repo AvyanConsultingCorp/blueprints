@@ -4,7 +4,7 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "vmn",
+        "namePrefix": "a0",
         "computerNamePrefix": "cn",
         "size": "Standard_DS2",
         "adminUsername": "testuser",
@@ -13,20 +13,9 @@
           {
             "isPublic": "false",
             "isPrimary": "true",
-            "subnetName": "rs1-web-sn",
-            "ipAllocationMethod": "static",
-            "startingIPAddress": "10.0.0.240"
-          },
-          {
-            "isPublic": "false",
-            "isPrimary": "false",
-            "subnetName": "rs1-biz-sn",
-            "ipAllocationMethod": "dynamic"
-          },
-          {
-            "isPublic": "true",
-            "isPrimary": "true",
-            "ipAllocationMethod": "static"
+            "subnetName": "a0-data-sn",
+            "privateIPAllocationMethod": "static",
+            "startingIPAddress": "10.0.1.240"
           }
         ],
         "imageReference": {
@@ -43,6 +32,12 @@
             "createOption": "Empty"
           }
         },
+        "availabilitySet": {
+          "useExistingAvailabilitySet": "No",
+          "name": "a0-data-as"
+        }	
+	
+	
         "osDisk": {
           "caching": "ReadWrite"
         }
@@ -51,31 +46,17 @@
         "description": "Settings for Virtual Machines"
       }
     },
-    "infrastructureSettings": {
-      "value": {
-        "baseName": "rs1",
-        "vnetResourceGroup": "rs-bb4-rg",
-        "vnetName": "rs1-dev-vnet",
-        "availabilitySet": {
-          "useExistingAvailabilitySet": "No",
-          "prefix": "xx",
-          "name": ""
-        }
-      },
-      "metadata": {
-        "description": "Infrastructure Settings"
-      }
-    },
+
     "loadBalancerSettings": {
       "value": {
-        "subnetName": "rs1-web-sn",
-        "namePrefix": "web",
+        "subnetName": "a0-data-sn",
+        "namePrefix": "data",
         "frontendIPConfigurations": [
           {
             "name": "config1",
-            "loadBalancerType": "public",
+            "loadBalancerType": "private",
             "internalLoadBalancerSettings": {
-              "privateIPAddress": "10.0.0.254",
+              "privateIPAddress": "10.0.1.10",
               "subnetName": "test-sn"
             }
           }
@@ -108,9 +89,15 @@
         ]
       }
     },
-    "storageAccountsCount": { "value": 1 },
-    "vmCount": { "value": 3 },
-    "vmStartIndex": { "value": 1 }
-
+    "buildingBlockSettings": {
+      "value": {
+        "storageAccountsCount": 1,
+        "vmCount": 2,
+        "vmStartIndex": 4
+      },
+      "metadata": {
+        "description": "Settings specific to the building block"
+      }
+    }
   }
 }
