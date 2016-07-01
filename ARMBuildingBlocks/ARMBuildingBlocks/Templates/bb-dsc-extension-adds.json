@@ -28,7 +28,7 @@
       "properties": {
         "publisher": "[variables('publisher')]",
         "type": "[variables('type')]",
-        "typeHandlerVersion": "[variables('typeHandlerVersion')]",
+        "typeHandlerVersion": "[parameters('dscTypeHandlerVersion')]",
         "settings": {
           "ModulesUrl": "[variables('ModulesUrl')]",
           "SasToken": "[variables('SasToken')]",
