@@ -15,7 +15,7 @@
             "isPrimary": "true",
             "subnetName": "a0-biz-sn",
             "privateIPAllocationMethod": "static",
-            "startingIPAddress": "10.0.2.240"
+            "startingIPAddress": "10.0.1.240"
           }
         ],
         "imageReference": {
@@ -61,7 +61,7 @@
             "name": "config1",
             "loadBalancerType": "internal",
             "internalLoadBalancerSettings": {
-              "privateIPAddress": "10.0.2.10",
+              "privateIPAddress": "10.0.1.10",
               "subnetName": "a0-biz-sn"
             }
           }
