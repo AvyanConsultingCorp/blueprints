@@ -1,0 +1,74 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "value": {
+        "namePrefix": "myapp-vm",
+        "computerNamePrefix": "cn",
+        "size": "Standard_DS2",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "nics": [
+          {
+            "isPublic": "false",
+            "subnetName": "myapp-web-sn",
+            "privateIPAllocationMethod": "static",
+            "startingIPAddress": "10.0.0.240",
+            "isPrimary": "false"
+          },
+          {
+            "isPublic": "true",
+            "publicIPAllocationMethod": "dynamic",
+            "subnetName": "myapp-data-sn",
+            "privateIPAllocationMethod": "static",
+            "startingIPAddress": "10.0.2.240",
+            "isPrimary": "true"
+          }
+        ],
+        "imageReference": {
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2012-R2-Datacenter",
+          "version": "latest"
+        },
+        "dataDisks": {
+          "count": 3,
+          "properties": {
+            "diskSizeGB": 127,
+            "caching": "None",
+            "createOption": "Empty"
+          }
+        },
+        "osDisk": {
+          "caching": "ReadWrite"
+        },
+        "availabilitySet": {
+          "useExistingAvailabilitySet": "No",
+          "name": "myapp-cn-as"
+        }
+      },
+      "metadata": {
+        "description": "Settings for Virtual Machines"
+      }
+    },
+    "virtualNetworkSettings": {
+      "value": {
+        "name": "myapp-cn-vnet"
+      },
+      "metadata": {
+        "description": "Infrastructure Settings"
+      }
+    },
+    "buildingBlockSettings": {
+      "value": {
+        "storageAccountsCount": 2,
+        "vmCount": 4,
+        "vmStartIndex": 1
+      },
+      "metadata": {
+        "description": "Settings specific to the building block"
+      }
+    }
+  }
+}
