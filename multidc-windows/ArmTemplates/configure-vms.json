@@ -195,9 +195,17 @@
         "[concat(' -Domain ', variables('sqlDomainName'),' -AdminUser ', variables('sqlDomainLogin'),' -AdminPassword ', parameters('adminPassword'), ' -ClusterName ', variables('clusterName'))]"
       ]
     },
-    "vmArray": [
-      "[variables('vmSettings').vmName[2]]",
-      "[variables('vmSettings').vmName[4]]"
+    "sqlAlwaysOnVmConfig": [
+      {
+        "name": "[variables('vmSettings').vmName[2]]",
+        "fileUri": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'AlwaysOn_0.ps1')]",
+        "command": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), 'AlwaysOn_0.ps1 ', variables('vmSettings').psArgument[2])]"
+      },
+      {
+        "name": "[variables('vmSettings').vmName[4]]",
+        "fileUri": "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),'AlwaysOn_1.ps1')]",
+        "command": "[concat('powershell -ExecutionPolicy Unrestricted -File ', variables('sqlAlwaysOnConfigScriptFileName'), 'AlwaysOn_1.ps1 ', variables('vmSettings').psArgument[4])]"
+      } 
     ]
   },
   "resources": [
@@ -767,7 +775,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(variables('vmArray')[copyindex()],'/configure-sql-alwayson')]",
+      "name": "[concat(variables('sqlAlwaysOnVmConfig')[copyindex()].name,'/configure-sql-alwayson')]",
       "apiVersion": "2015-06-15",
       "location": "[resourceGroup().location]",
       "copy": {
@@ -775,7 +783,7 @@
         "name": "configLoop"
       },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/',variables('vmArray')[copyindex()])]"
+        "[concat('Microsoft.Compute/virtualMachines/',variables('sqlAlwaysOnVmConfig')[copyindex()].name)]"
       ],
       "properties": {
         "publisher": "Microsoft.Compute",
@@ -784,8 +792,9 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
-            "[concat(uri(deployment().properties.templateLink.uri, variables('sqlAlwaysOnConfigScriptFolder')),'/', variables('sqlAlwaysOnConfigScriptFileName'),copyIndex(),'_0.ps1')]"
-          ]
+            "[variables('sqlAlwaysOnVmConfig')[copyindex()].fileUri]"
+          ],
+          "commandToExecute": "[variables('sqlAlwaysOnVmConfig')[copyindex()].command]"
         }
       }
     }
