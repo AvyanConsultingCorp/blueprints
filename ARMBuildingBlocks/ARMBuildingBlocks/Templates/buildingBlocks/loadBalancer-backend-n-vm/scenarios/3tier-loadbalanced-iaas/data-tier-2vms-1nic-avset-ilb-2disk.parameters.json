@@ -62,7 +62,7 @@
             "loadBalancerType": "internal",
             "internalLoadBalancerSettings": {
               "privateIPAddress": "10.0.1.10",
-              "subnetName": "test-sn"
+              "subnetName": "a0-data-sn"
             }
           }
         ],

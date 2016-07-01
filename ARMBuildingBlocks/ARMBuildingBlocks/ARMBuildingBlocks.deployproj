@@ -43,9 +43,9 @@
     <None Include="Scripts\nva.sh" />
     <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\azuredeploy.parameters.json" />
+    <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\scenarios\3tier-loadbalanced-iaas\biz-tier-4vms-1nic-avset-ilb-2disk.parameters.json" />
     <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\scenarios\3tier-loadbalanced-iaas\data-tier-2vms-1nic-avset-ilb-2disk.parameters.json" />
     <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\scenarios\3tier-loadbalanced-iaas\web-tier-3vms-1nic-avset-lb.parameters.json" />
-    <None Include="Templates\buildingBlocks\loadBalancer-backend-n-vm\scenarios\3tier-loadbalanced-iaas\biz-tier-4vms-1nic-avset-ilb-3disk.parameters.json" />
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.json" />
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\azuredeploy.parameters.json" />
     <None Include="Templates\buildingBlocks\Multi-vm-n-nic-m-storage\scenarios\4-vm-2-sa-2-nic-3-dd-public-ip.parameters.json" />
