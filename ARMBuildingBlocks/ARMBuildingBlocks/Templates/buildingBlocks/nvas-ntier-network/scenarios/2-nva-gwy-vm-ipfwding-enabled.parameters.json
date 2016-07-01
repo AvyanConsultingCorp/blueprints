@@ -1,0 +1,131 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "value": {
+        "namePrefix": "dev",
+        "computerNamePrefix": "dev",
+        "size": "Standard_DS2",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "nics": [
+          {
+            "isPrimary": "true",
+            "subnetName": "app0-in-subnet",
+            "ipAllocationMethod": "static",
+            "startingIPAddress": "10.0.1.240"
+          },
+          {
+            "isPrimary": "false",
+            "subnetName": "app0-out-subnet",
+            "ipAllocationMethod": "dynamic"
+          }
+        ],
+        "imageReference": {
+          "publisher": "canonical",
+          "offer": "ubuntuserver",
+          "sku": "15.10",
+          "version": "latest"
+        },
+        "dataDisks": {
+          "count": 2,
+          "properties": {
+            "diskSizeGB": 127,
+            "caching": "None",
+            "createOption": "Empty"
+          }
+        },
+        "osDisk": {
+          "caching": "ReadWrite"
+        }
+      },
+      "metadata": {
+        "description": "Settings for Virtual Machines"
+      }
+    },
+    "infrastructureSettings": {
+      "value": {
+        "baseName": "app0",
+        "vnetResourceGroup": "app0-rg",
+        "vnetName": "app0-vnet",
+        "availabilitySet": {
+          "useExistingAvailabilitySet": "No",
+          "prefix": "dev",
+          "name": ""
+        },
+        "subnetName": "GatewaySubnet",
+        "routeTable": {
+          "name": "app0-rtable1",
+          "subnetName": "GatewaySubnet",
+          "routes": [
+            {
+              "name": "route1",
+              "properties": {
+                "addressPrefix": "10.0.1.10/24",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.0.255.224"
+              }
+            },
+            {
+              "name": "route2",
+              "properties": {
+                "addressPrefix": "10.0.2.10/24",
+                "nextHopType": "VirtualAppliance",
+                "nextHopIpAddress": "10.0.255.224"
+              }
+            }
+          ]
+        },
+        "metadata": {
+          "description": "Infrastructure Settings"
+        }
+      }
+    },
+    "loadBalancerSettings": {
+      "value": {
+        "subnetName": "GatewaySubnet",
+        "namePrefix": "web",
+        "frontendIPConfigurations": [
+          {
+            "name": "config1",
+            "loadBalancerType": "public",
+            "internalLoadBalancerSettings": {
+              "privateIPAddress": "10.0.1.10",
+              "subnetName": "app0-in-subnet"
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "frontendPort": 80,
+            "backendPort": 80,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
+          },
+          {
+            "frontendPort": 443,
+            "backendPort": 443,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
+          }
+        ],
+        "probes": [
+          {
+            "port": 80,
+            "protocol": "Http",
+            "requestPath": "/"
+          },
+          {
+            "port": 443,
+            "protocol": "Http",
+            "requestPath": "/"
+          }
+        ]
+      }
+    },
+    "storageAccountsCount": { "value": 1 },
+    "vmCount": { "value": 2 },
+    "vmStartIndex": { "value": 1 }
+  }
+}

@@ -1,0 +1,108 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": {
+      "value": {
+        "namePrefix": "a0",
+        "computerNamePrefix": "cn",
+        "size": "Standard_DS2",
+        "adminUsername": "testuser",
+        "adminPassword": "AweS0me@PW",
+        "nics": [
+          {
+            "isPublic": "false",
+            "isPrimary": "true",
+            "subnetName": "a0-biz-sn",
+            "privateIPAllocationMethod": "static",
+            "startingIPAddress": "10.0.1.240"
+          }
+        ],
+        "imageReference": {
+          "publisher": "MicrosoftWindowsServer",
+          "offer": "WindowsServer",
+          "sku": "2012-R2-Datacenter",
+          "version": "latest"
+        },
+        "dataDisks": {
+          "count": 2,
+          "properties": {
+            "diskSizeGB": 127,
+            "caching": "None",
+            "createOption": "Empty"
+          }
+        },
+        "osDisk": {
+          "caching": "ReadWrite"
+        },
+        "availabilitySet": {
+          "useExistingAvailabilitySet": "No",
+          "name": "a0-biz-as"
+        }
+      },
+      "metadata": {
+        "description": "Settings for Virtual Machines"
+      }
+    },
+    "virtualNetworkSettings": {
+      "value": {
+        "name": "a0-cn-vnet"
+      },
+      "metadata": {
+        "description": "Virtual network settings"
+      }
+    },
+    "loadBalancerSettings": {
+      "value": {
+        "subnetName": "a0-biz-sn",
+        "namePrefix": "biz",
+        "frontendIPConfigurations": [
+          {
+            "name": "config1",
+            "loadBalancerType": "internal",
+            "internalLoadBalancerSettings": {
+              "privateIPAddress": "10.0.1.10",
+              "subnetName": "a0-biz-sn"
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "frontendPort": 80,
+            "backendPort": 80,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
+          },
+          {
+            "frontendPort": 443,
+            "backendPort": 443,
+            "protocol": "Tcp",
+            "frontendIPConfigurationName": "config1"
+          }
+        ],
+        "probes": [
+          {
+            "port": 80,
+            "protocol": "Http",
+            "requestPath": "/"
+          },
+          {
+            "port": 443,
+            "protocol": "Http",
+            "requestPath": "/"
+          }
+        ]
+      }
+    },
+    "buildingBlockSettings": {
+      "value": {
+        "storageAccountsCount": 2,
+        "vmCount": 4,
+        "vmStartIndex": 6
+      },
+      "metadata": {
+        "description": "Settings specific to the building block"
+      }
+    }
+  }
+}
