@@ -4,7 +4,7 @@
   "parameters": {
     "virtualMachinesSettings": {
       "value": {
-        "namePrefix": "myapp",
+        "namePrefix": "a0",
         "computerNamePrefix": "cn",
         "size": "Standard_DS2",
         "adminUsername": "testuser",
@@ -13,7 +13,7 @@
           {
             "isPublic": "false",
             "isPrimary": "true",
-            "subnetName": "myapp-web-sn",
+            "subnetName": "a0-web-sn",
             "privateIPAllocationMethod": "static",
             "startingIPAddress": "10.0.0.240"
           }
@@ -37,7 +37,7 @@
         },
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
-          "name": "myapp-web-as"
+          "name": "a0-web-as"
         }
       },
       "metadata": {
@@ -46,7 +46,7 @@
     },
     "virtualNetworkSettings": {
       "value": {
-        "name": "myapp-cn-vnet"
+        "name": "a0-cn-vnet"
       },
       "metadata": {
         "description": "Virtual network settings"
@@ -54,7 +54,7 @@
     },
     "loadBalancerSettings": {
       "value": {
-        "subnetName": "myapp-web-sn",
+        "subnetName": "a0-web-sn",
         "namePrefix": "web",
         "frontendIPConfigurations": [
           {
