@@ -27,6 +27,14 @@
         "osDisk": {
           "caching": "ReadWrite"
         },
+        "dataDisks": {
+          "count": 1,
+          "properties": {
+            "diskSizeGB": 127,
+            "caching": "None",
+            "createOption": "Empty"
+          }
+        },
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
           "name": "myapp-web-as"
