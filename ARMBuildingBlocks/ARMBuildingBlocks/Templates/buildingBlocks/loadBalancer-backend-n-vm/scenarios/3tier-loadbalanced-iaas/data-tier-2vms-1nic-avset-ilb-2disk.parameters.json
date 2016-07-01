@@ -32,12 +32,12 @@
             "createOption": "Empty"
           }
         },
+        "osDisk": {
+          "caching": "ReadWrite"
+        },
         "availabilitySet": {
           "useExistingAvailabilitySet": "No",
           "name": "a0-data-as"
-        },	
-        "osDisk": {
-          "caching": "ReadWrite"
         }
       },
       "metadata": {
