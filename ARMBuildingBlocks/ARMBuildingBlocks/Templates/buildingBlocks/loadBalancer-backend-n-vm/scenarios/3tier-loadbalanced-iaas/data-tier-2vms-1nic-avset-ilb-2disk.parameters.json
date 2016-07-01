@@ -44,7 +44,14 @@
         "description": "Settings for Virtual Machines"
       }
     },
-
+    "virtualNetworkSettings": {
+      "value": {
+        "name": "a0-cn-vnet"
+      },
+      "metadata": {
+        "description": "Virtual network settings"
+      }
+    },
     "loadBalancerSettings": {
       "value": {
         "subnetName": "a0-data-sn",
