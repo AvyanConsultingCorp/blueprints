@@ -104,7 +104,6 @@
       "tags": { "displayName": "VM" },
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]",
-        "[concat('Microsoft.Compute/availabilitySets/', parameters('vmAvSetName'))]"
       ],
       "properties": {
         "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('vmAvSetName'))]" },
