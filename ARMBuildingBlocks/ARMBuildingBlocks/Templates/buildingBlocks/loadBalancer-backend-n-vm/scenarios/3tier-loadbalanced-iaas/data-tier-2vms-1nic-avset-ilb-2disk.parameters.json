@@ -59,7 +59,7 @@
         "frontendIPConfigurations": [
           {
             "name": "config1",
-            "loadBalancerType": "private",
+            "loadBalancerType": "internal",
             "internalLoadBalancerSettings": {
               "privateIPAddress": "10.0.1.10",
               "subnetName": "test-sn"
