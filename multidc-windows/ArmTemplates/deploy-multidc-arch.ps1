@@ -1,11 +1,11 @@
 ﻿Login-AzureRmAccount
-Select-AzureRmSubscription -SubscriptionName 'my-subscription-name'
+Select-AzureRmSubscription -SubscriptionId 'a012a8b0-522a-4f59-81b6-aa0361eb9387'
 
 #############################################################################
 # Deploy infrastructure in first region
 
-$firstResourceGroupName='app-1-rg'
-$firstDeploymentName='app-1-rg-dep'
+$firstResourceGroupName='a0-rg'
+$firstDeploymentName='a0-rg-dep'
 $location1='West US' # First region to deploy into (see regional pairing for optimum selection)
 
 # Create new resource group
@@ -15,7 +15,14 @@ New-AzureRmResourceGroup -Name $firstResourceGroupName -Location $location1
 $templateUri = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-vnet.json'
 $templateParamUri1 = 'https://raw.githubusercontent.com/mspnp/blueprints/kirpas/multidc-arm-templates/multidc-windows/ArmTemplates/configure-vnet.v1.param.json'
 
-New-AzureRmResourceGroupDeployment -Name $firstDeploymentName -ResourceGroupName $firstResourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri1 -Verbose
+$result = Test-AzureRmResourceGroupDeployment -ResourceGroupName $firstResourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri1
+
+# Test-AzureRmResourceGroupDeployment returns a list of PSResourceManagerError objects, so a count of 0 is all clear signal!
+if($result.Count -eq 0){
+	New-AzureRmResourceGroupDeployment -Name $firstDeploymentName -ResourceGroupName $firstResourceGroupName -TemplateUri $templateUri -TemplateParameterUri $templateParamUri1 -Verbose
+}else{
+    $result
+}
 
 #############################################################################
 # Deploy infrastructure in second region
