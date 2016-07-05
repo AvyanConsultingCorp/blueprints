@@ -36,7 +36,8 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('templateToInvoke')]" },
         "parameters": {
-          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" }
+          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
+          "secureAdminPassword": {"value": "[parameters('secureAdminPassword')]"}
         }
       }
     }

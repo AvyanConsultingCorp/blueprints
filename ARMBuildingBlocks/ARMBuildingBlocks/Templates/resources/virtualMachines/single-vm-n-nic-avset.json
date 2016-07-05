@@ -7,6 +7,12 @@
       "metadata": {
         "description": "Settings for virtual machines."
       }
+    },
+    "secureAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Secure password via vault."
+      }
     }
   },
   "variables": {
@@ -46,7 +52,7 @@
         "osProfile": {
           "computerName": "[parameters('virtualMachinesSettings').vmName]",
           "adminUsername": "[parameters('virtualMachinesSettings').adminUsername]",
-          "adminPassword": "[parameters('virtualMachinesSettings').adminPassword]"
+          "adminPassword": "[parameters('secureAdminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
