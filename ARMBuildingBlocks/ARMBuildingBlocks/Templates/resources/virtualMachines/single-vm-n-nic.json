@@ -7,6 +7,12 @@
       "metadata": {
         "description": "Settings for virtual machines."
       }
+    },
+    "secureAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Secure password via vault."
+      }
     }
   },
   "variables": {

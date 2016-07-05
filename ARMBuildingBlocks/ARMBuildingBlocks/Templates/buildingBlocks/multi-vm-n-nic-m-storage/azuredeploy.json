@@ -19,6 +19,12 @@
       "metadata": {
         "description": "Settings for building block"
       }
+    },
+    "secureAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Admin password needs to be read in isolation to maintain format when accessed through keyvault."
+      }
     }
   },
   "variables": {
@@ -121,6 +127,7 @@
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
           "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" },
+          "secureAdminPassword": {"value": "[parameters('secureAdminPassword')]"},
           "context": {
             "value": {
               "storageAccounts": {

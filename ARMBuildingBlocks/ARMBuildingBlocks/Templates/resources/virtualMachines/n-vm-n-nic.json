@@ -19,6 +19,12 @@
       "metadata": {
         "description": "Settings for other parameters such as load balancer backend pool, storage account names."
       }
+    },
+    "secureAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Secure password passed in via keyvault"
+      }
     }
   },
   "variables": {
@@ -72,6 +78,9 @@
         "parameters": {
           "virtualMachinesSettings": {
             "value": "[reference(concat('settings-vmbatch-', parameters('context').iteration, '-', variables('templateUniqueString'))).outputs.result.value[copyindex()]]"
+          },
+          "secureAdminPassword": {
+            "value": "[parameters('secureAdminPassword')]"
           }
         }
       }
