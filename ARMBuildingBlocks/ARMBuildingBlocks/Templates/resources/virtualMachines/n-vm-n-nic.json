@@ -53,6 +53,7 @@
                 "diagnostic": "[parameters('context').storageAccounts.diagnostic]",
                 "vhd": "[parameters('context').storageAccounts.vhd]"
               },
+              "secureAdminPassword": "[parameters('secureAdminPassword')]",
               "availabilitySetName": "[parameters('context').availabilitySetName]"
             }
           },

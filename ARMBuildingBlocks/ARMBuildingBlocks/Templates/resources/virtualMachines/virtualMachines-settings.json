@@ -85,7 +85,7 @@
                   "availabilitySetName": "[parameters('context').availabilitySetName]",
                   "size": "[parameters('source').size]",
                   "adminUsername": "[parameters('source').adminUsername]",
-                  "adminPassword": "[parameters('source').adminPassword]",
+                  "adminPassword": "[parameters('context').secureAdminPassword]",
                   "nics": "[reference(concat(variables('vmName'), '-nics-template')).outputs.result.value]",
                   "imageReference": {
                     "publisher": "[parameters('source').imageReference.publisher]",
