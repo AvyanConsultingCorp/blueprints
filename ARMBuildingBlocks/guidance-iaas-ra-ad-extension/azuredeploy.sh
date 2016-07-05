@@ -426,19 +426,18 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-# install adds to ad vms
-for (( i=1; i<=${NUMBER_VMS}; i++ ))
-do
-	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
-		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
-		echo
-		echo
-		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-done  
+###### install adds to ad vms
+##### for (( i=1; i<=${NUMBER_VMS}; i++ ))
+##### do
+##### 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+#####		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
+#####		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
+#####		echo
+#####		echo
+#####		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+#####		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+##### done  
 
- 
 ############################################################################
 ## Update vNet DNS setting to dns vm1, dns vm2, on-prem dns server
 ############################################################################
