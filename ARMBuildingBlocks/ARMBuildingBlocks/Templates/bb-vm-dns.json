@@ -104,7 +104,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": ["[parameters('dnsServers')]"]
+          "dnsServers": [ "[parameters('dnsServers')]" ]
         }
       }
     },
@@ -153,7 +153,33 @@
             { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]" }
           ]
         }
-      }
+      },
+      "resources": [
+        {
+          "name": "[variables('scriptName')]",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "1.8",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[variables('scriptUri')]"
+              ],
+              "commandToExecute": "[variables('scriptCommand')]"
+            }
+          },
+          "tags": {
+            "displayName": "setup-script"
+          }
+        }
+      ]
     }
   ],
   "outputs": {
