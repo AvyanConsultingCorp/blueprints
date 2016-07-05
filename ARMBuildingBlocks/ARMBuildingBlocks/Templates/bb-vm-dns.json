@@ -3,10 +3,15 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
+    "domainName": { "type": "string" },
     "vmNamePrefix": { "type": "string" },
     "vmComputerName": {
       "type": "string",
       "maxLength": 15
+    },
+    "dnsServers": {
+      "type": "string",
+      "defaultValue": ""
     },
     "vmIPaddress": { "type": "string" },
     "snid": { "type": "string" },
@@ -75,6 +80,10 @@
     "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
     "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
     "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]",
+    "scriptName": { "value": "CreateDc" },
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds.ps1",
+    "scriptArgument": "[concat(' -SafeModePassword QAZwsx123 -Domain ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'))]",
+    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'adds.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
     {
@@ -93,7 +102,10 @@
               "subnet": { "id": "[parameters('snid')]" }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": ["[parameters('dnsServers')]"]
+        }
       }
     },
     {
@@ -101,9 +113,9 @@
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(variables('vmName'))]",
       "location": "[variables('location')]",
-      "tags": { "displayName": "VM" },
+      "tags": { "displayName": "domain-controller" },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]"
       ],
       "properties": {
         "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('vmAvSetName'))]" },
@@ -141,7 +153,33 @@
             { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]" }
           ]
         }
-      }
+      },
+      "resources": [
+        {
+          "name": "[variables('scriptName')]",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "CustomScriptExtension",
+            "typeHandlerVersion": "2.19",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "fileUris": [
+                "[variables('scriptUri')]"
+              ],
+              "commandToExecute": "[variables('scriptCommand')]"
+            }
+          },
+          "tags": {
+            "displayName": "setup-script"
+          }
+        }
+      ]
     }
   ],
   "outputs": {

@@ -82,6 +82,10 @@ VNET_AD_SUBNET_PREFIX=10.0.255.192/27
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
 AD_SERVER_IP_ADDRESS_ARRAY=[\"10.0.255.222\",\"10.0.255.211\"]
 
+AD_SERVER_IP_ADDRESSES="10.0.255.222,10.0.255.211"
+AD_SERVER_IP_ADDRESSES+=","
+AD_SERVER_IP_ADDRESSES+=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
+
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
 NVA_FE_ILB_IP_ADDRESS=10.0.0.30
 WEB_ILB_IP_ADDRESS=10.0.1.254
@@ -128,7 +132,8 @@ TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
 ON_PREM_DNS_SERVER_ADDRESS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"},\"onpremDnsServerAddress\":{\"value\":\"${ON_PREM_DNS_SERVER_ADDRESS}\"}}"
+DNS_SERVERS=
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":\"${DNS_SERVERS}\"},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"},\"onpremDnsServerAddress\":{\"value\":\"${ON_PREM_DNS_SERVER_ADDRESS}\"}}"
 
 echo
 echo
@@ -160,34 +165,6 @@ DEPLOYED_DB_UDR_NAME=${BASE_NAME}-db-udr
 
 DEPLOYED_DMZ_FE_SUBNET_NAME_PREFIX=dmz-fe
 DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX=dmz-be
-
-############################################################################
-## Create ad server in ad subnet
-############################################################################
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-1nic-static-private-ip.json
-RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
-AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
-AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
-VM_SIZE=Standard_DS3
-NUMBER_VMS=${AD_NUMBER_VMS}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
-SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
-VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
-echo
-echo
-echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-# install adds to ad vms
-for (( i=1; i<=${NUMBER_VMS}; i++ ))
-do
-	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
-		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
-		echo
-		echo
-		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-done  
 
 ############################################################################
 ## Create ILB and VMs in web, biz, db
@@ -394,6 +371,85 @@ echo
 echo
 echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
      azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+	 
+
+############################################################################
+## Manual Step: config on premise router to make on-prem-to-azure connection
+############################################################################
+echo -n "Manual Step: Please config your on premises network to connect to the azure vnet"
+read -p "Press any key to continue... " -n1 -s
+############################################################################
+## Update vNet DNS setting to on-premises DNS
+############################################################################
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
+RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
+ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
+ON_PREM_DNS_SERVER_ADDRESS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
+DNS_SERVERS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":\"${DNS_SERVERS}\"},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"},\"onpremDnsServerAddress\":{\"value\":\"${ON_PREM_DNS_SERVER_ADDRESS}\"}}"
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+
+
+## Create dns server in ad subnet
+############################################################################
+echo -n "Verify that DNS Server on the vNet has been updated"
+read -p "Press any key to continue... " -n1 -s
+
+DNS_RESOURCE_GROUP=${BASE_NAME}-dns-rg
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns.json
+RESOURCE_GROUP=${DNS_RESOURCE_GROUP}
+AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
+AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
+VM_SIZE=Standard_DS3
+NUMBER_VMS=${AD_NUMBER_VMS}
+SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
+VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
+DNS_SERVERS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":\"${DNS_SERVERS}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+
+echo
+echo
+echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+     azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+# install adds to ad vms
+for (( i=1; i<=${NUMBER_VMS}; i++ ))
+do
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
+		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
+		echo
+		echo
+		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+done  
+
+AD_SERVER_IP_ADDRESSES
+	 
+############################################################################
+## Update vNet DNS setting to dns vm1, dns vm2, on-prem dns server
+############################################################################
+echo -n "Verify that DNS Server has been installed correctly"
+echo -n "set the DNS server to azure VM"
+read -p "Press any key to continue... " -n1 -s
+
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
+RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
+ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
+ON_PREM_DNS_SERVER_ADDRESS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
+DNS_SERVERS=${AD_SERVER_IP_ADDRESSES}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":\"${DNS_SERVERS}\"},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"},\"onpremDnsServerAddress\":{\"value\":\"${ON_PREM_DNS_SERVER_ADDRESS}\"}}"
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}

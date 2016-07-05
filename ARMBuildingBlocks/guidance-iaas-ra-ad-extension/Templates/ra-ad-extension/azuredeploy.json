@@ -15,7 +15,7 @@
     "vnetGwSubnetPrefix": { "type": "string" },
     "vnetDmzFeSubnetPrefix": { "type": "string" },
     "vnetDmzBeSubnetPrefix": { "type": "string" },
-    "onpremDnsServerAddress": { "type": "string" }
+    "dnsServers": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -202,7 +202,7 @@
           ]
         },
         "dhcpOptions": {
-          "dnsServers": []
+          "dnsServers": [ "[parameters('dnsServers')]" ]
         },
         "subnets": [
           {
