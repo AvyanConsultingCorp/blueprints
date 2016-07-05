@@ -48,7 +48,8 @@
       ],
       "defaultValue": "Standard_DS3"
     },
-    "dnsServers": { "type": "string" }
+    "dnsServers": { "type": "string" },
+    "domainName": { "type": "string" }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -117,7 +118,8 @@
           "osType": { "value": "Windows" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "vmAvSetName": { "value": "[variables('vmAvSetName')]" }
+          "vmAvSetName": { "value": "[variables('vmAvSetName')]" },
+          "domainName": { "value": "[parameters('domainName')]" }
         }
       }
     }
