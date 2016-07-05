@@ -1,8 +1,8 @@
 ﻿{
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
   "parameters": {
-    "infrastructureSettings": {
+    "connectionSettings": {
       "type": "object"
     }
   },
@@ -12,13 +12,13 @@
     {
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/localNetworkGateways",
-      "name": "[parameters('infrastructureSettings').connection.localNetworkGateway.name]",
+      "name": "[parameters('connectionSettings').localNetworkGateway.name]",
       "location": "[resourceGroup().location]",
       "properties": {
         "localNetworkAddressSpace": {
-          "addressPrefixes": "[parameters('infrastructureSettings').connection.localNetworkGateway.addressPrefixes]"
+          "addressPrefixes": "[parameters('connectionSettings').localNetworkGateway.addressPrefixes]"
         },
-        "gatewayIpAddress": "[parameters('infrastructureSettings').connection.localNetworkGateway.ipAddress]"
+        "gatewayIpAddress": "[parameters('connectionSettings').localNetworkGateway.ipAddress]"
       }
     }
   ],
@@ -28,12 +28,12 @@
       "value": {
         "connectionType": "IPsec",
         "routingWeight": 10,
-        "sharedKey": "[parameters('infrastructureSettings').connection.sharedKey]",
+        "sharedKey": "[parameters('connectionSettings').sharedKey]",
         "virtualNetworkGateway1": {
-          "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('infrastructureSettings').connection.virtualNetworkGateway1.name)]"
+          "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('connectionSettings').virtualNetworkGateway1.name)]"
         },
         "localNetworkGateway2": {
-          "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('infrastructureSettings').connection.localNetworkGateway.name)]"
+          "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('connectionSettings').localNetworkGateway.name)]"
         }
       }
     }
