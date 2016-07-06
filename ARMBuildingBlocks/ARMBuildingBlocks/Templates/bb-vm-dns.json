@@ -82,7 +82,7 @@
     "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]",
     "scriptName": "CreateDc",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds.ps1",
-    "scriptArgument": "[concat(' -SafeModePassword adminP@ssw0rd -Domain ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'))]",
+    "scriptArgument": "[concat(' -SafeModePassword SafeMode@ssw0rd -Domain ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'adds.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
