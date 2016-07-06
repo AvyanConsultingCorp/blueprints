@@ -20,9 +20,6 @@
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(parameters('vmName'),'/domaincontroller')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
-      ],
       "properties": {
         "publisher": "Microsoft.Compute",
         "type": "CustomScriptExtension",
