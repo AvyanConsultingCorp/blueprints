@@ -2,36 +2,46 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "type": "string",
-      "maxLength": 10,
-      "metadata": { "description": "Prefix used for all resources created by this template." }
+    "virtualNetworkSettings": {
+      "type": "object"
     },
-    "infrastructureSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Infrastructure settings"
-      }
+    "vpnGatewaySettings": {
+      "type": "object"
+    },
+    "expressRouteGatewaySettings": {
+      "type": "object"
+    },
+    "vpnConnectionSettings": {
+      "type": "object"
+    },
+    "expressRouteConnectionSettings": {
+      "type": "object"
     }
   },
   "variables": {
+    "virtualNetworkGatewayTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworkGateways/virtualNetworkGateway.json')]",
+    "vpnGatewayDeploymentName": "[concat(parameters('vpnGatewaySettings').name, '-deployment')]",
+    "expressRouteGatewayDeploymentName": "[concat(parameters('expressRouteGatewaySettings').name, '-deployment')]",
+    "connectionTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/connections/connection.json')]",
+    "vpnConnectionDeploymentName": "[concat(parameters('vpnConnectionSettings').name, '-deployment')]",
+    "expressRouteConnectionDeploymentName": "[concat(parameters('expressRouteConnectionSettings').name, '-deployment')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "expressRouteGatewayDeployment",
+      "name": "[variables('expressRouteGatewayDeploymentName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworkGateways/virtualNetworkGateway.json')]"
+          "uri": "[variables('virtualNetworkGatewayTemplate')]"
         },
         "parameters": {
-          "infrastructureSettings": {
-            "value": {
-              "vnetName": "[parameters('infrastructureSettings').vnetName]",
-              "virtualNetworkGateway": "[parameters('infrastructureSettings').expressRoute.virtualNetworkGateway]"
-            }
+          "virtualNetworkSettings": {
+            "value": "[parameters('virtualNetworkSettings')]"
+          },
+          "virtualNetworkGatewaySettings": {
+            "value": "[parameters('expressRouteGatewaySettings')]"
           }
         }
       }
@@ -39,51 +49,68 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "virtualNetworkGatewayDeployment",
+      "name": "[variables('vpnGatewayDeploymentName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworkGateways/virtualNetworkGateway.json')]"
+          "uri": "[variables('virtualNetworkGatewayTemplate')]"
         },
         "parameters": {
-          "infrastructureSettings": {
-            "value": {
-              "vnetName": "[parameters('infrastructureSettings').vnetName]",
-              "virtualNetworkGateway": "[parameters('infrastructureSettings').ipsec.virtualNetworkGateway]"
-            }
+          "virtualNetworkSettings": {
+            "value": "[parameters('virtualNetworkSettings')]"
+          },
+          "virtualNetworkGatewaySettings": {
+            "value": "[parameters('vpnGatewaySettings')]"
           }
         }
       },
       "dependsOn": [
-        "expressRouteGatewayDeployment"
+        "[variables('expressRouteGatewayDeploymentName')]"
       ]
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "connectionDeployment",
+      "name": "[variables('vpnConnectionDeploymentName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/connections/connection.json')]"
+          "uri": "[variables('connectionTemplate')]"
         },
         "parameters": {
-          "infrastructureSettings": {
-            "value": {
-              "connection": "[parameters('infrastructureSettings').ipsec.connection]"
-            }
+          "connectionSettings": {
+            "value": "[parameters('vpnConnectionSettings')]"
           }
         }
       },
       "dependsOn": [
-        "virtualNetworkGatewayDeployment"
+        "[variables('vpnGatewayDeploymentName')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[variables('expressRouteConnectionDeploymentName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('connectionTemplate')]"
+        },
+        "parameters": {
+          "connectionSettings": {
+            "value": "[parameters('expressRouteConnectionSettings')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[variables('expressRouteGatewayDeploymentName')]"
       ]
     }
   ],
   "outputs": {
     "publicIPAddress": {
       "type": "object",
-      "value": "[reference('virtualNetworkGatewayDeployment').outputs.publicIPAddress.value]"
+      "value": "[reference(variables('vpnGatewayDeploymentName')).outputs.publicIPAddress.value]"
     }
   }
 }
