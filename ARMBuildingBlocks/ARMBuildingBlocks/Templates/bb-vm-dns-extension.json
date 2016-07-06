@@ -4,6 +4,7 @@
   "parameters": {
     "baseName": { "type": "string" },
     "domainName": { "type": "string" },
+    "vmName": { "type": "string" },
     "vmNamePrefix": { "type": "string" },
     "vmComputerName": {
       "type": "string",
@@ -87,72 +88,27 @@
   },
   "resources": [
     {
-      "apiVersion": "2016-03-30",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('vmNICName')]",
-      "location": "[variables('location')]",
-      "tags": { "displayName": "VM NIC" },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('vmIPaddress')]",
-              "subnet": { "id": "[parameters('snid')]" }
-            }
-          }
-        ],
-        "dnsSettings": {
-          "dnsServers": [ "[parameters('dnsServers')]" ]
-        }
-      }
-    },
-    {
       "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat(variables('vmName'))]",
-      "location": "[variables('location')]",
-      "tags": { "displayName": "domain-controller" },
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/domaincontroller')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
       ],
       "properties": {
-        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('vmAvSetName'))]" },
-        "hardwareProfile": { "vmSize": "[variables('VMSetting').vmSize]" },
-        "osProfile": {
-          "computerName": "[variables('vmName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('VMSetting').publisher]",
-            "offer": "[variables('VMSetting').offer]",
-            "sku": "[variables('VMSetting').sku]",
-            "version": "[variables('VMSetting').version]"
-          },
-          "osDisk": {
-            "name": "[variables('vmOSDiskName')]",
-            "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "name": "[variables('vmDataDiskName')]",
-              "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
-              "diskSizeGB": "127",
-              "createOption": "Empty",
-              "lun": 0
-            }
-          ]
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]" }
-          ]
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[variables('scriptUri')]"
+          ],
+          "commandToExecute": "[variables('scriptCommand')]"
         }
+      },
+      "tags": {
+        "displayName": "setup-script"
       }
     }
   ],

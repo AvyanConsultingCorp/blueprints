@@ -426,17 +426,26 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-###### install adds to ad vms
-##### for (( i=1; i<=${NUMBER_VMS}; i++ ))
-##### do
-##### 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-#####		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
-#####		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
-#####		echo
-#####		echo
-#####		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-#####		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-##### done  
+
+	 
+	 
+# install adds to ad vms
+echo -n "Verify that you can connect to dns servers"
+echo
+read -p "Press any key to continue... " -n1 -s
+
+for (( i=1; i<=${NUMBER_VMS}; i++ ))
+do
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+	#TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
+	#PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns-extension.json
+	PARAMETERS="{{\"vmName\":{\"value\":\"${VM_NAME}\"},\"baseName\":{\"value\":\"${BASE_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"dnsServers\":{\"value\":\"${DNS_SERVERS}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+	echo
+	echo
+	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+done  
 
 ############################################################################
 ## Update vNet DNS setting to dns vm1, dns vm2, on-prem dns server
