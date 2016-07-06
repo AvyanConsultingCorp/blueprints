@@ -81,9 +81,9 @@ VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
 VNET_AD_SUBNET_PREFIX=10.0.255.192/27
 
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
-AD_SERVER_IP_ADDRESS_ARRAY=[\"10.0.255.222\",\"10.0.255.211\"]
+AD_SERVER_IP_ADDRESS_ARRAY=[\"10.0.255.222\",\"10.0.255.221\"]
 
-AD_SERVER_IP_ADDRESSES="10.0.255.222,10.0.255.211"
+AD_SERVER_IP_ADDRESSES="10.0.255.222,10.0.255.221"
 AD_SERVER_IP_ADDRESSES+=","
 AD_SERVER_IP_ADDRESSES+=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
 
@@ -439,8 +439,8 @@ do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
 	#TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
 	#PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
-	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns-extension.json
-	PARAMETERS="{{\"vmName\":{\"value\":\"${VM_NAME}\"},\"baseName\":{\"value\":\"${BASE_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"dnsServers\":{\"value\":\"${DNS_SERVERS}\"},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-extension.json
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
 	echo
 	echo
 	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}

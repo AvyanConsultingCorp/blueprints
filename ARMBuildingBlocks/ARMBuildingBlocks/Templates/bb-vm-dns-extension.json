@@ -2,85 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": { "type": "string" },
     "domainName": { "type": "string" },
     "vmName": { "type": "string" },
-    "vmNamePrefix": { "type": "string" },
-    "vmComputerName": {
-      "type": "string",
-      "maxLength": 15
-    },
-    "dnsServers": {
-      "type": "string",
-      "defaultValue": ""
-    },
-    "vmIPaddress": { "type": "string" },
-    "snid": { "type": "string" },
-    "stgAccountName": { "type": "string" },
-    "osType": {
-      "type": "string",
-      "allowedValues": [
-        "Windows",
-        "Ubuntu"
-      ]
-    },
-    "vmSize": {
-      "type": "string",
-      "allowedValues": [
-        "Standard_DS1",
-        "Standard_DS2",
-        "Standard_DS3",
-        "Standard_DS4",
-        "Standard_DS11",
-        "Standard_DS12",
-        "Standard_DS13",
-        "Standard_DS14",
-        "Standard_GS1",
-        "Standard_GS2",
-        "Standard_GS3",
-        "Standard_GS4",
-        "Standard_GS5",
-        "Standard_DS1_v2",
-        "Standard_DS2_v2",
-        "Standard_DS3_v2",
-        "Standard_DS4_v2",
-        "Standard_DS5_v2",
-        "Standard_DS11_v2",
-        "Standard_DS12_v2",
-        "Standard_DS13_v2",
-        "Standard_DS14_v2",
-        "Standard_DS15_v2"
-      ],
-      "defaultValue": "Standard_DS3"
-    },
     "adminUsername": { "type": "string" },
-    "adminPassword": { "type": "securestring" },
-    "vmAvSetName": { "type": "string" }
+    "adminPassword": { "type": "securestring" }
   },
   "variables": {
-    "VMSettings": {
-      "Windows": {
-        "vmSize": "[parameters('vmSize')]",
-        "publisher": "MicrosoftWindowsServer",
-        "offer": "WindowsServer",
-        "sku": "2012-R2-Datacenter",
-        "version": "latest"
-      },
-      "Ubuntu": {
-        "vmSize": "[parameters('vmSize')]",
-        "publisher": "Canonical",
-        "offer": "UbuntuServer",
-        "sku": "14.04.2-LTS",
-        "version": "latest"
-      }
-    },
     "location": "[resourceGroup().location]",
-    "vmStorageAccountContainerName": "vhds",
-    "vmSetting": "[variables('VMSettings')[parameters('osType')]]",
-    "vmName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-vm')]",
-    "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
-    "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
-    "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]",
     "scriptName": "CreateDc",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds.ps1",
     "scriptArgument": "[concat(' -SafeModePassword adminP@ssw0rd -Domain ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'))]",
@@ -93,7 +21,7 @@
       "name": "[concat(parameters('vmName'),'/domaincontroller')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
       ],
       "properties": {
         "publisher": "Microsoft.Compute",
@@ -115,7 +43,7 @@
   "outputs": {
     "vmName": {
       "type": "string",
-      "value": "[variables('vmName')]"
+      "value": "[parameters('vmName')]"
     }
   }
 }
