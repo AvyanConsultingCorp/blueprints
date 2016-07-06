@@ -20,7 +20,7 @@ Write-Host $SafeModePassword
 Write-Host $Domain
 
 Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
-Install-windowsfeature -name DNS -IncludeAllSubFeature -IncludeManagementTools
+#Install-windowsfeature -name DNS -IncludeAllSubFeature -IncludeManagementTools
 
 $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
