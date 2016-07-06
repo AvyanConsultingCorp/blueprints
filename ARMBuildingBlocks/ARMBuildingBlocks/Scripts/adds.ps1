@@ -13,8 +13,6 @@ Param(
   [string]$Domain
 )
 
-Import-Module ADDSDeployment
-
 Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
 
 $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
@@ -22,6 +20,8 @@ $secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Fo
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 
 $credential = New-Object System.Management.Automation.PSCredential ("$Domain\$AdminUser", $secAdminPassword)
+
+Import-Module ADDSDeployment
 
 Install-ADDSDomainController -DomainName $Domain -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force
 
