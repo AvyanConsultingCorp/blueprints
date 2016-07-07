@@ -2,33 +2,38 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "baseName": {
-      "type": "string",
-      "maxLength": 10,
-      "metadata": { "description": "Prefix used for all resources created by this template." }
+    "virtualNetworkSettings": {
+      "type": "object"
     },
-    "infrastructureSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Infrastructure settings"
-      }
+    "virtualNetworkGatewaySettings": {
+      "type": "object"
+    },
+    "connectionSettings": {
+      "type": "object"
     }
   },
   "variables": {
+    "virtualNetworkGatewayTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworkGateways/virtualNetworkGateway.json')]",
+    "virtualNetworkGatewayDeploymentName": "[concat(parameters('virtualNetworkGatewaySettings').name, '-deployment')]",
+    "connectionTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/connections/connection.json')]",
+    "connectionDeploymentName": "[concat(parameters('connectionSettings').name, '-deployment')]"
   },
   "resources": [
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "virtualNetworkGatewayDeployment",
+      "name": "[variables('virtualNetworkGatewayDeploymentName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualNetworkGateways/virtualNetworkGateway.json')]"
+          "uri": "[variables('virtualNetworkGatewayTemplate')]"
         },
         "parameters": {
-          "infrastructureSettings": {
-            "value": "[parameters('infrastructureSettings')]"
+          "virtualNetworkSettings": {
+            "value": "[parameters('virtualNetworkSettings')]"
+          },
+          "virtualNetworkGatewaySettings": {
+            "value": "[parameters('virtualNetworkGatewaySettings')]"
           }
         }
       }
@@ -36,27 +41,27 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "connectionDeployment",
+      "name": "[variables('connectionDeploymentName')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri, '../../resources/connections/connection.json')]"
+          "uri": "[variables('connectionTemplate')]"
         },
         "parameters": {
-          "infrastructureSettings": {
-            "value": "[parameters('infrastructureSettings')]"
+          "connectionSettings": {
+            "value": "[parameters('connectionSettings')]"
           }
         }
       },
       "dependsOn": [
-        "virtualNetworkGatewayDeployment"
+        "[variables('virtualNetworkGatewayDeploymentName')]"
       ]
     }
   ],
   "outputs": {
     "publicIPAddress": {
       "type": "object",
-      "value": "[reference('virtualNetworkGatewayDeployment').outputs.publicIPAddress.value]"
+      "value": "[reference(variables('virtualNetworkGatewayDeploymentName')).outputs.publicIPAddress.value]"
     }
   }
 }
