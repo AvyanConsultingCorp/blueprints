@@ -10,8 +10,8 @@
       "maxLength": 15
     },
     "dnsServers": {
-      "type": "string",
-      "defaultValue": ""
+      "type": "array",
+      "defaultValue": []
     },
     "vmIPaddress": { "type": "string" },
     "snid": { "type": "string" },
@@ -104,7 +104,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": [ "[parameters('dnsServers')]" ]
+          "dnsServers": "[parameters('dnsServers')]"
         }
       }
     },

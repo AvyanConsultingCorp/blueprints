@@ -48,7 +48,10 @@
       ],
       "defaultValue": "Standard_DS3"
     },
-    "dnsServers": { "type": "string" },
+    "dnsServers": {
+      "type": "array",
+      "defaultValue": []
+    },
     "domainName": { "type": "string" }
   },
   "variables": {
