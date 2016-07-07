@@ -36,7 +36,7 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "vmPrefix": "[concat(parameters('virtualMachinesSettings').computerNamePrefix, '-vm')]",
-    "routeTableTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/routeTables/routeTables.json')]",
+    "routeTableTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/routeTables/routeTable.json')]",
     "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../loadBalancer-backend-n-vm/azuredeploy.json')]",
     "extIpFwdTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/enable-ip-forwarding/extension-enable-ip-forwarding.json')]",
     "extensionTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/extension-custom-script-for-linux.json')]",
