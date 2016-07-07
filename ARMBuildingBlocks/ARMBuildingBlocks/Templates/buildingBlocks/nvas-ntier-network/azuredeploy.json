@@ -94,7 +94,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": "[variables('scriptPath')]",
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File enable-default-gateway.ps1')"
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File enable-default-gateway.ps1'"
         }
       }
     }
