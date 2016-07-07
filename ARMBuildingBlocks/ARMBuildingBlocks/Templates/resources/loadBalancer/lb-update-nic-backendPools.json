@@ -1,0 +1,61 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": { "type": "object" },
+    "vmStartIndex": { "type": "int" },
+    "vmCount": { "type": "int" },
+    "loadBalancerBackendAddressPools": { "type": "array" },
+    "nicIndex": { "type": "int" },
+    "vnetName": { "type": "string" }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', sub(parameters('vmStartIndex'), 1), '-nic', add(parameters('nicIndex'), 1))]",
+      "properties": {
+        "mode": "Incremental",
+        "parameters": { },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "variables": { },
+          "resources": [ ],
+          "outputs": { }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2016-03-30",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), copyindex()), '-nic', add(parameters('nicIndex'), 1))]",
+      "location": "[resourceGroup().location]",
+      "copy": {
+        "name": "VMCount",
+        "count": "[parameters('vmCount')]"
+      },
+      "dependsOn": [
+        "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('vmStartIndex'), sub(copyindex(), 1)), '-nic', add(parameters('nicIndex'), 1))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "loadBalancerBackendAddressPools": "[parameters('loadBalancerBackendAddressPools')]",
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('virtualMachinesSettings').nics[parameters('nicIndex')].subnetName)]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
