@@ -209,7 +209,7 @@
           ]
         },
         "dhcpOptions": {
-          "dnsServers": [ "parameters('dnsServers')" ]
+          "dnsServers": [ "[parameters('dnsServers')]" ]
         },
         "subnets": [
           {
