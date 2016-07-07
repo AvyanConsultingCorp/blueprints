@@ -2,36 +2,45 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "virtualMachinesSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Settings for virtual machines"
-      }
-    },
-    "infrastructureSettings": {
-      "type": "object",
-      "metadata": {
-        "description": "Settings for infrastructure"
-      }
-    },
     "loadBalancerSettings": {
       "type": "object",
       "metadata": {
         "description": "Settings for infrastructure"
       }
     },
-    "storageAccountsCount": { "type": "int" },
-    "vmCount": { "type": "int" },
-    "vmStartIndex": { "type": "int" }
+    "virtualMachinesSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual machines"
+      }
+    },
+    "virtualNetworkSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for virtual network"
+      }
+    },
+    "buildingBlockSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for building block"
+      }
+    },
+    "routeTableSettings": {
+      "type": "object",
+      "metadata": {
+        "description": "Settings for route table."
+      }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "vmPrefix": "[concat(parameters('infrastructureSettings').baseName, '-', parameters('virtualMachinesSettings').namePrefix, '-vm')]",
+    "vmPrefix": "[concat(parameters('virtualMachinesSettings').computerNamePrefix, '-vm')]",
     "routeTableTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/routeTables/routeTable.json')]",
     "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../loadBalancer-backend-n-vm/azuredeploy.json')]",
     "extIpFwdTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/enable-ip-forwarding/extension-enable-ip-forwarding.json')]",
     "extensionTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/extension-custom-script-for-linux.json')]",
-    "scriptPath": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/linux/enable-ip-forwarding/enable-ip-forwarding.sh')]"
+    "scriptPath": "[uri(deployment().properties.templateLink.uri, '../../resources/virtualMachines/extensions/windows/enable-default-gateway-multi-nic/enable-default-gateway.ps1')]"
   },
   "resources": [
     {
@@ -45,8 +54,8 @@
         "mode": "Incremental",
         "templateLink": { "uri": "[variables('routeTableTemplate')]" },
         "parameters": {
-          "baseName": { "value": "[parameters('infrastructureSettings').baseName]" },
-          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" }
+          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" },
+          "routeTableSettings": { "value": "[parameters('routeTableSettings')]" }
         }
       }
     },
@@ -59,42 +68,35 @@
         "templateLink": { "uri": "[variables('loadBalancerTemplate')]" },
         "parameters": {
           "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
-          "infrastructureSettings": { "value": "[parameters('infrastructureSettings')]" },
-          "loadbalancerSettings": { "value": "[parameters('loadBalancerSettings')]" },
-          "storageAccountsCount": { "value": "[parameters('storageAccountsCount')]" },
-          "vmCount": { "value": "[parameters('vmCount')]" },
-          "vmStartIndex": { "value": "[parameters('vmStartIndex')]" }
+          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" },
+          "buildingBlockSettings": { "value": "[parameters('buildingBlockSettings')]" },
+          "loadBalancerSettings": { "value": "[parameters('loadBalancerSettings')]" }
         }
       }
     },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2016-02-01",
-      "name": "[concat('deploy-', variables('vmPrefix'), add(parameters('vmStartIndex'), copyindex()), '/nva-extension')]",
-      "copy": {
-        "count": "[parameters('vmCount')]",
-        "name": "deployExtLoop"
-      },
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('extIpFwdTemplate')]" },
-        "parameters": {
-          "virtualMachineSettings": {
-            "value": {
-              "vmName": "[concat(variables('vmPrefix'), add(parameters('vmStartIndex'), copyindex()))]"
-            }
-          }
-        }
-      },
-      "resources": [
         {
-          "type": "Microsoft.Compute/virtualMachines/extensions",
-          "apiVersion": "2015-06-15",
-          "name": "[concat(variables('vmPrefix'), add(parameters('vmStartIndex'), copyindex()), '/nva-extension')]",
-          "location": "[resourceGroup().location]",
-          "properties": "[reference('extIpFwdTemplate').outputs.properties.value]"
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2015-06-15",
+      "name": "[concat(variables('vmPrefix'), add(parameters('buildingBlockSettings').vmStartIndex, copyindex()), '/nva-extension')]",
+      "copy": {
+        "count": "[parameters('buildingBlockSettings').vmCount]",
+        "name": "nvaSetupLoop"
+      },
+      "dependsOn": [
+        "Microsoft.Resources/deployments/deploy-load-balancer-multivm",
+        "Microsoft.Resources/deployments/deploy-route-table"
+      ],
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": "[variables('scriptPath')]",
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File enable-default-gateway.ps1')"
         }
-      ]
+      }
     }
   ]
 }

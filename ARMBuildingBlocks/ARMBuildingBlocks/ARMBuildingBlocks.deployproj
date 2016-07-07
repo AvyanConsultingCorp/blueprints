@@ -93,6 +93,7 @@
     <None Include="Templates\resources\virtualMachines\extensions\linux\enable-ip-forwarding\enable-ip-forwarding.sh" />
     <None Include="Templates\resources\virtualMachines\extensions\linux\enable-ip-forwarding\extension-enable-ip-forwarding.json" />
     <None Include="Templates\resources\virtualMachines\extensions\linux\extension-custom-script-for-linux.json" />
+    <None Include="Templates\resources\virtualMachines\extensions\windows\enable-default-gateway-multi-nic\enable-default-gateway.ps1" />
     <None Include="Templates\resources\virtualMachines\extensions\windows\extension-powershell-dsc.json" />
     <None Include="Templates\resources\virtualMachines\n-vm-n-nic.json" />
     <None Include="Templates\resources\virtualMachines\public-nic-static-private-settings.json" />
