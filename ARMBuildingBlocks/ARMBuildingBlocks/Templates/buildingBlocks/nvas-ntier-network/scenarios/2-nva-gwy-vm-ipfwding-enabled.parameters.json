@@ -110,7 +110,7 @@
       }
     },
 
-    "routeTableSetttings": {
+    "routeTableSettings": {
       "value": {
         "name": "app0-in-rt",
         "subnets": [
