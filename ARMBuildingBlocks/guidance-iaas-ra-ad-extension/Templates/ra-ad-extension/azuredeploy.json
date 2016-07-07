@@ -15,7 +15,14 @@
     "vnetGwSubnetPrefix": { "type": "string" },
     "vnetDmzFeSubnetPrefix": { "type": "string" },
     "vnetDmzBeSubnetPrefix": { "type": "string" },
-    "dnsServers": { "type": "string" }
+    "dnsServers": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.255.222",
+        "10.0.255.221"
+      ]
+    }
+
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -202,7 +209,7 @@
           ]
         },
         "dhcpOptions": {
-          "dnsServers": [ "[parameters('dnsServers')]" ]
+          "dnsServers": [ "parameters('dnsServers')" ]
         },
         "subnets": [
           {
