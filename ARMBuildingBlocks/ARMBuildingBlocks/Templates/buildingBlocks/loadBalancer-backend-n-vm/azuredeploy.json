@@ -33,7 +33,7 @@
     "lbName": "[concat(variables('namePrefix'), '-ilb')]",
     "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
     "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/loadBalancer/loadBalancer.json')]",
-    "multiVMTemplate": "[uri(deployment().properties.templateLink.uri, '../Multi-vm-n-nic-m-storage/azuredeploy.json')]",
+    "multiVMTemplate": "[uri(deployment().properties.templateLink.uri, '../multi-vm-n-nic-m-storage/azuredeploy.json')]",
     "backendPoolNicTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/loadBalancer/lb-add-backendPool-nics.json')]"
   },
   "resources": [
