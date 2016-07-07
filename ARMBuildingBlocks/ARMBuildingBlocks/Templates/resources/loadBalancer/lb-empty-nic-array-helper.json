@@ -14,18 +14,8 @@
     }
   },
   "variables": {
-    "location": "[resourceGroup().location]",
     "instance": [
-      {
-        "name": "[parameters('source').name]",
-        "properties": {
-          "port": "[parameters('source').port]",
-          "protocol": "[parameters('source').protocol]",
-          "requestPath": "[parameters('source').requestPath]",
-          "intervalInSeconds": 15,
-          "numberOfProbes": 2
-        }
-      }
+      [ ]
     ]
 
   },

@@ -4,16 +4,20 @@
   "parameters": {
     "virtualNetworkSettings": {
       "value": {
-        "name": "drew-ra-vnet",
-        "addressPrefixes": [ "10.5.0.0/16" ],
+        "name": "rs1-dev-vnet",
+        "addressPrefixes": [ "10.0.0.0/16" ],
         "subnets": [
           {
-            "name": "web-sn",
-            "addressPrefix": "10.5.1.0/24"
+            "name": "rs1-web-sn",
+            "addressPrefix": "10.0.0.0/24"
           },
           {
-            "name": "data-sn",
-            "addressPrefix": "10.5.2.0/24"
+            "name": "rs1-biz-sn",
+            "addressPrefix": "10.0.1.0/24"
+          },
+          {
+            "name": "rs1-data-sn",
+            "addressPrefix": "10.0.2.0/24"
           }
         ],
         "dnsServers": []

@@ -15,10 +15,10 @@
   },
   "variables": {
     "frontendIPConfiguration": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('context').loadBalancerName, parameters('source').frontendIPConfigurationName)]",
-    "backendAddressPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('context').loadBalancerName, parameters('context').backendPoolName)]",
+    "backendAddressPoolId": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('context').loadBalancerName, parameters('source').backendPoolName)]",
     "instance": [
       {
-        "name": "[concat(parameters('source').protocol, '-', parameters('source').frontendPort)]",
+        "name": "[parameters('source').name]",
         "properties": {
           "frontendIPConfiguration": { "id": "[variables('frontendIPConfiguration')]" },
           "backendAddressPool": { "id": "[variables('backendAddressPoolId')]" },

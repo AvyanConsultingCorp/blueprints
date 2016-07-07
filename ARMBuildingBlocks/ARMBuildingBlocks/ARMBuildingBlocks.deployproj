@@ -25,9 +25,6 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
-    <Folder Include="Tools\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="azuredeploy.json" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
@@ -71,12 +68,16 @@
     <None Include="Templates\resources\connections\connection-IPsec.json" />
     <None Include="Templates\resources\connections\connection-Vnet2Vnet.json" />
     <None Include="Templates\resources\connections\connection.json" />
+    <None Include="Templates\resources\loadBalancer\lb-empty-nic-array-helper.json" />
+    <None Include="Templates\resources\loadBalancer\lb-add-backendPool-nics.json" />
     <None Include="Templates\resources\loadBalancer\lb-backendPools.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-internal.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-public.json" />
     <None Include="Templates\resources\loadBalancer\lb-frontendIPConfiguration-settings.json" />
     <None Include="Templates\resources\loadBalancer\lb-loadBalancingRules.json" />
+    <None Include="Templates\resources\loadBalancer\lb-nic-backendPools-array-helper.json" />
     <None Include="Templates\resources\loadBalancer\lb-probes.json" />
+    <None Include="Templates\resources\loadBalancer\lb-update-nic-backendPools.json" />
     <None Include="Templates\resources\loadBalancer\loadBalancer.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup-securityRules.json" />
     <None Include="Templates\resources\networkSecurityGroups\networkSecurityGroup.json" />
@@ -112,24 +113,6 @@
     <None Include="Templates\resources\virtualNetworkGateways\virtualNetworkGateway.json" />
     <None Include="Templates\resources\virtualNetworks\virtualNetwork-subnets.json" />
     <None Include="Templates\resources\virtualNetworks\virtualNetwork.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Tools\AzCopy.exe" />
-    <Content Include="Tools\Microsoft.Data.Edm.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.Data.OData.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.Data.Services.Client.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.WindowsAzure.Storage.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.WindowsAzure.Storage.DataMovement.dll">
-      <Visible>False</Visible>
-    </Content>
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>

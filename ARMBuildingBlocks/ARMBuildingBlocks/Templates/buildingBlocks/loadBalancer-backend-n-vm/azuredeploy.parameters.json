@@ -7,7 +7,7 @@
         "namePrefix": "web",
         "frontendIPConfigurations": [
           {
-            "name": "config1",
+            "name": "lbfe1",
             "loadBalancerType": "public",
             "internalLoadBalancerSettings": {
               "privateIPAddress": "10.0.0.254",
@@ -17,28 +17,48 @@
         ],
         "loadBalancingRules": [
           {
+            "name": "lbr1",
             "frontendPort": 80,
             "backendPort": 80,
             "protocol": "Tcp",
-            "frontendIPConfigurationName": "config1"
+            "backendPoolName": "lb-bep1",
+            "frontendIPConfigurationName": "lbfe1"
           },
           {
+            "name": "lbr2",
             "frontendPort": 443,
             "backendPort": 443,
             "protocol": "Tcp",
-            "frontendIPConfigurationName": "config1"
+            "backendPoolName": "lb-bep2",
+            "frontendIPConfigurationName": "lbfe1"
           }
         ],
         "probes": [
           {
+            "name": "lbp1",
             "port": 80,
             "protocol": "Http",
             "requestPath": "/"
           },
           {
+            "name": "lbp2",
             "port": 443,
             "protocol": "Http",
             "requestPath": "/"
+          }
+        ],
+        "backendPools": [
+          {
+            "name": "lb-bep1",
+            "nicIndex": 0
+          },
+          {
+            "name": "lb-bep2",
+            "nicIndex": 0
+          },
+          {
+            "name": "lb-bep3",
+            "nicIndex": 0
           }
         ]
       }
@@ -47,7 +67,7 @@
       "value": {
         "namePrefix": "rs-vm",
         "computerNamePrefix": "cn",
-        "size": "Standard_DS3",
+        "size": "Standard_DS2",
         "adminUsername": "testuser",
         "adminPassword": "AweS0me@PW",
         "nics": [

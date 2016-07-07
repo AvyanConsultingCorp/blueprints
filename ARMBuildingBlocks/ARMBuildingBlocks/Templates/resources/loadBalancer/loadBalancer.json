@@ -22,8 +22,7 @@
     "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
     "internalLoadBalancer": {
       "name": "[variables('lbName')]",
-      "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
-      "frontendIpConfigId": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), 'ipconfig1')]"
+      "id": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]"
     },
     "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]"
   },
@@ -60,8 +59,7 @@
           "source": { "value": "[parameters('loadBalancerSettings').loadBalancingRules]" },
           "context": {
             "value": {
-              "loadBalancerName": "[variables('internalLoadBalancer').name]",
-              "backendPoolName": "[variables('backendPoolName')]"
+              "loadBalancerName": "[variables('internalLoadBalancer').name]"
             }
           },
           "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-loadBalancingRules.json')]" }
@@ -84,17 +82,28 @@
       }
     },
     {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "backendPoolTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[variables('internalLoadBalancer').name]" },
+          "source": { "value": "[parameters('loadBalancerSettings').backendPools]" },
+          "context": { "value": { } },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-backendPools.json')]" }
+        }
+      }
+    },
+    {
       "type": "Microsoft.Network/loadBalancers",
       "apiVersion": "2016-03-30",
       "location": "[variables('location')]",
       "name": "[variables('internalLoadBalancer').name]",
       "properties": {
         "frontendIPConfigurations": "[reference('feIPConfigurationTemplate').outputs.result.value]",
-        "backendAddressPools": [
-          {
-            "name": "[variables('backendPoolName')]"
-          }
-        ],
+        "backendAddressPools": "[reference('backendPoolTemplate').outputs.result.value]",
         "loadBalancingRules": "[reference('lbRulesTemplate').outputs.result.value]",
         "probes": "[reference('probeTemplate').outputs.result.value]"
       }

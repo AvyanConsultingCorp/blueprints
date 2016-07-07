@@ -1,0 +1,100 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachinesSettings": { "type": "object" },
+    "vnetName": { "type": "string" },
+    "vmStartIndex": { "type": "int" },
+    "vmCount": { "type": "int" },
+    "loadBalancerName": { "type": "string" },
+    "backendPools": { "type": "array" }
+  },
+  "variables": {
+    "collectorTemplate": "[uri(deployment().properties.templateLink.uri, '../common/collector.json')]",
+    "updateNicsTemplate": "[uri(deployment().properties.templateLink.uri, 'lb-update-nic-backendPools.json')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "NicEmptyArrayHelperTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[parameters('loadBalancerName')]" },
+          "source": { "value": "[parameters('virtualMachinesSettings').nics]" },
+          "context": { "value": { } },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-empty-nic-array-helper.json')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "NicBepArrayHelperTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('collectorTemplate')]" },
+        "parameters": {
+          "parentResourceName": { "value": "[parameters('loadBalancerName')]" },
+          "source": { "value": "[parameters('backendPools')]" },
+          "context": {
+            "value": {
+              "loadBalancerName": "[parameters('loadBalancerName')]"
+            }
+          },
+          "state": { "value": "[reference('NicEmptyArrayHelperTemplate').outputs.result.value]" },
+          "mapperTemplateUri": { "value": "[uri(deployment().properties.templateLink.uri, 'lb-nic-backendPools-array-helper.json')]" }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', '-nic', 0, '-template')]",
+      "properties": {
+        "mode": "Incremental",
+        "parameters": { },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": { },
+          "variables": { },
+          "resources": [ ],
+          "outputs": { }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', '-nic', copyindex(1), '-template')]",
+      "copy": {
+        "name": "NicCount",
+        "count": "[length(parameters('virtualMachinesSettings').nics)]"
+      },
+      "dependsOn": [
+        "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', '-nic', copyindex(), '-template')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('updateNicsTemplate')]" },
+        "parameters": {
+          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
+          "vmStartIndex": { "value": "[parameters('vmStartIndex')]" },
+          "vmCount": { "value": "[parameters('vmCount')]" },
+          "loadBalancerBackendAddressPools": { "value": "[reference('NicBepArrayHelperTemplate').outputs.result.value[copyindex()]]" },
+          "nicIndex": { "value": "[copyindex()]" },
+          "vnetName": { "value": "[parameters('vnetName')]" }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "result": {
+      "type": "array",
+      "value": "[reference('NicBepArrayHelperTemplate').outputs.result.value]"
+    }
+  }
+}

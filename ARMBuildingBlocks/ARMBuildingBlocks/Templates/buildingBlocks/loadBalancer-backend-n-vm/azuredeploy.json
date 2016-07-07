@@ -33,9 +33,24 @@
     "lbName": "[concat(variables('namePrefix'), '-ilb')]",
     "backendPoolName": "[concat(variables('lbName'), '-bep1')]",
     "loadBalancerTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/loadBalancer/loadBalancer.json')]",
-    "multiVMTemplate": "[uri(deployment().properties.templateLink.uri, '../Multi-vm-n-nic-m-storage/azuredeploy.json')]"
+    "multiVMTemplate": "[uri(deployment().properties.templateLink.uri, '../Multi-vm-n-nic-m-storage/azuredeploy.json')]",
+    "backendPoolNicTemplate": "[uri(deployment().properties.templateLink.uri, '../../resources/loadBalancer/lb-add-backendPool-nics.json')]"
   },
   "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "name": "multiVMDeployTemplate",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('multiVMTemplate')]" },
+        "parameters": {
+          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
+          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" },
+          "buildingBlockSettings": { "value": "[parameters('buildingBlockSettings')]" }
+        }
+      }
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
@@ -52,50 +67,24 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2015-01-01",
-      "name": "multiVMDeployTemplate",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": { "uri": "[variables('multiVMTemplate')]" },
-        "parameters": {
-          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
-          "virtualNetworkSettings": { "value": "[parameters('virtualNetworkSettings')]" },
-          "buildingBlockSettings": { "value": "[parameters('buildingBlockSettings')]" }
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2016-03-30",
-      "name": "[concat(parameters('virtualMachinesSettings').namePrefix, '-vm', add(parameters('buildingBlockSettings').vmStartIndex, copyindex()), '-nic1')]",
-      "location": "[resourceGroup().location]",
+      "name": "AddNicsToBackendPool",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'multiVMDeployTemplate')]",
         "[concat('Microsoft.Resources/deployments/', 'loadBalancerTemplate')]"
       ],
-      "copy": {
-        "name": "VMCount",
-        "count": "[parameters('buildingBlockSettings').vmCount]"
-      },
       "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('backendPoolName'))]"
-                }
-              ],
-              "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkSettings').name, parameters('virtualMachinesSettings').nics[0].subnetName)]"
-
-              }
-            }
-          }
-        ]
+        "mode": "Incremental",
+        "templateLink": { "uri": "[variables('backendPoolNicTemplate')]" },
+        "parameters": {
+          "virtualMachinesSettings": { "value": "[parameters('virtualMachinesSettings')]" },
+          "vnetName": { "value": "[parameters('virtualNetworkSettings').name]" },
+          "vmStartIndex": { "value": "[parameters('buildingBlockSettings').vmStartIndex]" },
+          "vmCount": { "value": "[parameters('buildingBlockSettings').vmCount]" },
+          "loadBalancerName": { "value": "[variables('lbName')]" },
+          "backendPools": { "value": "[parameters('loadBalancerSettings').backendPools]" }
+        }
       }
     }
-
   ],
   "outputs": {
 
