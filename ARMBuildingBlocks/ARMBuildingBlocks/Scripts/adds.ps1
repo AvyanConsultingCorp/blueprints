@@ -10,8 +10,14 @@ Param(
   [string]$SafeModePassword,
 
   [Parameter(Mandatory=$True)]
-  [string]$Domain
+  [string]$Domain,
+
+  [Parameter(Mandatory=$True)]
+  [string]$SiteName
 )
+
+
+Initialize-Disk -Number 2 -PartitionStyle GPT | New-Partition -UseMaximumSize -DriveLetter F | Format-Volume -Confirm:$false -FileSystem NTFS -force 
 
 Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
 
@@ -23,5 +29,19 @@ $credential = New-Object System.Management.Automation.PSCredential ("$Domain\$Ad
 
 Import-Module ADDSDeployment
 
-Install-ADDSDomainController -DomainName $Domain -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force
-
+#Install-ADDSDomainController -DomainName $Domain -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force
+#Test-ADDSDomainControllerInstallation `
+Install-ADDSDomainController `
+-Credential $credential `
+-SafeModeAdministratorPassword $secSafeModePassword `
+-DomainName $Domain `
+-SiteName $SiteName `
+-SysvolPath "F:\Adds\SYSVOL" `
+-DatabasePath "F:\Adds\NTDS" `
+-LogPath "F:\Adds\NTDS" `
+-NoGlobalCatalog:$false `
+-CreateDnsDelegation:$false `
+-CriticalReplicationOnly:$false `
+-InstallDns:$true `
+-NoRebootOnCompletion:$false `
+-Force:$true
