@@ -15,10 +15,6 @@
     },
     "vmIPaddress": { "type": "string" },
     "snid": { "type": "string" },
-    "stgAccountName": {
-      "type": "string",
-      "defaultValue": "[concat(parameters('baseName'), uniqueString(resourceGroup().Id))]"
-    },
     "osType": {
       "type": "string",
       "allowedValues": [
@@ -84,8 +80,9 @@
     "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
     "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]",
     "vmPipName": "[concat(variables('vmName'),'-pip')]",
-    "scriptName": "CreateDc",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
+    "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), variables('uniqueString')))]",
+    "scriptName": "CreateDc",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds.ps1",
     "scriptArgument": "[concat(' -SafeModePassword SafeMode@ssw0rd -Domain ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'adds.ps1 ', variables('scriptArgument'))]"
@@ -132,13 +129,24 @@
       }
     },
     {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2015-06-15",
+      "location": "[variables('location')]",
+      "name": "[variables('stgAccountName')]",
+      "tags": {
+        "displayName": "Storage accounts"
+      },
+      "properties": { "accountType": "Premium_LRS" }
+    },
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(variables('vmName'))]",
       "location": "[variables('location')]",
       "tags": { "displayName": "domain-controller" },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/',variables('stgAccountName'))]"
       ],
       "properties": {
         "hardwareProfile": { "vmSize": "[variables('VMSetting').vmSize]" },

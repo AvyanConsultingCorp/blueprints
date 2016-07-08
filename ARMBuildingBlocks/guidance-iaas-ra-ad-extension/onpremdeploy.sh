@@ -15,7 +15,7 @@ VM_IP_ADDRESS=192.168.0.4
 AD_SUBNET_NAME_PREFIX=dns
 VM_NAME_PREFIX=dns
 VM_COMPUTER_NAME=dns
-AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
+AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
 ############################################################################
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
