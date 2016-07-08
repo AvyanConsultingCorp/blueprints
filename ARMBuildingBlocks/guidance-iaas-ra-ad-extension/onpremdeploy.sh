@@ -95,3 +95,13 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+############################################################################
+# Install RRAS on the vm
+
+VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-rras-extension.json
+PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
