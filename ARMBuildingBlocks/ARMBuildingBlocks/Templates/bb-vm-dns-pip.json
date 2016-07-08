@@ -3,7 +3,6 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "baseName": { "type": "string" },
-    "domainName": { "type": "string" },
     "vmNamePrefix": { "type": "string" },
     "vmComputerName": {
       "type": "string",
@@ -82,10 +81,6 @@
     "vmPipName": "[concat(variables('vmName'),'-pip')]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
     "stgAccountName": "[toLower(concat(replace(parameters('baseName'),'-',''), variables('uniqueString')))]",
-    "scriptName": "CreateDc",
-    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds.ps1",
-    "scriptArgument": "[concat(' -SafeModePassword SafeMode@ssw0rd -Domain ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'))]",
-    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'adds.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
     {

@@ -1,0 +1,59 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": { "type": "string" },
+    "safeModePassword": {
+      "type": "string",
+      "defaultValue": "SafeModeP@ssw0rd"
+    },
+    "domainName": {
+      "type": "string",
+      "defaultValue": "contoso.com"
+    },
+    "domainNetbiosName": {
+      "type": "string",
+      "defaultValue": "CONTOSO"
+    },
+    "siteName": {
+      "type": "string",
+      "defaultValue": "Default-First-Site-Name"
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "scriptName": "CreateDc",
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds-forest.ps1",
+    "scriptArgument": "[concat(' -SafeModePassword ', parameters('safeModePassword'), ' -DomainName ', parameters('domainName'),' -$DomainNetbiosName ', parameters('domainNetbiosName'),' -SiteName ', parameters('siteName'))]",
+    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'adds-forest.ps1 ', variables('scriptArgument'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/domaincontroller')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[variables('scriptUri')]"
+          ],
+          "commandToExecute": "[variables('scriptCommand')]"
+        }
+      },
+      "tags": {
+        "displayName": "setup-script"
+      }
+    }
+  ],
+  "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[parameters('vmName')]"
+    }
+  }
+}
