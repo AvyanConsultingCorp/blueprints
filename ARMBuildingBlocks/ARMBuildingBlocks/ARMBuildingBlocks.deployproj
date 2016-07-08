@@ -46,6 +46,7 @@
     <None Include="Not used\bb-vpn-connection.json" />
     <None Include="Not used\bb-vpn-gateway.json" />
     <None Include="Not used\bb-vpn-gateway.parameters.json" />
+    <None Include="Scripts\adds-forest.ps1" />
     <None Include="Scripts\apache.sh" />
     <None Include="Scripts\iisaspnet.ps1" />
     <None Include="Scripts\iisaspnet.ps1.zip" />
@@ -62,6 +63,7 @@
     <None Include="Templates\bb-gatewaysubnet-udr.json" />
     <None Include="Templates\bb-gatewaysubnet.json" />
     <None Include="Templates\bb-ntwk-forced-tunneling.json" />
+    <None Include="Templates\bb-vm-dns-forest-extension.json" />
     <None Include="Templates\bb-vm-dns-pip.json" />
     <None Include="Templates\bb-vm-dns-extension.json" />
     <None Include="Templates\bb-vm-dns.json" />
