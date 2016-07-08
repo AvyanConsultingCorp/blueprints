@@ -25,11 +25,13 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
+    <None Include="onpremdeploy.sh" />
     <None Include="azuredeploy.sh" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
     <None Include="README.md" />
+    <None Include="Templates\ra-ad-extension\onprem-simulation.json" />
     <None Include="Templates\ra-ad-extension\azuredeploy.json" />
     <None Include="Templates\ra-ad-extension\azuredeploy.parameters.json" />
     <None Include="Templates\ra-ad-extension\README.md" />
