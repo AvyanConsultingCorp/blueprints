@@ -16,6 +16,11 @@ Param(
   [string]$SiteName
 )
 
+#  $AdminUser = "adminUser"
+#  $AdminPassword = "adminP@ssw0rd"
+#  $SafeModePassword = "SafeModeP@ssw0rd"
+#  $Domain = "contoso.com"
+#  $SiteName="AzureAdSite"
 
 Initialize-Disk -Number 2 -PartitionStyle GPT | New-Partition -UseMaximumSize -DriveLetter F | Format-Volume -Confirm:$false -FileSystem NTFS -force 
 
