@@ -29,6 +29,8 @@ $credential = New-Object System.Management.Automation.PSCredential ("$Domain\$Ad
 
 Import-Module ADDSDeployment
 
+#New-ADReplicationSite -Name $SiteName -Description "description" -PassThru
+
 #Install-ADDSDomainController -DomainName $Domain -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force
 #Test-ADDSDomainControllerInstallation `
 Install-ADDSDomainController `
@@ -45,3 +47,12 @@ Install-ADDSDomainController `
 -InstallDns:$true `
 -NoRebootOnCompletion:$false `
 -Force:$true
+
+#$OnpremSiteName = "Default-First-Site-Name"
+#New-ADReplicationSiteLink `
+#-Name 'sitelinkname' `
+#-SitesIncluded $OnpremSiteName,$SiteName `
+#-Cost 500 `
+#-ReplicationFrequency 240 `
+#-InterSiteTransportProtocol IP `
+#-PassThru
