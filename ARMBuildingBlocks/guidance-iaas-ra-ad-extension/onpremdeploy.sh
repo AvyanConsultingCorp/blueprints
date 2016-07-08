@@ -90,7 +90,7 @@ read -p "Press any key to continue... " -n1 -s
 
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-forest-extension.json
-PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
+PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"safeModePassword\":{\"value\":\"SafeModeP@ssw0rd\"},\"domainName\":{\"value\":\"contoso.com\"},\"domainNetbiosName\":{\"value\":\"CONTOSO\"},\"siteName\":{\"value\":\"Default-First-Site-Name\"}}"
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
