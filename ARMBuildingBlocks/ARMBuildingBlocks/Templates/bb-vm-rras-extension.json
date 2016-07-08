@@ -8,7 +8,7 @@
     "location": "[resourceGroup().location]",
     "scriptName": "Install RRAS",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/rras.ps1",
-    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'adds-rras.ps1 ')]"
+    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'rras.ps1 ')]"
   },
   "resources": [
     {
