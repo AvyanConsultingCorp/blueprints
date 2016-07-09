@@ -9,8 +9,7 @@ ADMIN_PASSWORD=
 ############################################################################
 RESOURCE_GROUP=${BASE_NAME}-rg
 URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks
-SUBNET_NAME_PREFIX=onprem
-SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-sn
+SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-sn
 ############################################################################
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
@@ -72,7 +71,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 ############################################################################
 ## Create RRAS vm with pip on the vnet
 ############################################################################
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-pip.json
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-static-pip.json
 VM_NAME_PREFIX=routor
 VM_COMPUTER_NAME=routor
 VM_IP_ADDRESS=192.168.0.4
@@ -98,7 +97,7 @@ VM_NAME_PREFIX=dns
 VM_COMPUTER_NAME=dns
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
 VM_IP_ADDRESS=192.168.0.5
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-pip.json
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-static-pip.json
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"},\"vmIPaddress\":{\"value\":\"${VM_IP_ADDRESS}\"},\"snid\":{\"value\":\"${SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
 echo
 echo

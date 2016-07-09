@@ -10,7 +10,7 @@
       "type": "string",
       "defaultValue": "192.168.0.0/16"
     },
-    "adSubnetPrefix": {
+    "subnetPrefix": {
       "type": "string",
       "defaultValue": "192.168.0.0/24"
     },
@@ -22,7 +22,7 @@
   "variables": {
     "location": "[resourceGroup().location]",
     "vnetName": "[concat(parameters('baseName'),'-vnet')]",
-    "adSubnetName": "[concat(parameters('baseName'),'-dns-sn')]"
+    "subnetName": "[concat(parameters('baseName'),'-sn')]"
   },
   "resources": [
      {
@@ -45,9 +45,9 @@
         },
         "subnets": [
           {
-            "name": "[variables('adSubnetName')]",
+            "name": "[variables('subnetName')]",
             "properties": {
-              "addressPrefix": "[parameters('adSubnetPrefix')]"
+              "addressPrefix": "[parameters('subnetPrefix')]"
             }
           },
         ]
