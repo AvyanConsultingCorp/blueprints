@@ -8,15 +8,23 @@
     "adminPassword": { "type": "securestring" },
     "siteName": {
       "type": "string",
-      "defaultValue": "Default-First-Site-Name"
+      "defaultValue": "Azure-Vnet-Site"
+    },
+    "cidr": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16"
+    },
+    "replicationFrequency": {
+      "type": "int",
+      "defaultValue": 240
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "scriptName": "CreateDc",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds.ps1",
-    "scriptArgument": "[concat(' -SafeModePassword adminP@ssw0rd -Domain ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'),' -SiteName ', parameters('siteName'))]",
-    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'adds.ps1 ', variables('scriptArgument'))]"
+    "scriptArgument": "[concat(' -SafeModePassword adminP@ssw0rd -DomainName ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'),' -SiteName ', parameters('siteName'),' -$Cidr ', parameters('cidr'), ' -ReplicationFrequency ', parameters('replicationFrequency'))]",
+    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File adds.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
     {

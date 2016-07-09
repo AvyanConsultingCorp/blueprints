@@ -51,7 +51,6 @@ OS_TYPE=Windows
 DOMAIN_NAME=
 ADMIN_USER_NAME=
 ADMIN_PASSWORD=
-
 # VPN parameter defaults
 INPUT_ON_PREMISES_PUBLIC_IP=
 INPUT_ON_PREMISES_ADDRESS_SPACE=
@@ -59,6 +58,8 @@ INPUT_VPN_IPSEC_SHARED_KEY=
 INPUT_ON_PREMISES_DNS_SERVER_ADDRESS=
 ####################################
 ####################################
+REPLICATION_FREQUENCY=5
+
 DSC_TYPE_HANDLER_VERSION=2.19
 
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
@@ -397,7 +398,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 
-## Create dns server in ad subnet
+## Create dns vms
 ############################################################################
 echo -n "Verify that DNS Server on the vNet has been updated"
 echo
@@ -435,11 +436,9 @@ read -p "Press any key to continue... " -n1 -s
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-	#TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-adds.json
-	#PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"		
 	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-extension.json
-	SITE_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-Site
-	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"}}"
+	SITE_NAME=Azure-Vnet-Ad-Site
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"}\"cidr\":{\"value\":\"${VNET_PREFIX}\"}\"replicationFrequency\":{\"value\":\"${REPLICATION_FREQUENCY}\"}}"
 	echo
 	echo
 	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
