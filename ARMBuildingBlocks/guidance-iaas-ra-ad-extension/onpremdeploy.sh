@@ -55,7 +55,6 @@ echo azure config mode arm
      azure config mode arm
 ############################################################################
 ## Create vnet
-############################################################################
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/onprem-simulation.json
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"}}"
 echo
@@ -68,12 +67,10 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-############################################################################
-## Create RRAS vm with pip on the vnet
-############################################################################
+## Create onprem vm with pip on the vnet
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-static-pip.json
-VM_NAME_PREFIX=routor
-VM_COMPUTER_NAME=routor
+VM_NAME_PREFIX=onprem
+VM_COMPUTER_NAME=onprem
 VM_IP_ADDRESS=192.168.0.4
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"},\"vmIPaddress\":{\"value\":\"${VM_IP_ADDRESS}\"},\"snid\":{\"value\":\"${SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
@@ -82,7 +79,7 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-# Install RRAS on the vm
+## Install RRAS on the vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-rras-extension.json
 PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
 echo
@@ -90,24 +87,11 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-############################################################################
-## Create DNS vm with pip on the vnet
-############################################################################
-VM_NAME_PREFIX=dns
-VM_COMPUTER_NAME=dns
-VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
-VM_IP_ADDRESS=192.168.0.5
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-static-pip.json
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"},\"vmIPaddress\":{\"value\":\"${VM_IP_ADDRESS}\"},\"snid\":{\"value\":\"${SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
-echo
-echo
-echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-
-# Install ADDS forest on the vm
+## Install ADDS forest on the vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-forest-extension.json
 PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"safeModePassword\":{\"value\":\"SafeModeP@ssw0rd\"},\"domainName\":{\"value\":\"contoso.com\"},\"domainNetbiosName\":{\"value\":\"CONTOSO\"},\"siteName\":{\"value\":\"Default-First-Site-Name\"}}"
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+
