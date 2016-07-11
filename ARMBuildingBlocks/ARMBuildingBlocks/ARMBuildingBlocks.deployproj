@@ -67,7 +67,7 @@
     <None Include="Templates\bb-gatewaysubnet.json" />
     <None Include="Templates\bb-ntwk-forced-tunneling.json" />
     <None Include="Templates\bb-vm-dns-replication-site-extension.json" />
-    <None Include="Templates\bb-vm-joindomain.extension.json" />
+    <None Include="Templates\bb-vm-joindomain-extension.json" />
     <None Include="Templates\bb-vm-rras-extension.json" />
     <None Include="Templates\bb-vm-dns-forest-extension.json" />
     <None Include="Templates\bb-vm-static-pip.json" />
