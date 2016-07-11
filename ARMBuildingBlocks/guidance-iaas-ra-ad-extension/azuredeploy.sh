@@ -1,3 +1,18 @@
+############################################################################
+##  Arguments
+############################################################################
+BASE_NAME=
+SUBSCRIPTION=
+LOCATION=
+OS_TYPE=Windows
+DOMAIN_NAME=
+ADMIN_USER_NAME=
+ADMIN_PASSWORD=
+INPUT_ON_PREMISES_PUBLIC_IP=
+INPUT_ON_PREMISES_ADDRESS_SPACE=
+INPUT_VPN_IPSEC_SHARED_KEY=
+INPUT_ON_PREMISES_DNS_SERVER_ADDRESS=
+############################################################################
 
 # error handling or interruption via ctrl-c.
 # line number and error code of executed command is passed to errhandle function
@@ -35,29 +50,9 @@ function validateNotEmpty() {
     fi
 }
 
-############################################################################
-## Command Arguments
-############################################################################
-
+####################################
 URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks
 
-####################################
-####################################
-# Default parameter values
-BASE_NAME=
-SUBSCRIPTION=
-LOCATION=
-OS_TYPE=Windows
-DOMAIN_NAME=
-ADMIN_USER_NAME=
-ADMIN_PASSWORD=
-# VPN parameter defaults
-INPUT_ON_PREMISES_PUBLIC_IP=
-INPUT_ON_PREMISES_ADDRESS_SPACE=
-INPUT_VPN_IPSEC_SHARED_KEY=
-INPUT_ON_PREMISES_DNS_SERVER_ADDRESS=
-####################################
-####################################
 REPLICATION_FREQUENCY=5
 
 DSC_TYPE_HANDLER_VERSION=2.19
