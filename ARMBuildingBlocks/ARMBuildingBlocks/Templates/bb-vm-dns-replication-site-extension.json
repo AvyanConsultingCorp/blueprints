@@ -4,6 +4,8 @@
   "parameters": {
     "vmName": { "type": "string" },
     "domainName": { "type": "string" },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
     "siteName": {
       "type": "string",
       "defaultValue": "Azure-Vnet-Site"
@@ -21,7 +23,7 @@
     "location": "[resourceGroup().location]",
     "scriptName": "CreateDc",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds-replication-site.ps1",
-    "scriptArgument": "[concat(' -DomainName ', parameters('domainName'),' -SiteName ', parameters('siteName'),' -Cidr ', parameters('cidr'), ' -ReplicationFrequency ', parameters('replicationFrequency'))]",
+    "scriptArgument": "[concat(' -DomainName ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'),' -SiteName ', parameters('siteName'),' -Cidr ', parameters('cidr'), ' -ReplicationFrequency ', parameters('replicationFrequency'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File adds-replication-site.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [

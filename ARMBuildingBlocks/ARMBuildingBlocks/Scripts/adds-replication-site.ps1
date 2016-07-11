@@ -1,6 +1,12 @@
 ﻿[CmdletBinding()]
 Param(
   [Parameter(Mandatory=$True)]
+  [string]$AdminUser,
+
+  [Parameter(Mandatory=$True)]
+  [string]$AdminPassword,
+
+  [Parameter(Mandatory=$True)]
   [string]$DomainName,
 
   [Parameter(Mandatory=$True)]
@@ -14,6 +20,8 @@ Param(
   [int]$ReplicationFrequency
 )
 
+#  $AdminUser = "adminUser"
+#  $AdminPassword = "adminP@ssw0rd"
 #  $DomainName = "contoso.com"
 #  $SiteName="AzureAdSite"
 #  $Cidr = "10.0.0.0/16"
@@ -27,11 +35,15 @@ Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeMa
 
 Import-Module ADDSDeployment
 
-New-ADReplicationSite -Name $SiteName -Description $Description 
+$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential ("$DomainName\$AdminUser", $secAdminPassword)
 
-New-ADReplicationSubnet -Name $Cidr -Site $SiteName -Location $location 
+New-ADReplicationSite -Name $SiteName -Description $Description -Credential $credential 
+
+New-ADReplicationSubnet -Name $Cidr -Site $SiteName -Location $location -Credential $credential 
 
 New-ADReplicationSiteLink `
+-Credential $credential `
 -Name $SitelinkName `
 -SitesIncluded $OnpreSite, $SiteName `
 -Cost 100 `
