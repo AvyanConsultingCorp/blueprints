@@ -390,7 +390,7 @@ TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
 ON_PREM_DNS_SERVER_ADDRESS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
-DNS_SERVERS=[${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}]
+DNS_SERVERS=[\"${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}\"]
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
 echo
 echo
@@ -413,7 +413,7 @@ VM_SIZE=Standard_DS3
 NUMBER_VMS=${AD_NUMBER_VMS}
 SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
-DNS_SERVERS=[${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}]
+DNS_SERVERS=[\"${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}\"]
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
 
 echo
