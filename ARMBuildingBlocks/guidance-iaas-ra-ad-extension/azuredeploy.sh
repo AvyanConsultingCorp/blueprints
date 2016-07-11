@@ -415,26 +415,26 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-
 ############################################################################
 # Join the VMs to On-Prem AD Domain
 echo
-echo -n "Verify that you can connect to the onpremise dns servers"
 echo
-read -p "Press any key to Join the VMs to On-Prem Domain... " -n1 -s
-
+read -p "Press any key to Join the VMs to the On-Prem Domain... " -n1 -s
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
 	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-joindomain-extension.json
 	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
 	echo
-	
 	echo
 	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 done  
-	 
+echo
+echo
+echo -n "Please go to the on-prem DNS to veify that the above computers have been added to the domain"
+read -p "Press any key to continue ... " -n1 -s
+ 
 ############################################################################
 # install ADDS replication site 
 echo
@@ -447,14 +447,16 @@ PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"$
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+echo
+echo
+echo -n "Please go to the on-prem DNS to veify that the replication site has been created"
+read -p "Press any key to continue ... " -n1 -s
 
 ############################################################################
 # install ADDS/DNS to all DNS servers
 echo
 echo
-echo "Verify that AD Replication Site is created..."
-echo 
-read -p "Press any key to install ADDS/DNS to the AD VMs ... " -n1 -s
+read -p "Press any key to install ADDS/DNS on the AD VMs ... " -n1 -s
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
@@ -467,6 +469,13 @@ do
 	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 done  
+echo
+echo
+echo -n "Please go to the on-prem DNS to veify that the AD domain server has be added"
+echo
+echo
+echo -n "Please go to each azure DNS server to veify that the ADDS is configured successfully"
+read -p "Press any key to continue ... " -n1 -s
 
 ############################################################################
 ## Update vNet DNS setting to the Azure AD Servers
