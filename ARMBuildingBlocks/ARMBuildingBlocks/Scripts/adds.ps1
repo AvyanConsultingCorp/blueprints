@@ -15,50 +15,26 @@ Param(
   [Parameter(Mandatory=$True)]
   [string]$SiteName,
 
-  [Parameter(Mandatory=$True)]
-  [string]$Cidr,
-
-  #Replication Frequency in minutes
-  [Parameter(Mandatory=$True)]
-  [int]$ReplicationFrequency
 )
-
-$Description="azure vnet ad site"
-$Location="azure subnet location"
-#  $AdminUser = "adminUser"
-#  $AdminPassword = "adminP@ssw0rd"
-#  $SafeModePassword = "SafeModeP@ssw0rd"
-#  $DomainName = "contoso.com"
-#  $SiteName="AzureAdSite"
-#  $Cidr = "10.0.0.0/16"
-#  $ReplicationFrequency = 5
-$SitelinkName = "AzureToOnpremLink"
-$OnpreSite= "Default-First-Site-Name"
-
-$secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
-$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ("$DomainName\$AdminUser", $secAdminPassword)
 
 Initialize-Disk -Number 2 -PartitionStyle GPT
 New-Partition -UseMaximumSize -DriveLetter F -DiskNumber 2
 Format-Volume -DriveLetter F -Confirm:$false -FileSystem NTFS -force 
 
+#  $AdminUser = "adminUser"
+#  $AdminPassword = "adminP@ssw0rd"
+#  $SafeModePassword = "SafeModeP@ssw0rd"
+#  $DomainName = "contoso.com"
+#  $SiteName="AzureAdSite"
+
+$secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
+$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential ("$DomainName\$AdminUser", $secAdminPassword)
+
 Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
 
 Import-Module ADDSDeployment
 
-New-ADReplicationSite -Name $SiteName -Description $Description 
-
-New-ADReplicationSubnet -Name $Cidr -Site $SiteName -Location $location 
-
-New-ADReplicationSiteLink `
--Name $SitelinkName `
--SitesIncluded $OnpreSite, $SiteName `
--Cost 100 `
--ReplicationFrequency $ReplicationFrequency `
--InterSiteTransportProtocol IP
-
-#Install-ADDSDomainController -DomainName $DomainName -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force
 Install-ADDSDomainController `
 -Credential $credential `
 -SafeModeAdministratorPassword $secSafeModePassword `
