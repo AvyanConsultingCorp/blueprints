@@ -486,9 +486,10 @@ done
 ############################################################################
 ## Update vNet DNS setting Azure AD Servers
 ############################################################################
-echo -n "Verify that DNS Server has been installed correctly"
-echo -n "set the DNS server to azure VM"
-read -p "Press any key to continue... " -n1 -s
+echo "Verify that DNS Server has been installed correctly"
+echo
+echo 
+read -p "Press any key to set the Azure vnet DNS server the DNS in azure " -n1 -s
 
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}

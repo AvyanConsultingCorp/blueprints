@@ -13,7 +13,7 @@ Param(
   [string]$DomainName,
 
   [Parameter(Mandatory=$True)]
-  [string]$SiteName,
+  [string]$SiteName
 
 )
 
