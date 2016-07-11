@@ -60,7 +60,6 @@ New-ADReplicationSiteLink `
 
 #Install-ADDSDomainController -DomainName $DomainName -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force
 Install-ADDSDomainController `
--SiteName $Sitename `
 -Credential $credential `
 -SafeModeAdministratorPassword $secSafeModePassword `
 -DomainName $DomainName `
