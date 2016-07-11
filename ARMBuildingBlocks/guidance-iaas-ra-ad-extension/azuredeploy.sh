@@ -452,12 +452,12 @@ done
 # install adds replication site 
 echo
 echo
-read -p "Press any key to install adds to install adds replication site ... " -n1 -s
+read -p "Press any key to install adds replication site ... " -n1 -s
 
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
 	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-replication-site-extension.json
 	SITE_NAME=Azure-Vnet-Ad-Site
-	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"},\"cidr\":{\"value\":\"${VNET_PREFIX}\"},\"replicationFrequency\":{\"value\":${REPLICATION_FREQUENCY}}"
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"},\"cidr\":{\"value\":\"${VNET_PREFIX}\"},\"replicationFrequency\":{\"value\":${REPLICATION_FREQUENCY}}}"
 	echo
 	
 	echo
