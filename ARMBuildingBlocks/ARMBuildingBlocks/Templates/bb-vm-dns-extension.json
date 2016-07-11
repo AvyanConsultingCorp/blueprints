@@ -23,7 +23,7 @@
     "location": "[resourceGroup().location]",
     "scriptName": "CreateDc",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/adds.ps1",
-    "scriptArgument": "[concat(' -SafeModePassword adminP@ssw0rd -DomainName ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'),' -SiteName ', parameters('siteName'),' -$Cidr ', parameters('cidr'), ' -ReplicationFrequency ', parameters('replicationFrequency'))]",
+    "scriptArgument": "[concat(' -SafeModePassword adminP@ssw0rd -DomainName ', parameters('domainName'),' -AdminUser ', parameters('adminUsername'),' -AdminPassword ', parameters('adminPassword'),' -SiteName ', parameters('siteName'),' -Cidr ', parameters('cidr'), ' -ReplicationFrequency ', parameters('replicationFrequency'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File adds.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
