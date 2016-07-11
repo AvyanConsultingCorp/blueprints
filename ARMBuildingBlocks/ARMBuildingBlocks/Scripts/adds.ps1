@@ -32,9 +32,12 @@ $Location="azure subnet location"
 #  $SiteName="AzureAdSite"
 #  $Cidr = "10.0.0.0/16"
 #  $ReplicationFrequency = 5
-$SitelinkName = "Azure Vnet To On Prem Link"
-$SitesIncluded = "Default-First-Site-Name,$SiteName"
+$SitelinkName = "AzureToOnpremLink"
+$OnpreSite= "Default-First-Site-Name"
 
+$secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
+$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential ("$DomainName\$AdminUser", $secAdminPassword)
 
 Initialize-Disk -Number 2 -PartitionStyle GPT
 New-Partition -UseMaximumSize -DriveLetter F -DiskNumber 2
@@ -50,17 +53,12 @@ New-ADReplicationSubnet -Name $Cidr -Site $SiteName -Location $location
 
 New-ADReplicationSiteLink `
 -Name $SitelinkName `
--SitesIncluded $SitesIncluded `
+-SitesIncluded $OnpreSite, $SiteName `
 -Cost 100 `
 -ReplicationFrequency $ReplicationFrequency `
 -InterSiteTransportProtocol IP
 
-$secSafeModePassword = ConvertTo-SecureString $SafeModePassword -AsPlainText -Force
-$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ("$DomainName\$AdminUser", $secAdminPassword)
-
 #Install-ADDSDomainController -DomainName $DomainName -Credential $credential –InstallDns -SafeModeAdministratorPassword $secSafeModePassword -Force
-#Test-ADDSDomainControllerInstallation `
 Install-ADDSDomainController `
 -SiteName $Sitename `
 -Credential $credential `

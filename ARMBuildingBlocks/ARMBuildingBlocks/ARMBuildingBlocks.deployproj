@@ -46,6 +46,7 @@
     <None Include="Not used\bb-vpn-connection.json" />
     <None Include="Not used\bb-vpn-gateway.json" />
     <None Include="Not used\bb-vpn-gateway.parameters.json" />
+    <None Include="Scripts\joindomain.ps1" />
     <None Include="Scripts\rras.ps1" />
     <None Include="Scripts\adds-forest.ps1" />
     <None Include="Scripts\apache.sh" />
@@ -64,6 +65,7 @@
     <None Include="Templates\bb-gatewaysubnet-udr.json" />
     <None Include="Templates\bb-gatewaysubnet.json" />
     <None Include="Templates\bb-ntwk-forced-tunneling.json" />
+    <None Include="Templates\bb-vm-joindomain.extension.json" />
     <None Include="Templates\bb-vm-rras-extension.json" />
     <None Include="Templates\bb-vm-dns-forest-extension.json" />
     <None Include="Templates\bb-vm-static-pip.json" />
