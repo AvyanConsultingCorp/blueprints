@@ -1,6 +1,7 @@
 ############################################################################
 ##  Arguments
 ############################################################################
+# Please fill in your data here ...
 BASE_NAME=
 SUBSCRIPTION=
 LOCATION=
@@ -8,53 +9,19 @@ OS_TYPE=Windows
 DOMAIN_NAME=
 ADMIN_USER_NAME=
 ADMIN_PASSWORD=
-INPUT_ON_PREMISES_PUBLIC_IP=
-INPUT_ON_PREMISES_ADDRESS_SPACE=
-INPUT_VPN_IPSEC_SHARED_KEY=
-INPUT_ON_PREMISES_DNS_SERVER_ADDRESS=
+ON_PREMISES_PUBLIC_IP=
+ON_PREMISES_ADDRESS_SPACE=
+VPN_IPSEC_SHARED_KEY=
+ON_PREMISES_DNS_SERVER_ADDRESS=
 ############################################################################
 
-# error handling or interruption via ctrl-c.
-# line number and error code of executed command is passed to errhandle function
-
-trap 'errhandle $LINENO $?' SIGINT ERR
-
-errhandle()
-{
-  echo "Error or Interruption at line ${1} exit code ${2} "
-  exit ${2}
-}
-
-############################################################################
-
-############################################################################
-## Command Arguments
-############################################################################
-function validate() {
-    for i in "${@:2}"; do
-      if [[ "$1" == "$i" ]]
-      then
-        return 1
-      fi
-    done
-    
-    return 0
-}
-
-function validateNotEmpty() {
-    if [[ "$1" != "" ]]
-    then
-      return 1
-    else
-      return 0
-    fi
-}
-
-####################################
+# location of arm templates
 URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks
 
-REPLICATION_FREQUENCY=5
+# Active directory replication frequency in minutes
+REPLICATION_FREQUENCY=15
 
+# Active directory replication frequency in minutes
 DSC_TYPE_HANDLER_VERSION=2.19
 
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
@@ -73,13 +40,13 @@ VNET_MGMT_SUBNET_PREFIX=10.0.0.128/25
 VNET_WEB_SUBNET_PREFIX=10.0.1.0/24
 VNET_BIZ_SUBNET_PREFIX=10.0.2.0/24
 VNET_DB_SUBNET_PREFIX=10.0.3.0/24
+
 VNET_GATEWAY_SUBNET_ADDRESS_PREFIX=10.0.255.224/27
 VNET_AD_SUBNET_PREFIX=10.0.255.192/27
 
 # the following variables are used in the creation of vpn, web/biz/db tier, but not using in vnet creation
 AD_SERVER_IP_ADDRESS_ARRAY=[\"10.0.255.222\",\"10.0.255.221\"]
-DNS_SERVER_ADDRESS_ARRAY=[\"10.0.255.222\",\"10.0.255.221\",\"${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}\"]
-
+DNS_SERVER_ADDRESS_ARRAY=[\"10.0.255.222\",\"10.0.255.221\",\"${ON_PREMISES_DNS_SERVER_ADDRESS}\"]
 
 MGMT_JUMPBOX_IP_ADDRESS=10.0.0.254
 NVA_FE_ILB_IP_ADDRESS=10.0.0.30
@@ -101,6 +68,38 @@ BIZ_NUMBER_VMS=2
 DB_NUMBER_VMS=2
 AD_NUMBER_VMS=2
 
+############################################################################
+# error handling or interruption via ctrl-c.
+# line number and error code of executed command is passed to errhandle function
+
+trap 'errhandle $LINENO $?' SIGINT ERR
+
+errhandle()
+{
+  echo "Error or Interruption at line ${1} exit code ${2} "
+  exit ${2}
+}
+
+function validate() {
+    for i in "${@:2}"; do
+      if [[ "$1" == "$i" ]]
+      then
+        return 1
+      fi
+    done
+    
+    return 0
+}
+
+function validateNotEmpty() {
+    if [[ "$1" != "" ]]
+    then
+      return 1
+    else
+      return 0
+    fi
+}
+
 if validateNotEmpty ${SUBSCRIPTION};
 then
   echo "A value for SUBSCRIPTION must be provided"
@@ -112,6 +111,7 @@ then
   echo "A value for BASE_NAME must be provided"
   exit
 fi
+############################################################################
 
 echo
 echo
@@ -121,12 +121,10 @@ echo azure config mode arm
 ## Create vNet and Subnets for mgmt, nva-fe, nva-be, web, biz, db
 ############################################################################
 
-
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
 
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
-ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
-ON_PREM_DNS_SERVER_ADDRESS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
+ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
 DNS_SERVERS=[]
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
 
@@ -290,10 +288,8 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-
-#the folloiwng parameters are from the mgmt tier, and is needed for vpn creation
+# The folloiwng parameters are from the mgmt tier, and is needed for vpn creation
 DEPLOYED_GW_UDR_NAME=${BASE_NAME}-gw-udr
-
 
 ############################################################################
 ## Create jumbox in management subnet
@@ -323,26 +319,14 @@ VNET_NAME=${DEPLOYED_VNET_NAME}
 UDR_NAME=${DEPLOYED_GW_UDR_NAME}
 VPN_TYPE=RouteBased
 UDR_RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
-ON_PREMISES_PIP=${INPUT_ON_PREMISES_PUBLIC_IP}
-ON_PREMISES_ADDRESS_SPACE=${INPUT_ON_PREMISES_ADDRESS_SPACE}
-SHARED_KEY=${INPUT_VPN_IPSEC_SHARED_KEY}
+ON_PREMISES_PIP=${ON_PREMISES_PUBLIC_IP}
+SHARED_KEY=${VPN_IPSEC_SHARED_KEY}
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"gatewaySubnetAddressPrefix\":{\"value\":\"${GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vpnType\":{\"value\":\"${VPN_TYPE}\"},\"udrName\":{\"value\":\"${UDR_NAME}\"},\"udrResourceGroup\":{\"value\":\"${UDR_RESOURCE_GROUP}\"},\"onPremisesPIP\":{\"value\":\"${ON_PREMISES_PIP}\"},\"onPremisesAddressSpace\":{\"value\":\"${ON_PREMISES_ADDRESS_SPACE}\"},\"sharedKey\":{\"value\":\"${SHARED_KEY}\"}}"
 
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-
-############################################################################
-## UnComment the following lines to enable forced tunneling in web/biz/db tier
-#TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ntwk-forced-tunneling.json
-#RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
-#WEB_UDR_NAME=${DEPLOYED_WEB_UDR_NAME}
-#BIZ_UDR_NAME=${DEPLOYED_BIZ_UDR_NAME}
-#DB_UDR_NAME=${DEPLOYED_DB_UDR_NAME}
-#PARAMETERS="{\"webUdrName\":{\"value\":\"${WEB_UDR_NAME}\"},\"bizUdrName\":{\"value\":\"${BIZ_UDR_NAME}\"},\"dbUdrName\":{\"value\":\"${DB_UDR_NAME}\"}}"
-#azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-############################################################################
 
 ############################################################################
 ## Create Public LB and NVA Vms in dmz subnet 
@@ -375,59 +359,67 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 ############################################################################
 ## Manual Step: config on premise router to make on-prem-to-azure connection
 ############################################################################
-echo -n "Manual Step: Please config your on premises network to connect to the azure vnet"
 echo
-read -p "Press any key to continue after connected... " -n1 -s
+echo
+echo "Manual Step..."
+echo
+echo "Please config your on premises network to connect to the azure vnet"
+echo
+echo "make sure that you can ping the on prem DNS server for azure VMs"
 ############################################################################
 ## Update vNet DNS setting to on-premises DNS
 ############################################################################
+echo
+echo
+read -p "Press any key to update vNET setting to point to on-prem DNS ... " -n1 -s
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
-ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
-ON_PREM_DNS_SERVER_ADDRESS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
-DNS_SERVERS=[\"${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}\"]
+ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
+DNS_SERVERS=[\"${ON_PREMISES_DNS_SERVER_ADDRESS}\"]
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-
-## Create dns vms
+## Create dns resource group
 ############################################################################
 echo
 echo
 echo -n "Verify that DNS Server on the vNet has been updated"
 echo
-read -p "Press any key to continue to create VMs for DNS ... " -n1 -s
+read -p "Press any key to continue to create DNS resource group ... " -n1 -s
 
 DNS_RESOURCE_GROUP=${BASE_NAME}-dns-rg
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns.json
 RESOURCE_GROUP=${DNS_RESOURCE_GROUP}
+echo
+echo
+echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+     azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+
+## Create dns vms
+############################################################################
+echo
+echo
+read -p "Press any key to continue to create VMs for DNS ... " -n1 -s
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns.json
 AD_SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 AD_SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${AD_SUBNET_NAME_PREFIX}-sn
 VM_SIZE=Standard_DS3
 NUMBER_VMS=${AD_NUMBER_VMS}
 SUBNET_NAME_PREFIX=${DEPLOYED_AD_SUBNET_NAME_PREFIX}
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
-DNS_SERVERS=[\"${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}\"]
+DNS_SERVERS=[\"${ON_PREMISES_DNS_SERVER_ADDRESS}\"]
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"adSubnetId\":{\"value\":\"${AD_SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
-
-echo
-echo
-echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-     azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-	 
 ############################################################################
-# Join the VMs to On-Prem Domain
+# Join the VMs to On-Prem AD Domain
 echo
-echo -n "Verify that you can connect to dns servers"
+echo -n "Verify that you can connect to the onpremise dns servers"
 echo
 read -p "Press any key to Join the VMs to On-Prem Domain... " -n1 -s
 
@@ -444,27 +436,25 @@ do
 done  
 	 
 ############################################################################
-# install adds replication site 
+# install ADDS replication site 
 echo
 echo
 read -p "Press any key to install adds replication site ... " -n1 -s
+VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-replication-site-extension.json
+SITE_NAME=Azure-Vnet-Ad-Site
+PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"},\"cidr\":{\"value\":\"${VNET_PREFIX}\"},\"replicationFrequency\":{\"value\":${REPLICATION_FREQUENCY}}}"
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
-	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
-	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-replication-site-extension.json
-	SITE_NAME=Azure-Vnet-Ad-Site
-	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"},\"cidr\":{\"value\":\"${VNET_PREFIX}\"},\"replicationFrequency\":{\"value\":${REPLICATION_FREQUENCY}}}"
-	echo
-	
-	echo
-	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-
-
-# install adds to all DNS servers
+############################################################################
+# install ADDS/DNS to all DNS servers
 echo
 echo
-read -p "Press any key to install adds to the AD VMs ... " -n1 -s
-
+echo "Verify that AD Replication Site is created..."
+echo 
+read -p "Press any key to install ADDS/DNS to the AD VMs ... " -n1 -s
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
@@ -479,25 +469,37 @@ do
 done  
 
 ############################################################################
-## Update vNet DNS setting Azure AD Servers
+## Update vNet DNS setting to the Azure AD Servers
 ############################################################################
-echo "Verify that DNS Server has been installed correctly"
 echo
+echo
+echo "Verify that DNS Server has been installed correctly"
 echo 
-read -p "Press any key to set the Azure vnet DNS server the DNS in azure " -n1 -s
-
+read -p "Press any key to set the Azure vnet DNS settings to point to the DNS in azure " -n1 -s
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
-ON_PREM_NET_PREFIX=${INPUT_ON_PREMISES_ADDRESS_SPACE}
-ON_PREM_DNS_SERVER_ADDRESS=${INPUT_ON_PREMISES_DNS_SERVER_ADDRESS}
+ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
 DNS_SERVERS=${DNS_SERVER_ADDRESS_ARRAY}
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-
-	 
+ 
 ############################################################################
-## Update gateway UDR
+## Update gateway UDR Since it might have been deleted 
+############################################################################
+##
+##
+##
+##
+############################################################################
+## UnComment the following lines to enable forced tunneling in web/biz/db tier
+#TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ntwk-forced-tunneling.json
+#RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
+#WEB_UDR_NAME=${DEPLOYED_WEB_UDR_NAME}
+#BIZ_UDR_NAME=${DEPLOYED_BIZ_UDR_NAME}
+#DB_UDR_NAME=${DEPLOYED_DB_UDR_NAME}
+#PARAMETERS="{\"webUdrName\":{\"value\":\"${WEB_UDR_NAME}\"},\"bizUdrName\":{\"value\":\"${BIZ_UDR_NAME}\"},\"dbUdrName\":{\"value\":\"${DB_UDR_NAME}\"}}"
+#azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 ############################################################################
