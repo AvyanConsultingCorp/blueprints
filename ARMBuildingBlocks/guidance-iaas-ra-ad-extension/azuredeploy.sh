@@ -402,7 +402,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 ############################################################################
 echo -n "Verify that DNS Server on the vNet has been updated"
 echo
-read -p "Press any key to continue... " -n1 -s
+read -p "Press any key to continue to create VMs for DNS ... " -n1 -s
 
 DNS_RESOURCE_GROUP=${BASE_NAME}-dns-rg
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns.json
@@ -427,13 +427,46 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 
 	 
-	 
-# install adds to ad vms
+# Join the VMs to On-Prem Domain
 echo -n "Verify that you can connect to dns servers"
 echo
 read -p "Press any key to continue... " -n1 -s
 
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
+do
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-joindomain-extension.json
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}}"
+	echo
+	
+	echo
+	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+done  
+	 
+# install adds to the first ad vm
+echo
+echo -n "Verify that you can connect to dns servers"
+echo
+read -p "Press any key to install adds to the first AD VM ... " -n1 -s
+
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-extension.json
+	SITE_NAME=Azure-Vnet-Ad-Site
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"},\"cidr\":{\"value\":\"${VNET_PREFIX}\"},\"replicationFrequency\":{\"value\":${REPLICATION_FREQUENCY}}}"
+	echo
+	
+	echo
+	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+
+
+# install adds to the rest ad vms
+echo
+echo
+read -p "Press any key to install adds to the rest AD VMs ... " -n1 -s
+
+for (( i=2; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
 	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-extension.json
