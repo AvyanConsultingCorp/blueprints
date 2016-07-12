@@ -13,6 +13,7 @@ ON_PREMISES_PUBLIC_IP=
 ON_PREMISES_ADDRESS_SPACE=
 VPN_IPSEC_SHARED_KEY=
 ON_PREMISES_DNS_SERVER_ADDRESS=
+ON_PREMISES_DNS_SUBNET_PREFIX=
 ############################################################################
 
 # location of arm templates
@@ -126,7 +127,7 @@ TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
 DNS_SERVERS=[]
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"onpremDnsSubnetPrefix\":{\"value\":\"${ON_PREMISES_DNS_SUBNET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
 
 echo
 echo

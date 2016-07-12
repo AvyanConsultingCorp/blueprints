@@ -4,6 +4,7 @@
   "parameters": {
     "baseName": { "type": "string" },
     "onpremNetPrefix": { "type": "string" },
+    "onpremDnsSubnetPrefix": { "type": "string" },
     "vnetPrefix": { "type": "string" },
     "vnetAdSubnetPrefix": { "type": "string" },
     "vnetMgmtSubnetPrefix": { "type": "string" },
