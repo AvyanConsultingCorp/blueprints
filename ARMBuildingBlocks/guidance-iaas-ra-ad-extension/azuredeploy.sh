@@ -502,10 +502,21 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 ############################################################################
 ## Update gateway UDR Since it might have been deleted 
 ############################################################################
-##
-##
-##
-##
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vpn-gateway-connection.json
+RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
+GATEWAY_SUBNET_ADDRESS_PREFIX=${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}
+VNET_NAME=${DEPLOYED_VNET_NAME}
+UDR_NAME=${DEPLOYED_GW_UDR_NAME}
+VPN_TYPE=RouteBased
+UDR_RESOURCE_GROUP=${MGMT_RESOURCE_GROUP}
+ON_PREMISES_PIP=${ON_PREMISES_PUBLIC_IP}
+SHARED_KEY=${VPN_IPSEC_SHARED_KEY}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"gatewaySubnetAddressPrefix\":{\"value\":\"${GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vpnType\":{\"value\":\"${VPN_TYPE}\"},\"udrName\":{\"value\":\"${UDR_NAME}\"},\"udrResourceGroup\":{\"value\":\"${UDR_RESOURCE_GROUP}\"},\"onPremisesPIP\":{\"value\":\"${ON_PREMISES_PIP}\"},\"onPremisesAddressSpace\":{\"value\":\"${ON_PREMISES_ADDRESS_SPACE}\"},\"sharedKey\":{\"value\":\"${SHARED_KEY}\"}}"
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+
 ############################################################################
 ## UnComment the following lines to enable forced tunneling in web/biz/db tier
 #TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ntwk-forced-tunneling.json
