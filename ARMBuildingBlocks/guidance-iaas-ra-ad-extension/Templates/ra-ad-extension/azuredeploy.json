@@ -59,15 +59,17 @@
             "value": [
               "out-port53",
               "out-port88",
+              "out-port135",
               "out-port389",
               "out-port445",
-              "out-port135",
+              "out-port464",
               "out-dynamic-range",
 
               "in-port53",
               "in-port88",
-              "in-port389",
               "in-port135",
+              "in-port389",
+              "in-port464",
 
               "on-prem-rdp-allow",
               "gateway-allow",
@@ -128,11 +130,13 @@
               "*",
               "*",
               "*",
+
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
+
               "[parameters('onpremNetPrefix')]",
               "[parameters('vnetGwSubnetPrefix')]",
               "[parameters('vnetMgmtSubnetPrefix')]",
@@ -148,11 +152,13 @@
               "*",
               "*",
               "*",
+
               "*",
               "*",
               "*",
               "*",
               "*",
+              
               "*",
               "*",
               "*",
@@ -168,11 +174,13 @@
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
+
               "*",
               "*",
               "*",
               "*",
               "*",
+              
               "*",
               "*",
               "*",
@@ -182,16 +190,18 @@
             "value": [
               53,
               88,
-              389,
               135,
+              389,
               445,
               464,
               49152,
+
               53,
               88,
-              389,
               135,
+              389,
               464,
+
               3389,
               "*",
               "*",
