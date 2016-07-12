@@ -431,9 +431,12 @@ do
 	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 done  
+
 echo
 echo
 echo -n "Please go to the on-prem DNS to veify that the above computers have been added to the domain"
+echo
+echo
 read -p "Press any key to continue ... " -n1 -s
  
 ############################################################################
@@ -451,6 +454,8 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 echo
 echo
 echo -n "Please go to the on-prem DNS to veify that the replication site has been created"
+echo
+echo
 read -p "Press any key to continue ... " -n1 -s
 
 ############################################################################
@@ -470,22 +475,20 @@ do
 	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
 done  
+
 echo
 echo
-echo -n "Please go to the on-prem DNS to veify that the AD domain server has be added"
+echo -n "Please login to each azure DNS server to veify that the ADDS is configured successfully"
 echo
 echo
-echo -n "Please go to each azure DNS server to veify that the ADDS is configured successfully"
 read -p "Press any key to continue ... " -n1 -s
 
 ############################################################################
 ## Update vNet DNS setting to the Azure AD Servers
 ############################################################################
-echo
-echo
-echo "Verify that DNS Server has been installed correctly"
 echo 
-read -p "Press any key to set the Azure vnet DNS settings to point to the DNS in azure " -n1 -s
+echo 
+read -p "Press any key to set the Azure vnet DNS settings to point to the DNS in azure ... " -n1 -s
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
