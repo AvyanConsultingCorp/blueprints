@@ -55,14 +55,150 @@
         "parameters": {
           "baseName": { "value": "[parameters('baseName')]" },
           "nsgNamePrefix": { "value": "ad" },
-          "rulesNames": { "value": [ "on-prem-rdp-allow", "on-prem-ssh-allow", "gateway-allow", "self-allow", "vnet-allow" ] },
-          "rulesDirections": { "value": [ "Inbound", "Inbound", "Inbound", "Inbound", "Inbound" ] },
-          "rulesAccess": { "value": [ "Allow", "Allow", "Allow", "Allow", "Allow" ] },
-          "rulesSourceAddressPrefixes": { "value": [ "[parameters('onpremNetPrefix')]", "[parameters('onpremNetPrefix')]", "[parameters('vnetGwSubnetPrefix')]", "[parameters('vnetMgmtSubnetPrefix')]", "*" ] },
-          "rulesSourcePorts": { "value": [ "*", "*", "*", "*", "*" ] },
-          "rulesDestinationAddressPrefixes": { "value": [ "*", "*", "*", "*", "*" ] },
-          "rulesDestinationPorts": { "value": [ 3389, 22, "*", "*", "*" ] },
-          "rulesProtocol": { "value": [ "*", "*", "*", "*", "*" ] }
+          "rulesNames": {
+            "value": [
+              "out-port53",
+              "out-port88",
+              "out-port389",
+              "out-port445",
+              "out-port135",
+              "out-dynamic-range",
+
+              "in-port53",
+              "in-port88",
+              "in-port389",
+              "in-port135",
+
+              "on-prem-rdp-allow",
+              "gateway-allow",
+              "self-allow",
+              "vnet-deny"
+            ]
+          },
+          "rulesDirections": {
+            "value": [
+              "outbound",
+              "outbound",
+              "outbound",
+              "outbound",
+              "outbound",
+              "outbound",
+              "outbound",
+
+              "Inbound",
+              "Inbound",
+              "Inbound",
+              "Inbound",
+              "Inbound",
+
+              "Inbound",
+              "Inbound",
+              "Inbound",
+              "Inbound"
+            ]
+          },
+          "rulesAccess": {
+            "value": [
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+
+              "Allow",
+              "Allow",
+              "Allow",
+              "Deny"
+            ]
+          },
+          "rulesSourceAddressPrefixes": {
+            "value": [
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremNetPrefix')]",
+              "[parameters('vnetGwSubnetPrefix')]",
+              "[parameters('vnetMgmtSubnetPrefix')]",
+              "*"
+            ]
+          },
+          "rulesSourcePorts": {
+            "value": [
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*"
+            ]
+          },
+          "rulesDestinationAddressPrefixes": {
+            "value": [
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*"
+            ] },
+          "rulesDestinationPorts": {
+            "value": [
+              53,
+              88,
+              389,
+              135,
+              445,
+              464,
+              49152-65535,
+              53,
+              88,
+              389,
+              135,
+              464,
+              3389,
+              "*",
+              "*",
+              "*"
+            ]
+          },
+          "rulesProtocol": { "value": [ "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*" ] }
         }
       }
     },
