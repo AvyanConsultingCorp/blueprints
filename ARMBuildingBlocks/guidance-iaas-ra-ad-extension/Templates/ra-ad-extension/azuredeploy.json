@@ -65,11 +65,17 @@
               "out-port464",
               "out-dynamic-range",
 
-              "in-port53",
-              "in-port88",
-              "in-port135",
-              "in-port389",
-              "in-port464",
+              "vnet-to-port53",
+              "vnet-to-port88",
+              "vnet-to-port135",
+              "vnet-to-port389",
+              "vnet-to-port464",
+
+              "onprem-ad-to-port53",
+              "onprem-ad-port88",
+              "onprem-ad-port135",
+              "onprem-ad-port389",
+              "onprem-ad-port464",
 
               "mgmt-rdp-allow",
               "gateway-allow",
@@ -87,11 +93,17 @@
               "*",
               "*",
 
-              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
-              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
-              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
-              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
-              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
 
               "[parameters('vnetMgmtSubnetPrefix')]",
               "[parameters('vnetGwSubnetPrefix')]",
@@ -118,6 +130,12 @@
               "Inbound",
               "Inbound",
               "Inbound",
+              "Inbound",
+              "Inbound",
+
+              "Inbound",
+              "Inbound",
+              "Inbound",
               "Inbound"
             ]
           },
@@ -125,6 +143,12 @@
             "value": [
               "Allow",
               "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+              "Allow",
+
               "Allow",
               "Allow",
               "Allow",
@@ -162,6 +186,12 @@
               "*",
               "*",
               "*",
+              "*",
+              "*",
+
+              "*",
+              "*",
+              "*",
               "*"
             ]
           },
@@ -174,6 +204,12 @@
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
+
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
 
               "*",
               "*",
@@ -203,13 +239,19 @@
               389,
               464,
 
+              53,
+              88,
+              135,
+              389,
+              464,
+
               3389,
               "*",
               "*",
               "*"
             ]
           },
-          "rulesProtocol": { "value": [ "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*" ] }
+          "rulesProtocol": { "value": [ "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*" ] }
         }
       }
     },
