@@ -71,10 +71,32 @@
               "in-port389",
               "in-port464",
 
-              "on-prem-rdp-allow",
+              "mgmt-rdp-allow",
               "gateway-allow",
               "self-allow",
               "vnet-deny"
+            ]
+          },
+          "rulesSourceAddressPrefixes": {
+            "value": [
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+
+              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
+              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
+              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
+              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
+              [ "parameters('vnetPrefix')", "parameters('onpremDnsSubnetPrefix')" ],
+
+              "[parameters('vnetMgmtSubnetPrefix')]",
+              "[parameters('vnetGwSubnetPrefix')]",
+              "[parameters('vnetAdSubnetPrefix')]",
+              "*"
             ]
           },
           "rulesDirections": {
@@ -121,28 +143,6 @@
               "Deny"
             ]
           },
-          "rulesSourceAddressPrefixes": {
-            "value": [
-              "*",
-              "*",
-              "*",
-              "*",
-              "*",
-              "*",
-              "*",
-
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-
-              "[parameters('onpremNetPrefix')]",
-              "[parameters('vnetGwSubnetPrefix')]",
-              "[parameters('vnetMgmtSubnetPrefix')]",
-              "*"
-            ]
-          },
           "rulesSourcePorts": {
             "value": [
               "*",
@@ -158,7 +158,7 @@
               "*",
               "*",
               "*",
-              
+
               "*",
               "*",
               "*",
@@ -180,12 +180,13 @@
               "*",
               "*",
               "*",
-              
+
               "*",
               "*",
               "*",
               "*"
-            ] },
+            ]
+          },
           "rulesDestinationPorts": {
             "value": [
               53,
