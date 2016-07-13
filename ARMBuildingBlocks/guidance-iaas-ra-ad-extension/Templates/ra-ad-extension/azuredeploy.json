@@ -63,13 +63,15 @@
               "out-port389",
               "out-port445",
               "out-port464",
-              "out-dynamic-range",
+              "out-rpc-dynamic",
 
               "vnet-to-port53",
               "vnet-to-port88",
               "vnet-to-port135",
+              "vnet-to-port137-9",
               "vnet-to-port389",
               "vnet-to-port464",
+              "vnet-to-rpc-dynamic",
 
               "onprem-ad-to-port53",
               "onprem-ad-port88",
@@ -93,6 +95,8 @@
               "*",
               "*",
 
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
               "[parameters('vnetPrefix')]",
               "[parameters('vnetPrefix')]",
               "[parameters('vnetPrefix')]",
@@ -126,6 +130,8 @@
               "Inbound",
               "Inbound",
               "Inbound",
+              "Inbound",
+              "Inbound",
 
               "Inbound",
               "Inbound",
@@ -149,6 +155,8 @@
               "Allow",
               "Allow",
 
+              "Allow",
+              "Allow",
               "Allow",
               "Allow",
               "Allow",
@@ -182,6 +190,8 @@
               "*",
               "*",
               "*",
+              "*",
+              "*",
 
               "*",
               "*",
@@ -210,6 +220,8 @@
               "*",
               "*",
               "*",
+              "*",
+              "*",
 
               "*",
               "*",
@@ -232,11 +244,14 @@
               "445",
               "464",
               "49152-65535",
+
               "53",
               "88",
               "135",
+              "137-139",
               "389",
               "464",
+              "49152-65535",
 
               "53",
               "88",
@@ -250,7 +265,7 @@
               "*"
             ]
           },
-          "rulesProtocol": { "value": [ "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*" ] }
+          "rulesProtocol": { "value": [ "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*", "*" ] }
         }
       }
     },
