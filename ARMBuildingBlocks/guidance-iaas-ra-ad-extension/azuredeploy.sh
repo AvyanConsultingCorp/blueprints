@@ -163,6 +163,14 @@ DEPLOYED_DB_UDR_NAME=${BASE_NAME}-db-udr
 DEPLOYED_DMZ_FE_SUBNET_NAME_PREFIX=dmz-fe
 DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX=dmz-be
 
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please verify that the vNet is created "
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 ############################################################################
 ## Create ILB and VMs in web, biz, db
 ############################################################################
@@ -211,6 +219,15 @@ do
 		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 	fi
 done  
+
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please verify that the Web tiere is created correctly"
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 
 #### # create biz tier
 #### TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https.json
@@ -295,6 +312,15 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 # The folloiwng parameters are from the mgmt tier, and is needed for vpn creation
 DEPLOYED_GW_UDR_NAME=${BASE_NAME}-gw-udr
 
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please verify that the NVA is created correctly"
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
+
 ############################################################################
 ## Create jumbox in management subnet
 ############################################################################
@@ -311,6 +337,14 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please verify that the jupbox is created correctly"
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 
 ############################################################################
 ## Create VPN Gateway and VPN connection to connect to on premises network
@@ -331,6 +365,15 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please verify that the VPN gateway is created correctly"
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 
 ############################################################################
 ## Create Public LB and NVA Vms in dmz subnet 
@@ -359,6 +402,14 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 	 
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please verify that the DMZ is created correctly"
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 
 ############################################################################
 ## Manual Step: config on premise router to make on-prem-to-azure connection
