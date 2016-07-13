@@ -22,6 +22,8 @@ URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBl
 
 # Active directory replication frequency in minutes
 REPLICATION_FREQUENCY=15
+SITE_NAME=Azure-Vnet-Ad-Site
+ONPREM_SITE_NAME=Default-First-Site-Name
 
 # Active directory replication frequency in minutes
 DSC_TYPE_HANDLER_VERSION=2.19
@@ -471,8 +473,7 @@ fi
 
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-replication-site-extension.json
-SITE_NAME=Azure-Vnet-Ad-Site
-PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"},\"cidr\":{\"value\":\"${VNET_PREFIX}\"},\"replicationFrequency\":{\"value\":${REPLICATION_FREQUENCY}}}"
+PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"},\"onpremSiteName\":{\"value\":\"${ONPREM_SITE_NAME}\"},\"cidr\":{\"value\":\"${VNET_PREFIX}\"},\"replicationFrequency\":{\"value\":${REPLICATION_FREQUENCY}}}"
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
