@@ -7,6 +7,13 @@ LOCATION=
 ADMIN_USER_NAME=
 ADMIN_PASSWORD=
 ############################################################################
+DOMAIN_NAME=contoso.com
+DOMAIN_NETBIOS_NAME=CONTOSO
+VM_NAME_PREFIX=onprem
+VM_COMPUTER_NAME=onprem
+VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
+VM_IP_ADDRESS=192.168.0.4
+############################################################################
 RESOURCE_GROUP=${BASE_NAME}-rg
 URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-sn
@@ -67,12 +74,9 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
+############################################################################
 ## Create onprem vm with pip on the vnet
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-static-pip.json
-VM_NAME_PREFIX=onprem
-VM_COMPUTER_NAME=onprem
-VM_IP_ADDRESS=192.168.0.4
-VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"},\"vmIPaddress\":{\"value\":\"${VM_IP_ADDRESS}\"},\"snid\":{\"value\":\"${SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
 echo
 echo
@@ -87,11 +91,11 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
+############################################################################
 ## Install ADDS forest on the vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-forest-extension.json
-PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"safeModePassword\":{\"value\":\"SafeModeP@ssw0rd\"},\"domainName\":{\"value\":\"contoso.com\"},\"domainNetbiosName\":{\"value\":\"CONTOSO\"},\"siteName\":{\"value\":\"Default-First-Site-Name\"}}"
+PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"domainNetbiosName\":{\"value\":\"${DOMAIN_NETBIOS_NAME}\"}}"
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-

@@ -2,8 +2,7 @@
 Param(
 	[string]$SafeModePassword = "SafeModeP@ssw0rd",
 	[string]$DomainName = "contoso.com",
-	[string]$DomainNetbiosName = "CONTOSO",
-	[string]$SiteName="AzureAdSite"
+	[string]$DomainNetbiosName = "CONTOSO"
 )
 
 Initialize-Disk -Number 2 -PartitionStyle GPT
