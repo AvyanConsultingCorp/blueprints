@@ -13,6 +13,9 @@ Param(
   [string]$SiteName,
 
   [Parameter(Mandatory=$True)]
+  [string]$OnpremSiteName,
+
+  [Parameter(Mandatory=$True)]
   [string]$Cidr,
 
   #Replication Frequency in minutes
@@ -24,12 +27,12 @@ Param(
 #  $AdminPassword = "adminP@ssw0rd"
 #  $DomainName = "contoso.com"
 #  $SiteName="AzureAdSite"
+#  $OnpreSiteName= "Default-First-Site-Name"
 #  $Cidr = "10.0.0.0/16"
 #  $ReplicationFrequency = 5
 $Description="azure vnet ad site"
 $Location="azure subnet location"
 $SitelinkName = "AzureToOnpremLink"
-$OnpreSite= "Default-First-Site-Name"
 
 Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
 
@@ -45,7 +48,7 @@ New-ADReplicationSubnet -Name $Cidr -Site $SiteName -Location $location -Credent
 New-ADReplicationSiteLink `
 -Credential $credential `
 -Name $SitelinkName `
--SitesIncluded $OnpreSite, $SiteName `
+-SitesIncluded $OnpremSiteName, $SiteName `
 -Cost 100 `
 -ReplicationFrequency $ReplicationFrequency `
 -InterSiteTransportProtocol IP
