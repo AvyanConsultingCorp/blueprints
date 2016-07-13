@@ -64,8 +64,8 @@ echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscr
 	 
 echo
 echo
-echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
 ## Create onprem vm with pip on the vnet
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-static-pip.json
@@ -76,22 +76,22 @@ VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerName\":{\"value\":\"${VM_COMPUTER_NAME}\"},\"vmIPaddress\":{\"value\":\"${VM_IP_ADDRESS}\"},\"snid\":{\"value\":\"${SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
 echo
 echo
-echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
 ## Install RRAS on the vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-rras-extension.json
 PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"}}"
 echo
 echo
-echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
 ## Install ADDS forest on the vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-dns-forest-extension.json
 PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"safeModePassword\":{\"value\":\"SafeModeP@ssw0rd\"},\"domainName\":{\"value\":\"contoso.com\"},\"domainNetbiosName\":{\"value\":\"CONTOSO\"},\"siteName\":{\"value\":\"Default-First-Site-Name\"}}"
 echo
 echo
-echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
-     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS}
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
