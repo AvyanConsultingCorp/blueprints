@@ -64,7 +64,6 @@
               "out-port445",
               "out-port464",
               "out-rpc-dynamic",
-
               "vnet-to-port53",
               "vnet-to-port88",
               "vnet-to-port135",
@@ -72,13 +71,11 @@
               "vnet-to-port389",
               "vnet-to-port464",
               "vnet-to-rpc-dynamic",
-
               "onprem-ad-to-port53",
-              "onprem-ad-port88",
-              "onprem-ad-port135",
-              "onprem-ad-port389",
-              "onprem-ad-port464",
-
+              "onprem-ad-to-port88",
+              "onprem-ad-to-port135",
+              "onprem-ad-to-port389",
+              "onprem-ad-to-port464",
               "mgmt-rdp-allow",
               "gateway-allow",
               "self-allow",
@@ -94,7 +91,6 @@
               "*",
               "*",
               "*",
-
               "[parameters('vnetPrefix')]",
               "[parameters('vnetPrefix')]",
               "[parameters('vnetPrefix')]",
@@ -102,13 +98,11 @@
               "[parameters('vnetPrefix')]",
               "[parameters('vnetPrefix')]",
               "[parameters('vnetPrefix')]",
-
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
-
               "[parameters('vnetMgmtSubnetPrefix')]",
               "[parameters('vnetGwSubnetPrefix')]",
               "[parameters('vnetAdSubnetPrefix')]",
@@ -124,7 +118,6 @@
               "outbound",
               "outbound",
               "outbound",
-
               "Inbound",
               "Inbound",
               "Inbound",
@@ -132,13 +125,11 @@
               "Inbound",
               "Inbound",
               "Inbound",
-
               "Inbound",
               "Inbound",
               "Inbound",
               "Inbound",
               "Inbound",
-
               "Inbound",
               "Inbound",
               "Inbound",
@@ -154,7 +145,6 @@
               "Allow",
               "Allow",
               "Allow",
-
               "Allow",
               "Allow",
               "Allow",
@@ -162,13 +152,11 @@
               "Allow",
               "Allow",
               "Allow",
-
               "Allow",
               "Allow",
               "Allow",
               "Allow",
               "Allow",
-
               "Allow",
               "Allow",
               "Allow",
@@ -184,7 +172,6 @@
               "*",
               "*",
               "*",
-
               "*",
               "*",
               "*",
@@ -192,13 +179,11 @@
               "*",
               "*",
               "*",
-
               "*",
               "*",
               "*",
               "*",
               "*",
-
               "*",
               "*",
               "*",
@@ -214,7 +199,6 @@
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
               "[parameters('onpremDnsSubnetPrefix')]",
-
               "*",
               "*",
               "*",
@@ -222,13 +206,11 @@
               "*",
               "*",
               "*",
-
               "*",
               "*",
               "*",
               "*",
               "*",
-
               "*",
               "*",
               "*",
@@ -244,7 +226,6 @@
               "445",
               "464",
               "49152-65535",
-
               "53",
               "88",
               "135",
@@ -252,13 +233,11 @@
               "389",
               "464",
               "49152-65535",
-
               "53",
               "88",
               "135",
               "389",
               "464",
-
               "3389",
               "*",
               "*",
@@ -273,7 +252,6 @@
             "*",
             "*",
             "*",
-
             "*",
             "*",
             "*",
@@ -281,13 +259,11 @@
             "*",
             "*",
             "*",
-
             "*",
             "*",
             "*",
             "*",
             "*",
-
             "*",
             "*",
             "*",
