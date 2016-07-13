@@ -82,33 +82,6 @@
               "vnet-deny"
             ]
           },
-          "rulesSourceAddressPrefixes": {
-            "value": [
-              "*",
-              "*",
-              "*",
-              "*",
-              "*",
-              "*",
-              "*",
-              "[parameters('vnetPrefix')]",
-              "[parameters('vnetPrefix')]",
-              "[parameters('vnetPrefix')]",
-              "[parameters('vnetPrefix')]",
-              "[parameters('vnetPrefix')]",
-              "[parameters('vnetPrefix')]",
-              "[parameters('vnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('onpremDnsSubnetPrefix')]",
-              "[parameters('vnetMgmtSubnetPrefix')]",
-              "[parameters('vnetGwSubnetPrefix')]",
-              "[parameters('vnetAdSubnetPrefix')]",
-              "*"
-            ]
-          },
           "rulesDirections": {
             "value": [
               "outbound",
@@ -161,6 +134,33 @@
               "Allow",
               "Allow",
               "Deny"
+            ]
+          },
+          "rulesSourceAddressPrefixes": {
+            "value": [
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('vnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('onpremDnsSubnetPrefix')]",
+              "[parameters('vnetMgmtSubnetPrefix')]",
+              "[parameters('vnetGwSubnetPrefix')]",
+              "[parameters('vnetAdSubnetPrefix')]",
+              "*"
             ]
           },
           "rulesSourcePorts": {
@@ -244,31 +244,33 @@
               "*"
             ]
           },
-          "rulesProtocol": { "value": [
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*",
-            "*" 
-          ] }
+          "rulesProtocol": {
+            "value": [
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*",
+              "*"
+            ]
+          }
         }
       }
     },
