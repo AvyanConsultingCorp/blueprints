@@ -405,7 +405,9 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the DMZ has been created correctly"
+	echo -n "Please verify that the DMZ has been created correctly. "
+	echo
+	echo " Browse to the public IP of the DMZ Load Balancer and make sure that you can see the default IIS or Ubuntu page"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -419,9 +421,17 @@ fi
 	echo
 	echo "Manual Step..."
 	echo
-	echo "Please configure your on-premises network to connect to the Azure VNet"
+	echo "Please configure your on-premises network to connect to the Azure VNet and verify the following:"
 	echo
-	echo "Make sure that you can connect to the on-premises AD server from the Azure VMs"
+	echo "1. Browse to web tier ILB (10.0.1.254) from the on-premises RRAS server to see the default IIS/Ubuntu page"
+	echo
+	echo "2. RDP to the jumpbox (10.0.0.254) from the on-premises RRAS server"
+	echo
+	echo "3. Connect (ping) the on-premises AD server from the jumpbox"
+	echo
+	echo "4. RDP to all the windows VMs from the jumpbox. e.g. RDP to 10.0.1.4 if web server is Windows"
+	echo
+	echo "5. ssh to all the linux VMs from the jumpbox. e.g. ssh to 10.0.0.29 "
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -562,6 +572,16 @@ if [ "${Prompting}" == "true" ]; then
 	echo
 	echo -n "Please login to each Azure AD server to verify that Directory Services has been configured successfully"
 	echo
+	echo "1. login to the on premises AD/DNS server and verify ad1-vm is added to domain controller. "
+	echo "Note: ad2-vm may not show up immediately since it will take more than 15 mintues for the replication to start."
+	echo
+	echo "2. RDP to the jumpbox (10.0.0.254) from the on-premises RRAS server"
+	echo
+	echo "3. RDP to the ad1-vm (10.0.255.222) from the jumpbox and verify ADDS is configured correctly "
+	echo "see the log at C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status in ad1-vm for any errors"
+	echo
+	echo "4. RDP to the ad2-vm (10.0.255.221) from the jumpbox and verify ADDS is configured correctly"
+	echo "see the log at C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.8\Status in ad2-vm for any errors"
 	echo
 	read -p "Press any key to continue ... " -n1 -s
 fi
@@ -625,4 +645,11 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 #DB_UDR_NAME=${DEPLOYED_DB_UDR_NAME}
 #PARAMETERS="{\"webUdrName\":{\"value\":\"${WEB_UDR_NAME}\"},\"bizUdrName\":{\"value\":\"${BIZ_UDR_NAME}\"},\"dbUdrName\":{\"value\":\"${DB_UDR_NAME}\"}}"
 #azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+############################################################################
+############################################################################
+echo
+echo
+echo -n "Deployment has completed. To join any VM to the domain, you need to restart the VM first."
+echo
+echo
 ############################################################################
