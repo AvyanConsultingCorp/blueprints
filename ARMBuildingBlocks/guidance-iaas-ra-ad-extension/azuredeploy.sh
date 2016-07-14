@@ -6,14 +6,14 @@ BASE_NAME=
 SUBSCRIPTION=
 LOCATION=
 OS_TYPE=Windows
-DOMAIN_NAME=
-ADMIN_USER_NAME=
-ADMIN_PASSWORD=
+DOMAIN_NAME=contoso.com
+ADMIN_USER_NAME=adminUser
+ADMIN_PASSWORD=adminP@ssw0rd
 ON_PREMISES_PUBLIC_IP=
-ON_PREMISES_ADDRESS_SPACE=
+ON_PREMISES_ADDRESS_SPACE=192.168.0.0/16
 VPN_IPSEC_SHARED_KEY=
-ON_PREMISES_DNS_SERVER_ADDRESS=
-ON_PREMISES_DNS_SUBNET_PREFIX=
+ON_PREMISES_DNS_SERVER_ADDRESS=192.168.0.4
+ON_PREMISES_DNS_SUBNET_PREFIX=192.168.0.0/24
 ############################################################################
 Prompting=true
 
@@ -166,7 +166,7 @@ DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX=dmz-be
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the vNet is created "
+	echo -n "Please verify that the VNet has been created "
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -223,7 +223,7 @@ done
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the Web tiere is created correctly"
+	echo -n "Please verify that the Web tier has been created correctly"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -309,13 +309,13 @@ echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 
-# The folloiwng parameters are from the mgmt tier, and is needed for vpn creation
+# The following parameters are from the mgmt tier, and is needed for vpn creation
 DEPLOYED_GW_UDR_NAME=${BASE_NAME}-gw-udr
 
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the NVA is created correctly"
+	echo -n "Please verify that the NVA has been created correctly"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -340,7 +340,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the jupbox is created correctly"
+	echo -n "Please verify that the jumpbox has been created correctly"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -369,7 +369,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the VPN gateway is created correctly"
+	echo -n "Please verify that the VPN gateway has been created correctly"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -405,7 +405,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the DMZ is created correctly"
+	echo -n "Please verify that the DMZ has been created correctly"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -419,9 +419,9 @@ fi
 	echo
 	echo "Manual Step..."
 	echo
-	echo "Please config your on premises network to connect to the azure vnet"
+	echo "Please configure your on-premises network to connect to the Azure VNet"
 	echo
-	echo "make sure that you can connect to the on prem DNS server from azure VMs"
+	echo "Make sure that you can connect to the on-premises AD server from the Azure VMs"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -432,7 +432,7 @@ fi
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	read -p "Press any key to update vNET setting to point to on-prem DNS ... " -n1 -s
+	read -p "Press any key to update the VNet setting for the VNet to point to on-premises DNS ... " -n1 -s
 fi
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
@@ -450,10 +450,10 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that DNS Server on the vNet has been updated"
+	echo -n "Please verify that the DNS server setting on the VNet has been updated"
 	echo
 	echo
-	read -p "Press any key to create DNS resource group ... " -n1 -s
+	read -p "Press any key to create the resource group for the AD servers ... " -n1 -s
 fi
 
 
@@ -469,7 +469,7 @@ echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscr
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	read -p "Press any key to create VMs for DNS ... " -n1 -s
+	read -p "Press any key to create the VMs for the AD servers ... " -n1 -s
 fi
 
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns.json
@@ -490,7 +490,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	read -p "Press any key to Join the VMs to the On-Prem Domain... " -n1 -s
+	read -p "Press any key to join the VMs to the on-premises domain... " -n1 -s
 fi
 
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
@@ -508,7 +508,7 @@ done
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please go to the on-prem DNS to veify that the above computers have been added to the domain"
+	echo -n "Please go to the on-premises AD server to verify that the computers have been added to the domain"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -519,7 +519,7 @@ fi
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	read -p "Press any key to install ADDS replication site ... " -n1 -s
+	read -p "Press any key to install the Active Directory Directory Services replication site ... " -n1 -s
 fi
 
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
@@ -530,7 +530,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 echo
 echo
-echo -n "Please go to the on-prem DNS to veify that the replication site has been created"
+echo -n "Please go to the on-premises AD server to verify that the replication site has been created"
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
@@ -541,7 +541,7 @@ fi
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	read -p "Press any key to install ADDS/DNS on the AD VMs ... " -n1 -s
+	read -p "Press any key to install Directory Services and DNS on the AD VMs ... " -n1 -s
 fi
 
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
@@ -560,7 +560,7 @@ done
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please login to each azure DNS server to veify that the ADDS is configured successfully"
+	echo -n "Please login to each Azure AD server to verify that Directory Services has been configured successfully"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
@@ -571,7 +571,7 @@ fi
 if [ "${Prompting}" == "true" ]; then
 	echo 
 	echo 
-	read -p "Press any key to set the Azure vnet DNS settings to point to the DNS in azure ... " -n1 -s
+	read -p "Press any key to set the Azure VNet DNS settings to point to the DNS in Azure ... " -n1 -s
 fi
 
 TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-ad-extension/Templates/ra-ad-extension/azuredeploy.json
@@ -587,7 +587,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 if [ "${Prompting}" == "true" ]; then
 	echo 
 	echo 
-	echo "Please verify that vnet DNS setting is updated to azure vm dns servers "
+	echo "Please verify that the VNet DNS setting has been updated reference the Azure VM DNS servers "
 	echo
 	echo
 	read -p "Press any key continue ... " -n1 -s
@@ -599,7 +599,7 @@ fi
 if [ "${Prompting}" == "true" ]; then
 	echo 
 	echo 
-	read -p "Press any key to apply gateway UDR to gateway subnet Since it might have been removed ... " -n1 -s
+	read -p "Press any key to apply the gateway UDR to the gateway subnet (it might have been removed) ... " -n1 -s
 fi
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vpn-gateway-connection.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
