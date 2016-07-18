@@ -1,0 +1,2 @@
+makecert -sky exchange -pe -a sha256 -n "CN=pnpadfsroot" -r -sv pnpadfsroot.pvk pnpadfsroot.cer -len 2048
+makecert -sk pkey -iv pnpadfsroot.pvk -a sha256 -n "CN=pnpadfs.patternspractices.com , CN=enterpriseregistration.patternspractices.com" -ic pnpadfsroot.cer -sr localmachine -ss my -sky exchange -pe
