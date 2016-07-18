@@ -137,7 +137,7 @@ echo azure config mode arm
 ## Create vNet and Subnets for mgmt, nva-fe, nva-be, web, biz, db
 ############################################################################
 
-TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adds/Templates/ra-adds/azuredeploy.json
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adfs/Templates/ra-adfs/azuredeploy.json
 
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
@@ -446,7 +446,7 @@ if [ "${Prompting}" == "true" ]; then
 	echo
 	read -p "Press any key to update the VNet setting for the VNet to point to on-premises DNS ... " -n1 -s
 fi
-TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adds/Templates/ra-adds/azuredeploy.json
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adfs/Templates/ra-adfs/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
 DNS_SERVERS=[\"${ON_PREMISES_DNS_SERVER_ADDRESS}\"]
@@ -586,7 +586,7 @@ if [ "${Prompting}" == "true" ]; then
 	read -p "Press any key to set the Azure VNet DNS settings to point to the DNS in Azure ... " -n1 -s
 fi
 
-TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adds/Templates/ra-adds/azuredeploy.json
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adfs/Templates/ra-adfs/azuredeploy.json
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
 DNS_SERVERS=${DNS_SERVER_ADDRESS_ARRAY}

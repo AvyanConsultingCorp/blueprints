@@ -62,7 +62,7 @@ echo azure config mode arm
      azure config mode arm
 ############################################################################
 ## Create vnet
-TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adds/Templates/ra-adds/onprem-simulation.json
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adfs/Templates/ra-adfs/onprem-simulation.json
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"}}"
 echo
 echo

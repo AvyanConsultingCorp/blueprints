@@ -30,8 +30,8 @@
     </None>
     <None Include="Templates\azuredeploy.sh" />
     <None Include="Templates\onpremdeploy.sh" />
-    <None Include="Templates\ra-adds\azuredeploy.json" />
-    <None Include="Templates\ra-adds\onprem-simulation.json" />
+    <None Include="Templates\ra-adfs\azuredeploy.json" />
+    <None Include="Templates\ra-adfs\onprem-simulation.json" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
