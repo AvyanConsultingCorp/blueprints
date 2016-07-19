@@ -47,6 +47,13 @@
     <None Include="Not used\bb-vpn-gateway.json" />
     <None Include="Not used\bb-vpn-gateway.parameters.json" />
     <None Include="Scripts\adds-replication-site.ps1" />
+    <None Include="Scripts\ADFS\AddAdfsFarm.ps1" />
+    <None Include="Scripts\ADFS\domainjoin.ps1" />
+    <None Include="Scripts\ADFS\howtocreatecerts.txt" />
+    <None Include="Scripts\ADFS\howtocreatecerts.zip" />
+    <None Include="Scripts\ADFS\installadds.ps1" />
+    <None Include="Scripts\ADFS\InstallAdfsFarm.ps1" />
+    <None Include="Scripts\ADFS\installWebAppProxy.ps1" />
     <None Include="Scripts\joindomain.ps1" />
     <None Include="Scripts\rras.ps1" />
     <None Include="Scripts\adds-forest.ps1" />
