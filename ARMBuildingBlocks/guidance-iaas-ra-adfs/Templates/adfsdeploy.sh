@@ -28,7 +28,7 @@ ON_PREMISES_DNS_SUBNET_PREFIX=
 
 # step-by-step prompt for this script, set it to true will allow you 
 # to check and verify each step before going to the next step. 
-Prompting=true
+Prompting=true-not
 
 # location of arm templates
 URI_BASE=https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks
@@ -118,6 +118,33 @@ DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
 DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
 DEPLOYED_ADFS_SUBNET_NAME=${BASE_NAME}-adfs-sn
 
+############################################################################
+## Update vNet DNS setting to the Azure AD Servers
+############################################################################
+if [ "${Prompting}" == "true" ]; then
+	echo 
+	echo 
+	read -p "Press any key to set the Azure VNet DNS settings to point to the DNS in Azure ... " -n1 -s
+fi
+
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adfs/Templates/ra-adfs/azuredeploy.json
+RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
+ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
+DNS_SERVERS=${DNS_SERVER_ADDRESS_ARRAY}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"onpremNetPrefix\":{\"value\":\"${ON_PREM_NET_PREFIX}\"},\"onpremDnsSubnetPrefix\":{\"value\":\"${ON_PREMISES_DNS_SUBNET_PREFIX}\"},\"vnetPrefix\":{\"value\":\"${VNET_PREFIX}\"},\"vnetAdSubnetPrefix\":{\"value\":\"${VNET_AD_SUBNET_PREFIX}\"},\"vnetAdfsSubnetPrefix\":{\"value\":\"${VNET_ADFS_SUBNET_PREFIX}\"},\"vnetAdfsProxySubnetPrefix\":{\"value\":\"${VNET_ADFS_PROXY_SUBNET_PREFIX}\"},\"vnetMgmtSubnetPrefix\":{\"value\":\"${VNET_MGMT_SUBNET_PREFIX}\"},\"vnetNvaFeSubnetPrefix\":{\"value\":\"${VNET_NVA_FE_SUBNET_PREFIX}\"},\"vnetNvaBeSubnetPrefix\":{\"value\":\"${VNET_NVA_BE_SUBNET_PREFIX}\"},\"vnetWebSubnetPrefix\":{\"value\":\"${VNET_WEB_SUBNET_PREFIX}\"},\"vnetBizSubnetPrefix\":{\"value\":\"${VNET_BIZ_SUBNET_PREFIX}\"},\"vnetDbSubnetPrefix\":{\"value\":\"${VNET_DB_SUBNET_PREFIX}\"},\"vnetGwSubnetPrefix\":{\"value\":\"${VNET_GATEWAY_SUBNET_ADDRESS_PREFIX}\"},\"vnetDmzFeSubnetPrefix\":{\"value\":\"${VNET_DMZ_FE_SUBNET_PREFIX}\"},\"vnetDmzBeSubnetPrefix\":{\"value\":\"${VNET_DMZ_BE_SUBNET_PREFIX}\"}}"
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+ 
+if [ "${Prompting}" == "true" ]; then
+	echo 
+	echo 
+	echo "Please verify that the VNet DNS setting has been updated reference the Azure VM DNS servers "
+	echo
+	echo
+	read -p "Press any key continue ... " -n1 -s
+fi
 
 ############################################################################
 ############################################################################
@@ -171,6 +198,36 @@ echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+
+############################################################################
+# Join the VMs to On-Prem AD Domain
+############################################################################
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	read -p "Press any key to join the VMs to the on-premises domain... " -n1 -s
+fi
+
+for (( i=1; i<=${NUMBER_VMS}; i++ ))
+do
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-joindomain-extension.json
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
+	echo
+	echo
+	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+done  
+
+
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please go to the on-premises AD server to verify that the computers have been added to the domain"
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 	 
 ############################################################################
 # install iis/apache to adfs vms
