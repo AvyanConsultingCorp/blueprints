@@ -103,6 +103,14 @@ DB_NUMBER_VMS=2
 AD_NUMBER_VMS=2
 ADFS_NUMBER_VMS=2
 ADFS_PROXY_NUMBER_VMS=2
+############################################################################
+# Set azure CLI to arm mode
+############################################################################
+
+echo
+echo
+echo azure config mode arm
+     azure config mode arm
 
 ############################################################################
 
@@ -157,7 +165,7 @@ VNET_RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 VNET_NAME=${DEPLOYED_VNET_NAME}
 SUBNET_NAME=${DEPLOYED_ADFS_SUBNET_NAME}
 VM_IP_ADDRESS_ARRAY=${ADFS_SERVER_IP_ADDRESS_ARRAY}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"},\"vmIpAddressArray\":{\"value\":${VM_IP_ADDRESS_ARRAY}},}"
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"},\"vmIpAddressArray\":{\"value\":${VM_IP_ADDRESS_ARRAY}}}"
 
 echo
 echo
@@ -183,7 +191,7 @@ done
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please verify that the Web tier has been created correctly"
+	echo -n "Please verify that the IIS/Apache has been created correctly"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
