@@ -197,6 +197,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 # the following variables are used in the above resource group, you need to use them later to create web/biz/db tier. don't change their values.
 DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
 DEPLOYED_AD_SUBNET_NAME_PREFIX=ad
+DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
 DEPLOYED_MGMT_SUBNET_NAME_PREFIX=mgmt
 DEPLOYED_NVA_FE_SUBNET_NAME_PREFIX=nva-fe
 DEPLOYED_NVA_BE_SUBNET_NAME_PREFIX=nva-be
