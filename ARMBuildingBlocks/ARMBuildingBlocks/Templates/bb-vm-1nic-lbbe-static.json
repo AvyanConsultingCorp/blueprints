@@ -1,0 +1,155 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": { "type": "string" },
+    "vmNamePrefix": { "type": "string" },
+    "vmComputerName": {
+      "type": "string",
+      "maxLength": 15
+    },
+    "vmIPaddress": { "type": "string" },
+    "vmSize": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_DS1",
+        "Standard_DS2",
+        "Standard_DS3",
+        "Standard_DS4",
+        "Standard_DS11",
+        "Standard_DS12",
+        "Standard_DS13",
+        "Standard_DS14",
+        "Standard_GS1",
+        "Standard_GS2",
+        "Standard_GS3",
+        "Standard_GS4",
+        "Standard_GS5",
+        "Standard_DS1_v2",
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_DS5_v2",
+        "Standard_DS11_v2",
+        "Standard_DS12_v2",
+        "Standard_DS13_v2",
+        "Standard_DS14_v2",
+        "Standard_DS15_v2"
+      ],
+      "defaultValue": "Standard_DS3"
+    },
+    "snid": { "type": "string" },
+    "lbBackendPoolId": { "type": "string" },
+    "stgAccountName": { "type": "string" },
+    "osType": {
+      "type": "string",
+      "allowedValues": [
+        "Windows",
+        "Ubuntu"
+      ]
+    },
+    "adminUsername": { "type": "string" },
+    "adminPassword": { "type": "securestring" },
+    "vmAvSetName": { "type": "string" }
+  },
+  "variables": {
+    "VMSettings": {
+      "Windows": {
+        "vmSize": "[parameters('vmSize')]",
+        "publisher": "MicrosoftWindowsServer",
+        "offer": "WindowsServer",
+        "sku": "2012-R2-Datacenter",
+        "version": "latest"
+      },
+      "Ubuntu": {
+        "vmSize": "[parameters('vmSize')]",
+        "publisher": "Canonical",
+        "offer": "UbuntuServer",
+        "sku": "14.04.2-LTS",
+        "version": "latest"
+      }
+    },
+    "location": "[resourceGroup().location]",
+    "vmStorageAccountContainerName": "vhds",
+    "vmSetting": "[variables('VMSettings')[parameters('osType')]]",
+    "vmName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-vm')]",
+    "vmNICName": "[concat(parameters('baseName'),'-',parameters('vmNamePrefix'),'-nic')]",
+    "vmOSDiskName": "[concat(variables('vmName'),'-os.vhd')]",
+    "vmDataDiskName": "[concat(variables('vmName'),'-data.vhd')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('vmNICName')]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM NIC" },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('vmIPaddress')]",
+              "loadBalancerBackendAddressPools": [ { "id": "[parameters('lbBackendPoolId')]" } ],
+              "subnet": { "id": "[parameters('snid')]" }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(variables('vmName'))]",
+      "location": "[variables('location')]",
+      "tags": { "displayName": "VM" },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('vmNICName'))]"
+      ],
+      "properties": {
+        "availabilitySet": { "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('vmAvSetName'))]" },
+        "hardwareProfile": { "vmSize": "[variables('VMSetting').vmSize]" },
+        "osProfile": {
+          "computerName": "[parameters('vmComputerName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('VMSetting').publisher]",
+            "offer": "[variables('VMSetting').offer]",
+            "sku": "[variables('VMSetting').sku]",
+            "version": "[variables('VMSetting').version]"
+          },
+          "osDisk": {
+            "name": "[variables('vmOSDiskName')]",
+            "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmOSDiskName'))]" },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "name": "[variables('vmDataDiskName')]",
+              "vhd": { "uri": "[concat('http://', parameters('stgAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmDataDiskName'))]" },
+              "diskSizeGB": "127",
+              "createOption": "Empty",
+              "lun": 0
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            { "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNICName'))]" }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[variables('vmName')]"
+    }
+  }
+}

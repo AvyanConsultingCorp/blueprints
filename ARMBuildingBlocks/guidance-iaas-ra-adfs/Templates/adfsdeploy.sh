@@ -112,6 +112,7 @@ ADFS_PROXY_NUMBER_VMS=2
 ############################################################################
 
 DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
+############################################################################
 
 if [ "${Prompting}" == "true" ]; then
 	echo
@@ -132,7 +133,7 @@ echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscr
      azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 
 ############################################################################
-## Create adfs vms
+## Create adfs ilb and vms
 ############################################################################
 if [ "${Prompting}" == "true" ]; then
 	echo
@@ -140,7 +141,7 @@ if [ "${Prompting}" == "true" ]; then
 	read -p "Press any key to create the VMs for the ADFS servers ... " -n1 -s
 fi
 
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vms-dns.json
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https-static-ip.json
 SUBNET_NAME_PREFIX=${DEPLOYED_ADFS_SUBNET_NAME_PREFIX}
 SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-sn
 VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
