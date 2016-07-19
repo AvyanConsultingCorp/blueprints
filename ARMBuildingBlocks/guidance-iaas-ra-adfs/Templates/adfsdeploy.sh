@@ -117,6 +117,7 @@ echo azure config mode arm
 DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
 DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
 DEPLOYED_ADFS_SUBNET_NAME=${BASE_NAME}-adfs-sn
+NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 
 ############################################################################
 ## Update vNet DNS setting to the Azure AD Servers
@@ -164,7 +165,6 @@ fi
 ############################################################################
 ## Create adfs resource group
 ############################################################################
-NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 ADFS_RESOURCE_GROUP=${BASE_NAME}-adfs-rg
 RESOURCE_GROUP=${ADFS_RESOURCE_GROUP}
 echo
