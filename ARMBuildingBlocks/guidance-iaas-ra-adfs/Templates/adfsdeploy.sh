@@ -105,13 +105,17 @@ ADFS_NUMBER_VMS=2
 ADFS_PROXY_NUMBER_VMS=2
 
 ############################################################################
+
+DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
+DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
+DEPLOYED_ADFS_SUBNET_NAME=${BASE_NAME}-adfs-sn
+
+
+############################################################################
 ############################################################################
 ############################################################################
 ############################################################################
 ## Create ADFS servers (my-adfs-rg)
-############################################################################
-
-DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
 ############################################################################
 
 if [ "${Prompting}" == "true" ]; then
@@ -125,6 +129,7 @@ fi
 ############################################################################
 ## Create adfs resource group
 ############################################################################
+NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 ADFS_RESOURCE_GROUP=${BASE_NAME}-adfs-rg
 RESOURCE_GROUP=${ADFS_RESOURCE_GROUP}
 echo
@@ -143,75 +148,46 @@ fi
 
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https-static-ip.json
 SUBNET_NAME_PREFIX=${DEPLOYED_ADFS_SUBNET_NAME_PREFIX}
-SUBNET_ID=/subscriptions/${SUBSCRIPTION}/resourceGroups/${NTWK_RESOURCE_GROUP}/providers/Microsoft.Network/virtualNetworks/${BASE_NAME}-vnet/subnets/${BASE_NAME}-${SUBNET_NAME_PREFIX}-sn
-VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
-VM_SIZE=Standard_DS3
+ILB_IP_ADDRESS=${ADFS_ILB_IP_ADDRESS}
 NUMBER_VMS=${ADFS_NUMBER_VMS}
-DNS_SERVERS=${DNS_SERVER_ADDRESS_ARRAY}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"dnsServers\":{\"value\":${DNS_SERVERS}},\"adSubnetId\":{\"value\":\"${SUBNET_ID}\"},\"adServerIpAddressArray\":{\"value\":${AD_SERVER_IP_ADDRESS_ARRAY}},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmSize\":{\"value\":\"${VM_SIZE}\"}}"
+RESOURCE_GROUP=${ADFS_RESOURCE_GROUP}
+VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
+VM_COMPUTER_NAME_PREFIX=${SUBNET_NAME_PREFIX}
+VNET_RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
+VNET_NAME=${DEPLOYED_VNET_NAME}
+SUBNET_NAME=${DEPLOYED_ADFS_SUBNET_NAME}
+VM_IP_ADDRESS_ARRAY=${ADFS_SERVER_IP_ADDRESS_ARRAY}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"},\"vmIpAddressArray\":{\"value\":${VM_IP_ADDRESS_ARRAY}},}"
+
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
      azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
 	 
 ############################################################################
-# Join the adfs VMs to AD Domain
-############################################################################
-if [ "${Prompting}" == "true" ]; then
-	echo
-	echo
-	read -p "Press any key to join the VMs to the on-premises domain... " -n1 -s
-fi
-
+# install iis/apache to adfs vms
 for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-joindomain-extension.json
-	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
-	echo
-	echo
-	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-done  
-
-
-if [ "${Prompting}" == "true" ]; then
-	echo
-	echo
-	echo -n "Please go to the AD server to verify that the computers have been added to the domain"
-	echo
-	echo
-	read -p "Press any key to continue ... " -n1 -s
-fi
- 
-############################################################################
-# install ADFS to the adfs servers
-############################################################################
-if [ "${Prompting}" == "true" ]; then
-	echo
-	echo
-	read -p "Press any key to install ADFS on the adfs VMs ... " -n1 -s
-fi
-
-for (( i=1; i<=${NUMBER_VMS}; i++ ))
-do
-	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-adfs-extension.json
-	SITE_NAME=Azure-Vnet-Ad-Site
-	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"siteName\":{\"value\":\"${SITE_NAME}\"}}"
-	echo
-	
-	echo
-	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+	if [ "${OS_TYPE}" == "Windows" ]; then
+		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-iis.json
+		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"
+		
+		echo
+		echo
+		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+	fi
 done  
 
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	echo -n "Please login to each Azure AD server to verify that Directory Services has been configured successfully"
+	echo -n "Please verify that the Web tier has been created correctly"
 	echo
 	echo
 	read -p "Press any key to continue ... " -n1 -s
 fi
+
+############################################################################
 
