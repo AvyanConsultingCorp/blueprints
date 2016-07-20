@@ -1,2 +1,6 @@
-makecert -sky exchange -pe -a sha256 -n "CN=pnpadfsroot" -r -sv pnpadfsroot.pvk pnpadfsroot.cer -len 2048
-makecert -sk pkey -iv pnpadfsroot.pvk -a sha256 -n "CN=pnpadfs.patternspractices.com , CN=enterpriseregistration.patternspractices.com" -ic pnpadfsroot.cer -sr localmachine -ss my -sky exchange -pe
+# create my fake root certificate authority 
+makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
+
+# use my fake root certificate authority to generate a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
+makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=myadfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
+
