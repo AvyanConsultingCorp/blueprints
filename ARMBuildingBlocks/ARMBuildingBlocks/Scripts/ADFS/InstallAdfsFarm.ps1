@@ -95,13 +95,13 @@
 # example of command
 #.\AddAdfsFarm.ps1 -AdminUser "domainuser" -AdminPassword "domainPass" -NetBiosDomainName "patterns2" -FqDomainName "patternspractices.net" -GmsaAdfs "adfsacct" -FederationName "pnpadfs.patternspractices.net" -descriptionAdfs "PNP ADFS"
 
-$AdminUser = "adminUser"
-$AdminPassword = "adminP@ssw0rd"
-$NetBiosDomainName = "CONTOSO"
-$FqDomainName = "contoso.com"
-$GmsaAdfs = "adfsaccount"
-$FederationName = "myadsf.contoso.com"
-$DescriptionAdfs = "Contoso ADSF"
+# $AdminUser = "adminUser"
+# $AdminPassword = "adminP@ssw0rd"
+# $NetBiosDomainName = "CONTOSO"
+# $FqDomainName = "contoso.com"
+# $GmsaAdfs = "adfsaccount"
+# $FederationName = "myadsf.contoso.com"
+# $DescriptionAdfs = "Contoso ADSF"
 
 Install-WindowsFeature -IncludeManagementTools -Name ADFS-Federation
 
