@@ -24,7 +24,7 @@ $credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDom
 
 #uncomment those lines to install the cert or install them manually
 #certutil.exe -privatekey -p Pag`$1Lab -importPFX my C:\certificates\pnpadfsfinal.pfx NoExport
-#certutil.exe -privatekey -p Pag`$1Lab -importPFX root C:\certificates\pnpadfsroot.cer NoExport
+#certutil.exe -privatekey -importPFX root C:\certificates\pnpadfsroot.cer NoExport
 
 
 $thumbprint=(Get-ChildItem -DnsName $federationName -Path cert:\LocalMachine\My).Thumbprint

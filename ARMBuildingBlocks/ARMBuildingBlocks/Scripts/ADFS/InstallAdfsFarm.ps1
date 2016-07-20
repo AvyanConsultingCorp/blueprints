@@ -18,7 +18,7 @@
   [string]$FederationName,
 
   [Parameter(Mandatory=$True)]
-  [string]$descriptionAdfs
+  [string]$DescriptionAdfs
 
 
 )
@@ -45,7 +45,9 @@ New-ADServiceAccount $GmsaAdfs -DNSHostName "$GmsaAdfs.$FqDomainName" -AccountEx
 # we saved it on disk
 # install the certificate on local machine store
 
-#certutil.exe -privatekey -p "Pag`$some" -importPFX my C:\certificates\pnpadfsfinal.pfx NoExport
+# copy pnpadfsfinal.pfx from keyvault/blob to local drive C:\certificates\pnpadfsfinal.pfx
+
+certutil.exe -privatekey -p "Pag`$some" -importPFX my C:\certificates\pnpadfsfinal.pfx NoExport
 # the thumbnail of certificate is retrieved
 
 $thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My).Thumbprint
@@ -56,7 +58,7 @@ $thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My)
 
 #Write-Host "$NetBiosDomainName\$GmsaAdfs`$"
 
-Install-AdfsFarm  -CertificateThumbprint $thumbprint -FederationServiceDisplayName $descriptionAdfs -FederationServiceName $FederationName -GroupServiceAccountIdentifier "$NetBiosDomainName\$GmsaAdfs`$" -Credential $credential -OverwriteConfiguration
+Install-AdfsFarm  -CertificateThumbprint $thumbprint -FederationServiceDisplayName $DescriptionAdfs -FederationServiceName $FederationName -GroupServiceAccountIdentifier "$NetBiosDomainName\$GmsaAdfs`$" -Credential $credential -OverwriteConfiguration
 
 
 #Install-AdfsFarm  -CertificateThumbprint $thumbprint `
