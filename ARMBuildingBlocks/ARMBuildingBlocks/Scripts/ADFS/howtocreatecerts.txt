@@ -1,6 +1,7 @@
 # create my fake root certificate authority 
 makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
 
-# use my fake root certificate authority to generate a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
+# run command prompt as admin to use my fake root certificate authority 
+# to generate a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
 makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=myadfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
 
