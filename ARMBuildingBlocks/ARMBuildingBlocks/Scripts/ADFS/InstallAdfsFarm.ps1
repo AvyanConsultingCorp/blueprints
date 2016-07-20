@@ -30,18 +30,20 @@
 # 2. Download certutil.exe
 # copy certutil.exe to c:/temp/
 
-# 3. Create my fake root certificate authority, which will create
+# 3. Create my fake root certificate authority
+# makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
+# 
+# verify that the foloiwng files are created
 #	 C:/temp/MyFakeRootCertificateAuthority.cer
 #	 C:/temp/MyFakeRootCertificateAuthority.pvk
-# makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
 
-# 4. Run command prompt as admin to use my fake root certificate authority 
-#    to generate a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
+# 4. Run command prompt as admin to use my fake root certificate authority to generate
+#    a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
 # makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=myadfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
 
 # 5. start mmc certificates console 
-# expands to /Local Computer/Personal/Certificate/myadfs.contoso.com 
-# export the certificate with the private key to 
+#	expand to /Certificates (Local Computer)/Personal/Certificate/myadfs.contoso.com 
+#	export the certificate with the private key to 
 #    C:/temp/mytestcertificate.pfx
 
 # 6. Make sure you have the following files in the C:\temp
@@ -58,9 +60,17 @@
 #    to 
 #		C:\temp\ 
 
-# 9. Run the following in command prompt as admin:
-#	certutil.exe -importPFX root C:\temp\MyFakeRootCertificateAuthority.cer NoExport
-#	certutil.exe -privatekey -p "mypassword" -importPFX my C:\temp\mytestcertificate.pfx NoExport
+# 9. Run the following command prompt as admin:
+#	    certutil.exe -addstore "Root" "C:\temp\MyFakeRootCertificateAuthority.cer"
+#   Open mmc Certificate Console and verify that it now has the following item
+#      \Certificates (Local Computer)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
+
+# 10. Run the following command prompt as admin:
+#  		certutil.exe -privatekey -importPFX my C:\temp\mytestcertificate.pfx NoExport
+#   Open mmc Certificate Console and verify that it now has the following item
+#      \Certificates (Local Computer)\Personal\Certificates\myadfs.contoso.com issued by MyFakeRootCertificationAuthority 
+
+# 11. Repeat step 7 to 10 for next ADDS server
 
 ###############################################
 # Manual steps if you have a public signed certificate mypublicsignedcertificate.pfx by VerifSign, Go Daddy, DigiCert, and etc.
@@ -73,8 +83,10 @@
 #    to 
 #		C:\temp\ 
 
-# 3. Run the following in command prompt as admin:
-#	certutil.exe -privatekey -p "mypassword" -importPFX my C:\temp\mypublicsignedcertificate.pfx NoExport
+# 10. Run the following command prompt as admin:
+#    	certutil.exe -privatekey -importPFX my C:\temp\mypublicsignedcertificate.pfx NoExport
+#   Open mmc Certificate Console and verify that it now has the following item
+#      \Certificates (Local Computer)\Personal\Certificates\myadfs.contoso.com issued by A Real Certification Authority
 
 ###############################################
 
