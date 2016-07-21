@@ -231,28 +231,28 @@ fi
 	 
 ############################################################################
 # install iis/apache to adfs vms
-for (( i=1; i<=${NUMBER_VMS}; i++ ))
-do
-	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-	if [ "${OS_TYPE}" == "Windows" ]; then
-		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-iis.json
-		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"
-		
-		echo
-		echo
-		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-	fi
-done  
+## for (( i=1; i<=${NUMBER_VMS}; i++ ))
+## do
+## 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+## 	if [ "${OS_TYPE}" == "Windows" ]; then
+## 		TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-vm-iis.json
+## 		PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"dscTypeHandlerVersion\":{\"value\":\"${DSC_TYPE_HANDLER_VERSION}\"}}"
+## 		
+## 		echo
+## 		echo
+## 		echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+## 		     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+## 	fi
+## done  
 
-if [ "${Prompting}" == "true" ]; then
-	echo
-	echo
-	echo -n "Please verify that the IIS/Apache has been created correctly"
-	echo
-	echo
-	read -p "Press any key to continue ... " -n1 -s
-fi
+## if [ "${Prompting}" == "true" ]; then
+## 	echo
+## 	echo
+## 	echo -n "Please verify that the IIS/Apache has been created correctly"
+## 	echo
+## 	echo
+## 	read -p "Press any key to continue ... " -n1 -s
+## fi
 
 ############################################################################
 
