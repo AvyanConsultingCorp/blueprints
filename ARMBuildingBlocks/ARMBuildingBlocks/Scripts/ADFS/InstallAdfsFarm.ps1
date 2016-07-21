@@ -22,7 +22,7 @@
 )
 
 ###############################################
-# Manual steps if you want to create and use a self singed test certificate mytestcertificate
+# Manual steps if you want to create and use a self singed test certificate contosotestcertificate
 
 # 1. Log on your developer machine
 # in order to Create self signed certificate in you developer PC
@@ -42,14 +42,15 @@
 # makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=*.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
 
 # 5. start mmc certificates console 
-#	expand to /Certificates (Local Computer)/Personal/Certificate/myadfs.contoso.com 
-#	export the certificate with the private key to 
-#    C:/temp/mytestcertificate.pfx
+#	Expand to /Certificates (Local Computer)/Personal/Certificate/*.contoso.com 
+#
+#	Export the certificate with the private key to 
+#    C:/temp/contosotestcertificate.pfx
 
 # 6. Make sure you have the following files in the C:\temp
 #	 MyFakeRootCertificateAuthority.cer
 #	 MyFakeRootCertificateAuthority.pvk
-#    mytestcertificate.pfx
+#    contosotestcertificate.pfx
 
 ###################
 
@@ -58,7 +59,7 @@
 # 8. copy 
 #		certutil.exe
 #		MyFakeRootCertificateAuthority.cer
-#		mytestcertificate.pfx 
+#		contosotestcertificate.pfx 
 #    to 
 #		C:\temp\ 
 
@@ -68,7 +69,7 @@
 #      \Certificates (Local Computer)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
 
 # 10. Run the following command prompt as admin:
-#  		certutil.exe -privatekey -importPFX my C:\temp\mytestcertificate.pfx NoExport
+#  		certutil.exe -privatekey -importPFX my C:\temp\contosotestcertificate.pfx NoExport
 #   Open mmc Certificate Console and verify that it now has the following item
 #      \Certificates (Local Computer)\Personal\Certificates\myadfs.contoso.com issued by MyFakeRootCertificationAuthority 
 
