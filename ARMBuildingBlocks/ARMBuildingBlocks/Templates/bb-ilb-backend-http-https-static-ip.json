@@ -150,7 +150,7 @@
             "name": "ilb-probe",
             "properties": {
               "port": 80,
-              "protocol": "Http",
+              "protocol": "Tcp",
               "requestPath": "/"
             }
           }

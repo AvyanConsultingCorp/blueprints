@@ -39,7 +39,7 @@
 
 # 4. Run command prompt as admin to use my fake root certificate authority to generate
 #    a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
-# makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=myadfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
+# makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=*.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
 
 # 5. start mmc certificates console 
 #	expand to /Certificates (Local Computer)/Personal/Certificate/myadfs.contoso.com 
@@ -95,9 +95,9 @@
 # $AdminPassword = "adminP@ssw0rd"
 # $NetBiosDomainName = "CONTOSO"
 # $FqDomainName = "contoso.com"
-# $GmsaAdfs = "adfsaccount"
-# $FederationName = "myadfs.contoso.com"
-# $DescriptionAdfs = "Contoso ADFS"
+# $GmsaAdfs = "adfsservice"
+# $FederationName = "adfs.contoso.com"
+# $DescriptionAdfs = "Contoso Corporation"
 
 ###############################################
 # domainjoin script needs to be executed first

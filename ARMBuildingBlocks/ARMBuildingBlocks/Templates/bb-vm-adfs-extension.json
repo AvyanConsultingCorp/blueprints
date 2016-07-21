@@ -18,7 +18,7 @@
     },
     "gmsaAdfs": {
       "type": "string",
-      "defaultValue": "adfsaccount"
+      "defaultValue": "adfsservice"
     },
     "federationName": {
       "type": "string",
@@ -26,13 +26,13 @@
     },
     "descriptionAdfs": {
       "type": "string",
-      "defaultValue": "Contoso ADFS"
+      "defaultValue": "Contoso Corporation"
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "scriptName": "CreateDc",
-    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/ADSF/InstallAdfsFarm.ps1",
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/ADFS/InstallAdfsFarm.ps1",
     "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -netBiosDomainName ', parameters('NetBiosDomainName'),' -FqDomainName ', parameters('fqDomainName'), ' -GmsaAdfs ', parameters('gmsaAdfs'), ' -FederationName ', parameters('federationName'),' -DescriptionAdfs ', parameters('descriptionAdfs'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File InstallAdfsFarm.ps1 ', variables('scriptArgument'))]"
   },
