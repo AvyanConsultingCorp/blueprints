@@ -9,8 +9,8 @@ ADMIN_PASSWORD=
 ############################################################################
 DOMAIN_NAME=contoso.com
 DOMAIN_NETBIOS_NAME=CONTOSO
-VM_NAME_PREFIX=onprem
-VM_COMPUTER_NAME=onprem
+VM_NAME_PREFIX=1
+VM_COMPUTER_NAME=1
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}-vm
 VM_IP_ADDRESS=192.168.0.4
 ############################################################################

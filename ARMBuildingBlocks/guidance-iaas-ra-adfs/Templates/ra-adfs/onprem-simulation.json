@@ -4,7 +4,7 @@
   "parameters": {
     "baseName": {
       "type": "string",
-      "defaultValue": "onprem"
+      "defaultValue": "onpr"
     },
     "vnetPrefix": {
       "type": "string",
