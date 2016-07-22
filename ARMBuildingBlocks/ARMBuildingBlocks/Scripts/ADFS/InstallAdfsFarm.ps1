@@ -39,6 +39,7 @@
 
 # 4. Run command prompt as admin to use my fake root certificate authority to generate
 #    a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
+#
 # makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=*.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
 
 # 5. start mmc certificates console 
@@ -103,29 +104,25 @@
 ###############################################
 # domainjoin script needs to be executed first
 
-Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
-Import-Module ADDSDeployment
-
-Install-WindowsFeature -IncludeManagementTools -Name ADFS-Federation
-Import-Module ADFS
-
+# retrieve the the thumbnail of certificate
+$thumbprint=(Get-ChildItem -DnsName *.$FqDomainName -Path cert:\LocalMachine\My).Thumbprint
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-
 $credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDomainName\$AdminUser", $secAdminPassword)
 
-# retrieve the the thumbnail of certificate
-$thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My).Thumbprint
-
-Add-KdsRootKey –EffectiveTime (Get-Date).AddHours(-10) 
-
-# GMSA under which ADFS service runs under
+# Create GMSA under which ADFS service runs under
+Install-windowsfeature -name AD-Domain-Services -IncludeAllSubFeature -IncludeManagementTools
+Import-Module ADDSDeployment
 New-ADServiceAccount $GmsaAdfs -DNSHostName "$GmsaAdfs.$FqDomainName" -AccountExpirationDate $null -ServicePrincipalNames "http://$GmsaAdfs.$FqDomainName" -Credential $credential
+setspn -a host/$FederationName $GmsaAdfs
 
+# Install ADFS feature
+Install-WindowsFeature -IncludeManagementTools -Name ADFS-Federation
+Import-Module ADFS
+Add-KdsRootKey –EffectiveTime (Get-Date).AddHours(-10) 
 Install-AdfsFarm  -CertificateThumbprint $thumbprint -FederationServiceDisplayName $DescriptionAdfs -FederationServiceName $FederationName -GroupServiceAccountIdentifier "$NetBiosDomainName\$GmsaAdfs`$" -Credential $credential -OverwriteConfiguration
 
 # device registration service for workplace join 
 Initialize-ADDeviceRegistration -ServiceAccountName "$NetBiosDomainName\$GmsaAdfs`$" -DeviceLocation $FqDomainName -RegistrationQuota 10 -MaximumRegistrationInactivityPeriod 90 -Credential $Credential -Force
 Enable-AdfsDeviceRegistration -Credential $Credential -Force
 
-#Set-ADFSProperties –ExtendedProtectionTokenCheck "None"
 Restart-Computer
