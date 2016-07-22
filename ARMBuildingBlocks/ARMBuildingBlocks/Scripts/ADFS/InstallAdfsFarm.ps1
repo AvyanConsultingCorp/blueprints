@@ -41,17 +41,24 @@
 #    a certificate for myadfs.contoso.com and enterpriseregistration.contoso.com
 #
 # makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=*.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
+# makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=adfs1.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
+# makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=adfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
 
 # 5. start mmc certificates console 
 #	Expand to /Certificates (Local Computer)/Personal/Certificate/*.contoso.com 
+#	Expand to /Certificates (Local Computer)/Personal/Certificate/adfs1.contoso.com 
 #
 #	Export the certificate with the private key to 
-#    C:/temp/contosotestcertificate.pfx
+#    C:/temp/contosocom.pfx
+#    C:/temp/adfscontosocom.pfx
+#    C:/temp/adfs1contosocom.pfx
 
 # 6. Make sure you have the following files in the C:\temp
 #	 MyFakeRootCertificateAuthority.cer
 #	 MyFakeRootCertificateAuthority.pvk
-#    contosotestcertificate.pfx
+#    contosocom.pfx
+#    adfscontosocom.pfx
+#    adfs1contosocom.pfx
 
 ###################
 
@@ -60,7 +67,9 @@
 # 8. copy 
 #		certutil.exe
 #		MyFakeRootCertificateAuthority.cer
-#		contosotestcertificate.pfx 
+#       contosocom.pfx
+#       adfscontosocom.pfx
+#       adfs1contosocom.pfx
 #    to 
 #		C:\temp\ 
 
@@ -70,27 +79,31 @@
 #      \Certificates (Local Computer)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
 
 # 10. Run the following command prompt as admin:
-#  		certutil.exe -privatekey -importPFX my C:\temp\contosotestcertificate.pfx NoExport
+#  		certutil.exe -privatekey -importPFX my C:\temp\contosocom.pfx NoExport
+#  		certutil.exe -privatekey -importPFX my C:\temp\adfscontosocom.pfx NoExport
+#  		certutil.exe -privatekey -importPFX my C:\temp\adfs1contosocom.pfx NoExport
 #   Open mmc Certificate Console and verify that it now has the following item
-#      \Certificates (Local Computer)\Personal\Certificates\myadfs.contoso.com issued by MyFakeRootCertificationAuthority 
+#      \Certificates (Local Computer)\Personal\Certificates\*.contoso.com issued by MyFakeRootCertificationAuthority 
+#      \Certificates (Local Computer)\Personal\Certificates\adfs.contoso.com issued by MyFakeRootCertificationAuthority 
+#      \Certificates (Local Computer)\Personal\Certificates\adfs1.contoso.com issued by MyFakeRootCertificationAuthority 
 
 # 11. Repeat step 7 to 10 for next ADDS server
 
 ###############################################
-# Manual steps if you have a public signed certificate mypublicsignedcertificate.pfx by VerifSign, Go Daddy, DigiCert, and etc.
+# Manual steps if you have a public signed certificate adfs.contoso.com.pfx by VerifSign, Go Daddy, DigiCert, and etc.
 
 # 1. RDP to the each ADFS VM.
 
 # 2. copy 
 #		certutil.exe
-#		mypublicsignedcertificate.pfx 
+#		adfs.contoso.com.pfx 
 #    to 
 #		C:\temp\ 
 
 # 10. Run the following command prompt as admin:
-#    	certutil.exe -privatekey -importPFX my C:\temp\mypublicsignedcertificate.pfx NoExport
+#    	certutil.exe -privatekey -importPFX my C:\temp\adfs.contoso.com.pfx NoExport
 #   Open mmc Certificate Console and verify that it now has the following item
-#      \Certificates (Local Computer)\Personal\Certificates\myadfs.contoso.com issued by A Real Certification Authority
+#      \Certificates (Local Computer)\Personal\Certificates\adfs.contoso.com issued by A Real Certification Authority
 
 
 # $AdminUser = "adminUser"
@@ -105,7 +118,10 @@
 # domainjoin script needs to be executed first
 
 # retrieve the the thumbnail of certificate
-$thumbprint=(Get-ChildItem -DnsName *.$FqDomainName -Path cert:\LocalMachine\My).Thumbprint
+#$thumbprint=(Get-ChildItem -DnsName *.$FqDomainName -Path cert:\LocalMachine\My).Thumbprint
+$thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My).Thumbprint
+Write-Host $thumbprint
+
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDomainName\$AdminUser", $secAdminPassword)
 
