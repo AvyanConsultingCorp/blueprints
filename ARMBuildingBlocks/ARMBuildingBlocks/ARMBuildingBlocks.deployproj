@@ -52,6 +52,7 @@
     <None Include="Scripts\ADFS\howtocreatecerts.txt" />
     <None Include="Scripts\ADFS\howtocreatecerts.zip" />
     <None Include="Scripts\ADFS\installadds.ps1" />
+    <None Include="Scripts\ADFS\NewAdserviceAccount.ps1" />
     <None Include="Scripts\ADFS\InstallAdfsFarm.ps1" />
     <None Include="Scripts\ADFS\installWebAppProxy.ps1" />
     <None Include="Scripts\joindomain.ps1" />
