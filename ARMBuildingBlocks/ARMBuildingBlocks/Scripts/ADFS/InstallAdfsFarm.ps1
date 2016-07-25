@@ -92,6 +92,9 @@
 #   Open mmc Certificate Console and verify that it now has the following item
 #      \Certificates (Local Computer)\Personal\Certificates\adfs.contoso.com issued by A Real Certification Authority
 
+###############################################
+# Manual steps to create DNS entry
+
 
 # $AdminUser = "adminUser"
 # $AdminPassword = "adminP@ssw0rd"
@@ -104,12 +107,20 @@
 ###############################################
 # domainjoin script needs to be executed first
 
+###############################################
+# get credential of the domain admin
+$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDomainName\$AdminUser", $secAdminPassword)
+
+###############################################
+# Create global management service accoutn
+Add-KdsRootKey –EffectiveTime (Get-Date).AddHours(-10) 
+#New-ADServiceAccount adfsgmsa -DNSHostName adfs.contoso.com -AccountExpirationDate $null -ServicePrincipalNames host/adfs.contoso.com -Credential $credential
+New-ADServiceAccount $GmsaName -DNSHostName $FederationName -AccountExpirationDate $null -ServicePrincipalNames "host/$FederationName" -Credential $credential
+
 # retrieve the the thumbnail of certificate
 $thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My).Thumbprint
 Write-Host $thumbprint
-
-$secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDomainName\$AdminUser", $secAdminPassword)
 
 # Install ADFS feature
 Install-WindowsFeature -IncludeManagementTools -Name ADFS-Federation
@@ -121,5 +132,6 @@ Install-AdfsFarm -CertificateThumbprint $thumbprint -FederationServiceDisplayNam
 Initialize-ADDeviceRegistration -ServiceAccountName "$NetBiosDomainName\$GmsaName`$" -DeviceLocation $FqDomainName -RegistrationQuota 10 -MaximumRegistrationInactivityPeriod 90 -Credential $Credential -Force
 Enable-AdfsDeviceRegistration -Credential $Credential -Force
 
-# to test, browse to 
+# Create a dns entry for 
+
 # https://adfs.contoso.com/adfs/ls/idpinitiatedsignon.htm
