@@ -13,6 +13,7 @@ SUBSCRIPTION=
 LOCATION=
 OS_TYPE=
 DOMAIN_NAME=
+NET_BIOS_DOMAIN_NAME=
 ADMIN_USER_NAME=
 ADMIN_PASSWORD=
 ON_PREMISES_PUBLIC_IP=
@@ -22,11 +23,9 @@ ON_PREMISES_DNS_SERVER_ADDRESS=
 ON_PREMISES_DNS_SUBNET_PREFIX=
 
 ############################################################################
-NET_BIOS_DOMAIN_NAME=CONTOSO
-FQ_DOMAIN_NAME=contoso.com
 ADFS_GMSA_NAME=adfsgmsa
-ADFS_FEDERATION_NAME=adfs.contoso.com
 ADFS_HOST_NAME=adfs
+ADFS_FEDERATION_NAME=${ADFS_HOST_NAME}.${DOMAIN_NAME}
 
 ############################################################################
 ## Other configuation data
@@ -727,9 +726,8 @@ if [ "${Prompting}" == "true" ]; then
 fi
 
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
-ADFS_HOST_IP=${ADFS_ILB_IP_ADDRESS}
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-gmsa-dnsrecord-extension.json
-PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"fqDomainName\":{\"value\":\"${FQ_DOMAIN_NAME}\"},\"gmsaName\":{\"value\":\"${ADFS_GMSA_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"},\"hostName\":{\"value\":\"${ADFS_HOST_NAME}\"},\"hostIp\":{\"value\":\"${ADFS_HOST_IP}\"}}"
+PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"fqDomainName\":{\"value\":\"${DOMAIN_NAME}\"},\"gmsaName\":{\"value\":\"${ADFS_GMSA_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"},\"hostName\":{\"value\":\"${ADFS_HOST_NAME}\"},\"hostIp\":{\"value\":\"${ADFS_ILB_IP_ADDRESS}\"}}"
 echo
 	
 echo
