@@ -37,7 +37,7 @@
     "location": "[resourceGroup().location]",
     "scriptName": "CreateGmsaAndDnsRecord",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/ADFS/CreateGmsaAndDnsRecord.ps1",
-    "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -NetBiosDomainName ', parameters('netBiosDomainName'),' -FqDomainName ', parameters('fqDomainName'), ' -GmsaName', parameters('gmsaName'), ' -FederationName ', parameters('federationName'),' -HostName ', parameters('hostName'),' -HostIp ', parameters('hostIp'))]",
+    "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -NetBiosDomainName ', parameters('netBiosDomainName'),' -FqDomainName ', parameters('fqDomainName'), ' -GmsaName ', parameters('gmsaName'), ' -FederationName ', parameters('federationName'),' -HostName ', parameters('hostName'),' -HostIp ', parameters('hostIp'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File CreateGmsaAndDnsRecord.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
