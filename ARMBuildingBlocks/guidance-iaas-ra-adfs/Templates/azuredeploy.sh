@@ -20,7 +20,13 @@ ON_PREMISES_ADDRESS_SPACE=
 VPN_IPSEC_SHARED_KEY=
 ON_PREMISES_DNS_SERVER_ADDRESS=
 ON_PREMISES_DNS_SUBNET_PREFIX=
+
 ############################################################################
+NET_BIOS_DOMAIN_NAME=CONTOSO
+FQ_DOMAIN_NAME=contoso.com
+ADFS_GMSA_NAME=adfsgmsa
+ADFS_FEDERATION_NAME=adfs.contoso.com
+ADFS_HOST_NAME=adfs
 
 ############################################################################
 ## Other configuation data
@@ -711,6 +717,33 @@ if [ "${Prompting}" == "true" ]; then
 	read -p "Press any key continue ... " -n1 -s
 fi
 
+############################################################################
+# Create Group Management Service Account and DNS Record for ADFS
+############################################################################
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	read -p "Press any key to Create  Group Management Service Account and DNS Record for ADFS in the first ADDS Server ... " -n1 -s
+fi
+
+VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
+ADFS_HOST_IP=${ADFS_ILB_IP_ADDRESS}
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-gmsa-dnsrecord-extension.json
+PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"fqDomainName\":{\"value\":\"${FQ_DOMAIN_NAME}\"},\"gmsaName\":{\"value\":\"${ADFS_GMSA_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"},\"hostName\":{\"value\":\"${ADFS_HOST_NAME}\"},\"hostIp\":{\"value\":\"${ADFS_HOST_IP}\"}}"
+echo
+	
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please login to the first Azure AD server to verify that the service account is created and dns record is added"
+	echo
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 ############################################################################
 ## Update gateway UDR Since it might have been deleted 
 ############################################################################
