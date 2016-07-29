@@ -38,11 +38,10 @@
 # get credential of the domain admin
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDomainName\$AdminUser", $secAdminPassword)
+
 ###############################################
-# Create global management service accout (you can use ADSI Edit to verify)
-
+# Create group managed service accout (you can use ADSI Edit to verify)
 Add-KdsRootKey –EffectiveTime (Get-Date).AddHours(-10) 
-
 #New-ADServiceAccount adfsgmsa -DNSHostName adfs.contoso.com -AccountExpirationDate $null -ServicePrincipalNames host/adfs.contoso.com -Credential $credential
 New-ADServiceAccount $GmsaName -DNSHostName $FederationName -AccountExpirationDate $null -ServicePrincipalNames "host/$FederationName" -Credential $credential
 

@@ -18,7 +18,7 @@
   [string]$FederationName,
 
   [Parameter(Mandatory=$True)]
-  [string]$DescriptionAdfs
+  [string]$Description
 )
 
 ###############################################
@@ -74,33 +74,26 @@
 # $FqDomainName = "contoso.com"
 # $GmsaName = "adfsgmsa"
 # $FederationName = "adfs.contoso.com"
-# $DescriptionAdfs = "Contoso Corporation"
+# $Description = "Contoso Corporation"
 
 ###############################################
 # get credential of the domain admin
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDomainName\$AdminUser", $secAdminPassword)
 
-###############################################
-# Create global management service accoutn
-Add-KdsRootKey –EffectiveTime (Get-Date).AddHours(-10) 
-#New-ADServiceAccount adfsgmsa -DNSHostName adfs.contoso.com -AccountExpirationDate $null -ServicePrincipalNames host/adfs.contoso.com -Credential $credential
-New-ADServiceAccount $GmsaName -DNSHostName $FederationName -AccountExpirationDate $null -ServicePrincipalNames "host/$FederationName" -Credential $credential
-
 # retrieve the the thumbnail of certificate
 $thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My).Thumbprint
-Write-Host $thumbprint
 
 # Install ADFS feature
 Install-WindowsFeature -IncludeManagementTools -Name ADFS-Federation
 Import-Module ADFS
-Add-KdsRootKey –EffectiveTime (Get-Date).AddHours(-10) 
-Install-AdfsFarm -CertificateThumbprint $thumbprint -FederationServiceDisplayName $DescriptionAdfs -FederationServiceName $FederationName -GroupServiceAccountIdentifier "$NetBiosDomainName\$GmsaName`$" -Credential $credential -OverwriteConfiguration
 
-# device registration service for workplace join 
+# Install a new ADFS Farm
+Install-AdfsFarm -CertificateThumbprint $thumbprint -FederationServiceDisplayName $Description -FederationServiceName $FederationName -GroupServiceAccountIdentifier "$NetBiosDomainName\$GmsaName`$" -Credential $credential -OverwriteConfiguration
+
+# Initialize device registration service for workplace join 
 Initialize-ADDeviceRegistration -ServiceAccountName "$NetBiosDomainName\$GmsaName`$" -DeviceLocation $FqDomainName -RegistrationQuota 10 -MaximumRegistrationInactivityPeriod 90 -Credential $Credential -Force
 Enable-AdfsDeviceRegistration -Credential $Credential -Force
 
-# Create a dns entry for 
-
+# Test with the folloiwng link
 # https://adfs.contoso.com/adfs/ls/idpinitiatedsignon.htm
