@@ -123,7 +123,7 @@ ADFS_RESOURCE_GROUP=${BASE_NAME}-adfs-rg
 RESOURCE_GROUP=${ADFS_RESOURCE_GROUP}
 
 ############################################################################
-# Install ADFS Farm in the first VM 
+# Install New ADFS Farm in the first VM 
 ############################################################################
 ############################################################################
 if [ "${Prompting}" == "true" ]; then
@@ -134,7 +134,7 @@ fi
 
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
-	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-joindomain-extension.json
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-install-adfs-farm-extension.json
 	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
 	echo
 	echo
@@ -153,7 +153,7 @@ if [ "${Prompting}" == "true" ]; then
 fi
 	 
 ############################################################################
-# Install ADFS in the second and the rest VMs 
+# Add ADFS in the second and the rest VMs 
 ############################################################################
 
 
