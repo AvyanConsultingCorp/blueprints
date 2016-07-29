@@ -201,9 +201,14 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 
 # the following variables are used in the above resource group, you need to use them later to create web/biz/db tier. don't change their values.
 DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
+
 DEPLOYED_AD_SUBNET_NAME_PREFIX=ad
+
 DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
 DEPLOYED_ADFS_SUBNET_NAME=${BASE_NAME}-adfs-sn
+
+DEPLOYED_ADFS_PROXY_SUBNET_NAME_PREFIX=adfs-proxy
+DEPLOYED_ADFS_PROXY_SUBNET_NAME=${BASE_NAME}-adfs-proxy-sn
 
 DEPLOYED_MGMT_SUBNET_NAME_PREFIX=mgmt
 DEPLOYED_NVA_FE_SUBNET_NAME_PREFIX=nva-fe
@@ -948,7 +953,97 @@ if [ "${Prompting}" == "true" ]; then
 	echo
 	read -p "Press any key to continue ... " -n1 -s
 fi
+############################################################################
+############################################################################
+############################################################################
+############################################################################
+## Create ADFS proxy in my-adfs-proxy-rg
+############################################################################
 
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	echo -n "Please verify that the DNS server setting on the VNet has been updated"
+	echo
+	echo
+	read -p "Press any key to create the resource group for the AD servers ... " -n1 -s
+fi
+############################################################################
+## Create adfs proxy resource group
+############################################################################
+
+ADFS_PROXY_RESOURCE_GROUP=${BASE_NAME}-adfs-proxy-rg
+RESOURCE_GROUP=${ADFS_PROXY_RESOURCE_GROUP}
+echo
+echo
+echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+     azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+############################################################################
+## Create adfs proxy ilb and vms
+############################################################################
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	read -p "Press any key to create the VMs for the ADFS proxy servers ... " -n1 -s
+fi
+
+TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https-static-ip.json
+SUBNET_NAME_PREFIX=${DEPLOYED_ADFS_PROXY_SUBNET_NAME_PREFIX}
+ILB_IP_ADDRESS=${ADFS_PROXY_ILB_IP_ADDRESS}
+NUMBER_VMS=${ADFS_PROXY_NUMBER_VMS}
+RESOURCE_GROUP=${ADFS_PROXY_RESOURCE_GROUP}
+VM_NAME_PREFIX=proxy
+VM_COMPUTER_NAME_PREFIX=proxy
+VNET_RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
+VNET_NAME=${DEPLOYED_VNET_NAME}
+SUBNET_NAME=${DEPLOYED_ADFS_PROXY_SUBNET_NAME}
+VM_IP_ADDRESS_ARRAY=${ADFS_PROXY_SERVER_IP_ADDRESS_ARRAY}
+PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"},\"vmIpAddressArray\":{\"value\":${VM_IP_ADDRESS_ARRAY}}}"
+
+echo
+echo
+echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+
+
+############################################################################
+# Manual Steps: Install Certificate to ADFS Proxy VMs
+############################################################################
+	echo
+	echo -n "Please install the certificate to each ADFS Proxy VM "
+	echo
+	read -p "Press any key to see the detailed steps ... " -n1 -s
+	echo
+	echo  ###############################################
+    echo 
+	echo ###############################################
+	echo Manual step for install certificate to the ADFS VMs:
+	echo
+	echo 1. Make sure you have a certificate \(e.g. adfs.contoso.com.pfx\) either self created or signed by VerifSign, Go Daddy, DigiCert, and etc.
+	echo
+	echo 2. RDP to the each ADFS VM \(adfs1-vm, adfs2-vm, ...\)
+	echo
+	echo 3. Copy to c:\temp the following file
+	echo		c:\temp\certutil.exe
+	echo		c:\temp\adfs.contoso.com.pfx 
+	echo        c:\MyFakeRootCertificateAuthority.cer  \(if you created the cert yourself \)
+	echo
+	echo 4. Run the following command prompt as admin:
+	echo    	certutil.exe -privatekey -importPFX my C:\temp\adfs.contoso.com.pfx NoExport
+    echo	    certutil.exe -addstore Root C:\temp\MyFakeRootCertificateAuthority.cer
+	echo
+	echo 5. Start MMC, Add Certificates Snap-in, sellect Computer account, and verify that the following certificate is installed:
+	echo      \Certificates \(Local Computer\)\Personal\Certificates\adfs.contoso.com
+    echo      \Certificates \(Local Computer\)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
+    echo
+	echo ###############################################
+	echo
+	echo -n "Please install the certificate to each ADFS VM "
+	echo
+	echo
+	read -p "Press any key to after you have installed certificate continue ... " -n1 -s
+	 
+	 
 ############################################################################
 ## Update gateway UDR Since it might have been deleted 
 ############################################################################
