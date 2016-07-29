@@ -22,79 +22,52 @@
 )
 
 ###############################################
-# Manual steps if you want to create and use a self singed test certificate contosotestcertificate
+# If you don't have a public signed certificate (e.g.adfs.contoso.com.pfx) by VerifSign, Go Daddy, DigiCert, and etc.
+# Here are manual steps to create a self singed test certificate adfs.contoso.com.pfx
 
 # 1. Log on your developer machine
-# in order to Create self signed certificate in you developer PC
 
-# 2. Download certutil.exe
-# copy certutil.exe to c:/temp/
+# 2. Download certutil.exe to 
+#       C:/temp/certutil.exe 
 
 # 3. Create my fake root certificate authority
-# makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
-# 
-# verify that the foloiwng files are created
-#	 C:/temp/MyFakeRootCertificateAuthority.cer
-#	 C:/temp/MyFakeRootCertificateAuthority.pvk
+#       makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
+#    Verify that the foloiwng files are created
+#	    C:/temp/MyFakeRootCertificateAuthority.cer
+#	    C:/temp/MyFakeRootCertificateAuthority.pvk
 
-# 4. Run command prompt as admin to use my fake root certificate authority to generate
-#    a certificate for adfs.contoso.com
-#
-# makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=adfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
+# 4. Run command prompt as admin to use my fake root certificate authority to generate a certificate for adfs.contoso.com
+#      makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=adfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
 
-# 5. start mmc certificates console 
-#	Expand to /Certificates (Local Computer)/Personal/Certificate/adfs.contoso.com 
-#
-#	Export the certificate with the private key to 
-#    C:/temp/adfscontosocom.pfx
+# 5. Start MMC certificates console 
+#	 Expand to /Certificates (Local Computer)/Personal/Certificate/adfs.contoso.com 
+#	 Export the certificate with the private key to 
+#       C:/temp/adfs.contoso.com.pfx
 
 # 6. Make sure you have the following files in the C:\temp
-#	 MyFakeRootCertificateAuthority.cer
-#	 MyFakeRootCertificateAuthority.pvk
-#    adfscontosocom.pfx
-
-###################
-
-# 7. RDP to the each ADFS VM.
-
-# 8. copy 
-#		certutil.exe
-#		MyFakeRootCertificateAuthority.cer
-#       adfscontosocom.pfx
-#    to 
-#		C:\temp\ 
-
-# 9. Run the following command prompt as admin:
-#	    certutil.exe -addstore "Root" "C:\temp\MyFakeRootCertificateAuthority.cer"
-#   Open mmc Certificate Console and verify that it now has the following item
-#      \Certificates (Local Computer)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
-
-# 10. Run the following command prompt as admin:
-#  		certutil.exe -privatekey -importPFX my C:\temp\adfscontosocom.pfx NoExport
-#   Open mmc Certificate Console and verify that it now has the following item
-#      \Certificates (Local Computer)\Personal\Certificates\adfs.contoso.com issued by MyFakeRootCertificationAuthority 
-
-# 11. Repeat step 7 to 10 for next ADDS server
+#	    MyFakeRootCertificateAuthority.cer
+#       MyFakeRootCertificateAuthority.pvk
+#       adfs.contoso.com.pfx
 
 ###############################################
-# Manual steps if you have a public signed certificate adfs.contoso.com.pfx by VerifSign, Go Daddy, DigiCert, and etc.
+# Manual step for install certificate to the ADFS VMs:
 
-# 1. RDP to the each ADFS VM.
+# 1. Make sure you have a certificate (e.g. adfs.contoso.com.pfx) either self created or signed by VerifSign, Go Daddy, DigiCert, and etc.
 
-# 2. copy 
-#		certutil.exe
-#		adfs.contoso.com.pfx 
-#    to 
-#		C:\temp\ 
+# 2. RDP to the each ADFS VM (adfs1-vm, adfs2-vm, ...)
 
-# 10. Run the following command prompt as admin:
+# 3. Copy to c:\temp the following file
+#		c:\temp\certutil.exe
+#		c:\temp\adfs.contoso.com.pfx 
+
+# 4. Run the following command prompt as admin:
 #    	certutil.exe -privatekey -importPFX my C:\temp\contoso.com.pfx NoExport
-#   Open mmc Certificate Console and verify that it now has the following item
-#      \Certificates (Local Computer)\Personal\Certificates\adfs.contoso.com issued by A Real Certification Authority
+
+
+# 5. Start MMC, Add Certificates Console, and verify that the following certificate is installed:
+#      \Certificates (Local Computer)\Personal\Certificates\adfs.contoso.com
 
 ###############################################
-# Manual steps to create DNS entry
-
 
 # $AdminUser = "adminUser"
 # $AdminPassword = "adminP@ssw0rd"
@@ -103,9 +76,6 @@
 # $GmsaName = "adfsgmsa"
 # $FederationName = "adfs.contoso.com"
 # $DescriptionAdfs = "Contoso Corporation"
-
-###############################################
-# domainjoin script needs to be executed first
 
 ###############################################
 # get credential of the domain admin
