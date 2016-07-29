@@ -877,9 +877,9 @@ fi
 	echo		c:\temp\adfs.contoso.com.pfx 
 	echo
 	echo 4. Run the following command prompt as admin:
-	echo    	certutil.exe -privatekey -importPFX my C:\temp\contoso.com.pfx NoExport
+	echo    	certutil.exe -privatekey -importPFX my C:\temp\adfs.contoso.com.pfx NoExport
 	echo
-	echo 5. Start MMC, Add Certificates Console, and verify that the following certificate is installed:
+	echo 5. Start MMC, Add Certificates Snap-in, sellect Computer account, and verify that the following certificate is installed:
 	echo      \Certificates \(Local Computer\)\Personal\Certificates\adfs.contoso.com
 	echo
 	echo ###############################################
