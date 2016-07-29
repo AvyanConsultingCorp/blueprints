@@ -119,70 +119,21 @@ DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
 DEPLOYED_ADFS_SUBNET_NAME=${BASE_NAME}-adfs-sn
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 
-############################################################################
-############################################################################
-############################################################################
-############################################################################
-## Create ADFS in my-adfs-rg
-############################################################################
-
-if [ "${Prompting}" == "true" ]; then
-	echo
-	echo
-	echo -n "Please verify that the DNS server setting on the VNet has been updated"
-	echo
-	echo
-	read -p "Press any key to create the resource group for the AD servers ... " -n1 -s
-fi
-############################################################################
-## Create adfs resource group
-############################################################################
 ADFS_RESOURCE_GROUP=${BASE_NAME}-adfs-rg
 RESOURCE_GROUP=${ADFS_RESOURCE_GROUP}
-echo
-echo
-echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-     azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 
 ############################################################################
-## Create adfs ilb and vms
+# Install ADFS Farm in the first VM 
+############################################################################
 ############################################################################
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	read -p "Press any key to create the VMs for the ADFS servers ... " -n1 -s
+	read -p "Press any key to install ADFS to the first VM ... " -n1 -s
 fi
 
-TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-ilb-backend-http-https-static-ip.json
-SUBNET_NAME_PREFIX=${DEPLOYED_ADFS_SUBNET_NAME_PREFIX}
-ILB_IP_ADDRESS=${ADFS_ILB_IP_ADDRESS}
-NUMBER_VMS=${ADFS_NUMBER_VMS}
-RESOURCE_GROUP=${ADFS_RESOURCE_GROUP}
-VM_NAME_PREFIX=${SUBNET_NAME_PREFIX}
-VM_COMPUTER_NAME_PREFIX=${SUBNET_NAME_PREFIX}
-VNET_RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
-VNET_NAME=${DEPLOYED_VNET_NAME}
-SUBNET_NAME=${DEPLOYED_ADFS_SUBNET_NAME}
-VM_IP_ADDRESS_ARRAY=${ADFS_SERVER_IP_ADDRESS_ARRAY}
-PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vnetResourceGroup\":{\"value\":\"${VNET_RESOURCE_GROUP}\"},\"vnetName\":{\"value\":\"${VNET_NAME}\"},\"subnetName\":{\"value\":\"${SUBNET_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"subnetNamePrefix\":{\"value\":\"${SUBNET_NAME_PREFIX}\"},\"ilbIpAddress\":{\"value\":\"${ILB_IP_ADDRESS}\"},\"osType\":{\"value\":\"${OS_TYPE}\"},\"numberVMs\":{\"value\":${NUMBER_VMS}},\"vmNamePrefix\":{\"value\":\"${VM_NAME_PREFIX}\"},\"vmComputerNamePrefix\":{\"value\":\"${VM_COMPUTER_NAME_PREFIX}\"},\"vmIpAddressArray\":{\"value\":${VM_IP_ADDRESS_ARRAY}}}"
-
-echo
-echo
-echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
-
-############################################################################
-# Join the VMs to AD Domain
-############################################################################
-if [ "${Prompting}" == "true" ]; then
-	echo
-	echo
-	read -p "Press any key to join the VMs to the on-premises domain... " -n1 -s
-fi
-
-for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
-	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
 	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-joindomain-extension.json
 	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"domainName\":{\"value\":\"${DOMAIN_NAME}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"}}"
 	echo
@@ -202,7 +153,7 @@ if [ "${Prompting}" == "true" ]; then
 fi
 	 
 ############################################################################
-# Install ADFS Farm in the first VM 
+# Install ADFS in the second and the rest VMs 
 ############################################################################
 
 

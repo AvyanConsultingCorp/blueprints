@@ -203,6 +203,8 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 DEPLOYED_VNET_NAME=${BASE_NAME}-vnet
 DEPLOYED_AD_SUBNET_NAME_PREFIX=ad
 DEPLOYED_ADFS_SUBNET_NAME_PREFIX=adfs
+DEPLOYED_ADFS_SUBNET_NAME=${BASE_NAME}-adfs-sn
+
 DEPLOYED_MGMT_SUBNET_NAME_PREFIX=mgmt
 DEPLOYED_NVA_FE_SUBNET_NAME_PREFIX=nva-fe
 DEPLOYED_NVA_BE_SUBNET_NAME_PREFIX=nva-be
@@ -761,6 +763,7 @@ fi
 ############################################################################
 ## Create adfs resource group
 ############################################################################
+
 ADFS_RESOURCE_GROUP=${BASE_NAME}-adfs-rg
 RESOURCE_GROUP=${ADFS_RESOURCE_GROUP}
 echo
