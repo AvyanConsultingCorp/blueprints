@@ -916,6 +916,38 @@ if [ "${Prompting}" == "true" ]; then
 	read -p "Press any key to continue ... " -n1 -s
 fi
 
+############################################################################
+# Add ADFS Farm Node to Existing Farm
+############################################################################
+############################################################################
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	read -p "Press any key to add the reset ADFS Farm Node ... " -n1 -s
+fi
+
+PRIMARY_COMPUTER_NAME=${VM_COMPUTER_NAME_PREFIX}1
+
+for (( i=2; i<=${NUMBER_VMS}; i++ ))
+do
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-add-adfs-farm-node-extension.json
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"fqDomainName\":{\"value\":\"${DOMAIN_NAME}\"},\"gmsaName\":{\"value\":\"${ADFS_GMSA_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"},\"primaryComputerName\":{\"value\":\"${PRIMARY_COMPUTER_NAME}\"}}"
+	echo
+	echo
+	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+done  
+
+		 
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo Please log into the rest ADFS VMs to verify the installation
+	echo
+	echo You can browse to https://adfs.contoso.com/adfs/ls/idpinitiatedsignon.htm to verify the installation
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
 
 ############################################################################
 ## Update gateway UDR Since it might have been deleted 

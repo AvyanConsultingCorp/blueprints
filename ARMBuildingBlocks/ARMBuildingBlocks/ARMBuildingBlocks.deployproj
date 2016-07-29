@@ -47,7 +47,7 @@
     <None Include="Not used\bb-vpn-gateway.json" />
     <None Include="Not used\bb-vpn-gateway.parameters.json" />
     <None Include="Scripts\adds-replication-site.ps1" />
-    <None Include="Scripts\ADFS\AddAdfsFarm.ps1" />
+    <None Include="Scripts\ADFS\AddAdfsFarmNode.ps1" />
     <None Include="Scripts\ADFS\domainjoin.ps1" />
     <None Include="Scripts\ADFS\howtocreatecerts.txt" />
     <None Include="Scripts\ADFS\howtocreatecerts.zip" />
@@ -78,6 +78,7 @@
     <None Include="Templates\bb-ntwk-forced-tunneling.json" />
     <None Include="Templates\bb-vm-1nic-lbbe-static.json" />
     <None Include="Templates\bb-vm-gmsa-dnsrecord-extension.json" />
+    <None Include="Templates\bb-vm-add-adfs-farm-node-extension.json" />
     <None Include="Templates\bb-vm-install-adfs-farm-extension.json" />
     <None Include="Templates\bb-vm-dns-replication-site-extension.json" />
     <None Include="Templates\bb-vm-joindomain-extension.json" />
