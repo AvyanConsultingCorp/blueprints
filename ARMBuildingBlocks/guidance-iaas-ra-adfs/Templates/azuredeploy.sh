@@ -829,9 +829,65 @@ if [ "${Prompting}" == "true" ]; then
 fi
 	 
 ############################################################################
-# Install ADFS Farm in the first VM 
+# Manual Steps: Install Certificate to ADFS VMs
 ############################################################################
-
+	echo
+	echo -n "Please install the certificate to each ADFS VM "
+	echo
+	read -p "Press any key to see the detailed steps ... " -n1 -s
+	echo
+	echo
+	echo  ###############################################
+	echo  If you do not have a public signed certificate \(e.g.adfs.contoso.com.pfx\) by VerifSign, Go Daddy, DigiCert, and etc.
+	echo  Here are manual steps to create a self singed test certificate adfs.contoso.com.pfx
+	echo
+	echo  1. Log on your developer machine
+	echo
+	echo  2. Download certutil.exe to 
+	echo        C:/temp/certutil.exe 
+	echo
+	echo  3. Create my fake root certificate authority
+	echo        makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
+	echo     Verify that the foloiwng files are created
+	echo 	    C:/temp/MyFakeRootCertificateAuthority.cer
+	echo 	    C:/temp/MyFakeRootCertificateAuthority.pvk
+    echo 
+	echo  4. Run command prompt as admin to use my fake root certificate authority to generate a certificate for adfs.contoso.com
+	echo        makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n \"CN=adfs.contoso.com , CN=enterpriseregistration.contoso.com\" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
+    echo 
+	echo  5. Start MMC certificates console 
+	echo 	 Expand to /Certificates \(Local Computer\)/Personal/Certificate/adfs.contoso.com 
+	echo 	 Export the certificate with the private key to 
+	echo        C:/temp/adfs.contoso.com.pfx
+    echo 
+	echo  6. Make sure you have the following files in the C:\temp
+	echo 	    MyFakeRootCertificateAuthority.cer
+	echo        MyFakeRootCertificateAuthority.pvk
+	echo        adfs.contoso.com.pfx
+    echo 
+	echo ###############################################
+	echo Manual step for install certificate to the ADFS VMs:
+	echo
+	echo 1. Make sure you have a certificate \(e.g. adfs.contoso.com.pfx\) either self created or signed by VerifSign, Go Daddy, DigiCert, and etc.
+	echo
+	echo 2. RDP to the each ADFS VM \(adfs1-vm, adfs2-vm, ...\)
+	echo
+	echo 3. Copy to c:\temp the following file
+	echo		c:\temp\certutil.exe
+	echo		c:\temp\adfs.contoso.com.pfx 
+	echo
+	echo 4. Run the following command prompt as admin:
+	echo    	certutil.exe -privatekey -importPFX my C:\temp\contoso.com.pfx NoExport
+	echo
+	echo 5. Start MMC, Add Certificates Console, and verify that the following certificate is installed:
+	echo      \Certificates \(Local Computer\)\Personal\Certificates\adfs.contoso.com
+	echo
+	echo ###############################################
+	echo
+	echo -n "Please install the certificate to each ADFS VM "
+	echo
+	echo
+	read -p "Press any key to after you have installed certificate continue ... " -n1 -s
 
 
 
