@@ -7,7 +7,9 @@
       "type": "string",
       "defaultValue": "AdminUser"
     },
-    "adminPassword": { "type": "securestring" },
+    "adminPassword": {
+      "type": "securestring" 
+    },
     "netBiosDomainName": {
       "type": "string",
       "defaultValue": "CONTOSO"
@@ -16,24 +18,24 @@
       "type": "string",
       "defaultValue": "contoso.com"
     },
-    "gmsaAdfs": {
+    "gmsaName": {
       "type": "string",
-      "defaultValue": "adfsservice"
+      "defaultValue": "adfsgmsa"
     },
     "federationName": {
       "type": "string",
       "defaultValue": "adfs.contoso.com"
     },
-    "descriptionAdfs": {
+    "description": {
       "type": "string",
       "defaultValue": "Contoso Corporation"
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "scriptName": "CreateDc",
+    "scriptName": "InstallAdfsFarm",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/ADFS/InstallAdfsFarm.ps1",
-    "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -netBiosDomainName ', parameters('NetBiosDomainName'),' -FqDomainName ', parameters('fqDomainName'), ' -GmsaAdfs ', parameters('gmsaAdfs'), ' -FederationName ', parameters('federationName'),' -DescriptionAdfs ', parameters('descriptionAdfs'))]",
+    "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -NetBiosDomainName ', parameters('netBiosDomainName'),' -FqDomainName ', parameters('fqDomainName'), ' -GmsaName ', parameters('gmsaName'), ' -FederationName ', parameters('federationName'),' -Description ', parameters('description'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File InstallAdfsFarm.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
