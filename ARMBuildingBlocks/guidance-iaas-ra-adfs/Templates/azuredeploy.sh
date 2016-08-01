@@ -1017,23 +1017,25 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 	echo  ###############################################
     echo 
 	echo ###############################################
-	echo Manual step for install certificate to the ADFS VMs:
+	echo Manual step for install certificate to the ADFS Proxy VMs:
 	echo
 	echo 1. Make sure you have a certificate \(e.g. adfs.contoso.com.pfx\) either self created or signed by VerifSign, Go Daddy, DigiCert, and etc.
 	echo
-	echo 2. RDP to the each ADFS VM \(adfs1-vm, adfs2-vm, ...\)
+	echo 2. RDP to the each ADFS Proxy VM \(my-proxy1-vm, my-proxy2-vm, ...\) through the jumpbox
 	echo
 	echo 3. Copy to c:\temp the following file
 	echo		c:\temp\certutil.exe
 	echo		c:\temp\adfs.contoso.com.pfx 
-	echo        c:\MyFakeRootCertificateAuthority.cer  \(if you created the cert yourself \)
+	echo        c:\MyFakeRootCertificateAuthority.cer  \(if you created the above cert yourself \)
 	echo
 	echo 4. Run the following command prompt as admin:
 	echo    	certutil.exe -privatekey -importPFX my C:\temp\adfs.contoso.com.pfx NoExport
-    echo	    certutil.exe -addstore Root C:\temp\MyFakeRootCertificateAuthority.cer
+	echo    Run the following command prompt as admin \(if you created the above cert yourself \)
+    echo	    certutil.exe -addstore Root C:\temp\MyFakeRootCertificateAuthority.cer 
 	echo
 	echo 5. Start MMC, Add Certificates Snap-in, sellect Computer account, and verify that the following certificate is installed:
 	echo      \Certificates \(Local Computer\)\Personal\Certificates\adfs.contoso.com
+	echo    If you created the above cert yourself, verify the the following certificate is installed:
     echo      \Certificates \(Local Computer\)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
     echo
 	echo ###############################################
@@ -1041,7 +1043,7 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 	echo -n "Please install the certificate to each ADFS VM "
 	echo
 	echo
-	read -p "Press any key to after you have installed certificate continue ... " -n1 -s
+	read -p "Press any key to after you have installed certificate to continue ... " -n1 -s
 	 
 	 
 ############################################################################
