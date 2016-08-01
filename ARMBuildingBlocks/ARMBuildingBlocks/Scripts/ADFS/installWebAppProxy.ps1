@@ -32,25 +32,19 @@
 #      \Certificates (Local Computer)\Personal\Certificates\adfs.contoso.com
 #    If you created the above cert yourself, verify the the following certificate is installed:
 #      \Certificates (Local Computer)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
-
-
 ###############################################
 
-# example of command
-# .\installWebAppProxy.ps1 -AdminUser administrator1 -AdminPassword "Pag`$1Lab00000" -NetBiosDomainName patterns2 -FederationName pnpadfs.patternspractices.net 
-
-Install-WindowsFeature -IncludeManagementTools -name Web-Application-Proxy
+# get credential of the domain admin
 $secAdminPassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential ("$NetBiosDomainName\$AdminUser", $secAdminPassword)
 
-#uncomment those lines to install the cert or install them manually
-#certutil.exe -privatekey -p Pag`$1Lab -importPFX my C:\certificates\pnpadfsfinal.pfx NoExport
-#certutil.exe -privatekey -importPFX root C:\certificates\pnpadfsroot.cer NoExport
+# retrieve the the thumbnail of certificate
+$thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My).Thumbprint
 
+# Install ADFS feature
+Install-WindowsFeature -IncludeManagementTools -name Web-Application-Proxy
 
-$thumbprint=(Get-ChildItem -DnsName $federationName -Path cert:\LocalMachine\My).Thumbprint
+# .\installWebAppProxy.ps1 -AdminUser adminUser -AdminPassword "adminP@ssw0rd" -NetBiosDomainName CONTOSO -FederationName adfs.contoso.com
+Install-WebApplicationProxy -FederationServiceTrustCredential $credential -CertificateThumbprint $thumbprint -FederationServiceName $FederationName 
 
-Install-WebApplicationProxy -FederationServiceTrustCredential $Credential -CertificateThumbprint $thumbprint -FederationServiceName $federationName 
-
-Add-WebApplicationProxyApplication -BackendServerUrl "https://$federationName" -ExternalCertificateThumbprint $thumbprint -ExternalUrl "https://$federationName" -Name "Partner ADFS" -ExternalPreAuthentication PassThrough
-
+Add-WebApplicationProxyApplication -BackendServerUrl "https://$FederationName" -ExternalCertificateThumbprint $thumbprint -ExternalUrl "https://$FederationName" -Name "Contoso App" -ExternalPreAuthentication PassThrough

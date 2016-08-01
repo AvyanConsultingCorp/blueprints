@@ -1058,7 +1058,7 @@ for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
 	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-install-webapp-proxy-extension.json
-	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"fqDomainName\":{\"value\":\"${DOMAIN_NAME}\"},\"gmsaName\":{\"value\":\"${ADFS_GMSA_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"},\"primaryComputerName\":{\"value\":\"${PRIMARY_COMPUTER_NAME}\"}}"
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"}}"
 	echo
 	echo
 	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
@@ -1068,9 +1068,17 @@ done
 		 
 if [ "${Prompting}" == "true" ]; then
 	echo
-	echo Please log into the rest ADFS VMs to verify the installation
+	echo Please log into ADFS Proxy VMs to verify the installation
 	echo
-	echo You can browse to https://adfs.contoso.com/adfs/ls/idpinitiatedsignon.htm to verify the installation
+    echo To test, enable public IP for the proxy server, and assume the ip is 11.22.33.44
+	echo in you local dev PC, edit the following file:
+	echo     C:\Windows\System32\drivers\etc\host
+	echo Add a line
+	echo     11.22.33.44 adfs.contoso.com
+	echo Save host file and Run the command 
+	echo     net stop "dns client"
+	echo Browse to 
+	echo     https://adfs.contoso.com/adfs/ls/idpinitiatedsignon.htm to verify the installation
 	echo
 	read -p "Press any key to continue ... " -n1 -s
 fi

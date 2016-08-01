@@ -14,28 +14,16 @@
       "type": "string",
       "defaultValue": "CONTOSO"
     },
-    "fqDomainName": {
-      "type": "string",
-      "defaultValue": "contoso.com"
-    },
-    "gmsaName": {
-      "type": "string",
-      "defaultValue": "adfsgmsa"
-    },
     "federationName": {
       "type": "string",
       "defaultValue": "adfs.contoso.com"
-    },
-    "primaryComputerName": {
-      "type": "string",
-      "defaultValue": "adfs1-vm"
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
     "scriptName": "installWebAppProxy",
     "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/ADFS/installWebAppProxy.ps1",
-    "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -NetBiosDomainName ', parameters('netBiosDomainName'),' -FqDomainName ', parameters('fqDomainName'), ' -GmsaName ', parameters('gmsaName'), ' -FederationName ', parameters('federationName'),' -PrimaryComputerName ', parameters('primaryComputerName'))]",
+    "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -NetBiosDomainName ', parameters('netBiosDomainName'), ' -FederationName ', parameters('federationName'))]",
     "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File installWebAppProxy.ps1 ', variables('scriptArgument'))]"
   },
   "resources": [
