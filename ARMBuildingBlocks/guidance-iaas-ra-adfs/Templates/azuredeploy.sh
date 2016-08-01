@@ -1045,16 +1045,53 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 	echo
 	read -p "Press any key to after you have installed certificate to continue ... " -n1 -s
 ############################################################################
-# Install ADFS Proxy 
+# Install The First ADFS Proxy 
 ############################################################################
 ############################################################################
 if [ "${Prompting}" == "true" ]; then
 	echo
 	echo
-	read -p "Press any key to install ADFS Proxy to the proxy servers ... " -n1 -s
+	read -p "Press any key to install the first ADFS Proxy ... " -n1 -s
 fi
 
-for (( i=1; i<=${NUMBER_VMS}; i++ ))
+	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-install-webapp-proxy-and-app-extension.json
+	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"}}"
+	echo
+	echo
+	echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+	     azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
+
+		 
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo Please log into ADFS Proxy VMs to verify the installation
+	echo
+    echo To test, enable public IP for the proxy server, and assume the ip is 11.22.33.44
+	echo in you local dev PC, edit the following file:
+	echo     C:\Windows\System32\drivers\etc\host
+	echo Add a line
+	echo     11.22.33.44 adfs.contoso.com
+	echo Save host file and Run the command 
+	echo     net stop "dns client"
+	echo Browse to 
+	echo     https://adfs.contoso.com/adfs/ls/idpinitiatedsignon.htm to verify the installation
+	echo
+	read -p "Press any key to continue ... " -n1 -s
+fi
+############################################################################
+############################################################################
+############################################################################
+# Install additional ADFS Proxy 
+############################################################################
+############################################################################
+if [ "${Prompting}" == "true" ]; then
+	echo
+	echo
+	read -p "Press any key to install Additional ADFS Proxy to the proxy servers ... " -n1 -s
+fi
+
+for (( i=2; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
 	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-install-webapp-proxy-extension.json
@@ -1082,8 +1119,6 @@ if [ "${Prompting}" == "true" ]; then
 	echo
 	read -p "Press any key to continue ... " -n1 -s
 fi
-############################################################################
-############################################################################
 	 
 	 
 ############################################################################
