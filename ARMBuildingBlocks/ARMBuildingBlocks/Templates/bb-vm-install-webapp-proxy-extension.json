@@ -1,0 +1,70 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": { "type": "string" },
+    "adminUser": {
+      "type": "string",
+      "defaultValue": "AdminUser"
+    },
+    "adminPassword": {
+      "type": "securestring" 
+    },
+    "netBiosDomainName": {
+      "type": "string",
+      "defaultValue": "CONTOSO"
+    },
+    "fqDomainName": {
+      "type": "string",
+      "defaultValue": "contoso.com"
+    },
+    "gmsaName": {
+      "type": "string",
+      "defaultValue": "adfsgmsa"
+    },
+    "federationName": {
+      "type": "string",
+      "defaultValue": "adfs.contoso.com"
+    },
+    "primaryComputerName": {
+      "type": "string",
+      "defaultValue": "adfs1-vm"
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "scriptName": "installWebAppProxy",
+    "scriptUri": "https://raw.githubusercontent.com/mspnp/blueprints/master/ARMBuildingBlocks/ARMBuildingBlocks/Scripts/ADFS/installWebAppProxy.ps1",
+    "scriptArgument": "[concat(' -AdminUser ',parameters('adminUser'),' -AdminPassword ', parameters('adminPassword'),' -NetBiosDomainName ', parameters('netBiosDomainName'),' -FqDomainName ', parameters('fqDomainName'), ' -GmsaName ', parameters('gmsaName'), ' -FederationName ', parameters('federationName'),' -PrimaryComputerName ', parameters('primaryComputerName'))]",
+    "scriptCommand": "[concat('powershell -ExecutionPolicy Unrestricted -File installWebAppProxy.ps1 ', variables('scriptArgument'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(parameters('vmName'),'/domaincontroller')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.8",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[variables('scriptUri')]"
+          ],
+          "commandToExecute": "[variables('scriptCommand')]"
+        }
+      },
+      "tags": {
+        "displayName": "setup-script"
+      }
+    }
+  ],
+  "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[parameters('vmName')]"
+    }
+  }
+}

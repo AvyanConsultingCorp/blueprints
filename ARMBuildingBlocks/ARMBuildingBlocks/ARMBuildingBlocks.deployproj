@@ -77,6 +77,7 @@
     <None Include="Templates\bb-gatewaysubnet.json" />
     <None Include="Templates\bb-ntwk-forced-tunneling.json" />
     <None Include="Templates\bb-vm-1nic-lbbe-static.json" />
+    <None Include="Templates\bb-vm-install-webapp-proxy-extension.json" />
     <None Include="Templates\bb-vm-gmsa-dnsrecord-extension.json" />
     <None Include="Templates\bb-vm-add-adfs-farm-node-extension.json" />
     <None Include="Templates\bb-vm-install-adfs-farm-extension.json" />
