@@ -865,7 +865,7 @@ fi
 	echo 	 Export the certificate with the private key to 
 	echo        C:/temp/adfs.contoso.com.pfx
     echo 
-	echo  6. Make sure you have the following files in the C:\temp
+	echo  6. Make sure you have the following files in the C:\\temp
 	echo 	    MyFakeRootCertificateAuthority.cer
 	echo        MyFakeRootCertificateAuthority.pvk
 	echo        adfs.contoso.com.pfx
@@ -877,22 +877,22 @@ fi
 	echo
 	echo 2. RDP to the each ADFS VM \(adfs1-vm, adfs2-vm, ...\)
 	echo
-	echo 3. Copy to c:\temp the following file
-	echo		c:\temp\certutil.exe
-	echo		c:\temp\adfs.contoso.com.pfx 
+	echo 3. Copy to c:\\temp the following file
+	echo		c:\\temp\\certutil.exe
+	echo		c:\\temp\\adfs.contoso.com.pfx 
 	echo
 	echo 4. Run the following command prompt as admin:
-	echo    	certutil.exe -privatekey -importPFX my C:\temp\adfs.contoso.com.pfx NoExport
+	echo    	certutil.exe -privatekey -importPFX my C:\\temp\\adfs.contoso.com.pfx NoExport
 	echo
 	echo 5. Start MMC, Add Certificates Snap-in, sellect Computer account, and verify that the following certificate is installed:
-	echo      \Certificates \(Local Computer\)\Personal\Certificates\adfs.contoso.com
+	echo      \\Certificates \(Local Computer\)\\Personal\\Certificates\\adfs.contoso.com
 	echo
 	echo ###############################################
 	echo
 	echo -n "Please install the certificate to each ADFS VM "
 	echo
 	echo
-	read -p "Press any key to after you have installed certificate continue ... " -n1 -s
+	read -p "after you have installed certificate, Press any key to continue ... " -n1 -s
 
 ############################################################################
 # Install New ADFS Farm in the first VM 
@@ -1023,27 +1023,27 @@ echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_
 	echo
 	echo 2. RDP to the each ADFS Proxy VM \(my-proxy1-vm, my-proxy2-vm, ...\) through the jumpbox
 	echo
-	echo 3. Copy to c:\temp the following file
-	echo		c:\temp\certutil.exe
-	echo		c:\temp\adfs.contoso.com.pfx 
-	echo        c:\MyFakeRootCertificateAuthority.cer  \(if you created the above cert yourself \)
+	echo 3. Copy to c:\\temp the following file
+	echo		c:\\temp\\certutil.exe
+	echo		c:\\temp\\adfs.contoso.com.pfx 
+	echo        c:\\MyFakeRootCertificateAuthority.cer  \(if you created the above cert yourself \)
 	echo
 	echo 4. Run the following command prompt as admin:
-	echo    	certutil.exe -privatekey -importPFX my C:\temp\adfs.contoso.com.pfx NoExport
+	echo    	certutil.exe -privatekey -importPFX my C:\\temp\\adfs.contoso.com.pfx NoExport
 	echo    Run the following command prompt as admin \(if you created the above cert yourself \)
-    echo	    certutil.exe -addstore Root C:\temp\MyFakeRootCertificateAuthority.cer 
+    echo	    certutil.exe -addstore Root C:\\temp\\MyFakeRootCertificateAuthority.cer 
 	echo
 	echo 5. Start MMC, Add Certificates Snap-in, sellect Computer account, and verify that the following certificate is installed:
-	echo      \Certificates \(Local Computer\)\Personal\Certificates\adfs.contoso.com
+	echo      \\Certificates \(Local Computer\)\\Personal\\Certificates\\adfs.contoso.com
 	echo    If you created the above cert yourself, verify the the following certificate is installed:
-    echo      \Certificates \(Local Computer\)\Trusted Root Certification Authorities\Certificates\MyFakeRootCertificateAuthority 
+    echo      \\Certificates \(Local Computer\)\\Trusted Root Certification Authorities\\Certificates\\MyFakeRootCertificateAuthority 
     echo
 	echo ###############################################
 	echo
 	echo -n "Please install the certificate to each ADFS VM "
 	echo
 	echo
-	read -p "Press any key to after you have installed certificate to continue ... " -n1 -s
+	read -p "after you have installed certificate, Press any key to continue ... " -n1 -s
 ############################################################################
 # Install The First ADFS Proxy 
 ############################################################################
@@ -1069,7 +1069,7 @@ if [ "${Prompting}" == "true" ]; then
 	echo
     echo To test, enable public IP for the proxy server, and assume the ip is 11.22.33.44
 	echo in you local dev PC, edit the following file:
-	echo     C:\Windows\System32\drivers\etc\host
+	echo     C:\\Windows\\System32\\drivers\\etc\\host
 	echo Add a line
 	echo     11.22.33.44 adfs.contoso.com
 	echo Save host file and Run the command 
@@ -1109,7 +1109,7 @@ if [ "${Prompting}" == "true" ]; then
 	echo
     echo To test, enable public IP for the proxy server, and assume the ip is 11.22.33.44
 	echo in you local dev PC, edit the following file:
-	echo     C:\Windows\System32\drivers\etc\host
+	echo     C:\\Windows\\System32\\drivers\\etc\\host
 	echo Add a line
 	echo     11.22.33.44 adfs.contoso.com
 	echo Save host file and Run the command 
