@@ -1,4 +1,5 @@
-﻿Param(
+﻿# .\installWebAppProxy.ps1 -AdminUser adminUser -AdminPassword "adminP@ssw0rd" -NetBiosDomainName CONTOSO -FederationName adfs.contoso.com
+Param(
   [Parameter(Mandatory=$True)]
   [string]$AdminUser,
 
@@ -12,7 +13,7 @@
   [string]$FederationName
 )
 ###############################################
-# Manual step for install certificate to the ADFS WAeb Applicaiton Proxy VMs:
+# Manual step for install certificate to the ADFS Web Applicaiton Proxy VMs:
 
 # 1. Make sure you have a certificate (e.g. adfs.contoso.com.pfx) either self created or signed by VerifSign, Go Daddy, DigiCert, and etc.
 
@@ -44,7 +45,6 @@ $thumbprint=(Get-ChildItem -DnsName $FederationName -Path cert:\LocalMachine\My)
 # Install ADFS feature
 Install-WindowsFeature -IncludeManagementTools -name Web-Application-Proxy
 
-# .\installWebAppProxy.ps1 -AdminUser adminUser -AdminPassword "adminP@ssw0rd" -NetBiosDomainName CONTOSO -FederationName adfs.contoso.com
 Install-WebApplicationProxy -FederationServiceTrustCredential $credential -CertificateThumbprint $thumbprint -FederationServiceName $FederationName 
 
 Add-WebApplicationProxyApplication -BackendServerUrl "https://$FederationName" -ExternalCertificateThumbprint $thumbprint -ExternalUrl "https://$FederationName" -Name "Contoso App" -ExternalPreAuthentication PassThrough
