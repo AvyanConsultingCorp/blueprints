@@ -1054,12 +1054,10 @@ if [ "${Prompting}" == "true" ]; then
 	read -p "Press any key to install ADFS Proxy to the proxy servers ... " -n1 -s
 fi
 
-PRIMARY_COMPUTER_NAME=${VM_COMPUTER_NAME_PREFIX}1
-
-for (( i=2; i<=${NUMBER_VMS}; i++ ))
+for (( i=1; i<=${NUMBER_VMS}; i++ ))
 do
 	VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}${i}-vm
-	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-add-adfs-farm-node-extension.json
+	TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-install-webapp-proxy-extension.json
 	PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"fqDomainName\":{\"value\":\"${DOMAIN_NAME}\"},\"gmsaName\":{\"value\":\"${ADFS_GMSA_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"},\"primaryComputerName\":{\"value\":\"${PRIMARY_COMPUTER_NAME}\"}}"
 	echo
 	echo
