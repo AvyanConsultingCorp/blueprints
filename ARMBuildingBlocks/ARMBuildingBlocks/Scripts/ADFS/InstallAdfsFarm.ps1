@@ -22,34 +22,6 @@
 )
 
 ###############################################
-# If you don't have a public signed certificate (e.g.adfs.contoso.com.pfx) by VerifSign, Go Daddy, DigiCert, and etc.
-# Here are manual steps to create a self singed test certificate adfs.contoso.com.pfx
-
-# 1. Log on your developer machine
-
-# 2. Download certutil.exe to 
-#       C:/temp/certutil.exe 
-
-# 3. Create my fake root certificate authority
-#       makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
-#    Verify that the foloiwng files are created
-#	    C:/temp/MyFakeRootCertificateAuthority.cer
-#	    C:/temp/MyFakeRootCertificateAuthority.pvk
-
-# 4. Run command prompt as admin to use my fake root certificate authority to generate a certificate for adfs.contoso.com
-#      makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=adfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
-
-# 5. Start MMC certificates console 
-#	 Expand to /Certificates (Local Computer)/Personal/Certificate/adfs.contoso.com 
-#	 Export the certificate with the private key to 
-#       C:/temp/adfs.contoso.com.pfx
-
-# 6. Make sure you have the following files in the C:\temp
-#	    MyFakeRootCertificateAuthority.cer
-#       MyFakeRootCertificateAuthority.pvk
-#       adfs.contoso.com.pfx
-
-###############################################
 # Manual step for install certificate to the ADFS VMs:
 
 # 1. Make sure you have a certificate (e.g. adfs.contoso.com.pfx) either self created or signed by VerifSign, Go Daddy, DigiCert, and etc.
@@ -97,3 +69,33 @@ Enable-AdfsDeviceRegistration -Credential $Credential -Force
 
 # Test with the folloiwng link
 # https://adfs.contoso.com/adfs/ls/idpinitiatedsignon.htm
+
+###############################################
+# Note:
+# If you don't have a public signed certificate (e.g.adfs.contoso.com.pfx) by VerifSign, Go Daddy, DigiCert, and etc.
+# Here are manual steps to create a self singed test certificate adfs.contoso.com.pfx
+
+# 1. Log on your developer machine
+
+# 2. Download certutil.exe to 
+#       C:/temp/certutil.exe 
+
+# 3. Create my fake root certificate authority
+#       makecert -sky exchange -pe -a sha256 -n "CN=MyFakeRootCertificateAuthority" -r -sv MyFakeRootCertificateAuthority.pvk MyFakeRootCertificateAuthority.cer -len 2048
+#    Verify that the foloiwng files are created
+#	    C:/temp/MyFakeRootCertificateAuthority.cer
+#	    C:/temp/MyFakeRootCertificateAuthority.pvk
+
+# 4. Run command prompt as admin to use my fake root certificate authority to generate a certificate for adfs.contoso.com
+#      makecert -sk pkey -iv MyFakeRootCertificateAuthority.pvk -a sha256 -n "CN=adfs.contoso.com , CN=enterpriseregistration.contoso.com" -ic MyFakeRootCertificateAuthority.cer -sr localmachine -ss my -sky exchange -pe
+
+# 5. Start MMC certificates console 
+#	 Expand to /Certificates (Local Computer)/Personal/Certificate/adfs.contoso.com 
+#	 Export the certificate with the private key to 
+#       C:/temp/adfs.contoso.com.pfx
+
+# 6. Make sure you have the following files in the C:\temp
+#	    MyFakeRootCertificateAuthority.cer
+#       MyFakeRootCertificateAuthority.pvk
+#       adfs.contoso.com.pfx
+
