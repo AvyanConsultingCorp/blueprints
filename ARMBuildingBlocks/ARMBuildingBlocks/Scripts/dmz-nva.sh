@@ -11,9 +11,10 @@ iptables -X
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.1.254:80
 iptables -t nat -A POSTROUTING -p tcp -d 10.0.1.254 --dport 80 -j SNAT --to-source $PRIVATE_IP_ADDRESS
 iptables -t nat -A POSTROUTING -p tcp -d 10.0.1.254 --dport 80 -j SNAT --to-source $PUBLIC_IP_ADDRESS
-iptables -t nat -A PREROUTING -p tcp --dport 443 -j DNAT --to-destination 10.0.1.254:443
-iptables -t nat -A POSTROUTING -p tcp -d 10.0.1.254 --dport 443 -j SNAT --to-source $PRIVATE_IP_ADDRESS
-iptables -t nat -A POSTROUTING -p tcp -d 10.0.1.254 --dport 443 -j SNAT --to-source $PUBLIC_IP_ADDRESS
+
+iptables -t nat -A PREROUTING -p tcp --dport 443 -j DNAT --to-destination 10.0.255.158:443
+iptables -t nat -A POSTROUTING -p tcp -d 10.0.255.158 --dport 443 -j SNAT --to-source $PRIVATE_IP_ADDRESS
+iptables -t nat -A POSTROUTING -p tcp -d 10.0.255.158 --dport 443 -j SNAT --to-source $PUBLIC_IP_ADDRESS
 service ufw stop
 service ufw start
 

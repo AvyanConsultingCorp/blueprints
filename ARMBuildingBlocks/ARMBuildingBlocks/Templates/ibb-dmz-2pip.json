@@ -81,7 +81,9 @@
     "lbName": "[concat(parameters('baseName'),'-dmz-lb')]",
     "lbId": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
     "lbFEName": "feIpConfig1",
+    "lbFE2Name": "feIpConfig2",
     "lbFEId": "[concat(variables('lbId'),'/frontendIPConfigurations/',variables('lbFEName'))]",
+    "lbFE2Id": "[concat(variables('lbId'),'/frontendIPConfigurations/',variables('lbFE2Name'))]",
     "lbBEName": "beAddressPool",
     "lbBEId": "[concat(variables('lbId'),'/backendAddressPools/',variables('lbBEName'))]",
     "uniqueString": "[uniqueString(resourceGroup().Id)]",
@@ -159,7 +161,7 @@
           {
             "name": "https",
             "properties": {
-              "frontendIPConfiguration": { "id": "[variables('lbFEId')]" },
+              "frontendIPConfiguration": { "id": "[variables('lbFE2Id')]" },
               "backendAddressPool": { "id": "[variables('lbBEId')]" },
               "frontendPort": 443,
               "backendPort": 443,
