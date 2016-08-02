@@ -57,6 +57,7 @@
     <None Include="Scripts\ADFS\NewAdserviceAccount.ps1" />
     <None Include="Scripts\ADFS\InstallAdfsFarm.ps1" />
     <None Include="Scripts\ADFS\installWebAppProxy.ps1" />
+    <None Include="Scripts\dmz-nva-iptables-to-web-and-adfsproxy.sh" />
     <None Include="Scripts\joindomain.ps1" />
     <None Include="Scripts\rras.ps1" />
     <None Include="Scripts\adds-forest.ps1" />
