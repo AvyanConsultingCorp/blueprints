@@ -483,10 +483,18 @@ fi
 ############################################################################
 
 ############################################################################
-## Create Public LB and NVA Vms in dmz subnet 
+## Create my-dmz-rg resource group
 ############################################################################
 DMZ_RESOURCE_GROUP=${BASE_NAME}-dmz-rg
 RESOURCE_GROUP=${DMZ_RESOURCE_GROUP}
+echo
+echo
+echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+     azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
+
+############################################################################
+## Create Public LB and NVA Vms in dmz subnet 
+############################################################################
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/ibb-dmz-2pip.json
 DMZ_FE_SUBNET_NAME_PREFIX=${DEPLOYED_DMZ_FE_SUBNET_NAME_PREFIX}
 DMZ_BE_SUBNET_NAME_PREFIX=${DEPLOYED_DMZ_BE_SUBNET_NAME_PREFIX}
@@ -501,10 +509,6 @@ VM_IP_ADDRESS_2_ARRAY=${DMZ_BE_VM_IP_ADDRESSES}
 VM_IP_ADDRESS_3_ARRAY=${DMZ_MGMT_VM_IP_ADDRESSES}
 
 PARAMETERS="{\"baseName\":{\"value\":\"${BASE_NAME}\"},\"vmIPaddress1Array\":{\"value\":${VM_IP_ADDRESS_1_ARRAY}},\"vmIPaddress2Array\":{\"value\":${VM_IP_ADDRESS_2_ARRAY}},\"vmIPaddress3Array\":{\"value\":${VM_IP_ADDRESS_3_ARRAY}},\"feSubnetId\":{\"value\":\"${FE_SUBNET_ID}\"},\"beSubnetId\":{\"value\":\"${BE_SUBNET_ID}\"},\"mgmtSubnetId\":{\"value\":\"${MGMT_SUBNET_ID}\"},\"adminUsername\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"vmSize\":{\"value\":\"${VM_SIZE}\"},\"publicIPAddress1Name\":{\"value\":\"${PUBLIC_IP_ADDRESS1_NAME}\"},\"publicIPAddress2Name\":{\"value\":\"${PUBLIC_IP_ADDRESS2_NAME}\"}}"
-echo
-echo
-echo azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
-     azure group create --name ${RESOURCE_GROUP} --location ${LOCATION} --subscription ${SUBSCRIPTION}
 echo
 echo
 echo azure group deployment create --template-uri ${TEMPLATE_URI} -g ${RESOURCE_GROUP} -p ${PARAMETERS} --subscription ${SUBSCRIPTION}
