@@ -102,6 +102,7 @@
     <None Include="Templates\bb-vnet-1subnet.json" />
     <None Include="Templates\bb-vpn-gateway-connection.json" />
     <None Include="Templates\bb-vpn-gateway-connection.parameters.json" />
+    <None Include="Templates\ibb-dmz-2pip.json" />
     <None Include="Templates\ibb-dmz.json" />
     <None Include="Templates\bb-vms-1nic-static-private-ip.json" />
     <None Include="Templates\ibb-mgmt-jumpbox.json" />
