@@ -736,7 +736,7 @@ if [ "${Prompting}" == "true" ]; then
 	echo
 	read -p "Press any key to Create  Group Management Service Account and DNS Record for ADFS in the first ADDS Server ... " -n1 -s
 fi
-
+RESOURCE_GROUP=${DNS_RESOURCE_GROUP}
 VM_NAME=${BASE_NAME}-${VM_NAME_PREFIX}1-vm
 TEMPLATE_URI=${URI_BASE}/ARMBuildingBlocks/Templates/bb-vm-gmsa-dnsrecord-extension.json
 PARAMETERS="{\"vmName\":{\"value\":\"${VM_NAME}\"},\"adminUser\":{\"value\":\"${ADMIN_USER_NAME}\"},\"adminPassword\":{\"value\":\"${ADMIN_PASSWORD}\"},\"netBiosDomainName\":{\"value\":\"${NET_BIOS_DOMAIN_NAME}\"},\"fqDomainName\":{\"value\":\"${DOMAIN_NAME}\"},\"gmsaName\":{\"value\":\"${ADFS_GMSA_NAME}\"},\"federationName\":{\"value\":\"${ADFS_FEDERATION_NAME}\"},\"hostName\":{\"value\":\"${ADFS_HOST_NAME}\"},\"hostIp\":{\"value\":\"${ADFS_ILB_IP_ADDRESS}\"}}"
