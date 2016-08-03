@@ -164,7 +164,7 @@
               "Allow",
               "Allow",
               "Allow",
-              "Allow"
+              "Deny"
             ]
           },
           "rulesSourcePorts": {
@@ -334,7 +334,7 @@
               "Allow",
               "Allow",
               "Allow",
-              "Allow"
+              "Deny"
             ]
           },
           "rulesSourcePorts": {
@@ -444,7 +444,7 @@
               "Allow",
               "Allow",
               "Allow",
-              "Allow"
+              "Deny"
             ]
           },
           "rulesSourcePorts": {
