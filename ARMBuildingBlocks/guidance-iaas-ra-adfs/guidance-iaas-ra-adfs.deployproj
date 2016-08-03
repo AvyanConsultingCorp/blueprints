@@ -28,7 +28,6 @@
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
-    <None Include="Templates\adfsdeploy.sh" />
     <None Include="Templates\azuredeploy.sh" />
     <None Include="Templates\onpremdeploy.sh" />
     <None Include="Templates\ra-adfs\azuredeploy.json" />
