@@ -182,7 +182,7 @@ echo azure config mode arm
 ## Create vNet (my-ntwk-rg)
 ############################################################################
 
-TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-adfs/Templates/ra-adfs/azuredeploy.json
+TEMPLATE_URI=${URI_BASE}/guidance-iaas-ra-aad/Templates/ra-aad/azuredeploy.json
 NTWK_RESOURCE_GROUP=${BASE_NAME}-ntwk-rg
 RESOURCE_GROUP=${NTWK_RESOURCE_GROUP}
 ON_PREM_NET_PREFIX=${ON_PREMISES_ADDRESS_SPACE}
