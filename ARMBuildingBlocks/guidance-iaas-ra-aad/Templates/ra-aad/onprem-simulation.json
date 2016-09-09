@@ -1,0 +1,59 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "baseName": {
+      "type": "string",
+      "defaultValue": "onpr"
+    },
+    "vnetPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/16"
+    },
+    "subnetPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/24"
+    },
+    "dnsServers": {
+      "type": "array",
+      "defaultValue": [ ]
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vnetName": "[concat(parameters('baseName'),'-vnet')]",
+    "subnetName": "[concat(parameters('baseName'),'-sn')]"
+  },
+  "resources": [
+     {
+      "name": "[variables('vnetName')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "vnet"
+      },
+      "properties": {
+        "mode": "Incremental",
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetPrefix')]"
+          ]
+        },
+        "dhcpOptions": {
+          "dnsServers": "[parameters('dnsServers')]"
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnetPrefix')]"
+            }
+          },
+        ]
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
