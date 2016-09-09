@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "ARMBuildingBlocks", "ARMBuildingBlocks\ARMBuildingBlocks.deployproj", "{06C057FD-2159-461B-90AF-F2551FA1C2E0}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-iaas-ra-ad-extension", "guidance-iaas-ra-ad-extension\guidance-iaas-ra-ad-extension.deployproj", "{F2003085-E99D-46B9-B0BA-AB395E8D6E85}"
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-iaas-ra-adfs", "guidance-iaas-ra-adfs\guidance-iaas-ra-adfs.deployproj", "{91B6C235-88A6-4CF7-9BEF-627C28004DDE}"
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "guidance-iaas-ra-aad", "guidance-iaas-ra-aad\guidance-iaas-ra-aad.deployproj", "{29E1E552-0DE2-4DAF-A330-C7840D0F2EAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{91B6C235-88A6-4CF7-9BEF-627C28004DDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91B6C235-88A6-4CF7-9BEF-627C28004DDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91B6C235-88A6-4CF7-9BEF-627C28004DDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29E1E552-0DE2-4DAF-A330-C7840D0F2EAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29E1E552-0DE2-4DAF-A330-C7840D0F2EAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29E1E552-0DE2-4DAF-A330-C7840D0F2EAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29E1E552-0DE2-4DAF-A330-C7840D0F2EAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

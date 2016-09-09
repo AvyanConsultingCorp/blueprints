@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>91b6c235-88a6-4cf7-9bef-627c28004dde</ProjectGuid>
+    <ProjectGuid>29e1e552-0de2-4daf-a330-c7840d0f2ead</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFrameworkIdentifier>Deployment</TargetFrameworkIdentifier>
@@ -30,8 +30,8 @@
     </None>
     <None Include="Templates\azuredeploy.sh" />
     <None Include="Templates\onpremdeploy.sh" />
-    <None Include="Templates\ra-adfs\azuredeploy.json" />
-    <None Include="Templates\ra-adfs\onprem-simulation.json" />
+    <None Include="Templates\ra-aad\azuredeploy.json" />
+    <None Include="Templates\ra-aad\onprem-simulation.json" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
